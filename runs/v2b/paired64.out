@@ -1,0 +1,27 @@
+paired suite openings_v1 (516 openings, 1032 games): A=runs/v2b/net_0150.pt@64 vs B=runs/dev1/net_0200.pt@64  [161s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1  100.0%       n/a        +1200               100.0% 100.0%    50.0%    0.0%      1 /   0 /   0
+  orbits      15   65.0%  [ 48.3,  80.0]   +108 [ -12, +241]   76.7%  53.3%    61.7%    3.3%      6 /   7 /   2
+  natural    250   60.9%  [ 57.1,  64.9]    +77 [ +50, +107]   71.2%  50.6%    60.3%   12.6%    106 /  90 /  54
+  random     250   65.4%  [ 61.6,  69.2]   +111 [ +82, +141]   73.0%  57.8%    57.6%   11.2%    119 /  95 /  36
+  all        516   63.3%  [ 60.5,  66.1]    +95 [ +74, +116]   72.3%  54.3%    59.0%   11.6%    232 / 192 /  92
+  end reasons: line 74.7%  count 13.7%  equal 11.6%  |  mean length 49.5
+wrote runs/v2b/paired_vs_dev1_64.json
+paired suite openings_v1 (516 openings, 1032 games): A=runs/v2b/net_0150.pt@64 vs B=runs/v2a/net_0150.pt@64  [45s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1   75.0%       n/a        n/a                 100.0%  50.0%    75.0%   50.0%      1 /   0 /   0
+  orbits      15   51.7%  [ 35.0,  68.3]    +12 [-108, +134]   73.3%  30.0%    71.7%    3.3%      4 /   8 /   3
+  natural    250   56.2%  [ 52.4,  60.0]    +43 [ +17,  +70]   68.4%  44.0%    62.2%   12.4%     85 / 112 /  53
+  random     250   54.1%  [ 50.1,  58.1]    +29 [  +1,  +57]   62.0%  46.2%    57.9%   14.6%     87 /  99 /  64
+  all        516   55.1%  [ 52.4,  57.8]    +35 [ +17,  +55]   65.5%  44.7%    60.4%   13.3%    177 / 219 / 120
+  end reasons: line 71.0%  count 15.7%  equal 13.3%  |  mean length 49.4
+wrote runs/v2b/paired_vs_v2a_64.json
+paired suite openings_v1 (516 openings, 1032 games): A=runs/v2a/net_0150.pt@64 vs B=runs/dev1/net_0200.pt@64  [45s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1   25.0%       n/a        n/a                  50.0%   0.0%    75.0%   50.0%      0 /   0 /   1
+  orbits      15   58.3%  [ 43.3,  73.3]    +58 [ -47, +176]   66.7%  50.0%    58.3%   16.7%      6 /   5 /   4
+  natural    250   57.3%  [ 53.3,  61.4]    +51 [ +23,  +81]   64.0%  50.6%    56.7%   15.0%     98 /  91 /  61
+  random     250   61.8%  [ 57.7,  65.7]    +84 [ +54, +113]   69.4%  54.2%    57.6%   12.0%    110 /  95 /  45
+  all        516   59.4%  [ 56.6,  62.3]    +66 [ +46,  +87]   66.7%  52.2%    57.2%   13.7%    214 / 191 / 111
+  end reasons: line 71.5%  count 14.8%  equal 13.7%  |  mean length 49.4
+wrote runs/v2a/paired_vs_dev1_64.json

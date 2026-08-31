@@ -1,0 +1,12 @@
+averaged 3 checkpoints; BN statistics recomputed on 65536 buffer positions
+wrote runs/v2b\net_swa.pt
+paired suite openings_v1 (516 openings, 1032 games): A=runs/v2b/net_swa.pt@64 vs B=runs/v2b/net_0150.pt@64  [57s]
+  natural    250   46.2%  [ 42.4,  50.0]    -26 [ -53,   +0]   56.6%  35.8%    60.4%   14.0%     60 / 108 /  82
+  random     250   45.5%  [ 41.4,  49.6]    -31 [ -60,   -3]   53.6%  37.4%    58.1%   13.0%     65 / 103 /  82
+  all        516   45.9%  [ 43.1,  48.7]    -28 [ -48,   -9]   55.0%  36.8%    59.1%   13.6%    128 / 220 / 168
+averaged 3 checkpoints; BN statistics recomputed on 65536 buffer positions
+wrote runs/v2b_s1\net_swa.pt
+paired suite openings_v1 (516 openings, 1032 games): A=runs/v2b_s1/net_swa.pt@64 vs B=runs/v2b/net_0150.pt@64  [56s]
+  all        516   49.5%  [ 46.6,  52.3]     -4 [ -24,  +16]   59.6%  39.3%    60.1%   11.5%    141 / 225 / 150
+raw net (value head + policy argmax)     73.8 [72.2,75.4]    0.353    0.603   72.7 [71.0,74.4]  0.351 0.083 [0.071,0.095]   93.1 [92.2,94.0]
+search 64 sims                                                                70.3 [68.6,71.8]  0.331 0.010 [0.006,0.014]   99.0 [98.7,99.4]

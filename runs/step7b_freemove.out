@@ -1,0 +1,57 @@
+30000 positions from 6000 held-out games (['games_0147.npz', 'games_0148.npz', 'games_0149.npz']), net runs/v2b/net_0150.pt, 256-sim search values
+free-move positions: 0.085; mean value free -0.177 vs confined -0.112 (raw difference -0.065)
+
+OLS of the search value (mover's perspective), cluster-robust SE by game, R^2 = 0.538:
+  intercept        -0.9765 +- 0.2184
+  free_move        +0.1626 +- 0.0270 *
+  ply/10           +0.0860 +- 0.0662 *
+  (ply/10)^2       -0.0046 +- 0.0052
+  macro_score      +0.0167 +- 0.0087 *
+  open_boards      -0.0091 +- 0.0258
+  empties/10       +0.0928 +- 0.0531 *
+  is_X             +0.5935 +- 0.0103 *
+  threats_for      +0.1569 +- 0.0211 *
+  threats_against  -0.1671 +- 0.0168 *
+
+OLS of the raw value (mover's perspective), cluster-robust SE by game, R^2 = 0.629:
+  intercept        -0.4372 +- 0.1862
+  free_move        +0.2563 +- 0.0251 *
+  ply/10           -0.0030 +- 0.0558
+  (ply/10)^2       -0.0008 +- 0.0041
+  macro_score      +0.0175 +- 0.0069 *
+  open_boards      +0.0276 +- 0.0225 *
+  empties/10       -0.0163 +- 0.0459
+  is_X             +0.6083 +- 0.0083 *
+  threats_for      +0.1953 +- 0.0164 *
+  threats_against  -0.1551 +- 0.0158 *
+
+OLS of the search value on board ownership by class (per board owned), cluster-robust SE by game, R^2 = 0.539:
+  intercept        -0.9379 +- 0.4495
+  free_move        +0.1596 +- 0.0274 *
+  ply/10           +0.0718 +- 0.0678 *
+  (ply/10)^2       -0.0046 +- 0.0053
+  empties/10       +0.0778 +- 0.0543 *
+  is_X             +0.5940 +- 0.0103 *
+  threats_for      +0.1652 +- 0.0217 *
+  threats_against  -0.1706 +- 0.0175 *
+  full_boards      +0.1930 +- 0.1124 *
+  centre_self      +0.0121 +- 0.0392
+  centre_opp       +0.0039 +- 0.0385
+  corners_self     +0.0065 +- 0.0316
+  corners_opp      -0.0049 +- 0.0307
+  edges_self       +0.0163 +- 0.0276
+  edges_opp        -0.0165 +- 0.0276
+  net worth of owning (self - opp coefficient): centre +0.008, corner +0.011, edge +0.033
+
+stratified free - confined difference in search value (cells with >= 30 positions of each kind):
+  ply 32-43, macro score -2: free -0.432 (n=  144)  confined -0.446 (n=  630)  diff +0.014
+  ply 32-43, macro score -1: free -0.351 (n=  355)  confined -0.342 (n= 1966)  diff -0.009
+  ply 32-43, macro score +0: free -0.162 (n=  372)  confined -0.211 (n= 2749)  diff +0.049
+  ply 32-43, macro score +1: free +0.018 (n=  182)  confined -0.066 (n= 1719)  diff +0.084
+  ply 32-43, macro score +2: free -0.031 (n=   42)  confined +0.095 (n=  492)  diff -0.126
+  ply 44-50, macro score -2: free -0.579 (n=  142)  confined -0.558 (n=  184)  diff -0.020
+  ply 44-50, macro score -1: free -0.378 (n=  336)  confined -0.492 (n=  415)  diff +0.114
+  ply 44-50, macro score +0: free -0.188 (n=  429)  confined -0.204 (n=  537)  diff +0.015
+  ply 44-50, macro score +1: free +0.161 (n=  273)  confined +0.069 (n=  392)  diff +0.092
+  ply 44-50, macro score +2: free +0.599 (n=  105)  confined +0.079 (n=  159)  diff +0.520
+weighted mean difference: +0.062

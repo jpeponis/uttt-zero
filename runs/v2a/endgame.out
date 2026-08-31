@@ -1,0 +1,15 @@
+3000 distinct positions with 6-16 empties in open boards
+solved in 94.1s: exact win/draw/loss for the mover = 0.459/0.137/0.404
+
+evaluator                       3-way acc  sign acc  mean|err|  move error
+raw net                             0.777     0.766      0.351 
+raw net, symmetry-averaged          0.779     0.773      0.348 
+search 32 sims                      0.733     0.726      0.365       0.012
+search 64 sims                      0.753     0.740      0.332       0.007
+search 256 sims                     0.750     0.738      0.328       0.002
+
+by remaining empties (raw 3-way acc | last search: 3-way acc, move error):
+   6- 9 empties (n= 903): 0.849 | 0.726, 0.000
+  10-12 empties (n= 836): 0.785 | 0.791, 0.000
+  13-14 empties (n= 627): 0.727 | 0.751, 0.005
+  15-16 empties (n= 634): 0.715 | 0.730, 0.006

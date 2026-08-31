@@ -1,0 +1,19 @@
+# big / regenerable artifacts stay out; code, docs, suites, configs, logs, small results and
+# the final checkpoint of every run (the anchors) are tracked.
+.venv/
+__pycache__/
+*.pyc
+.sol-*
+runs/**
+!runs/*/
+!runs/*.sh
+!runs/*.out
+!runs/*.json
+!runs/*.log
+!runs/*/config*.json
+!runs/*/log.jsonl
+!runs/*/*.out
+!runs/*/paired_*.json
+!runs/*/net_0150.pt
+!runs/*/net_0200.pt
+!runs/*/net_0300.pt

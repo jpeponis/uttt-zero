@@ -1,0 +1,146 @@
+suites/endgame_v1.npz: 3000 positions, 2870 source games, W/D/L 0.333/0.333/0.333; free-move positions 0.441
+rollout anchor scored in 15s
+
+runs/v2b/net_0150.pt on endgame_v1  [70s]
+evaluator                                       WDL acc %    Brier  logloss            3-way %  |err|             regret          optimal %
+raw net (value head + policy argmax)     75.0 [73.5,76.6]    0.335    0.564   72.4 [70.7,74.0]  0.356 0.078 [0.066,0.089]   93.5 [92.6,94.4]
+raw net, symmetry-averaged WDL           75.3 [73.6,76.8]    0.327    0.550   73.4 [71.7,75.0]  0.351                                      
+search 32 sims                                                                66.9 [65.2,68.5]  0.367 0.016 [0.011,0.021]   98.6 [98.1,99.0]
+search 64 sims                                                                70.6 [69.0,72.2]  0.330 0.008 [0.005,0.011]   99.2 [98.9,99.5]
+search 256 sims                                                               70.2 [68.6,71.9]  0.331 0.001 [0.000,0.003]  99.9 [99.7,100.0]
+rollout UCT 100000 playouts                                                                           0.003 [0.001,0.005]   99.7 [99.5,99.9]
+
+WDL accuracy % by stratum: raw net (value head + policy argmax) | raw net, symmetry-averaged WDL
+  empties 6-9      (n= 750):  85.7   88.4
+  empties 10-12    (n= 750):  78.1   77.7
+  empties 13-14    (n= 750):  71.3   71.6
+  empties 15-16    (n= 750):  64.9   63.3
+  mover wins       (n=1000):  81.9   83.6
+  draw             (n=1000):  54.7   54.2
+  mover loses      (n=1000):  88.5   88.0
+  X to move        (n=1500):  75.1   74.9
+  O to move        (n=1500):  75.0   75.7
+  free move        (n=1324):  77.9   79.2
+  sent to a board  (n=1676):  72.7   72.2
+
+action regret by stratum: raw net (value head + policy argmax) | search 256 sims | rollout UCT 100000 playouts
+  empties 6-9      (n= 750): 0.040  0.000  0.000
+  empties 10-12    (n= 750): 0.063  0.001  0.000
+  empties 13-14    (n= 750): 0.093  0.000  0.004
+  empties 15-16    (n= 750): 0.115  0.004  0.007
+  mover wins       (n=1000): 0.098  0.000  0.000
+  draw             (n=1000): 0.135  0.004  0.008
+  mover loses      (n=1000): 0.000  0.000  0.000
+  X to move        (n=1500): 0.072  0.002  0.003
+  O to move        (n=1500): 0.083  0.001  0.003
+  free move        (n=1324): 0.110  0.001  0.003
+  sent to a board  (n=1676): 0.053  0.002  0.002
+
+optimal-move % by stratum: raw net (value head + policy argmax) | search 256 sims | rollout UCT 100000 playouts
+  empties 6-9      (n= 750):  96.5  100.0  100.0
+  empties 10-12    (n= 750):  94.1   99.9  100.0
+  empties 13-14    (n= 750):  92.4  100.0   99.6
+  empties 15-16    (n= 750):  90.9   99.6   99.3
+  mover wins       (n=1000):  94.0  100.0  100.0
+  draw             (n=1000):  86.5   99.6   99.2
+  mover loses      (n=1000): 100.0  100.0  100.0
+  X to move        (n=1500):  94.0   99.8   99.7
+  O to move        (n=1500):  93.0   99.9   99.7
+  free move        (n=1324):  90.9   99.9   99.7
+  sent to a board  (n=1676):  95.5   99.8   99.8
+suites/endgame_v1.npz: 3000 positions, 2870 source games, W/D/L 0.333/0.333/0.333; free-move positions 0.441
+
+runs/v2a/net_0150.pt on endgame_v1  [41s]
+evaluator                                       WDL acc %    Brier  logloss            3-way %  |err|             regret          optimal %
+raw net (value head + policy argmax)     74.4 [72.7,76.0]    0.341    0.574   72.0 [70.3,73.7]  0.357 0.080 [0.068,0.091]   93.4 [92.5,94.3]
+raw net, symmetry-averaged WDL           75.4 [73.8,76.9]    0.329    0.553   73.1 [71.4,74.7]  0.350                                      
+search 32 sims                                                                67.2 [65.5,68.8]  0.368 0.019 [0.014,0.025]   98.3 [97.8,98.8]
+search 64 sims                                                                70.6 [68.9,72.2]  0.331 0.011 [0.007,0.015]   99.0 [98.6,99.3]
+search 256 sims                                                               70.1 [68.5,71.7]  0.332 0.004 [0.002,0.007]   99.6 [99.3,99.8]
+
+WDL accuracy % by stratum: raw net (value head + policy argmax) | raw net, symmetry-averaged WDL
+  empties 6-9      (n= 750):  85.1   86.9
+  empties 10-12    (n= 750):  76.8   78.8
+  empties 13-14    (n= 750):  72.3   71.7
+  empties 15-16    (n= 750):  63.5   64.1
+  mover wins       (n=1000):  83.6   84.4
+  draw             (n=1000):  53.3   54.9
+  mover loses      (n=1000):  86.3   86.9
+  X to move        (n=1500):  73.7   74.7
+  O to move        (n=1500):  75.1   76.1
+  free move        (n=1324):  78.0   78.9
+  sent to a board  (n=1676):  71.5   72.6
+
+action regret by stratum: raw net (value head + policy argmax) | search 256 sims
+  empties 6-9      (n= 750): 0.032  0.001
+  empties 10-12    (n= 750): 0.057  0.004
+  empties 13-14    (n= 750): 0.117  0.004
+  empties 15-16    (n= 750): 0.112  0.008
+  mover wins       (n=1000): 0.108  0.002
+  draw             (n=1000): 0.131  0.011
+  mover loses      (n=1000): 0.000  0.000
+  X to move        (n=1500): 0.067  0.007
+  O to move        (n=1500): 0.092  0.002
+  free move        (n=1324): 0.119  0.004
+  sent to a board  (n=1676): 0.048  0.005
+
+optimal-move % by stratum: raw net (value head + policy argmax) | search 256 sims
+  empties 6-9      (n= 750):  97.1   99.9
+  empties 10-12    (n= 750):  94.8   99.6
+  empties 13-14    (n= 750):  90.8   99.6
+  empties 15-16    (n= 750):  91.1   99.2
+  mover wins       (n=1000):  93.4   99.8
+  draw             (n=1000):  86.9   98.9
+  mover loses      (n=1000): 100.0  100.0
+  X to move        (n=1500):  94.4   99.3
+  O to move        (n=1500):  92.5   99.8
+  free move        (n=1324):  90.2   99.6
+  sent to a board  (n=1676):  96.0   99.5
+suites/endgame_v1.npz: 3000 positions, 2870 source games, W/D/L 0.333/0.333/0.333; free-move positions 0.441
+
+runs/dev1/net_0200.pt on endgame_v1  [38s]
+evaluator                                       WDL acc %    Brier  logloss            3-way %  |err|             regret          optimal %
+raw net (value head + policy argmax)     71.2 [69.5,72.9]    0.385    0.658   71.1 [69.5,72.8]  0.372 0.083 [0.071,0.095]   93.2 [92.3,94.1]
+raw net, symmetry-averaged WDL           71.7 [70.0,73.4]    0.368    0.625   71.9 [70.2,73.5]  0.366                                      
+search 32 sims                                                                66.5 [64.8,68.1]  0.373 0.026 [0.020,0.033]   97.8 [97.3,98.3]
+search 64 sims                                                                70.3 [68.6,71.9]  0.336 0.014 [0.010,0.019]   98.7 [98.2,99.1]
+search 256 sims                                                               70.3 [68.6,71.9]  0.335 0.002 [0.001,0.004]   99.8 [99.6,99.9]
+
+WDL accuracy % by stratum: raw net (value head + policy argmax) | raw net, symmetry-averaged WDL
+  empties 6-9      (n= 750):  82.1   82.3
+  empties 10-12    (n= 750):  72.9   74.9
+  empties 13-14    (n= 750):  68.3   69.3
+  empties 15-16    (n= 750):  61.6   60.4
+  mover wins       (n=1000):  86.9   87.6
+  draw             (n=1000):  42.1   42.4
+  mover loses      (n=1000):  84.7   85.2
+  X to move        (n=1500):  68.6   68.9
+  O to move        (n=1500):  73.9   74.6
+  free move        (n=1324):  74.3   75.1
+  sent to a board  (n=1676):  68.8   69.1
+
+action regret by stratum: raw net (value head + policy argmax) | search 256 sims
+  empties 6-9      (n= 750): 0.041  0.000
+  empties 10-12    (n= 750): 0.065  0.001
+  empties 13-14    (n= 750): 0.108  0.003
+  empties 15-16    (n= 750): 0.117  0.005
+  mover wins       (n=1000): 0.116  0.000
+  draw             (n=1000): 0.133  0.007
+  mover loses      (n=1000): 0.000  0.000
+  X to move        (n=1500): 0.078  0.003
+  O to move        (n=1500): 0.088  0.001
+  free move        (n=1324): 0.122  0.002
+  sent to a board  (n=1676): 0.053  0.002
+
+optimal-move % by stratum: raw net (value head + policy argmax) | search 256 sims
+  empties 6-9      (n= 750):  96.5  100.0
+  empties 10-12    (n= 750):  94.3   99.9
+  empties 13-14    (n= 750):  91.2   99.7
+  empties 15-16    (n= 750):  90.8   99.5
+  mover wins       (n=1000):  92.9  100.0
+  draw             (n=1000):  86.7   99.3
+  mover loses      (n=1000): 100.0  100.0
+  X to move        (n=1500):  93.5   99.7
+  O to move        (n=1500):  92.9   99.9
+  free move        (n=1324):  90.1   99.8
+  sent to a board  (n=1676):  95.6   99.8

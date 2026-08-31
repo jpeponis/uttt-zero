@@ -1,0 +1,74 @@
+=== wide96_c1 final in-run evals
+{'iter': 119, 'vs_dev1_net_0200': 0.631, 'ci_dev1_net_0200': [0.589, 0.674], 'vs_v2b_net_0150': 0.537, 'ci_v2b_net_0150': [0.494, 0.576], 'eg_wdl_acc': 0.7493, 'eg_brier': 0.3397, 'eg_regret_raw': 0.075, 'eg_optimal_raw': 0.9377, 'eg_acc3_search': 0.7057, 'eg_regret_search': 0.0077, 'eg_optimal_search': 0.993}
+{'iter': 129, 'vs_dev1_net_0200': 0.661, 'ci_dev1_net_0200': [0.622, 0.698], 'vs_v2b_net_0150': 0.558, 'ci_v2b_net_0150': [0.515, 0.604], 'eg_wdl_acc': 0.75, 'eg_brier': 0.3388, 'eg_regret_raw': 0.074, 'eg_optimal_raw': 0.94, 'eg_acc3_search': 0.7083, 'eg_regret_search': 0.0067, 'eg_optimal_search': 0.9933}
+{'iter': 139, 'vs_dev1_net_0200': 0.693, 'ci_dev1_net_0200': [0.652, 0.735], 'vs_v2b_net_0150': 0.558, 'ci_v2b_net_0150': [0.514, 0.603], 'eg_wdl_acc': 0.7493, 'eg_brier': 0.3387, 'eg_regret_raw': 0.0727, 'eg_optimal_raw': 0.94, 'eg_acc3_search': 0.7097, 'eg_regret_search': 0.008, 'eg_optimal_search': 0.9923}
+{'iter': 149, 'vs_dev1_net_0200': 0.652, 'ci_dev1_net_0200': [0.611, 0.693], 'vs_v2b_net_0150': 0.595, 'ci_v2b_net_0150': [0.558, 0.635], 'eg_wdl_acc': 0.7517, 'eg_brier': 0.3296, 'eg_regret_raw': 0.0703, 'eg_optimal_raw': 0.9413, 'eg_acc3_search': 0.7097, 'eg_regret_search': 0.0087, 'eg_optimal_search': 0.9917}
+wall-clock (h): 3.51
+=== paired matches
+paired suite openings_v1 (516 openings, 1032 games): A=runs/wide96_c1/net_0150.pt@64 vs B=runs/v2b/net_0150.pt@64  [72s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1   25.0%       n/a        n/a                  50.0%   0.0%    75.0%   50.0%      0 /   0 /   1
+  orbits      15   50.0%  [ 35.0,  66.7]     +0 [-108, +120]   53.3%  46.7%    53.3%   13.3%      4 /   6 /   5
+  natural    250   57.8%  [ 53.7,  61.6]    +55 [ +26,  +82]   66.8%  48.8%    59.0%   11.6%     98 / 101 /  51
+  random     250   59.7%  [ 55.8,  63.6]    +68 [ +40,  +97]   67.8%  51.6%    58.1%   17.0%    105 /  90 /  55
+  all        516   58.4%  [ 55.7,  61.1]    +59 [ +40,  +78]   66.9%  50.0%    58.4%   14.3%    207 / 197 / 112
+  end reasons: line 73.3%  count 12.4%  equal 14.3%  |  mean length 49.1
+wrote runs/wide96_c1/paired_vs_v2b_64.json
+paired suite openings_v1 (516 openings, 1032 games): A=runs/wide96_c1/net_0150.pt@64 vs B=runs/dev1/net_0200.pt@64  [71s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1   50.0%       n/a        n/a                 100.0%   0.0%   100.0%    0.0%      0 /   1 /   0
+  orbits      15   66.7%  [ 50.0,  81.7]   +120 [  +0, +260]   76.7%  56.7%    60.0%    6.7%      7 /   6 /   2
+  natural    250   66.4%  [ 62.5,  70.2]   +118 [ +89, +149]   70.2%  62.6%    53.8%   12.4%    131 /  83 /  36
+  random     250   66.7%  [ 62.8,  70.6]   +121 [ +91, +152]   76.8%  56.6%    60.1%   13.4%    134 /  77 /  39
+  all        516   66.5%  [ 63.8,  69.2]   +119 [ +99, +141]   73.6%  59.4%    57.1%   12.7%    272 / 167 /  77
+  end reasons: line 73.2%  count 14.1%  equal 12.7%  |  mean length 49.4
+wrote runs/wide96_c1/paired_vs_dev1_64.json
+=== endgame set
+suites/endgame_v1.npz: 3000 positions, 2870 source games, W/D/L 0.333/0.333/0.333; free-move positions 0.441
+
+runs/wide96_c1/net_0150.pt on endgame_v1  [31s]
+evaluator                                       WDL acc %    Brier  logloss            3-way %  |err|             regret          optimal %
+raw net (value head + policy argmax)     75.2 [73.6,76.8]    0.330    0.555   73.6 [71.9,75.2]  0.332 0.070 [0.060,0.081]   94.2 [93.3,95.0]
+raw net, symmetry-averaged WDL           76.5 [74.8,78.0]    0.320    0.537   74.1 [72.4,75.8]  0.328                                      
+search 32 sims                                                                67.4 [65.8,69.0]  0.363 0.012 [0.008,0.017]   98.8 [98.4,99.2]
+search 64 sims                                                                71.0 [69.4,72.6]  0.328 0.009 [0.005,0.012]   99.2 [98.8,99.5]
+search 256 sims                                                               70.0 [68.4,71.6]  0.333 0.002 [0.001,0.004]   99.8 [99.6,99.9]
+
+WDL accuracy % by stratum: raw net (value head + policy argmax) | raw net, symmetry-averaged WDL
+  empties 6-9      (n= 750):  87.6   88.7
+  empties 10-12    (n= 750):  77.7   78.8
+  empties 13-14    (n= 750):  70.8   73.3
+  empties 15-16    (n= 750):  64.7   65.1
+  mover wins       (n=1000):  85.7   86.2
+  draw             (n=1000):  50.9   53.7
+  mover loses      (n=1000):  89.0   89.5
+  X to move        (n=1500):  74.7   75.9
+  O to move        (n=1500):  75.7   77.0
+  free move        (n=1324):  78.7   80.1
+  sent to a board  (n=1676):  72.4   73.6
+
+action regret by stratum: raw net (value head + policy argmax) | search 256 sims
+  empties 6-9      (n= 750): 0.029  0.001
+  empties 10-12    (n= 750): 0.064  0.003
+  empties 13-14    (n= 750): 0.084  0.001
+  empties 15-16    (n= 750): 0.103  0.004
+  mover wins       (n=1000): 0.091  0.000
+  draw             (n=1000): 0.119  0.007
+  mover loses      (n=1000): 0.000  0.000
+  X to move        (n=1500): 0.063  0.003
+  O to move        (n=1500): 0.077  0.001
+  free move        (n=1324): 0.100  0.003
+  sent to a board  (n=1676): 0.047  0.002
+
+optimal-move % by stratum: raw net (value head + policy argmax) | search 256 sims
+  empties 6-9      (n= 750):  97.6   99.9
+  empties 10-12    (n= 750):  94.3   99.7
+  empties 13-14    (n= 750):  92.9   99.9
+  empties 15-16    (n= 750):  91.9   99.6
+  mover wins       (n=1000):  94.4  100.0
+  draw             (n=1000):  88.1   99.3
+  mover loses      (n=1000): 100.0  100.0
+  X to move        (n=1500):  94.7   99.7
+  O to move        (n=1500):  93.6   99.9
+  free move        (n=1324):  91.8   99.7
+  sent to a board  (n=1676):  96.0   99.8

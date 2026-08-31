@@ -1,0 +1,238 @@
+[
+ {
+  "id": 259,
+  "game_id": 153,
+  "ply": 45,
+  "exact": 1,
+  "best": 48,
+  "pv": [
+   48,
+   27,
+   50,
+   45,
+   47
+  ],
+  "raw_move": 50,
+  "search_move": 50,
+  "motifs": [],
+  "board": "to move: O   next board: any   moves: 45\nX X X  X O .  O . X\n. . O  O . O  O . .\n. . .  O X X  O . .\n\n. X .  O O O  . X .\nX . .  . X .  . . .\nO O X  . . .  X O O\n\nX X X  O O .  . . .\nO . .  X X X  . X X\nX O .  . X .  O O O\nmacro:\nX.O\n.O.\nXXO"
+ },
+ {
+  "id": 879,
+  "game_id": 512,
+  "ply": 48,
+  "exact": 0,
+  "best": 9,
+  "pv": [
+   9,
+   3,
+   27,
+   4,
+   13,
+   1,
+   15,
+   31
+  ],
+  "raw_move": 13,
+  "search_move": 13,
+  "motifs": [
+   "denies_free_move",
+   "tiebreak_conversion",
+   "draw_hold"
+  ],
+  "board": "to move: X   next board: any   moves: 48\nX . X  . O X  O X X\n. . .  O . O  X O O\n. O .  . X O  O . .\n\n. X O  . X O  . O O\nO . O  . X O  X X X\nX X .  . . O  . O X\n\n. . X  . X .  . . .\n. . X  O O O  X X X\nO . X  . X .  O . O\nmacro:\n...\n.OX\nXOX"
+ },
+ {
+  "id": 1677,
+  "game_id": 950,
+  "ply": 38,
+  "exact": 1,
+  "best": 76,
+  "pv": [
+   76,
+   54,
+   72
+  ],
+  "raw_move": 62,
+  "search_move": 62,
+  "motifs": [
+   "gives_free_move"
+  ],
+  "board": "to move: X   next board: any   moves: 38\nO O O  X O O  X X X\nX . .  X O X  . . .\n. . .  . O .  . . O\n\n. O .  . X O  . X .\nX O .  . X O  . . O\n. O .  . X .  X X X\n\n. . .  . X .  . . .\n. O .  O X O  . . O\n. . .  . X .  . O X\nmacro:\nOOX\nOXX\n.X."
+ },
+ {
+  "id": 2499,
+  "game_id": 1431,
+  "ply": 46,
+  "exact": 0,
+  "best": 48,
+  "pv": [
+   48,
+   26,
+   45,
+   58
+  ],
+  "raw_move": 49,
+  "search_move": 49,
+  "motifs": [
+   "gives_free_move",
+   "tiebreak_conversion",
+   "draw_hold"
+  ],
+  "board": "to move: X   next board: any   moves: 46\nO . X  . O .  O O X\n. . X  X X X  X X O\n. . X  . . .  O X .\n\nO O O  . . O  . . O\nX . .  X X O  . . X\nO O .  . . O  X O O\n\nX X O  . . .  . O X\nX . .  O . .  . O .\nO . .  X X X  . O X\nmacro:\nXX.\nOO.\n.XO"
+ },
+ {
+  "id": 2763,
+  "game_id": 1578,
+  "ply": 48,
+  "exact": 1,
+  "best": 36,
+  "pv": [
+   36,
+   1,
+   31
+  ],
+  "raw_move": 31,
+  "search_move": 31,
+  "motifs": [
+   "local_win"
+  ],
+  "board": "to move: X   next board: any   moves: 48\nX . .  O O O  . . X\n. . .  X . .  O O O\nO O X  . . .  X O .\n\nO . X  . X O  . . X\nX . O  . X .  O . X\nX X O  . . X  . X X\n\n. . .  X X X  . X O\nO O O  O . .  X . O\nX O .  X O O  . X O\nmacro:\n.OO\n..X\nOXO"
+ },
+ {
+  "id": 3382,
+  "game_id": 1939,
+  "ply": 48,
+  "exact": 1,
+  "best": 56,
+  "pv": [
+   56,
+   13,
+   28,
+   15,
+   29
+  ],
+  "raw_move": 28,
+  "search_move": 28,
+  "motifs": [
+   "local_win",
+   "gives_free_move"
+  ],
+  "board": "to move: X   next board: any   moves: 48\nO O X  O X X  O . X\n. . X  X . O  O . .\n. X X  . . .  O . .\n\nX . .  . . O  X X X\nX . O  . X O  O . X\nO . O  . . O  O O .\n\nO . .  . O X  . O O\nX X .  . . X  . X O\nX O X  . O X  . X O\nmacro:\nX.O\n.OX\n.XO"
+ },
+ {
+  "id": 3577,
+  "game_id": 2050,
+  "ply": 49,
+  "exact": 0,
+  "best": 52,
+  "pv": [
+   52,
+   18,
+   59,
+   48,
+   57,
+   51,
+   54
+  ],
+  "raw_move": 56,
+  "search_move": 18,
+  "motifs": [
+   "gives_free_move",
+   "tiebreak_conversion",
+   "draw_hold"
+  ],
+  "board": "to move: O   next board: any   moves: 49\nX X X  . O O  . X X\n. . .  X O X  . . O\n. . O  O . O  . O X\n\nO O .  X . O  O X O\nX O X  O X X  . X O\n. O .  . . X  . . X\n\n. X .  . . .  O X .\n. . .  O . .  X O O\nO O X  X X X  X . O\nmacro:\nXO.\nOX.\n.XO"
+ },
+ {
+  "id": 3940,
+  "game_id": 2253,
+  "ply": 47,
+  "exact": 0,
+  "best": 79,
+  "pv": [
+   79,
+   65,
+   62,
+   76,
+   74,
+   77,
+   67,
+   68
+  ],
+  "raw_move": 76,
+  "search_move": 76,
+  "motifs": [
+   "denies_free_move",
+   "tiebreak_conversion",
+   "draw_hold"
+  ],
+  "board": "to move: O   next board: 8   moves: 47\nX X X  . X .  X . O\nO . O  O O O  X . O\n. . .  . X .  X . .\n\nO O O  O O O  . O X\nX X O  X X .  X X X\nO O X  . . .  . . .\n\nX X .  O O .  . . .\nX . .  X . .  O . .\nO O .  . X X  X . O\nmacro:\nXOX\nOOX\n..."
+ },
+ {
+  "id": 4447,
+  "game_id": 2548,
+  "ply": 50,
+  "exact": 1,
+  "best": 11,
+  "pv": [
+   11,
+   19,
+   15
+  ],
+  "raw_move": 15,
+  "search_move": 15,
+  "motifs": [
+   "denies_free_move"
+  ],
+  "board": "to move: X   next board: any   moves: 50\nO X O  X O .  X . X\nO X X  O X .  X . .\nX . X  . O O  . O .\n\nX X O  O . O  O . .\nO . X  X X X  O O X\nX O X  . . .  . O O\n\nO X .  . . .  O . .\nO . .  . . O  X O X\nO . .  X X X  . . O\nmacro:\n...\n.XO\nOXO"
+ },
+ {
+  "id": 5190,
+  "game_id": 2974,
+  "ply": 47,
+  "exact": 0,
+  "best": 31,
+  "pv": [
+   31,
+   11,
+   25,
+   65,
+   18,
+   21,
+   26,
+   22
+  ],
+  "raw_move": 29,
+  "search_move": 33,
+  "motifs": [
+   "local_win",
+   "gives_free_move",
+   "tiebreak_conversion",
+   "draw_hold"
+  ],
+  "board": "to move: O   next board: 3   moves: 47\nX . .  O O .  . X X\nX . O  X X .  . . O\nX X .  X O X  . . .\n\n. O .  O X O  . . .\nX . O  . X .  O . X\n. O .  . X .  X X X\n\n. O .  O X .  O O O\n. O .  X O O  . . .\nO O X  X O X  . X O\nmacro:\nX..\n.XX\nO.O"
+ },
+ {
+  "id": 5358,
+  "game_id": 3073,
+  "ply": 39,
+  "exact": 1,
+  "best": 57,
+  "pv": [
+   57,
+   32,
+   21,
+   34,
+   24,
+   55,
+   18
+  ],
+  "raw_move": 55,
+  "search_move": 62,
+  "motifs": [
+   "denies_free_move"
+  ],
+  "board": "to move: O   next board: 6   moves: 39\nO . .  . X .  . . X\nX X X  O O O  . X .\n. . .  . . .  . O X\n\nX X O  O X O  . O .\nO O .  . X .  X O X\nX . .  . X .  . O .\n\nO . O  . . .  . . .\n. . .  . . O  . . X\nX . .  X X X  O O O\nmacro:\nXO.\n.XO\n.XO"
+ }
+]

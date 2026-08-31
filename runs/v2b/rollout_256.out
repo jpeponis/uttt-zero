@@ -1,0 +1,9 @@
+paired suite openings_v1 (516 openings, 1032 games): A=runs/v2b/net_0150.pt@256 vs B=rollout@100000  [758s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1  100.0%       n/a        n/a                 100.0% 100.0%    50.0%    0.0%      1 /   0 /   0
+  orbits      15   93.3%  [ 86.7,  98.3]   +458 [+325, +708]   93.3%  93.3%    50.0%   13.3%     15 /   0 /   0
+  natural    250   87.8%  [ 85.2,  90.3]   +343 [+304, +388]   92.4%  83.2%    54.6%    6.0%    203 /  44 /   3
+  random     250   86.8%  [ 84.1,  89.4]   +327 [+289, +370]   90.8%  82.8%    54.0%    6.4%    201 /  46 /   3
+  all        516   87.5%  [ 85.7,  89.3]   +338 [+310, +368]   91.7%  83.3%    54.2%    6.4%    420 /  90 /   6
+  end reasons: line 87.3%  count 6.3%  equal 6.4%  |  mean length 49.4
+wrote runs/v2b/paired_256_vs_rollout100k.json

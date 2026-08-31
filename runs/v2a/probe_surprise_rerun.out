@@ -1,0 +1,37 @@
+=== probe (dedup fixed)
+49148 distinct positions, plies 6-60, from runs/v2a/latest.pt
+baseline value (side to move): mean +0.015
+
+free move instead of being confined          n= 43494  mean +0.269  p10 +0.055  median +0.204  p90 +0.563   [ply 0-19: +0.171, ply 20-34: +0.191, ply 35-81: +0.438]
+    with 2 open boards: +0.454 (n=543)
+    with 3 open boards: +0.538 (n=1692)
+    with 4 open boards: +0.521 (n=3006)
+    with 5 open boards: +0.426 (n=4010)
+    with 6 open boards: +0.330 (n=4656)
+    with 7 open boards: +0.249 (n=5426)
+    with 8 open boards: +0.191 (n=7047)
+    with 9 open boards: +0.178 (n=17083)
+
+owning a centre board vs opponent owning it  n= 11197  mean +1.026  p10 +0.084  median +1.033  p90 +1.888   [ply 20-34: +1.066, ply 35-81: +1.021]
+owning a corner board vs opponent owning it  n= 42282  mean +0.910  p10 +0.084  median +0.935  p90 +1.750   [ply 20-34: +0.874, ply 35-81: +0.917]
+owning a edge board vs opponent owning it    n= 56935  mean +0.794  p10 +0.098  median +0.797  p90 +1.469   [ply 0-19: +0.804, ply 20-34: +0.791, ply 35-81: +0.795]
+    centre - corner: +0.116   corner - edge: +0.116
+
+open centre board removed (drawn) for both   n= 34053  mean +0.060  p10 -0.420  median +0.024  p90 +0.523   [ply 0-19: +0.041, ply 20-34: +0.089, ply 35-81: +0.025]
+open corner board removed (drawn) for both   n=133456  mean +0.024  p10 -0.405  median +0.000  p90 +0.444   [ply 0-19: +0.018, ply 20-34: +0.048, ply 35-81: -0.010]
+open edge board removed (drawn) for both     n=120496  mean +0.024  p10 -0.303  median +0.001  p90 +0.344   [ply 0-19: +0.024, ply 20-34: +0.042, ply 35-81: -0.009]
+=== surprise (dedup fixed)
+6969 positions, 256 sims. Search move != raw argmax in 29.8% of positions; mean |search value - raw value| = 0.172
+by ply:  disagreement %   mean|dv|   mean p_raw(search move)
+   2- 9:  16.8%        0.027       0.763   (n=447)
+  10-19:  21.6%        0.038       0.701   (n=1508)
+  20-29:  34.0%        0.081       0.576   (n=1657)
+  30-39:  37.5%        0.240       0.519   (n=1750)
+  40-49:  30.1%        0.368       0.573   (n=1344)
+  50-70:  19.8%        0.316       0.668   (n=263)
+
+### largest value surprises (search much better for the mover than the net thought)
+
+### largest negative value surprises (net too optimistic)
+
+### largest policy surprises (search chooses a move the net almost never considers)

@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>uttt-zero</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --ink:#1f2430; --muted:#6b7280; --line:#c9ccd3; --thick:#1f2430; --x:#1d4ed8; --o:#dc2626; --bg:#fafaf9; --panel:#fff; --hot:#f59e0b; }
+  body { margin:0; font:14px/1.45 system-ui, sans-serif; color:var(--ink); background:var(--bg); }
+  .wrap { display:flex; gap:24px; padding:20px; max-width:1100px; margin:0 auto; flex-wrap:wrap; }
+  .board { display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; width:min(92vw, 540px); aspect-ratio:1; background:var(--thick); padding:6px; border-radius:6px; }
+  .local { display:grid; grid-template-columns:repeat(3, 1fr); gap:2px; background:var(--line); padding:2px; position:relative; }
+  .local.won-x { background:#bfdbfe; } .local.won-o { background:#fecaca; } .local.full { background:#d1d5db; }
+  .local.next { outline:3px solid var(--hot); outline-offset:-1px; }
+  .cell { background:var(--panel); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:clamp(14px, 3.2vw, 26px); cursor:default; position:relative; user-select:none; }
+  .cell.legal { cursor:pointer; box-shadow: inset 0 0 0 2px #fde68a; }
+  .cell.legal:hover { background:#fef3c7; }
+  .cell.x { color:var(--x); } .cell.o { color:var(--o); }
+  .cell.last { box-shadow: inset 0 0 0 3px var(--hot); }
+  .cell .heat { position:absolute; inset:0; background:var(--x); opacity:0; pointer-events:none; }
+  .cell .n { position:absolute; right:2px; bottom:0; font-size:9px; font-weight:400; color:var(--muted); }
+  .local .badge { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:clamp(40px, 10vw, 96px); font-weight:800; opacity:.55; pointer-events:none; }
+  .panel { flex:1 1 320px; min-width:300px; }
+  h1 { font-size:18px; margin:0 0 6px; } h1 small { color:var(--muted); font-weight:400; font-size:12px; }
+  .row { display:flex; gap:8px; align-items:center; margin:6px 0; flex-wrap:wrap; }
+  button, select, input { font:inherit; padding:5px 10px; border:1px solid var(--line); border-radius:5px; background:var(--panel); }
+  button { cursor:pointer; } button:hover { background:#f3f4f6; }
+  .status { font-weight:600; margin:8px 0; }
+  .bar { display:flex; height:14px; border-radius:4px; overflow:hidden; border:1px solid var(--line); margin:6px 0; }
+  .bar div { height:100%; } .bar .w { background:var(--x); } .bar .d { background:#9ca3af; } .bar .l { background:var(--o); }
+  table { border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; }
+  td, th { padding:3px 6px; border-bottom:1px solid #eee; text-align:right; } th { color:var(--muted); font-weight:500; } td:first-child, th:first-child { text-align:left; }
+  .muted { color:var(--muted); } .mono { font-family:ui-monospace, monospace; }
+  label { color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <div id="board" class="board"></div>
+    <div class="row muted" style="margin-top:8px">Cells: click a highlighted cell to move. Orange frame = board you are sent to. Blue overlay = search visits (after Analyse).</div>
+  </div>
+  <div class="panel">
+    <h1>uttt-zero <small id="net"></small></h1>
+    <div class="row">
+      <label>You play</label>
+      <select id="human"><option value="X">X (first)</option><option value="O">O</option><option value="none">both sides (analysis)</option></select>
+      <label>sims</label><input id="sims" type="number" value="800" min="8" max="20000" step="8" style="width:80px">
+      <button id="new">New game</button>
+    </div>
+    <div class="row">
+      <button id="analyse">Analyse</button>
+      <button id="hint">Hint</button>
+      <button id="agent">Agent moves</button>
+      <button id="undo">Undo</button>
+    </div>
+    <div id="status" class="status"></div>
+    <div id="eval"></div>
+    <div id="pv" class="mono muted"></div>
+    <table id="moves"></table>
+    <div id="hist" class="mono muted" style="margin-top:8px; word-break:break-all"></div>
+  </div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+let S = null, A = null, hintMove = null;
+const cellName = m => `b${Math.floor(m / 9) + 1}c${m % 9 + 1}`;
+async function api(path, body) {
+  const r = await fetch(path, body ? {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)} : {});
+  return r.json();
+}
+function render() {
+  const b = $('board'); b.innerHTML = '';
+  const legal = new Set(S.legal), last = S.history.length ? S.history[S.history.length - 1] : -1;
+  const visits = {}; let maxN = 1;
+  if (A && !A.done) { for (const x of A.moves) { visits[x.m] = x.n; maxN = Math.max(maxN, x.n); } }
+  for (let B = 0; B < 9; B++) {
+    const L = document.createElement('div'); L.className = 'local';
+    const st = S.macro[B];
+    if (st === 1) L.classList.add('won-x'); else if (st === -1) L.classList.add('won-o'); else if (st === 2) L.classList.add('full');
+    if (!S.done && S.next_board === B) L.classList.add('next');
+    for (let c = 0; c < 9; c++) {
+      const m = 9 * B + c, v = S.cells[m];
+      const d = document.createElement('div'); d.className = 'cell';
+      if (v === 1) { d.textContent = 'X'; d.classList.add('x'); } else if (v === -1) { d.textContent = 'O'; d.classList.add('o'); }
+      if (legal.has(m) && !S.done) { d.classList.add('legal'); d.onclick = () => move(m); }
+      if (m === last) d.classList.add('last');
+      if (visits[m]) { const h = document.createElement('div'); h.className = 'heat'; h.style.opacity = (0.08 + 0.5 * visits[m] / maxN).toFixed(2); d.appendChild(h);
+        const n = document.createElement('span'); n.className = 'n'; n.textContent = visits[m]; d.appendChild(n); }
+      if (m === hintMove) d.style.boxShadow = 'inset 0 0 0 3px #16a34a';
+      L.appendChild(d);
+    }
+    if (st === 1 || st === -1) { const g = document.createElement('div'); g.className = 'badge ' + (st === 1 ? 'x' : 'o'); g.style.color = st === 1 ? 'var(--x)' : 'var(--o)'; g.textContent = st === 1 ? 'X' : 'O'; L.appendChild(g); }
+    b.appendChild(L);
+  }
+  const who = S.player === 1 ? 'X' : 'O';
+  $('status').textContent = S.done ? `Game over: ${S.winner === 0 ? 'draw' : (S.winner === 1 ? 'X' : 'O') + ' wins'} (${S.end_reason}), ${S.move_count} moves`
+    : `${who} to move` + (S.next_board >= 0 ? ` in board ${S.next_board + 1}` : ' anywhere (free move)') + ` — move ${S.move_count + 1}`;
+  $('hist').textContent = S.history.length ? 'moves: ' + S.history.map((m, i) => `${i + 1}.${cellName(m)}`).join(' ') : '';
+  $('net').textContent = `${S.net} · ${S.sims} sims`;
+}
+function renderAnalysis() {
+  if (!A || A.done) { $('eval').innerHTML = ''; $('moves').innerHTML = ''; $('pv').textContent = ''; return; }
+  const who = S.player === 1 ? 'X' : 'O';
+  const [w, d, l] = A.wdl;
+  $('eval').innerHTML = `<div>Search value for ${who}: <b>${A.root_value.toFixed(3)}</b> <span class="muted">(raw net ${A.raw_value.toFixed(3)}, ${A.sims} sims)</span></div>
+    <div class="bar"><div class="w" style="width:${100 * w}%"></div><div class="d" style="width:${100 * d}%"></div><div class="l" style="width:${100 * l}%"></div></div>
+    <div class="muted">raw WDL for ${who}: win ${(100 * w).toFixed(0)}% · draw ${(100 * d).toFixed(0)}% · loss ${(100 * l).toFixed(0)}%</div>`;
+  $('pv').textContent = 'PV: ' + A.pv.map(cellName).join(' ');
+  const rows = A.moves.sort((a, b) => b.n - a.n).slice(0, 10);
+  $('moves').innerHTML = '<tr><th>move</th><th>visits</th><th>Q</th><th>prior</th></tr>' + rows.map(x => `<tr${x.m === A.best ? ' style="font-weight:700"' : ''}><td>${cellName(x.m)}</td><td>${x.n}</td><td>${x.q.toFixed(3)}</td><td>${(100 * x.p).toFixed(1)}%</td></tr>`).join('');
+}
+async function refresh() { S = await api('/api/state'); render(); }
+async function move(m) { hintMove = null; A = null; const r = await api('/api/move', {move: m}); if (r.error) { alert(r.error); return; } S = r.state; render(); renderAnalysis(); }
+$('new').onclick = async () => { hintMove = null; A = null; const r = await api('/api/new', {human: $('human').value, sims: +$('sims').value}); S = r.state; render(); renderAnalysis(); };
+$('analyse').onclick = async () => { $('status').textContent = 'thinking…'; A = await api('/api/analyse', {sims: +$('sims').value}); render(); renderAnalysis(); };
+$('hint').onclick = async () => { $('status').textContent = 'thinking…'; A = await api('/api/analyse', {sims: +$('sims').value}); hintMove = A.best; render(); renderAnalysis(); };
+$('agent').onclick = async () => { hintMove = null; A = null; const r = await api('/api/agent'); S = r.state; render(); renderAnalysis(); };
+$('undo').onclick = async () => { hintMove = null; A = null; const r = await api('/api/undo'); S = r.state; render(); renderAnalysis(); };
+refresh().then(() => { $('human').value = S.human; $('sims').value = S.sims; });
+</script>
+</body>
+</html>

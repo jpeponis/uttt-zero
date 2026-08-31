@@ -1,0 +1,65 @@
+=== checkpoint-to-checkpoint noise: v2b net_0130/0140 vs v2b net_0150 and v2b_s1 net_0130/0140 vs v2b net_0150 (full suite)
+paired suite openings_v1 (516 openings, 1032 games): A=runs/v2b/net_0130.pt@64 vs B=runs/v2b/net_0150.pt@64  [56s]
+  all        516   47.2%  [ 44.4,  50.0]    -19 [ -39,   +0]   53.8%  40.7%    56.5%   15.4%    149 / 194 / 173
+paired suite openings_v1 (516 openings, 1032 games): A=runs/v2b_s1/net_0130.pt@64 vs B=runs/v2b/net_0150.pt@64  [57s]
+  all        516   48.6%  [ 45.8,  51.4]    -10 [ -29,   +9]   56.8%  40.4%    58.2%   12.3%    141 / 223 / 152
+paired suite openings_v1 (516 openings, 1032 games): A=runs/v2b/net_0140.pt@64 vs B=runs/v2b/net_0150.pt@64  [59s]
+  all        516   47.5%  [ 44.8,  50.1]    -18 [ -36,   +1]   55.7%  39.2%    58.2%   13.8%    130 / 222 / 164
+paired suite openings_v1 (516 openings, 1032 games): A=runs/v2b_s1/net_0140.pt@64 vs B=runs/v2b/net_0150.pt@64  [58s]
+  all        516   44.1%  [ 41.4,  46.8]    -41 [ -60,  -22]   54.2%  34.1%    60.0%   14.6%    115 / 220 / 181
+=== atlas across seeds
+v2b @1024: done (22s)
+v2b @4096: done (76s)
+v2b_s1 @1024: done (98s)
+v2b_s1 @4096: done (152s)
+v2c @1024: done (174s)
+v2c @4096: done (228s)
+
+First-move orbits: deep-search value for X after the move, by net @ budget (rank in brackets)
+orbit  v2b@1024   v2b@4096   v2b_s1@1024   v2b_s1@4096   v2c@1024   v2c@4096     mean rank
+  [40]  +0.341( 1) +0.347( 1) +0.332( 1) +0.342( 1) +0.314( 1) +0.324( 1)     1.0
+  [36]  +0.270( 2) +0.266( 2) +0.216( 3) +0.216( 3) +0.242( 2) +0.242( 2)     2.3
+  [ 0]  +0.229( 3) +0.233( 3) +0.227( 2) +0.234( 2) +0.214( 3) +0.218( 3)     2.7
+  [37]  +0.196( 4) +0.198( 4) +0.209( 4) +0.212( 4) +0.193( 4) +0.201( 4)     4.0
+  [ 5]  +0.160( 5) +0.158( 6) +0.149( 6) +0.142( 8) +0.143( 5) +0.144( 5)     5.8
+  [10]  +0.150( 6) +0.144( 8) +0.161( 5) +0.160( 5) +0.143( 6) +0.143( 6)     6.0
+  [ 8]  +0.149( 7) +0.158( 5) +0.148( 7) +0.155( 6) +0.134( 8) +0.139( 8)     6.8
+  [ 2]  +0.149( 8) +0.148( 7) +0.148( 8) +0.151( 7) +0.137( 7) +0.140( 7)     7.3
+  [ 4]  +0.146( 9) +0.135( 9) +0.136( 9) +0.122( 9) +0.095(11) +0.099(10)     9.5
+  [ 1]  +0.128(10) +0.123(10) +0.134(10) +0.120(10) +0.123( 9) +0.116( 9)     9.7
+  [12]  +0.107(11) +0.105(11) +0.116(11) +0.115(11) +0.095(10) +0.098(11)    10.8
+  [15]  +0.068(13) +0.072(13) +0.090(12) +0.087(13) +0.087(12) +0.082(12)    12.5
+  [16]  +0.078(12) +0.078(12) +0.085(13) +0.088(12) +0.069(13) +0.073(13)    12.5
+  [ 9]  +0.054(14) +0.058(14) +0.072(14) +0.076(14) +0.065(14) +0.068(14)    14.0
+  [13]  -0.055(15) -0.051(15) -0.024(15) -0.033(15) -0.018(15) -0.020(15)    15.0
+
+Kendall tau between columns (first-move ranking):
+                 v2b@1k    v2b@4k   v2b_@1k   v2b_@4k    v2c@1k    v2c@4k
+  v2b@1k           1.00      0.94      0.94      0.92      0.92      0.94
+  v2b@4k           0.94      1.00      0.89      0.90      0.87      0.89
+  v2b_@1k          0.94      0.89      1.00      0.94      0.90      0.92
+  v2b_@4k          0.92      0.90      0.94      1.00      0.85      0.87
+  v2c@1k           0.92      0.87      0.90      0.85      1.00      0.98
+  v2c@4k           0.94      0.89      0.92      0.87      0.98      1.00
+
+best first move per column: [40, 40, 40, 40, 40, 40]  (stable: True)
+
+Replies: best reply class (X's value after it, lower = better for O) per first move and column;
+agreement = share of columns choosing the same best reply as the strongest net at the largest budget
+  after [ 0] (5 reply classes): v2b@1k: 1(+0.23)  v2b@4k: 1(+0.23)  v2b_@1k: 5(+0.23)  v2b_@4k: 1(+0.23)  v2c@1k: 1(+0.21)  v2c@4k: 1(+0.20)   agreement 0.83
+  after [ 1] (9 reply classes): v2b@1k:14(+0.11)  v2b@4k:12(+0.10)  v2b_@1k:14(+0.11)  v2b_@4k:14(+0.10)  v2c@1k:14(+0.11)  v2c@4k:12(+0.10)   agreement 0.33
+  after [ 2] (9 reply classes): v2b@1k:20(+0.15)  v2b@4k:18(+0.15)  v2b_@1k:18(+0.14)  v2b_@4k:18(+0.14)  v2c@1k:25(+0.13)  v2c@4k:25(+0.13)   agreement 0.33
+  after [ 4] (6 reply classes): v2b@1k:36(+0.13)  v2b@4k:36(+0.11)  v2b_@1k:40(+0.13)  v2b_@4k:40(+0.12)  v2c@1k:40(+0.09)  v2c@4k:36(+0.10)   agreement 0.50
+  after [ 5] (9 reply classes): v2b@1k:45(+0.14)  v2b@4k:46(+0.14)  v2b_@1k:45(+0.13)  v2b_@4k:45(+0.13)  v2c@1k:45(+0.13)  v2c@4k:52(+0.13)   agreement 0.17
+  after [ 8] (6 reply classes): v2b@1k:80(+0.15)  v2b@4k:72(+0.15)  v2b_@1k:72(+0.15)  v2b_@4k:72(+0.15)  v2c@1k:80(+0.13)  v2c@4k:80(+0.14)   agreement 0.50
+  after [ 9] (9 reply classes): v2b@1k: 0(+0.05)  v2b@4k: 0(+0.06)  v2b_@1k: 0(+0.07)  v2b_@4k: 5(+0.07)  v2c@1k: 5(+0.06)  v2c@4k: 5(+0.06)   agreement 0.50
+  after [10] (5 reply classes): v2b@1k:12(+0.15)  v2b@4k:12(+0.14)  v2b_@1k:16(+0.16)  v2b_@4k:16(+0.15)  v2c@1k:12(+0.14)  v2c@4k:12(+0.14)   agreement 0.67
+  after [12] (9 reply classes): v2b@1k:30(+0.10)  v2b@4k:30(+0.10)  v2b_@1k:30(+0.11)  v2b_@4k:28(+0.11)  v2c@1k:30(+0.09)  v2c@4k:28(+0.09)   agreement 0.33
+  after [13] (6 reply classes): v2b@1k:40(-0.05)  v2b@4k:40(-0.05)  v2b_@1k:40(-0.02)  v2b_@4k:40(-0.03)  v2c@1k:40(-0.02)  v2c@4k:37(-0.02)   agreement 0.17
+  after [15] (9 reply classes): v2b@1k:60(+0.07)  v2b@4k:60(+0.07)  v2b_@1k:60(+0.09)  v2b_@4k:60(+0.09)  v2c@1k:55(+0.09)  v2c@4k:60(+0.08)   agreement 0.83
+  after [16] (6 reply classes): v2b@1k:70(+0.08)  v2b@4k:70(+0.08)  v2b_@1k:66(+0.08)  v2b_@4k:66(+0.09)  v2c@1k:66(+0.07)  v2c@4k:70(+0.07)   agreement 0.50
+  after [36] (6 reply classes): v2b@1k: 4(+0.25)  v2b@4k: 4(+0.25)  v2b_@1k: 4(+0.20)  v2b_@4k: 4(+0.21)  v2c@1k: 0(+0.25)  v2c@4k: 0(+0.24)   agreement 0.33
+  after [37] (6 reply classes): v2b@1k:12(+0.19)  v2b@4k:12(+0.20)  v2b_@1k:12(+0.20)  v2b_@4k:12(+0.21)  v2c@1k:10(+0.19)  v2c@4k:12(+0.20)   agreement 0.83
+  after [40] (2 reply classes): v2b@1k:37(+0.35)  v2b@4k:37(+0.35)  v2b_@1k:37(+0.34)  v2b_@4k:37(+0.36)  v2c@1k:37(+0.33)  v2c@4k:37(+0.33)   agreement 1.00
+mean best-reply agreement with v2c@4096: 0.52
+wrote runs/atlas_seeds.json  [228s]

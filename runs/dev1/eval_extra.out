@@ -1,0 +1,6 @@
+A=runs/dev1/net_0200.pt@256 vs B=runs/dev1/net_0200.pt@64: A scores +199 =19 -38 (81.4%)  [86s]
+  X wins 49.2%  O wins 43.4%  draws 7.4%  | ended by line 79.3%  by count 13.3%  drawn 7.4%  | mean length 49.8
+A=runs/dev1/net_0200.pt@256 vs B=runs/dev1/net_0200.pt@256: A scores +256 =0 -256 (50.0%)  [149s]
+  X wins 0.0%  O wins 100.0%  draws 0.0%  | ended by line 100.0%  by count 0.0%  drawn 0.0%  | mean length 56.0
+A=runs/dev1/net_0200.pt@256 vs B=runs/dev1/net_0200.pt@256: A scores +232 =65 -215 (51.7%)  [162s]
+  X wins 51.4%  O wins 35.9%  draws 12.7%  | ended by line 70.7%  by count 16.6%  drawn 12.7%  | mean length 51.5

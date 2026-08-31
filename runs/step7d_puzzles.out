@@ -1,0 +1,61 @@
+6000 candidate positions from 3113 games (7s)
+solved with children in 31s; exact W/D/L for the mover 0.480/0.132/0.388
+raw-policy failures (puzzles): 208 (3.5%); search-64 failures (hard): 13 (0.22%)
+puzzle rate by empties: 6: 0.9%, 7: 2.2%, 8: 3.6%, 9: 3.0%, 10: 3.2%, 11: 3.1%, 12: 4.3%, 13: 4.2%, 14: 4.7%
+motifs among puzzles: closes_board 2, denies_free_move 68, draw_hold 71, gives_free_move 92, local_win 55, macro_win 4, tiebreak_conversion 110
+regret of the raw move among puzzles: 1 (win->draw or draw->loss) 65.9%, 2 (win->loss) 34.1%
+wrote suites/puzzles_v1.npz (208 puzzles, 11 hard) and 11 readable hard puzzles  [591s]
+
+hard puzzle id 259 (game 153, ply 45): exact +1, best 48, PV [48, 27, 50, 45, 47], raw 50, search 50, motifs []
+to move: O   next board: any   moves: 45
+X X X  X O .  O . X
+. . O  O . O  O . .
+. . .  O X X  O . .
+
+. X .  O O O  . X .
+X . .  . X .  . . .
+O O X  . . .  X O O
+
+X X X  O O .  . . .
+O . .  X X X  . X X
+X O .  . X .  O O O
+macro:
+X.O
+.O.
+XXO
+
+hard puzzle id 879 (game 512, ply 48): exact +0, best 9, PV [9, 3, 27, 4, 13, 1, 15, 31], raw 13, search 13, motifs ['denies_free_move', 'tiebreak_conversion', 'draw_hold']
+to move: X   next board: any   moves: 48
+X . X  . O X  O X X
+. . .  O . O  X O O
+. O .  . X O  O . .
+
+. X O  . X O  . O O
+O . O  . X O  X X X
+X X .  . . O  . O X
+
+. . X  . X .  . . .
+. . X  O O O  X X X
+O . X  . X .  O . O
+macro:
+...
+.OX
+XOX
+
+hard puzzle id 1677 (game 950, ply 38): exact +1, best 76, PV [76, 54, 72], raw 62, search 62, motifs ['gives_free_move']
+to move: X   next board: any   moves: 38
+O O O  X O O  X X X
+X . .  X O X  . . .
+. . .  . O .  . . O
+
+. O .  . X O  . X .
+X O .  . X O  . . O
+. O .  . X .  X X X
+
+. . .  . X .  . . .
+. O .  O X O  . . O
+. . .  . X .  . O X
+macro:
+OOX
+OXX
+.X.

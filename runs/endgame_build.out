@@ -1,0 +1,20 @@
+48863 candidate positions from 5 files (75s)
+  solved 1000: 1000/3000 slots filled (23s)
+  solved 2000: 1794/3000 slots filled (89s)
+  solved 3000: 2205/3000 slots filled (115s)
+  solved 4000: 2470/3000 slots filled (143s)
+  solved 5000: 2633/3000 slots filled (372s)
+  solved 6000: 2704/3000 slots filled (392s)
+  solved 7000: 2780/3000 slots filled (422s)
+  solved 8000: 2827/3000 slots filled (441s)
+  solved 9000: 2862/3000 slots filled (484s)
+  solved 10000: 2909/3000 slots filled (518s)
+  solved 11000: 2960/3000 slots filled (587s)
+  solved 12000: 2979/3000 slots filled (657s)
+  solved 13000: 2998/3000 slots filled (675s)
+  solved 14000: 3000/3000 slots filled (705s)
+wrote suites/endgame_v1.npz: 3000 positions; exact W/D/L for the mover 0.333/0.333/0.333; 2870 source games
+  empties 6-9: [125, 125, 125, 125, 125, 125]
+  empties 10-12: [125, 125, 125, 125, 125, 125]
+  empties 13-14: [125, 125, 125, 125, 125, 125]
+  empties 15-16: [125, 125, 125, 125, 125, 125]
