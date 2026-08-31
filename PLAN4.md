@@ -93,6 +93,32 @@ part), puzzles overwrite trap (C9), atomic saves (C3), config clobber on resume 
 - Replay-buffer incremental hashing, async checkpoint writer (S10): `t_iter` now measures
   the overhead directly; act only if it shows up (>5 % of an iteration).
 
+## 2b. Incident 2026-08-30 night: both queue4 runs killed by GPU faults during in-run eval
+
+`deep8_c1` (iter 79) and `wide128_c1_s96` (iter 29) both died with `CUDA error: an illegal
+memory access` at `graph.replay()` inside `evaluate()`'s paired matches; the Windows event
+log has an `nvlddmkm` id-153 driver fault at each crash time (23:08, 23:50) — the first GPU
+faults in ~30 h of training on this stack. The new element that night: the third anchor made
+every evaluation create and destroy **4** CUDA-graph-capturing search objects (plus a
+batch-3000 endgame search), instead of 3. Root cause not proven (torch/driver race under
+graph churn vs. marginal hardware under this load); response covers both:
+
+- **`EvalKit`** (train2): all evaluation players and the endgame search are built once per
+  run and reused, with the candidate's weights refreshed in place — zero graph churn, and
+  evals got ~2× faster after the first (measured 10.3 s → 4.4 s on the smoke test).
+  `--eval_graph 0` exists as an eager-eval fallback if a fault ever recurs.
+- **Two-file checkpointing**: `latest.pt` (every iteration, no buffer) + `latest_full.pt`
+  (every `save_buffer_every`, with buffer, atomic). Resume prefers `latest_full.pt`, so a
+  crash costs ≤ 10 iterations — the old single-file scheme had let iters 70–78 overwrite
+  the only buffer-bearing checkpoint, making the crashed 79-iteration run unresumable
+  (REVIEW-codex finding 4's residual, now actually fixed).
+- **`runs/queue4.sh` auto-retries** each run up to 6 times (a fresh process = clean CUDA
+  context), gated on the `DONE` marker.
+
+The crashed partials are archived as `runs/*_crash1` (their pre-drop numbers say nothing
+about depth/sims — do not read them as results). Queue relaunched with the fixes; a resumed
+run's `log.jsonl` may contain a few replayed iteration lines (append mode) — harmless.
+
 ## 3. State of the ladder (unchanged from PLAN3 §3, with corrected wording)
 
 `runs/wide128_c1/net_0150.pt` remains the best net *at 64 sims*: +77 Elo [+57, +96] vs v2b,

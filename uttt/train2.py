@@ -70,6 +70,7 @@ class TrainConfig:
     eval_every: int = 10
     eval_games: int = 128  # per side; only used when suite == "" (unpaired random 2-ply openings)
     eval_sims: int = 64
+    eval_graph: int = 1  # 0: eager eval searches (slower; fallback if graph-mode eval ever faults again)
     anchors: str = "runs/dev1/net_0200.pt"  # comma-separated checkpoints used as fixed opponents
     suite: str = "suites/openings_v1.npz"  # fixed opening suite, every opening played with both colours (tools/openings.py)
     eval_openings: int = 100  # at most this many openings per sub-suite of the suite (0 = the whole suite)
@@ -157,37 +158,51 @@ def train_steps(net, opt, scaler, buf: GPUReplayBuffer, cfg: TrainConfig, n_step
     return dict(zip(("policy", "value", "own", "margin", "acc_v", "acc_p"), [round(x, 4) for x in t]))
 
 
-def evaluate(net, cfg: TrainConfig, device, anchors: dict, suite: Suite | None = None) -> dict:
-    """Deterministic 64-sim matches vs the fixed anchor evaluators. With a suite: every opening is played
-    with both colours and logged as vs_<anchor> (score), ci_<anchor> (95 % bootstrap over opening pairs)
-    and suites_<anchor> (score per sub-suite). Without: cfg.eval_games games per side from random 2-ply openings."""
-    ev = FusedEvaluator(net, device)
-    ecfg = SearchConfig(n_sims=cfg.eval_sims, mode="gumbel", gumbel_scale=0.0, cuda_graph=device.type == "cuda", depth_cap=min(cfg.eval_sims, 24))
-    out = {}
-    if suite is None:
-        n = cfg.eval_games
-        for name, aev in anchors.items():
-            r1 = play_games(SearchPlayer2(ev, n, ecfg, device), SearchPlayer2(aev, n, ecfg, device), n, device, 2)
-            r2 = play_games(SearchPlayer2(aev, n, ecfg, device), SearchPlayer2(ev, n, ecfg, device), n, device, 2)
-            out[f"vs_{name}"] = round((r1.wins + r2.losses + 0.5 * (r1.draws + r2.draws)) / (2 * n), 3)
+class EvalKit:
+    """Persistent evaluation machinery: candidate evaluator, per-anchor players and endgame search are
+    built ONCE and reused for every evaluation, with the candidate's weights refreshed in place (the
+    mechanism the self-play graphs already rely on). Before 2026-08-31 every evaluation created and
+    destroyed 4+ CUDA-graph-capturing search objects; the two in-eval GPU faults of that night
+    (nvlddmkm 153, illegal memory access at graph.replay) happened under exactly that churn.
+
+    Logs vs_<anchor> (score), ci_<anchor> (95 % bootstrap over opening pairs), suites_<anchor>
+    (score per sub-suite); without a suite: cfg.eval_games games per side, random 2-ply openings."""
+
+    def __init__(self, net, cfg: TrainConfig, device, anchors: dict, suite: Suite | None, es: EndgameSet | None) -> None:
+        self.cfg, self.device, self.suite, self.es = cfg, device, suite, es
+        graph = device.type == "cuda" and bool(cfg.eval_graph)
+        ecfg = SearchConfig(n_sims=cfg.eval_sims, mode="gumbel", gumbel_scale=0.0, cuda_graph=graph, depth_cap=min(cfg.eval_sims, 24))
+        self.fe = FusedEvaluator(net, device)
+        n = suite.n if suite is not None else cfg.eval_games
+        self.pa = SearchPlayer2(self.fe, n, ecfg, device)
+        self.pb = {name: SearchPlayer2(aev, n, ecfg, device) for name, aev in anchors.items()}
+        self.eg_cache: dict = {}  # sims -> BatchedSearch reused across endgame evaluations
+
+    def run(self, net) -> dict:
+        self.fe.refresh(net)
+        cfg, out = self.cfg, {}
+        if self.suite is None:
+            n = cfg.eval_games
+            for name, pb in self.pb.items():
+                r1 = play_games(self.pa, pb, n, self.device, 2)
+                r2 = play_games(pb, self.pa, n, self.device, 2)
+                out[f"vs_{name}"] = round((r1.wins + r2.losses + 0.5 * (r1.draws + r2.draws)) / (2 * n), 3)
+        else:
+            for name, pb in self.pb.items():
+                s = summarize(play_paired(self.pa, pb, self.suite, self.device), n_boot=1000)
+                o = s["overall"]
+                out[f"vs_{name}"] = round(o["score"], 3)
+                out[f"ci_{name}"] = [round(o["ci"][0], 3), round(o["ci"][1], 3)]
+                out[f"suites_{name}"] = {k: round(v["score"], 3) for k, v in s["suites"].items()}
+        if self.es is not None:
+            res = endgame_evaluate(self.fe, self.es, self.device, sims=(cfg.eval_sims,), n_boot=200, symmetrise=False,
+                                   graph=bool(cfg.eval_graph), search_cache=self.eg_cache)
+            raw, srch = res["rows"][0], res["rows"][-1]
+            out.update({"eg_wdl_acc": round(raw["wdl_acc"], 4), "eg_brier": round(raw["brier"], 4),
+                        "eg_regret_raw": round(raw["regret"], 4), "eg_optimal_raw": round(raw["optimal"], 4),
+                        "eg_acc3_search": round(srch["acc3"], 4), "eg_regret_search": round(srch["regret"], 4),
+                        "eg_optimal_search": round(srch["optimal"], 4)})
         return out
-    pa = SearchPlayer2(ev, suite.n, ecfg, device)
-    for name, aev in anchors.items():
-        s = summarize(play_paired(pa, SearchPlayer2(aev, suite.n, ecfg, device), suite, device), n_boot=1000)
-        o = s["overall"]
-        out[f"vs_{name}"] = round(o["score"], 3)
-        out[f"ci_{name}"] = [round(o["ci"][0], 3), round(o["ci"][1], 3)]
-        out[f"suites_{name}"] = {k: round(v["score"], 3) for k, v in s["suites"].items()}
-    return out
-
-
-def evaluate_endgame(net, cfg: TrainConfig, device, es: EndgameSet) -> dict:
-    """Raw value head and the eval-budget search on the frozen exact endgame set (uttt.endgame)."""
-    res = endgame_evaluate(FusedEvaluator(net, device), es, device, sims=(cfg.eval_sims,), n_boot=200, symmetrise=False)
-    raw, srch = res["rows"][0], res["rows"][-1]
-    return {"eg_wdl_acc": round(raw["wdl_acc"], 4), "eg_brier": round(raw["brier"], 4), "eg_regret_raw": round(raw["regret"], 4),
-            "eg_optimal_raw": round(raw["optimal"], 4), "eg_acc3_search": round(srch["acc3"], 4),
-            "eg_regret_search": round(srch["regret"], 4), "eg_optimal_search": round(srch["optimal"], 4)}
 
 
 def main(cfg: TrainConfig) -> None:
@@ -243,20 +258,23 @@ def main(cfg: TrainConfig) -> None:
               f"weight x{cfg.exact_weight}, policy {'replaced' if cfg.exact_policy else 'kept'}", flush=True)
     drops = [int(x) for x in cfg.lr_drops.split(",") if x]
     log_path = os.path.join(cfg.run, "log.jsonl")
-    ckpt_path = os.path.join(cfg.run, "latest.pt")
+    ckpt_path = os.path.join(cfg.run, "latest.pt")  # every iteration, no buffer (small, fast)
+    full_path = os.path.join(cfg.run, "latest_full.pt")  # every save_buffer_every iterations, WITH buffer
     start_iter, global_step = 0, 0
-    if os.path.exists(ckpt_path):
-        ck = torch.load(ckpt_path, map_location=device, weights_only=False)
+    resume_path = full_path if os.path.exists(full_path) else ckpt_path  # prefer full state: replaying a few
+    if os.path.exists(resume_path):  # iterations beats resuming with an empty buffer (bit us 2026-08-30)
+        ck = torch.load(resume_path, map_location=device, weights_only=False)
         net.load_state_dict(ck["net"])
         opt.load_state_dict(ck["opt"])
         if "buffer" in ck:
             buf.load_state_dict(ck["buffer"])
         else:
-            print(f"WARNING: {ckpt_path} has no replay buffer (saved every {cfg.save_buffer_every} iterations); "
-                  "resuming with an EMPTY buffer - restart from a buffer checkpoint iteration to avoid this", flush=True)
+            print(f"WARNING: {resume_path} has no replay buffer (saved every {cfg.save_buffer_every} iterations); "
+                  "resuming with an EMPTY buffer", flush=True)
         start_iter, global_step = ck["iter"] + 1, ck.get("global_step", 0)
         fe.refresh(net)
-        print(f"resumed from iteration {ck['iter']} (buffer {buf.size})")
+        print(f"resumed from iteration {ck['iter']} ({os.path.basename(resume_path)}, buffer {buf.size})", flush=True)
+    ekit = EvalKit(net, cfg, device, anchors, suite, es) if cfg.eval_every else None
 
     schedule = sorted((int(a), int(b)) for a, b in (x.split(":") for x in cfg.sims_schedule.split(",") if x))
     for it in range(start_iter, cfg.iters):
@@ -300,19 +318,19 @@ def main(cfg: TrainConfig) -> None:
                 buf.apply_exact(slots, vals, pols if cfg.exact_policy else None)
                 rec.update({"exact_new": int(len(vals)), "exact_total": labeler.total, "t_exact_wait": round(time.perf_counter() - t3, 1),
                             "exact_wdl": [round(float((vals == v).mean()), 3) for v in (1, 0, -1)]})
-        if cfg.eval_every and (it + 1) % cfg.eval_every == 0:
+        if ekit and (it + 1) % cfg.eval_every == 0:
             t2 = time.perf_counter()
-            rec.update(evaluate(net, cfg, device, anchors, suite))
-            if es is not None:
-                rec.update(evaluate_endgame(net, cfg, device, es))
+            rec.update(ekit.run(net))
             rec["t_eval"] = round(time.perf_counter() - t2, 1)
             torch.save({"net": net.state_dict(), "cfg": asdict(cfg)}, os.path.join(cfg.run, f"net_{it + 1:04d}.pt"))
         t4 = time.perf_counter()
         ck = {"net": net.state_dict(), "opt": opt.state_dict(), "iter": it, "global_step": global_step, "cfg": asdict(cfg)}
+        torch.save(ck, ckpt_path + ".tmp")  # atomic: a crash mid-save must not destroy the resume point
+        os.replace(ckpt_path + ".tmp", ckpt_path)
         if cfg.save_buffer_every and (it + 1) % cfg.save_buffer_every == 0:
             ck["buffer"] = buf.state_dict()
-        torch.save(ck, ckpt_path + ".tmp")  # atomic: a crash mid-save must not destroy the only resume point
-        os.replace(ckpt_path + ".tmp", ckpt_path)
+            torch.save(ck, full_path + ".tmp")  # separate file: later bufferless saves can no longer destroy it
+            os.replace(full_path + ".tmp", full_path)
         rec["t_ckpt"] = round(time.perf_counter() - t4, 1)
         rec["t_iter"] = round(time.perf_counter() - t0, 1)  # end-to-end, incl. persistence/buffer/exact/eval/ckpt
         print(json.dumps(rec), flush=True)

@@ -231,8 +231,12 @@ def _row(es: EndgameSet, name: str, wdl: np.ndarray | None, scalar: np.ndarray |
 
 
 @torch.no_grad()
-def evaluate(fe, es: EndgameSet, device, sims=(32, 64, 256), n_boot: int = 2000, symmetrise: bool = True) -> dict:
-    """Score a FusedEvaluator (raw heads) and the v2 search at the given budgets on the set."""
+def evaluate(fe, es: EndgameSet, device, sims=(32, 64, 256), n_boot: int = 2000, symmetrise: bool = True,
+             graph: bool = True, search_cache: dict | None = None) -> dict:
+    """Score a FusedEvaluator (raw heads) and the v2 search at the given budgets on the set.
+
+    search_cache: optional {sims: BatchedSearch} dict a repeated caller (train2.EvalKit) owns, so the
+    search objects and their CUDA graphs are built once and reused instead of churned per call."""
     from .search import BatchedSearch, SearchConfig
 
     cells, macro, nb, player = _tensors(es, device)
@@ -247,8 +251,13 @@ def evaluate(fe, es: EndgameSet, device, sims=(32, 64, 256), n_boot: int = 2000,
         wdl_s = wdl_probs(fe, cells, macro, nb, player, symmetrise=True).cpu().numpy()
         rows.append(_row(es, "raw net, symmetry-averaged WDL", wdl_s, None, None, n_boot))
     for s in sims:
-        scfg = SearchConfig(n_sims=s, mode="gumbel", gumbel_scale=0.0, cuda_graph=device.type == "cuda", depth_cap=min(s, 24))
-        r = BatchedSearch(fe, n, scfg, device).search(cells, macro, nb, player, done, winner, selfplay=False)
+        bs = search_cache.get(s) if search_cache is not None else None
+        if bs is None:
+            scfg = SearchConfig(n_sims=s, mode="gumbel", gumbel_scale=0.0, cuda_graph=graph and device.type == "cuda", depth_cap=min(s, 24))
+            bs = BatchedSearch(fe, n, scfg, device)
+            if search_cache is not None:
+                search_cache[s] = bs
+        r = bs.search(cells, macro, nb, player, done, winner, selfplay=False)
         rows.append(_row(es, f"search {s} sims", None, r.root_value.cpu().numpy(), r.action.cpu().numpy(), n_boot))
     return {"rows": rows, "n": n}
 
