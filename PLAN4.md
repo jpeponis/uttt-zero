@@ -128,19 +128,22 @@ endgame regret 0.067, raw-policy optimal 94.4 %. The two stacked levers stand: c
 
 ## 4. Next steps, in order
 
-1. **Running now** (`runs/queue4.sh`, ~11.5 h + evals on the 3090):
-   - **A. `deep8_c1`** — 8 blocks × 128 filters, c_scale 1.0, otherwise the wide128_c1
-     recipe (~6.1 h). The depth lever, untested so far.
-   - **B. `wide128_c1_s96`** — 6×128, final self-play phase at 96 sims
-     (`--sims_schedule 60:48,100:96 --depth_cap 16`, ~5.3 h). The teacher-quality lever:
-     c_scale (+40) proved the target side matters and the 256-vs-64 self-match (77–80 %)
-     shows the search is far from saturated; more sims is the config-only version of
-     "better teacher" (S7 and C5 agree here). Watch `cap_hit` (was ≤0.9 % at 64/cap 12).
-   - Both judged by PLAN3 §2 rules on the full suite vs v2b **and** wide128_c1 (now the
-     third in-run anchor). Believe > +3 points only.
-2. **Then one long run** with whatever won A/B (or wide128_c1 if neither did):
-   `--iters 300 --lr_drops 200,280`, buffer unchanged (window in iterations is what
-   matters; `--games` stays 4096 — the probe killed 8192). ~9–12 h.
+1. **Done — queue4 results (2026-08-31, full paired suite, final checkpoints @64):**
+   - **A. `deep8_c1`** (8×128, c_scale 1.0): **adopt**. 53.3 % [50.5, 56.0] = **+23 Elo
+     [+4, +42] head-to-head vs wide128_c1**; 64.0 % (+100) vs v2b; endgame bests across
+     the board (raw WDL 77.6, raw regret 0.064, raw optimal 94.7 %). +3.3 points —
+     borderline clear of the ±3 rule, CI excludes zero, every secondary metric agrees.
+     Cost 1.36× (≈6.2 h/150 it). **New best net: `runs/deep8_c1/net_0150.pt`.**
+   - **B. `wide128_c1_s96`** (final phase at 96 sims): **null**. 50.2 % [47.4, 53.0] vs
+     wide128_c1 (+1 Elo); 59.9 % vs v2b ≈ wide128_c1's 60.9 %; endgame unchanged;
+     `cap_hit` 0.2–0.4 % at 96/cap 16 (not a truncation artifact). Caveat for any retry:
+     the 50-iteration dose sat entirely after the LR drops, where learning is slowest —
+     a from-iteration-60 dose would be the stronger test, not currently scheduled.
+   - Ladder rewrite: v2b 0 → wide128_c1 +77 → **deep8_c1 +100** (vs v2b, 64 sims).
+2. **Running now** (`runs/queue5.sh`): the long run — deep8_c1's recipe, one change:
+   `--iters 300 --lr_drops 200,280` (~13–15 h), `deep8_c1/net_0150.pt` added as fourth
+   anchor, buffer unchanged (`--games` stays 4096 — the probe killed 8192). Judged vs
+   v2b, wide128_c1 **and** deep8_c1 (eval_run.sh now includes the deep8_c1 match).
 3. **Seed-replicate the winner** (3060, overnight, ~2× the 3090 time): the wide runs have
    no replicate and the adjacent-step CIs are unresolved (S2). One replicate of the final
    recipe bounds the seed noise where it is actually being spent.
