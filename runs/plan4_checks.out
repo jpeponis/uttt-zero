@@ -1,0 +1,19 @@
+=== orientation robustness: wide128_c1 vs v2b @64 on the rotated suite (canonical result: 60.9 [58.2, 63.5])
+paired suite openings_v1_rotcheck (516 openings, 1032 games): A=runs/wide128_c1/net_0150.pt@64 vs B=runs/v2b/net_0150.pt@64  [80s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1    0.0%       n/a        n/a                   0.0%   0.0%    50.0%    0.0%      0 /   0 /   1
+  orbits      15   63.3%  [ 45.0,  80.0]    +95 [ -35, +241]   80.0%  46.7%    66.7%    6.7%      7 /   5 /   3
+  natural    250   59.2%  [ 55.1,  63.0]    +65 [ +36,  +92]   67.4%  51.0%    58.2%   12.8%    104 / 100 /  46
+  random     250   61.5%  [ 57.6,  65.3]    +81 [ +53, +110]   68.4%  54.6%    56.9%   16.6%    112 /  93 /  45
+  all        516   60.3%  [ 57.6,  63.0]    +73 [ +53,  +92]   68.1%  52.5%    57.8%   14.4%    223 / 198 /  95
+  end reasons: line 74.8%  count 10.8%  equal 14.4%  |  mean length 49.2
+
+=== FLOP-matched play: wide128_c1@64 vs v2b@256 (4x sims offsets 4x width)
+paired suite openings_v1 (516 openings, 1032 games): A=runs/wide128_c1/net_0150.pt@64 vs B=runs/v2b/net_0150.pt@256  [156s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1   50.0%       n/a        n/a                 100.0%   0.0%   100.0%    0.0%      0 /   1 /   0
+  orbits      15   35.0%  [ 20.0,  51.7]   -108 [-241,  +12]   36.7%  33.3%    51.7%   23.3%      3 /   4 /   8
+  natural    250   32.1%  [ 28.3,  35.8]   -130 [-161, -101]   42.2%  22.0%    60.1%   13.4%     31 /  85 / 134
+  random     250   39.7%  [ 35.9,  43.4]    -73 [-101,  -46]   47.6%  31.8%    57.9%   17.4%     51 /  90 / 109
+  all        516   35.9%  [ 33.2,  38.5]   -101 [-121,  -81]   44.8%  27.0%    58.9%   15.6%     85 / 180 / 251
+  end reasons: line 71.4%  count 13.0%  equal 15.6%  |  mean length 49.6

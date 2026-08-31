@@ -1,0 +1,153 @@
+# uttt-zero — PLAN4: hand-off (2026-08-30, after the two-model review)
+
+Read this first; it supersedes `PLAN3.md` (kept — its §2 measurement kit, §3 ladder, §4 lessons
+and §5 game beliefs remain the reference and are not repeated here; only corrections appear
+below). New since PLAN3: two independent reviews (`REVIEW-claude.md`, `REVIEW-sol.md` — GPT-5.6
+"Sol", 16 findings), throughput probes, robustness checks, a git repo, and the operational
+fixes those reviews demanded. File map: `README.md`.
+
+## 1. What changed since PLAN3
+
+**Code/ops (committed, `git log`):**
+- `git init` done; code, docs, suites, run configs/logs and every run's final checkpoint are
+  tracked (~40 MB). Commit before and after every recipe change from now on.
+- `train2.py`: `latest.pt` is written atomically (tmp + rename — a crash mid-save can no
+  longer destroy the resume point); `config.json` is never clobbered (a resume writes
+  `config_resume_*.json` beside it and warns on drift); provenance (`argv`, torch version,
+  git rev, start time) is stored under `_provenance`; each log line now has `t_ckpt` and
+  end-to-end `t_iter` (the previously untimed persistence/buffer/checkpoint overhead is
+  visible); a finished run writes `runs/<run>/DONE`.
+- `eval_run.sh` discovers the final checkpoint (no more hardcoded `net_0150.pt` — a 300-iter
+  run would have been silently scored at its midpoint, Sol finding 15 = claude finding 2);
+  it also matches vs `wide128_c1` now. `watch_run.sh` waits for `DONE`, not a checkpoint name.
+- `tools/puzzles.py --out` is required (the default silently overwrote the frozen
+  `suites/puzzles_v1.npz` — exactly the yardstick trap PLAN3 §7 warns about).
+- `search.py`: `cap_hits` included in the CUDA-graph capture snapshot (first-call metric
+  contamination, Sol finding 11; moves were never affected).
+
+**Measurements (new, all reproducible from `runs/`):**
+- `runs/probe_g8192.out`: wide128 recipe at `--games 8192` → 2236–2293 pos/s steady state vs
+  2216 at 4096. **Batch doubling buys 1–4 %.** PLAN3 §6.1(b)'s "the wide nets are GPU-bound,
+  so batch scaling is now nearly free" had the logic backwards — batch scaling is free in the
+  *launch-bound* regime; wide128 at 4096 is ~95 % GPU-bound. `--games 8192` is dead as a
+  throughput lever (and was a compound intervention anyway — window, steps, label fraction
+  all shift with it; Sol finding 3). What survives of the idea: in a GPU-bound regime,
+  *phase-dependent self-play budgets at equal mean sims cost roughly equal FLOPs* — but that
+  needs `selfplay_cont` surgery (games migrating between per-budget pools), not a flag.
+- `runs/probe_b8.out`: 8×128 at 4096 games → 1630 pos/s = 1.36× the cost of 6×128 (matches
+  the 1.33 FLOP ratio; fully GPU-bound). A 150-iter 8-block run ≈ 6.1 h.
+- `runs/plan4_checks.out`: (a) orientation robustness — the paired suite replayed with a
+  random non-identity D4 image per opening (`runs/openings_v1_rotcheck.npz`, diagnostic
+  only) gives wide128_c1 vs v2b **60.3 % [57.6, 63.0]** against the canonical 60.9 %
+  [58.2, 63.5]: the canonical-orientation bias Sol's finding 6 posits is ≤ ~0.6 points —
+  real concern, negligible magnitude, no yardstick change needed. (b) FLOP-matched play —
+  wide128_c1@64 scores **35.9 % [33.2, 38.5] = −101 Elo** against v2b@256 (4× sims offsets
+  4× width): at equal inference FLOPs the small net + deep search wins decisively.
+
+## 2. Review adjudication (what was accepted, what was not)
+
+Sol's 16 findings (`REVIEW-sol.md`) vs my independent pass (`REVIEW-claude.md`):
+
+**Accepted and acted on** — provenance/git (S4), `net_0150` hardcodes (S15=C2), the 8192
+compound-intervention critique (S3=C1/C4, settled by the probe), `cap_hits` capture (S11,
+part), puzzles overwrite trap (C9), atomic saves (C3), config clobber on resume (S4, part).
+
+**Accepted as wording/claim corrections** (PLAN3 §1/§6 are corrected *here*, the files stand):
+- "Width scaling has not flattened" **overclaims** (S2). By the project's own ±3-point rule,
+  only the endpoints are resolved: 6×64→6×128 at c_scale 1 is +5.1 points [+1.2, +9.1]
+  (paired per-opening deltas); the adjacent steps +2.7 (64→96) and +2.5 (96→128) are inside
+  the noise band. Correct statement: *the endpoint trend is positive; adjacent increments
+  are unresolved; no wide run has a seed replicate.*
+- "Strongest net" means **strongest at equal sims**, not equal compute (S1). Confirmed
+  directly: v2b@256 beats wide128_c1@64 by +101 Elo at matched inference FLOPs
+  (`runs/plan4_checks.out`). This does not
+  undermine width for *training* (the 6×64 recipe plateaued across 4 runs — capacity was
+  binding there), but deployment/best-play claims must quote the budget, and the CodinGame
+  port should be sized by batch-1 latency, not by the ladder.
+- The phased-search "+50 Elo at equal mean cost" is equal cost only for ~48-ply games;
+  longer games get up to +20 % more sims under "0:32,24:96" (S12). Mostly a real schedule
+  effect (game-length-weighted extra sims ≈ +3–5 % ≈ +5 Elo), but re-tune §6.3's play
+  config under a per-move budget, which is the deployment constraint anyway.
+- The suite's pooled "overall" mixes designed strata (S5): keep using it as the fixed index
+  it is, but quote `natural` alongside (both are already in every `paired_*.json` and the
+  `suites_*` log keys). The endgame set is a *development* set after 15 in-run reads per
+  run (S14): fine for curves and recipe ranking; build any confirmation set fresh (§4.5).
+- Exact-label negative ⇒ "capacity/representation" was too strong (S8): the experiment rules
+  out label correction, not data-mixture/loss-weighting explanations of draw blindness. The
+  cheap discriminating test (overfit a 6×64 on balanced exact endgames) is listed in §4.5;
+  still irrelevant for Elo (search solves the endgame in play).
+
+**Rejected / deferred, with reasons:**
+- Hot-path micro-optimizations — redundant `legal_mask`, aux heads in inference, fp32
+  encode (S9): real but ~1–3 % where it matters; the regime is conv-FLOP-bound at wide128
+  and the redundant ops live inside already-captured graphs (launch cost zero). Not worth
+  the regression risk now; revisit only if a profile ever shows otherwise.
+- Dense-tree redesign / leaf bucketing / evaluation cache (S11): the fixed-slot design is
+  what makes CUDA graphs possible; memory is a non-issue at 4096 games (~0.6 GB of 24).
+- Structured/D4-equivariant architecture before more depth (S13): legitimate branch,
+  wrong priority for a codebase with a working, unexhausted scaling lever and a 5-9 h run
+  budget. Parked in §4.6.
+- Full manifest/DVC apparatus, hierarchical seed-level bootstrap machinery (S2/S4): the
+  proportionate versions were done (git + provenance + replicates in §4); the rest is
+  process overhead a two-GPU solo project does not need yet.
+- Replay-buffer incremental hashing, async checkpoint writer (S10): `t_iter` now measures
+  the overhead directly; act only if it shows up (>5 % of an iteration).
+
+## 3. State of the ladder (unchanged from PLAN3 §3, with corrected wording)
+
+`runs/wide128_c1/net_0150.pt` remains the best net *at 64 sims*: +77 Elo [+57, +96] vs v2b,
+endgame regret 0.067, raw-policy optimal 94.4 %. The two stacked levers stand: c_scale 1.0
+(+40, free) and width (endpoint +5.1 points 64→128 at c1). Everything else in PLAN3 §3–§5
+(measurement kit, noise bands, game beliefs) stands as written.
+
+## 4. Next steps, in order
+
+1. **Running now** (`runs/queue4.sh`, ~11.5 h + evals on the 3090):
+   - **A. `deep8_c1`** — 8 blocks × 128 filters, c_scale 1.0, otherwise the wide128_c1
+     recipe (~6.1 h). The depth lever, untested so far.
+   - **B. `wide128_c1_s96`** — 6×128, final self-play phase at 96 sims
+     (`--sims_schedule 60:48,100:96 --depth_cap 16`, ~5.3 h). The teacher-quality lever:
+     c_scale (+40) proved the target side matters and the 256-vs-64 self-match (77–80 %)
+     shows the search is far from saturated; more sims is the config-only version of
+     "better teacher" (S7 and C5 agree here). Watch `cap_hit` (was ≤0.9 % at 64/cap 12).
+   - Both judged by PLAN3 §2 rules on the full suite vs v2b **and** wide128_c1 (now the
+     third in-run anchor). Believe > +3 points only.
+2. **Then one long run** with whatever won A/B (or wide128_c1 if neither did):
+   `--iters 300 --lr_drops 200,280`, buffer unchanged (window in iterations is what
+   matters; `--games` stays 4096 — the probe killed 8192). ~9–12 h.
+3. **Seed-replicate the winner** (3060, overnight, ~2× the 3090 time): the wide runs have
+   no replicate and the adjacent-step CIs are unresolved (S2). One replicate of the final
+   recipe bounds the seed noise where it is actually being spent.
+4. **Best-play configuration** (3060, cheap): re-tune the phased schedule for wide128_c1
+   (or the §4.2 winner) under a *per-move* budget; keep ≥256 sims late. Report the play
+   agent with its budget, separately from the ladder.
+5. **Analysis second pass** (3060, as PLAN3 §6.5, with the review's upgrades): rerun atlas /
+   decision / freemove with wide128_c1; puzzles → `--out suites/puzzles_v2_dev.npz` (v1
+   stays frozen); if a confirmation endgame/opening set is built, split by source game
+   into dev/test *before* solving (S14) and keep the test half unread until a final
+   comparison. Optional, only if draw blindness is ever worth chasing: the 6×64
+   overfit-on-balanced-endgames diagnostic (S8).
+6. **Parked branches** (in preference order, none scheduled): per-pool phased self-play
+   budgets (needs selfplay_cont surgery; equal-FLOP argument in §1); Gumbel target sweep
+   beyond c_scale (`c_visit`, `m_considered` — one 6×64 run each on the 3060 if idle);
+   replay reanalysis by a stronger teacher; structured/equivariant architectures (S13);
+   CodinGame port (batch-1 latency budget first — see §2 on equal-compute).
+
+## 5. Operational notes (deltas to PLAN3 §7)
+
+- Git: repo lives in the project root; `git log` is the run-provenance spine now — commit
+  before launching a run so `config.json`'s `_provenance.git` points at real code.
+- Train command: PLAN3 §7's line still current, plus `--c_scale 1.0 --filters 128` and the
+  third anchor `runs/wide128_c1/net_0150.pt`; see `runs/queue4.sh` for the exact live text.
+- `runs/<run>/DONE` marks completion; `eval_run.sh <run> [device]` finds the last
+  checkpoint itself. In-run tail in `analysis.out` is the last 30 iterations.
+- New log keys: `t_ckpt`, `t_iter` (end-to-end). If `t_iter` exceeds
+  `t_selfplay + t_train + t_eval + t_exact_wait` by more than ~5 %, the untimed overhead
+  (S10) has become real — look at buffer save and games persistence first.
+- The rotated-suite diagnostic and FLOP-matched match live in `runs/plan4_checks.out`;
+  `runs/openings_v1_rotcheck.npz` is *not* a yardstick.
+- Probes (`runs/probe_g8192`, `runs/probe_b8`) were 3-iteration throughput measurements —
+  their nets are untrained garbage; only the `.out` files matter.
+- Traps (all of PLAN3 §7's, plus): never write analysis outputs into `suites/`; a resumed
+  run now refuses to clobber `config.json` — if you *meant* to change the config mid-run,
+  don't (start a new run).

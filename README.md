@@ -35,9 +35,11 @@ suites/         frozen yardsticks: openings_v1.npz (516 openings from the v2a co
                 (positions where the raw policy loses exact value; PVs, motifs, provenance)
 runs/           training runs: config.json, log.jsonl, latest.pt, net_NNNN.pt, games/*.npz, paired_*.json (suite matches)
 web/            server.py + index.html: local play/analysis UI (python web/server.py <ckpt> --sims 800 --device cuda:1)
-PLAN3.md        START HERE: hand-off, strength ladder, measurement kit, next steps (supersedes PLAN2)
+PLAN4.md        START HERE: hand-off, review adjudication, corrected claims, next steps (supersedes PLAN3)
+PLAN3.md        measurement kit, strength ladder, game beliefs (referenced by PLAN4, corrections there)
 PLAN2.md        detailed result sections (2b-2k) referenced by PLAN3
-PLAN.md, NOTES-v2.md, RESULTS-dev1.md, RESULTS-v2a.md, REVIEW-codex.md   original plan, notes, run results, outside review
+PLAN.md, NOTES-v2.md, RESULTS-dev1.md, RESULTS-v2a.md   original plan, notes, run results
+REVIEW-codex.md, REVIEW-sol.md, REVIEW-claude.md        outside reviews (codex: v2a era; sol + claude: PLAN3 era, adjudicated in PLAN4)
 ```
 
 Setup: `.venv` (Python 3.10) with torch 2.13+cu126, numpy, numba.
