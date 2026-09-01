@@ -19,6 +19,7 @@ echo "=== paired matches"
 $P tools/openings.py match --a $N --b runs/v2b/net_0150.pt --sims 64 --device $D --out runs/$R/paired_vs_v2b_64.json
 [ "$R" != "wide128_c1" ] && $P tools/openings.py match --a $N --b runs/wide128_c1/net_0150.pt --sims 64 --device $D --out runs/$R/paired_vs_wide128c1_64.json
 [ "$R" != "deep8_c1" ] && [ -f runs/deep8_c1/net_0150.pt ] && $P tools/openings.py match --a $N --b runs/deep8_c1/net_0150.pt --sims 64 --device $D --out runs/$R/paired_vs_deep8c1_64.json
+[ "$R" != "deep8_c1_300" ] && [ -f runs/deep8_c1_300/net_0300.pt ] && $P tools/openings.py match --a $N --b runs/deep8_c1_300/net_0300.pt --sims 64 --device $D --out runs/$R/paired_vs_deep8c1_300_64.json
 $P tools/openings.py match --a $N --b runs/dev1/net_0200.pt --sims 64 --device $D --out runs/$R/paired_vs_dev1_64.json
 echo "=== endgame set"
 $P tools/endgame.py eval $N --device $D

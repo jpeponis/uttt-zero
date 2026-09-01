@@ -169,9 +169,16 @@ optimization/duration artefact, not a representational wall.
 3. **Seed-replicate the winner** (3060, overnight, ~2× the 3090 time): the wide runs have
    no replicate and the adjacent-step CIs are unresolved (S2). One replicate of the final
    recipe bounds the seed noise where it is actually being spent.
-4. **Best-play configuration** (3060, cheap): re-tune the phased schedule for wide128_c1
-   (or the §4.2 winner) under a *per-move* budget; keep ≥256 sims late. Report the play
-   agent with its budget, separately from the ladder.
+3b. **Done — next 3090 run chosen** (owner, 2026-09-01): 10×128 at 300 iterations
+   (`runs/queue6.sh`, ~18 h, `--eval_graph 0`, `--eval_every 20`, anchors v2b /
+   wide128_c1 / deep8_c1_300). Duration-600 and the seed replicate remain queued behind
+   it, in that order of appeal depending on this result.
+4. **Best-play configuration — done** (`runs/plan4_retune.out`): phased schedules beat
+   uniform 256 at equal mean cost with the new net too — "0:128,24:384" **+26 Elo
+   [+8, +43]**, "0:64,24:448" +25 [+7, +42] (both vs deep8_c1_300@256, paired suite).
+   **The playing agent is `deep8_c1_300/net_0300.pt` with `--a_sims "0:128,24:384"`**
+   (the milder ramp; equal strength, better early-game floor). `web/server.py` still
+   takes a flat `--sims` — pass 800 there as before, the schedule is a CLI-match concept.
 5. **Analysis second pass** (3060, as PLAN3 §6.5, with the review's upgrades): rerun atlas /
    decision / freemove with wide128_c1; puzzles → `--out suites/puzzles_v2_dev.npz` (v1
    stays frozen); if a confirmation endgame/opening set is built, split by source game
