@@ -171,8 +171,12 @@ optimization/duration artefact, not a representational wall.
    recipe bounds the seed noise where it is actually being spent.
 3b. **Done — next 3090 run chosen** (owner, 2026-09-01): 10×128 at 300 iterations
    (`runs/queue6.sh`, ~18 h, `--eval_graph 0`, `--eval_every 20`, anchors v2b /
-   wide128_c1 / deep8_c1_300). Duration-600 and the seed replicate remain queued behind
-   it, in that order of appeal depending on this result.
+   wide128_c1 / deep8_c1_300).
+3c. **OWNER DIRECTIVE (2026-09-01): after queue6 and its analysis, PAUSE.** No further
+   training runs — no duration-600, no seed replicate — until a full retrospective is
+   written: everything done and learned across the project (engineering, measurement
+   methodology, training levers and nulls, game knowledge, the review arc). The
+   retrospective is the next deliverable after queue6's numbers land.
 4. **Best-play configuration — done** (`runs/plan4_retune.out`): phased schedules beat
    uniform 256 at equal mean cost with the new net too — "0:128,24:384" **+26 Elo
    [+8, +43]**, "0:64,24:448" +25 [+7, +42] (both vs deep8_c1_300@256, paired suite).
