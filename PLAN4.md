@@ -121,10 +121,13 @@ run's `log.jsonl` may contain a few replayed iteration lines (append mode) — h
 
 ## 3. State of the ladder (unchanged from PLAN3 §3, with corrected wording)
 
-`runs/wide128_c1/net_0150.pt` remains the best net *at 64 sims*: +77 Elo [+57, +96] vs v2b,
-endgame regret 0.067, raw-policy optimal 94.4 %. The two stacked levers stand: c_scale 1.0
-(+40, free) and width (endpoint +5.1 points 64→128 at c1). Everything else in PLAN3 §3–§5
-(measurement kit, noise bands, game beliefs) stands as written.
+Ladder at 64 sims vs v2b (superseding PLAN3 §3's top): wide128_c1 +77 → deep8_c1 +100
+(§4.1) → **deep8_c1_300 +211** (§4.2) — current best `runs/deep8_c1_300/net_0300.pt`.
+The stacked levers: c_scale 1.0 (+40, free), width (endpoint +5.1 pts), depth (+23),
+**duration (+127)**. PLAN3 §2 (measurement kit) and §5 (game beliefs) stand as written,
+with one revision: the "draw blindness at every net size" belief — the 300-iteration run
+lifted exact-draw recognition from ~55 % to 67.5 % (§4.2), so it was substantially an
+optimization/duration artefact, not a representational wall.
 
 ## 4. Next steps, in order
 
@@ -140,10 +143,29 @@ endgame regret 0.067, raw-policy optimal 94.4 %. The two stacked levers stand: c
      the 50-iteration dose sat entirely after the LR drops, where learning is slowest —
      a from-iteration-60 dose would be the stronger test, not currently scheduled.
    - Ladder rewrite: v2b 0 → wide128_c1 +77 → **deep8_c1 +100** (vs v2b, 64 sims).
-2. **Running now** (`runs/queue5.sh`): the long run — deep8_c1's recipe, one change:
-   `--iters 300 --lr_drops 200,280` (~13–15 h), `deep8_c1/net_0150.pt` added as fourth
-   anchor, buffer unchanged (`--games` stays 4096 — the probe killed 8192). Judged vs
-   v2b, wide128_c1 **and** deep8_c1 (eval_run.sh now includes the deep8_c1 match).
+2. **Done — queue5, the long run (2026-09-01): the biggest single gain of the project.**
+   `deep8_c1_300` = deep8_c1's recipe, one change (`--iters 300 --lr_drops 200,280`,
+   14.5 h wall incl. one crash-recovery). Full paired suite, `net_0300.pt` @64:
+   - vs **deep8_c1** (its 150-iter parent): **67.5 % [65.0, 70.0] = +127 Elo** — duration
+     alone, from the later LR drops landing on ~2× the data. Each drop gave a visible step.
+   - vs v2b: **77.1 % [74.9, 79.3] = +211**; vs wide128_c1: 71.3 % (+158); vs dev1:
+     86.7 % (+326). (Direct +127 vs ladder-difference +111 — usual non-transitivity, CIs
+     overlap.) **New best net: `runs/deep8_c1_300/net_0300.pt`.**
+   - Endgame: raw WDL **84.0** [82.6, 85.4] (previous best 77.6), Brier 0.221, raw regret
+     **0.045**, raw optimal **96.1 %**; search@256 regret 0.001 / 99.9 % optimal. And the
+     headline within the headline: **the draw stratum moved — 67.5 %** after sitting at
+     ~55 % across every 6-block net and 150-iteration run in the project. "Draw blindness
+     is not capacity" (PLAN2 §2i) and the S8 adjudication both get revised: a large part
+     of it was *optimization/duration*, not representation, labels, or width.
+   - Ops note: one nvlddmkm fault again — in the eval path again (3 of 3 all-time), with
+     EvalKit's persistent graphs, so churn is exonerated and the eval-graph configuration
+     itself (depth-cap-24 graphs at small batch) is the suspect surface. Recovery worked
+     unattended (resume from `latest_full.pt` at iter 99, ≤10 iterations lost). Next runs:
+     consider `--eval_graph 0` (~+1.5 % run time) to remove the surface entirely.
+   - Open question this result raises: duration is NOT exhausted at 300 — the natural
+     next probes are (a) another duration doubling (600 iters, drops ~400/560, ~29 h),
+     (b) 10×128 at 300 iters (~18 h), (c) the §3-item seed replicate of this recipe
+     (14 h). One change per run; owner's call on which GPU-day to spend first.
 3. **Seed-replicate the winner** (3060, overnight, ~2× the 3090 time): the wide runs have
    no replicate and the adjacent-step CIs are unresolved (S2). One replicate of the final
    recipe bounds the seed noise where it is actually being spent.
