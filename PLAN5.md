@@ -4,8 +4,8 @@ Written at the pause called in PLAN4 §3c, after RETROSPECTIVE.md. Sections: §0
 decision (more training, or use the net we have?) with a recommendation; §1 a full review
 of the work so far; §2–§4 the analysis programme in three phases; §5 the training runs
 still worth doing and the ones that are not; §6 housekeeping; §7 order and budget.
-Nothing here has been started. Numbers are from RETROSPECTIVE.md, PLAN4 §3–§4 and
-`runs/*/analysis.out`.
+Nothing here has been started except A8 (three 10-minute matches, §2). Numbers are from
+RETROSPECTIVE.md, PLAN4 §3–§4, `runs/*/analysis.out` and `runs/plan5_A8.out`.
 
 ## 0. The decision: stop climbing, start reading
 
@@ -48,8 +48,20 @@ the game"):
    between iteration 150 and 300?") that those checkpoints can answer and a 600-iteration
    run cannot.
 3. *Deployment.* The only goal Elo serves directly is an external test (CodinGame), which
-   is a batch-1 latency problem; the equal-compute result (v2b@256 beats wide128_c1@64 by
-   +101) says the ladder's winner is not obviously the deployment winner anyway.
+   is a batch-1 latency problem, and the ladder is an equal-*sims* instrument. The one
+   cheap decision-relevant measurement — A8, equal-*FLOP* matches, run before this plan
+   was finalised (`runs/plan5_A8.out`, 10 minutes on the 3090) — says:
+   - **deep10@64 beats v2b@427 by +42 [+23, +61]** (56.0 % of pairs). The "small net that
+     thinks 4× longer wins" result (v2b@256 over wide128_c1@64, +101) does not survive
+     depth and duration: the ladder's winner is now also the winner at equal compute.
+   - **deep10@64 vs deep8_c1_300@80: −11 [−30, +7]** (48.4 %, inside the ±3 band). The
+     last rung's +35 at equal sims is *entirely paid for* by its 1.25× per-simulation
+     cost. At a fixed inference budget, blocks 8 → 10 bought nothing; a 12-block run
+     would have to beat that, and the same measurement says duration (150 → 300, same
+     per-sim cost, +127) is where free deployment strength came from.
+   - Phased "0:128,24:384" vs uniform 256 on deep10: **+10 [−7, +26]** (51.4 %), below
+     the rule. The phased gain shrinks with strength (+50 v2b, +26 deep8_300, +10 here);
+     it is no longer a claim for this net.
 
 **The risk of *not* pausing** is the draw-blindness lesson. "Draw blindness is
 representational" was stated in PLAN2, restated in PLAN3, accepted by both outside
@@ -72,8 +84,10 @@ beliefs is the wrong order.** We already know what a 600-iteration run would tel
   deep8_c1_300 and deep10_c1_300 by more than their CIs — i.e. the analysis is
   strength-limited; or (ii) the checkpoint timeline (§3 B1) shows concepts still
   *appearing* at iteration 280–300 rather than sharpening — i.e. the net is still learning
-  new things; or (iii) a deployment target appears that needs Elo at a fixed budget. Absent
-  those, the marginal GPU-day goes to the opening book and the tablebase (§4).
+  new things; or (iii) a deployment target appears that needs Elo at a fixed budget — and
+  then the run is **600 iterations, not 12 blocks**: A8b says depth no longer pays at
+  equal compute, duration does. Absent those, the marginal GPU-day goes to the opening
+  book and the tablebase (§4).
 
 ## 1. Review of the work so far
 
@@ -110,16 +124,22 @@ beliefs is the wrong order.** We already know what a 600-iteration run would tel
    points against a ±2.5-point seed band measured at 6×64 — about 2σ, and the seed band
    at 10×128 is unmeasured. The +23 (deep8_c1 vs wide128_c1) sits at the edge of the ±3
    rule. → §5.
-4. **The equal-compute question is open at 10 blocks.** Per simulation deep10 costs
-   ≈ 6.7× v2b (blocks × filters²: 10·128² / 6·64²), so the fair fight is v2b@427 vs
-   deep10@64 — never played. The page's "small net that thinks longer wins" story was
-   measured at width 128 / 6 blocks; it may not survive depth and duration. 15 minutes.
+4. **The equal-compute question was open at 10 blocks — now closed (A8, §2).** Per
+   simulation deep10 costs ≈ 6.7× v2b (blocks × filters²: 10·128² / 6·64²). The fair
+   fight, v2b@427 vs deep10@64, went to deep10 by +42 [+23, +61]: the page's "small net
+   that thinks longer wins" story, measured at width 128 / 6 blocks / 150 iterations,
+   does not survive depth and duration. But deep10@64 vs deep8_c1_300@80 is −11 [−30,
+   +7]: the *last* rung is a wash at equal compute. Both belong in the explainer and in
+   `KNOWLEDGE.md`.
 5. **The fault root cause was never found.** Three nvlddmkm faults, all eval-path graph
    replays, none in ~60 h of self-play graphs; `--eval_graph 0` removed the surface at
    ~3 h/run. Only matters if training resumes; then reopen graph eval with retries
    (≤ 10 iterations per fault) rather than pay 6× per eval.
-6. **Best-play config is assumed, not verified, on the best net.** Phased "0:128,24:384"
-   was verified on v2b and deep8_c1_300; `web/server.py` still takes a flat `--sims`.
+6. **Best-play config was assumed, not verified, on the best net — now measured (A8c):**
+   phased "0:128,24:384" vs uniform 256 on deep10 is +10 [−7, +26], under the rule. The
+   RETROSPECTIVE's "assumed to transfer" did not; `web/server.py`'s flat `--sims` is
+   fine as it is. The trend (+50 → +26 → +10 with strength) is itself a small finding:
+   the stronger the raw policy, the less late search adds.
 7. **Elo non-transitivity** is visible (+127 direct vs +111 ladder-difference) and
    documented; the rule "always quote *vs whom* and *at what budget*" should be in every
    table, including this one.
@@ -164,12 +184,24 @@ where cheap. Write the "moved" criterion first, then run.
 | A5 | ownership ≈ 0 with threats controlled; ±0.17 per macro line | same regression | v2b | line coefficient CI overlaps ±0.17; ownership within ±0.05 | ownership coefficients leave zero |
 | A6 | X share 57–60 %; draws rise with strength; count decides ~30 % of strong games | `tools/corpus_stats.py` on deep10 iters 280–299 vs v2a's last 20; plus the `end reasons` lines already in every paired match | v2a/v2b | — descriptive; report the new numbers | — |
 | A7 | raw-policy endgame failures are count-rule and free-move motifs, not local tactics | `tools/puzzles.py --out suites/puzzles_v2_dev.npz`, positions from deep8_c1_300's late games (not deep10's own training data), ≤ 14 empties | v2b (3.5 % puzzles, 11 hard) | motif ordering same | puzzle rate ≪ 1 % (the +242 net has nothing left to teach here) or motifs reshuffled |
-| A8 | equal-compute: search beats width | `tools/openings.py match`: deep10@64 vs v2b@427; deep10@64 vs deep8_300@80; also phased "0:128,24:384" vs uniform 256 on deep10 | wide128_c1 vs v2b@256 (−101) | v2b@427 still wins | deep10@64 wins — depth+duration bought something 4× search cannot |
+| A8 | equal-compute: search beats width | `tools/openings.py match`: deep10@64 vs v2b@427; deep10@64 vs deep8_300@80; also phased "0:128,24:384" vs uniform 256 on deep10 | wide128_c1 vs v2b@256 (−101) | v2b@427 still wins | deep10@64 wins — depth+duration bought something 6.7× search cannot. **Run 2026-09-02: MOVED** (see results table) |
 | A9 | endgame: raw WDL 84.6 / draws 68.7 / search 99.8 % optimal | `tools/endgame.py` build `suites/endgame_v2_{dev,test}.npz` from deep8_c1_300's iteration-280+ games (strong-play distribution; not deep10's training data — deep8_300's own score on it carries that caveat), split by source game before solving; eval both nets on v1 and v2_dev; v2_test once, at the end of PLAN5 | endgame_v1 (dev-contaminated) | v2_test within ±2 of v1 | v1 ≫ v2_test: the v1 numbers were overfit by selection |
 
 Output: `runs/plan5_A.out` per tool, and a results table appended to this file with each
 row marked **held / moved / reversed**. Rows that *moved* are the interesting ones and
 feed §0's resume criterion (i).
+
+**Phase A results so far** (paired suite, 516 openings / 1032 games, ±2.8 points):
+
+| row | match | score | Elo [95 % CI] | draws | verdict |
+|---|---|---|---|---|---|
+| A8a | deep10@64 vs v2b@427 (FLOP-matched, 6.7×) | 56.0 % [53.2, 58.6] | **+42 [+23, +61]** | 15.2 % | **moved** — at equal compute the deep, long-trained net beats the small net for the first time (was −101 at 6×128 vs 6×64@256) |
+| A8b | deep10@64 vs deep8_c1_300@80 (FLOP-matched, 1.25×) | 48.4 % [45.7, 51.1] | −11 [−30, +7] | 20.3 % | **null** — blocks 8 → 10 bought nothing at equal compute; the +35 at equal sims is the cost difference |
+| A8c | deep10 phased "0:128,24:384" vs uniform 256 | 51.4 % [48.9, 53.7] | +10 [−7, +26] | 24.7 % | **not confirmed** on this net (was +50 v2b, +26 deep8_300); uniform 256 is the play config until something beats it by 3 points |
+
+Files: `runs/deep10_c1_300/paired_vs_v2b_flopmatched.json`, `paired_vs_deep8c1_300_flopmatched.json`,
+`paired_phased_vs_256.json`; log `runs/plan5_A8.out`. Note the draw rate rising down the
+table — deep10 against itself draws a quarter of the suite.
 
 ## 3. Phase B — the network on its own terms (new tooling; both GPUs free)
 
@@ -263,8 +295,9 @@ behavioural one (§1c); nothing in Phase B is reported from probe accuracy alone
   recipe has; (3) a second measurement of +35 vs deep8_c1_300. It is not a rung; nothing
   in Phase A waits for it. Judged by the ±3 rule like everything else.
 - **Not now: 600 iterations (≈ 38 h), 12 blocks (≈ 23 h).** Resume criteria are §0's
-  (i)–(iii). If resumed, duration first (better Elo/h record), graph eval + retries,
-  deep10 added to the anchors and to `eval_run.sh`.
+  (i)–(iii). If resumed, duration first — it has the better Elo/h record *and* it is the
+  lever that pays at equal inference compute (A8b: depth 8 → 10 did not) — with graph
+  eval + retries, deep10 added to the anchors and to `eval_run.sh`.
 - **Not at all, still**: exact labels, hygiene, aux-head ablations, SWA, games-8192 — the
   nulls stay null; a sims-96 phase dosed from iteration 60 remains the one un-run
   variant of a null and is not worth a GPU-day now.
@@ -275,8 +308,8 @@ behavioural one (§1c); nothing in Phase B is reported from probe accuracy alone
   and `suites/` to a location outside the repo and the machine (302 GB free locally; git
   ignores all of it). The corpora are the one artefact that cannot be regenerated.
 - `runs/eval_run.sh`: add the `deep10_c1_300/net_0300.pt` match line (guarded like the
-  others). `web/server.py`: accept a ply schedule for `--sims` (the CLI matcher already
-  does) so the UI plays the verified best config.
+  others). `web/server.py`: no change — A8c did not confirm the phased schedule on
+  deep10, so flat `--sims 256` (or more) is the play config.
 - Docs: README "START HERE" → PLAN5; PLAN/PLAN2/PLAN3/PLAN4/NOTES-v2/RESULTS-*/REVIEW-* →
   `docs/history/` with a one-line index; RETROSPECTIVE and KNOWLEDGE (when it exists)
   stay at top level.
@@ -286,7 +319,7 @@ behavioural one (§1c); nothing in Phase B is reported from probe accuracy alone
 
 | when | 3060 | 3090 | writing |
 |---|---|---|---|
-| day 1 | §6; Phase A A1–A7 queued (`runs/plan5_A.sh`, unattended) | A8/A9 (matches + endgame_v2 solve, ~2 h); then the replicate if approved (19 h) | B1 script; A "moved" table |
+| day 1 | §6; Phase A A1–A7 queued (`runs/plan5_A.sh`, unattended) | A9 (endgame_v2 solve, ~2 h; A8 already done); then the replicate if approved (19 h) | B1 script; A "moved" table |
 | day 2 | B1 runs; B2 label generator + probe trainer | replicate running (or C1 opening book at 16 k sims) | B1 figure; A results into this file |
 | day 3 | B2/B3 grids over 15 checkpoints | C1 opening book | B2/B3 write-up |
 | day 4 | B4/B5; B6 surrogate + suite match | B2/B3 on the replicate (if run) | C2–C4: `KNOWLEDGE.md`; explainer Part 7 |

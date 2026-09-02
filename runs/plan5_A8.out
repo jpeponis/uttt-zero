@@ -1,0 +1,31 @@
+=== A8a: deep10@64 vs v2b@427 (FLOP-matched)
+paired suite openings_v1 (516 openings, 1032 games): A=runs/deep10_c1_300/net_0300.pt@64 vs B=runs/v2b/net_0150.pt@427  [172s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1   50.0%       n/a        n/a                   0.0% 100.0%     0.0%    0.0%      0 /   1 /   0
+  orbits      15   46.7%  [ 30.0,  63.3]    -23 [-147,  +95]   50.0%  43.3%    53.3%   13.3%      4 /   5 /   6
+  natural    250   54.3%  [ 50.2,  58.1]    +30 [  +1,  +57]   65.0%  43.6%    60.7%   15.8%     90 /  93 /  67
+  random     250   58.2%  [ 54.6,  62.1]    +57 [ +32,  +86]   67.2%  49.2%    59.0%   14.8%     99 / 105 /  46
+  all        516   56.0%  [ 53.2,  58.6]    +42 [ +23,  +61]   65.5%  46.4%    59.5%   15.2%    193 / 204 / 119
+  end reasons: line 73.4%  count 11.3%  equal 15.2%  |  mean length 50.2
+wrote runs/deep10_c1_300/paired_vs_v2b_flopmatched.json
+=== A8b: deep10@64 vs deep8_c1_300@80 (FLOP-matched)
+paired suite openings_v1 (516 openings, 1032 games): A=runs/deep10_c1_300/net_0300.pt@64 vs B=runs/deep8_c1_300/net_0300.pt@80  [83s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1   50.0%       n/a        n/a                  50.0%  50.0%    50.0%  100.0%      0 /   1 /   0
+  orbits      15   46.7%  [ 30.0,  63.3]    -23 [-147,  +95]   46.7%  46.7%    50.0%   26.7%      4 /   6 /   5
+  natural    250   48.9%  [ 45.3,  52.6]     -8 [ -33,  +18]   60.4%  37.4%    61.5%   18.2%     67 / 106 /  77
+  random     250   48.0%  [ 44.1,  51.7]    -14 [ -41,  +12]   56.4%  39.6%    58.4%   21.6%     75 /  83 /  92
+  all        516   48.4%  [ 45.7,  51.1]    -11 [ -30,   +7]   58.0%  38.8%    59.6%   20.3%    146 / 196 / 174
+  end reasons: line 66.5%  count 13.3%  equal 20.3%  |  mean length 51.0
+wrote runs/deep10_c1_300/paired_vs_deep8c1_300_flopmatched.json
+=== A8c: deep10 phased 0:128,24:384 vs uniform 256
+paired suite openings_v1 (516 openings, 1032 games): A=runs/deep10_c1_300/net_0300.pt@0:128,24:384 vs B=runs/deep10_c1_300/net_0300.pt@256  [344s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1   50.0%       n/a        n/a                 100.0%   0.0%   100.0%    0.0%      0 /   1 /   0
+  orbits      15   55.0%  [ 38.3,  71.7]    +35 [ -83, +161]   63.3%  46.7%    58.3%   30.0%      8 /   2 /   5
+  natural    250   52.5%  [ 49.0,  56.1]    +17 [  -7,  +43]   64.8%  40.2%    62.3%   22.6%     78 / 108 /  64
+  random     250   50.1%  [ 46.7,  53.4]     +1 [ -23,  +24]   61.4%  38.8%    61.3%   26.6%     73 / 108 /  69
+  all        516   51.4%  [ 48.9,  53.7]    +10 [  -7,  +26]   63.2%  39.6%    61.8%   24.7%    159 / 219 / 138
+  end reasons: line 64.1%  count 11.2%  equal 24.7%  |  mean length 51.3
+wrote runs/deep10_c1_300/paired_phased_vs_256.json
+A8 done at Wed Sep  2 09:03:57 EDT 2026
