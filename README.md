@@ -25,7 +25,12 @@ Read in this order:
 3. **`RETROSPECTIVE.md`** — what was learned over the four days of work: the strength
    ladder, which training changes worked and which did nothing, engineering and
    measurement lessons, and what the agent believes about the game.
-4. History, only as needed: `PLAN4.md` (hand-off and review adjudication, superseded by
+4. **`docs/explainer.html`** — the public explainer (a 3Blue1Brown-style page for a
+   reader with no background), also published at
+   https://claude.ai/code/artifact/d3d1bef5-2140-48ee-b55b-ed09d2982791. Opens from
+   disk. Its Part 8 is the plain-language version of the game beliefs; PLAN5 §4 C4 will
+   rewrite it from `KNOWLEDGE.md` when that exists.
+5. History, only as needed: `PLAN4.md` (hand-off and review adjudication, superseded by
    PLAN5), `PLAN3.md` (measurement kit, strength ladder, game beliefs; corrections in
    PLAN4), `PLAN2.md` (detailed result sections 2b-2k), `PLAN.md` and `NOTES-v2.md`
    (original plan and notes), `RESULTS-dev1.md` and `RESULTS-v2a.md` (early run results),

@@ -1,0 +1,1594 @@
+<!-- Standalone copy of the uttt-zero explainer artifact: https://claude.ai/code/artifact/d3d1bef5-2140-48ee-b55b-ed09d2982791 (published 2026-09-02) -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>uttt-zero</title>
+<style>
+  /* host-equivalent reset */
+  :root { color-scheme: light dark; }
+  body { margin: 0; font: 14px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<!--
+  Rework provenance: structural spec distilled from Grant Sanderson's stated philosophy
+  (SoME judging criteria at 3blue1brown.com/blog/some1 and /blog/some2 - motivation,
+  clarity, novelty, memorability; TED "What makes people engage with math"; interviews
+  on motivation-before-definition). Principles applied:
+  1. MOTIVATION FIRST - open with a concrete puzzle the reader owns (the send rule, the
+     unsolved-game question) before any tool appears; every tool enters as the answer to
+     a question already on the table.
+  2. CONCRETE BEFORE ABSTRACT - a played-out tic-tac-toe line before "minimax"; a biased
+     coin before "paired evaluation"; a win percentage before "Elo"; a kitchen before
+     "kernel launch". Definitions arrive as summaries of experiences the reader just had.
+  3. "YOU COULD HAVE INVENTED THIS" - the AlphaZero loop is assembled from two ideas the
+     reader is walked into (lookahead amplifies intuition; intuition can be trained to
+     imitate its amplified self), so the loop feels inevitable, not handed down.
+  4. VISUALS ARE THE ARGUMENT - each figure carries a claim the prose leans on (the toy
+     tree IS the minimax explanation; the timeline IS the GPU diagnosis; the curve IS Elo).
+  5. RESPECT INTELLIGENCE, ASSUME NO BACKGROUND - every term built from scratch on first
+     need (network, MCTS, Elo, confidence interval, CUDA graph) or omitted; no dumbing
+     down of the honest-science material (noise floor, FLOP-matched caveat, null results).
+  6. LAYERS SIGNALLED - concept cards mark each new tool entering the reader's kit;
+     intuition is labelled as intuition, measurement as measurement.
+  7. PLAIN ENGLISH (2026-09-02 pass) - one idea per sentence; the idea in words before
+     the number arrives; every term explained the first time it is used (simulation, lap,
+     checkpoint, Elo, confidence interval, filter, block, learning-rate cut, policy vs
+     value, head to head); intervals spelled out rather than bracketed mid-sentence. The
+     network's anatomy is drawn (Part 6), and the seven nets trained over the four days
+     are drawn side by side on one baseline so the reader can see them grow.
+-->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  /* ---------- tokens: dark-first (the lecture hall), light swapped in ---------- */
+  :root {
+    --bg: #0f1319;
+    --surface: #161c25;
+    --ink: #e8ecf2;
+    --muted: #94a1b1;
+    --line: #2a3341;
+    --line-soft: #1c242f;
+    --acc-ink: #5ec7de;      /* accent as text */
+    --x: #1a93b5;            /* X marks / chart fills (validated, dark) */
+    --o: #c47f2c;            /* O marks (validated, dark) */
+    --o-ink: #e0a45c;
+    --x-tint: rgba(26, 147, 181, 0.20);
+    --o-tint: rgba(196, 127, 44, 0.20);
+    --serif: "STIX Two Text", "Times New Roman", Georgia, serif;
+    --mono: "IBM Plex Mono", "Cascadia Mono", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #f4f6f8;
+      --surface: #ffffff;
+      --ink: #1a222e;
+      --muted: #5a6779;
+      --line: #d3dbe3;
+      --line-soft: #e6ebf0;
+      --acc-ink: #076e8e;
+      --x: #0284ad;
+      --o: #a35a0a;
+      --o-ink: #8f5209;
+      --x-tint: rgba(2, 132, 173, 0.13);
+      --o-tint: rgba(163, 90, 10, 0.13);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f4f6f8;
+    --surface: #ffffff;
+    --ink: #1a222e;
+    --muted: #5a6779;
+    --line: #d3dbe3;
+    --line-soft: #e6ebf0;
+    --acc-ink: #076e8e;
+    --x: #0284ad;
+    --o: #a35a0a;
+    --o-ink: #8f5209;
+    --x-tint: rgba(2, 132, 173, 0.13);
+    --o-tint: rgba(163, 90, 10, 0.13);
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1319;
+    --surface: #161c25;
+    --ink: #e8ecf2;
+    --muted: #94a1b1;
+    --line: #2a3341;
+    --line-soft: #1c242f;
+    --acc-ink: #5ec7de;
+    --x: #1a93b5;
+    --o: #c47f2c;
+    --o-ink: #e0a45c;
+    --x-tint: rgba(26, 147, 181, 0.20);
+    --o-tint: rgba(196, 127, 44, 0.20);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.68;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 900px; margin: 0 auto; padding: 56px 22px 80px; }
+  a { color: var(--acc-ink); }
+  a:focus-visible { outline: 2px solid var(--acc-ink); outline-offset: 2px; }
+
+  /* ---------- type ---------- */
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--acc-ink);
+    margin: 0 0 10px;
+  }
+  h1 {
+    font-size: clamp(34px, 6vw, 46px);
+    font-weight: 700;
+    line-height: 1.12;
+    margin: 0 0 14px;
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+  h2 {
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.25;
+    margin: 6px 0 16px;
+    text-wrap: balance;
+  }
+  h3 { font-size: 19px; font-weight: 600; margin: 36px 0 10px; }
+  .lede { font-size: 20px; line-height: 1.55; color: var(--muted); max-width: 62ch; margin: 0; }
+  .lede em { color: var(--ink); font-style: italic; }
+  section { margin-top: 76px; }
+  section > p, section > .prose p { max-width: 68ch; }
+  p { margin: 0 0 16px; }
+  .mono, code { font-family: var(--mono); font-size: 0.85em; }
+  code { background: var(--line-soft); padding: 1px 5px; border-radius: 4px; white-space: nowrap; }
+  strong { font-weight: 600; }
+  .num { font-family: var(--mono); font-size: 0.88em; font-variant-numeric: tabular-nums; }
+  .accent { color: var(--acc-ink); }
+
+  header.hero { padding-bottom: 8px; }
+  .hero-meta {
+    font-family: var(--mono); font-size: 12.5px; color: var(--muted);
+    margin-top: 18px; display: flex; flex-wrap: wrap; gap: 6px 22px;
+  }
+
+  hr.rule { border: 0; border-top: 1px solid var(--line); margin: 64px 0 0; }
+
+  /* ---------- concept cards: the reader's toolkit ---------- */
+  .concept {
+    background: var(--surface); border: 1px solid var(--line-soft);
+    border-left: 3px solid var(--x);
+    border-radius: 0 8px 8px 0; padding: 16px 20px 4px; margin: 26px 0; max-width: 66ch;
+  }
+  .concept .c-tag {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.13em;
+    text-transform: uppercase; color: var(--acc-ink); margin: 0 0 8px;
+  }
+  .concept p { font-size: 16px; }
+
+  /* ---------- figures ---------- */
+  figure { margin: 28px 0; }
+  figure svg { max-width: 100%; height: auto; display: block; }
+  figcaption {
+    font-size: 14.5px; color: var(--muted); line-height: 1.55;
+    max-width: 70ch; margin-top: 10px;
+    border-left: 2px solid var(--line); padding-left: 12px;
+  }
+  .panel-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+  .panel-row .panel-title {
+    font-family: var(--mono); font-size: 12px; color: var(--ink);
+    letter-spacing: 0.06em; margin: 0 0 6px;
+  }
+  .scroll-x { overflow-x: auto; }
+
+  /* SVG classes (theme-aware via tokens) */
+  .grid line, .grid rect { stroke: var(--line); fill: none; stroke-width: 1; }
+  .sX { stroke: var(--x); } .fX { fill: var(--x); }
+  .sO { stroke: var(--o); } .fO { fill: var(--o); }
+  .fXt { fill: var(--x-tint); } .fOt { fill: var(--o-tint); }
+  .sInk { stroke: var(--ink); } .fInk { fill: var(--ink); }
+  .sMut { stroke: var(--muted); } .fMut { fill: var(--muted); }
+  .fSoft { fill: var(--line-soft); }
+  .sLine { stroke: var(--line); }
+  .tLbl { font-family: var(--mono); font-size: 12px; fill: var(--muted); }
+  .tLblInk { font-family: var(--mono); font-size: 12px; fill: var(--ink); }
+  .tLblAcc { font-family: var(--mono); font-size: 12px; fill: var(--acc-ink); }
+  .tLblO { font-family: var(--mono); font-size: 12px; fill: var(--o-ink); }
+  .tNote { font-family: var(--serif); font-size: 13px; fill: var(--muted); }
+  .tTitle { font-family: var(--mono); font-size: 12.5px; font-weight: 600; fill: var(--ink); }
+
+  /* ---------- steps ladder ---------- */
+  ol.fixes { list-style: none; margin: 26px 0; padding: 0; max-width: 680px; display: flex; flex-direction: column; }
+  ol.fixes li {
+    display: grid; grid-template-columns: 30px 1fr; gap: 0 14px;
+    padding: 12px 0; border-top: 1px solid var(--line-soft);
+  }
+  ol.fixes li:first-child { border-top: 0; }
+  ol.fixes .n { font-family: var(--mono); font-size: 13px; color: var(--acc-ink); padding-top: 2px; }
+  ol.fixes .what { font-weight: 600; }
+  ol.fixes .how { display: block; font-size: 15px; color: var(--muted); margin-top: 2px; }
+  ol.fixes .delta { display: block; font-family: var(--mono); font-size: 12.5px; color: var(--acc-ink); margin-top: 4px; }
+  .result-chip {
+    display: inline-block; font-family: var(--mono); font-size: 14px;
+    border: 1px solid var(--x); color: var(--acc-ink);
+    padding: 8px 14px; border-radius: 6px; margin-top: 4px;
+  }
+
+  /* ---------- stat tiles ---------- */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin: 26px 0; }
+  .stat { background: var(--surface); border: 1px solid var(--line-soft); border-radius: 8px; padding: 14px 16px; }
+  .stat .v { font-family: var(--mono); font-size: 21px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .stat .k { font-size: 13px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+
+  /* ---------- null ledger table ---------- */
+  .tbl-wrap { overflow-x: auto; margin: 24px 0; }
+  table.nulls { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 15px; }
+  table.nulls th {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--muted); text-align: left; font-weight: 500;
+    padding: 8px 14px 8px 0; border-bottom: 1px solid var(--line);
+  }
+  table.nulls td { padding: 9px 14px 9px 0; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+  table.nulls td.r { font-family: var(--mono); font-size: 13px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.nulls td.why { color: var(--muted); font-size: 14.5px; }
+
+  /* ---------- belief list ---------- */
+  .beliefs { margin: 26px 0; padding: 0; list-style: none; max-width: 72ch; }
+  .beliefs li { padding: 15px 0; border-top: 1px solid var(--line-soft); }
+  .beliefs li:first-child { border-top: 0; }
+  .beliefs .b-head { font-weight: 600; }
+  .beliefs .b-body { color: var(--muted); font-size: 15.5px; }
+  .beliefs .b-why { display: block; margin-top: 7px; font-size: 15.5px; font-style: italic; color: var(--muted); }
+  .beliefs .b-why .q { font-weight: 600; font-style: normal; color: var(--ink); }
+  .beliefs .b-why em { color: var(--ink); }
+
+  /* ---------- a belief that was withdrawn, and the lessons it left ---------- */
+  .beliefs.revised li { border-top: 0; border-left: 3px solid var(--o); padding: 10px 0 10px 16px; }
+  .beliefs .b-tag {
+    display: block; font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--o-ink); margin-bottom: 6px;
+  }
+  ul.lessons { max-width: 68ch; margin: 18px 0 26px; padding-left: 1.3em; }
+  ul.lessons li { margin-bottom: 10px; }
+  ul.lessons li strong { font-weight: 600; }
+
+  footer {
+    margin-top: 80px; padding-top: 20px; border-top: 1px solid var(--line);
+    font-size: 13.5px; color: var(--muted); font-family: var(--mono); line-height: 1.7;
+  }
+</style>
+
+<main class="page">
+
+<header class="hero">
+  <p class="eyebrow">uttt-zero &middot; an AlphaZero-style agent on one desktop</p>
+  <h1>The game that plays you back</h1>
+  <p class="lede">In Ultimate Tic-Tac-Toe, every move you make chooses the board your opponent must answer in. Nobody has solved this game. This is the story of teaching one desktop PC to play it very well <em>starting from nothing</em> &mdash; and of the harder problem underneath: knowing that it worked, and what it discovered about the game.</p>
+  <div class="hero-meta">
+    <span>RTX&nbsp;3090 + RTX&nbsp;3060</span>
+    <span>CodinGame rules</span>
+    <span>~35-minute read</span>
+    <span>no background assumed</span>
+  </div>
+</header>
+
+<!-- ============================================================ PART 1 -->
+<section>
+  <p class="eyebrow">Part 1 &middot; The game</p>
+  <h2>Nine boards, and a steering wheel</h2>
+
+  <p>You already know tic-tac-toe, and you already know its flaw: two people who pay attention always draw. It is a solved game &mdash; solved, in practice, by most ten-year-olds.</p>
+  <p>Now put nine tic-tac-toe boards in a 3&times;3 grid. Winning three small boards in a row wins the game. That alone would just be nine boring games in a trench coat. The rule that changes everything is this: <strong>the cell you pick inside a small board decides which board your opponent must play in next.</strong> Play the top-right <em>cell</em> of any board, and your opponent is sent to the top-right <em>board</em>.</p>
+  <p>Sit with that for a second, because it is the whole personality of the game. Every move is two moves: a mark, and a command. You never simply ask &ldquo;what&rsquo;s my best square?&rdquo; &mdash; you also ask &ldquo;where does this square <em>send</em> them?&rdquo; A locally brilliant move can be a globally terrible gift, delivering your opponent to exactly the battlefield they wanted. Playing well feels less like tic-tac-toe and more like steering.</p>
+
+  <figure>
+    <div class="panel-row">
+      <div>
+        <p class="panel-title">your cell &rarr; their board</p>
+        <svg viewBox="0 0 300 268" role="img" aria-label="A 9-by-9 Ultimate Tic-Tac-Toe board. X plays the top-right cell of the centre board, and an arrow shows the opponent being sent to the top-right board.">
+          <defs>
+            <g id="lbA">
+              <rect x="0" y="0" width="66" height="66" rx="3"/>
+              <line x1="22" y1="0" x2="22" y2="66"/><line x1="44" y1="0" x2="44" y2="66"/>
+              <line x1="0" y1="22" x2="66" y2="22"/><line x1="0" y1="44" x2="66" y2="44"/>
+            </g>
+            <marker id="arwA" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="var(--x)"/>
+            </marker>
+          </defs>
+          <rect x="193" y="26" width="66" height="66" class="fXt"/>
+          <g class="grid">
+            <use href="#lbA" x="41" y="26"/><use href="#lbA" x="117" y="26"/><use href="#lbA" x="193" y="26"/>
+            <use href="#lbA" x="41" y="102"/><use href="#lbA" x="117" y="102"/><use href="#lbA" x="193" y="102"/>
+            <use href="#lbA" x="41" y="178"/><use href="#lbA" x="117" y="178"/><use href="#lbA" x="193" y="178"/>
+          </g>
+          <rect x="193" y="26" width="66" height="66" fill="none" class="sX" stroke-width="1.6"/>
+          <rect x="161" y="102" width="22" height="22" class="fXt"/>
+          <g class="sX" stroke-width="2.4" stroke-linecap="round">
+            <line x1="166" y1="107" x2="178" y2="119"/><line x1="178" y1="107" x2="166" y2="119"/>
+          </g>
+          <path d="M 181 100 Q 214 90 223 72" fill="none" class="sX" stroke-width="1.6" marker-end="url(#arwA)"/>
+          <text x="150" y="260" text-anchor="middle" class="tLbl">top-right cell &rarr; top-right board</text>
+        </svg>
+      </div>
+      <div>
+        <p class="panel-title">closed board &rarr; free move</p>
+        <svg viewBox="0 0 300 268" role="img" aria-label="The same board, but the top-right board is already won by O and closed. X's move would send O there, so O instead gets a free move in any open board, shown highlighted.">
+          <defs>
+            <g id="lbB">
+              <rect x="0" y="0" width="66" height="66" rx="3"/>
+              <line x1="22" y1="0" x2="22" y2="66"/><line x1="44" y1="0" x2="44" y2="66"/>
+              <line x1="0" y1="22" x2="66" y2="22"/><line x1="0" y1="44" x2="66" y2="44"/>
+            </g>
+          </defs>
+          <g class="fXt">
+            <rect x="41" y="26" width="66" height="66"/><rect x="117" y="26" width="66" height="66"/>
+            <rect x="41" y="102" width="66" height="66"/><rect x="117" y="102" width="66" height="66"/><rect x="193" y="102" width="66" height="66"/>
+            <rect x="41" y="178" width="66" height="66"/><rect x="117" y="178" width="66" height="66"/><rect x="193" y="178" width="66" height="66"/>
+          </g>
+          <rect x="193" y="26" width="66" height="66" class="fOt"/>
+          <g class="grid">
+            <use href="#lbB" x="41" y="26"/><use href="#lbB" x="117" y="26"/><use href="#lbB" x="193" y="26"/>
+            <use href="#lbB" x="41" y="102"/><use href="#lbB" x="117" y="102"/><use href="#lbB" x="193" y="102"/>
+            <use href="#lbB" x="41" y="178"/><use href="#lbB" x="117" y="178"/><use href="#lbB" x="193" y="178"/>
+          </g>
+          <circle cx="226" cy="59" r="17" fill="none" class="sO" stroke-width="3"/>
+          <rect x="161" y="102" width="22" height="22" fill="none" class="sX" stroke-width="1.2"/>
+          <g class="sX" stroke-width="2.4" stroke-linecap="round">
+            <line x1="166" y1="107" x2="178" y2="119"/><line x1="178" y1="107" x2="166" y2="119"/>
+          </g>
+          <path d="M 181 100 Q 214 90 223 76" fill="none" class="sMut" stroke-width="1.4" stroke-dasharray="4 4"/>
+          <text x="150" y="260" text-anchor="middle" class="tLbl">that board is closed &rarr; play anywhere</text>
+        </svg>
+      </div>
+      <div>
+        <p class="panel-title">no line of boards &rarr; count wins</p>
+        <svg viewBox="0 0 300 268" role="img" aria-label="The macro board at the end of a game: X owns four boards, O owns three, two are drawn, no three-in-a-row exists. X wins on the count, four boards to three.">
+          <defs>
+            <pattern id="hC" width="7" height="7" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+              <line x1="0" y1="0" x2="0" y2="7" class="sMut" stroke-width="1" opacity="0.45"/>
+            </pattern>
+          </defs>
+          <g class="grid">
+            <rect x="41" y="26" width="66" height="66" rx="3" class="fXt"/>
+            <rect x="117" y="26" width="66" height="66" rx="3" class="fOt"/>
+            <rect x="193" y="26" width="66" height="66" rx="3" class="fXt"/>
+            <rect x="41" y="102" width="66" height="66" rx="3" class="fOt"/>
+            <rect x="117" y="102" width="66" height="66" rx="3" class="fXt"/>
+            <rect x="193" y="102" width="66" height="66" rx="3" fill="url(#hC)"/>
+            <rect x="41" y="178" width="66" height="66" rx="3" fill="url(#hC)"/>
+            <rect x="117" y="178" width="66" height="66" rx="3" class="fXt"/>
+            <rect x="193" y="178" width="66" height="66" rx="3" class="fOt"/>
+          </g>
+          <g class="sX" stroke-width="4" stroke-linecap="round">
+            <line x1="60" y1="45" x2="88" y2="73"/><line x1="88" y1="45" x2="60" y2="73"/>
+            <line x1="212" y1="45" x2="240" y2="73"/><line x1="240" y1="45" x2="212" y2="73"/>
+            <line x1="136" y1="121" x2="164" y2="149"/><line x1="164" y1="121" x2="136" y2="149"/>
+            <line x1="136" y1="197" x2="164" y2="225"/><line x1="164" y1="197" x2="136" y2="225"/>
+          </g>
+          <g class="sO" stroke-width="4" fill="none">
+            <circle cx="150" cy="59" r="15"/><circle cx="74" cy="135" r="15"/><circle cx="226" cy="211" r="15"/>
+          </g>
+          <text x="150" y="260" text-anchor="middle" class="tLbl">X 4 &middot; O 3 &middot; drawn 2 &rarr; X wins</text>
+        </svg>
+      </div>
+    </div>
+    <figcaption>The three rules that give the game its character. Left: the cell you pick inside a small board names the board your opponent must play in. Middle: if that board is already won or full (&ldquo;closed&rdquo;), your opponent instead gets a <em>free move</em> &mdash; any open cell, anywhere. Right: if all nine boards close with no three-in-a-row of boards, whoever <em>won more boards</em> wins; equal counts draw. A drawn board counts for nobody and blocks every line through it.</figcaption>
+  </figure>
+
+  <p>These are the rules of the CodinGame arena, a long-running online competition where people write programs to play games against each other. That last rule &mdash; the board count as a tiebreak &mdash; is no footnote. When two strong players meet, roughly <strong>a third of their games never produce a line of boards at all</strong>. Those games are decided by the count. Any honest analysis of this game has to treat &ldquo;collect more boards&rdquo; as a second way to win, not an afterthought.</p>
+
+  <h3>The questions nobody can answer</h3>
+  <p>Once you have played a few games, two questions become almost physically itchy. <em>What is actually the best first move?</em> Players argue. Centre of the centre board is the folk favourite, but corner openings have their partisans. And bigger: <em>with perfect play, who wins?</em> Ordinary tic-tac-toe is a draw. Is this one? Nobody knows. The game is <strong>unsolved</strong>.</p>
+  <p>Here is a crude way to feel the size of it. Each of the 81 cells can be empty, X or O, so there are at most 3<sup>81</sup> ways to colour the board &mdash; about 4&thinsp;&times;&thinsp;10<sup>38</sup>. That over-counts, because most colourings can never arise in a real game, but the honest number is still far beyond anything a computer can list. The most serious solving attempt to date is a heavily optimised exact search. On a 12-core desktop it needs hours to crack a position that is already about 20 moves into the game. Its author estimates that solving the <em>whole</em> game from the empty board would take a few hundred million CPU-hours &mdash; millions of dollars of raw computing.</p>
+  <p>So the question this project set out to answer is the more interesting one: <strong>if you cannot solve a game, how do you find out what&rsquo;s true about it?</strong> How would you learn its best openings? What a move is worth? When games are decided? And how would you know you weren&rsquo;t fooling yourself? Everything on this page is a piece of that answer.</p>
+</section>
+
+<!-- ============================================================ PART 2 -->
+<section>
+  <p class="eyebrow">Part 2 &middot; Thinking ahead</p>
+  <h2>You already know how a game computer works</h2>
+
+  <p>Forget computers for a moment. How do <em>you</em> decide a move in any game? You mentally play it forward: &ldquo;If I go here, they&rsquo;ll go there, then I can go here&hellip; no, wait, that loses. What if I go here instead?&rdquo; That inner monologue is the entire foundation of game-playing programs. Let&rsquo;s make it just slightly more precise, on a game small enough to hold in your head.</p>
+
+  <div class="concept">
+    <p class="c-tag">Concept &middot; the value of a position</p>
+    <p>Give every finished game a score from one player&rsquo;s point of view: <span class="num">+1</span> if they won, <span class="num">0</span> for a draw, <span class="num">&minus;1</span> if they lost. Then work backwards: an <em>unfinished</em> position is worth whatever it ends up as when both sides play their best from here on. On your turn, you pick the move leading to the highest-value position; on their turn, assume they do the same for themselves &mdash; which means the worst for you.</p>
+  </div>
+
+  <figure>
+    <svg viewBox="0 0 760 424" role="img" aria-label="A lookahead tree from a tic-tac-toe position where X has two in a row on top and O has two in a row in the middle. Playing the top-right cell wins immediately, value plus one. Blocking O in the centre-right leads to a draw, value zero. Playing bottom-right lets O complete a row, value minus one. X takes the maximum: the position is worth plus one.">
+      <defs>
+        <g id="lbT">
+          <rect x="0" y="0" width="60" height="60" rx="3"/>
+          <line x1="20" y1="0" x2="20" y2="60"/><line x1="40" y1="0" x2="40" y2="60"/>
+          <line x1="0" y1="20" x2="60" y2="20"/><line x1="0" y1="40" x2="60" y2="40"/>
+        </g>
+        <marker id="arwK" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" class="fMut"/>
+        </marker>
+      </defs>
+
+      <!-- root: X X . / O O . / . . . -->
+      <g class="grid"><use href="#lbT" x="350" y="14"/></g>
+      <g class="sX" stroke-width="2.2" stroke-linecap="round">
+        <line x1="355" y1="19" x2="365" y2="29"/><line x1="365" y1="19" x2="355" y2="29"/>
+        <line x1="375" y1="19" x2="385" y2="29"/><line x1="385" y1="19" x2="375" y2="29"/>
+      </g>
+      <g class="sO" stroke-width="2.2" fill="none">
+        <circle cx="360" cy="44" r="6"/><circle cx="380" cy="44" r="6"/>
+      </g>
+      <text x="424" y="40" class="tLblInk">your move (X)</text>
+      <text x="424" y="57" class="tLbl">three of the choices</text>
+
+      <!-- arrows to children -->
+      <g fill="none" class="sMut" stroke-width="1.2">
+        <path d="M 348 78 Q 240 100 156 128" marker-end="url(#arwK)"/>
+        <path d="M 380 78 L 380 128" marker-end="url(#arwK)"/>
+        <path d="M 412 78 Q 520 100 604 128" marker-end="url(#arwK)"/>
+      </g>
+      <text x="212" y="100" class="tLbl">top-right</text>
+      <text x="390" y="110" class="tLbl">right-middle (block)</text>
+      <text x="524" y="100" class="tLbl">bottom-right</text>
+
+      <!-- child A: win -->
+      <g class="grid"><use href="#lbT" x="110" y="134"/></g>
+      <g class="sX" stroke-width="2.2" stroke-linecap="round">
+        <line x1="115" y1="139" x2="125" y2="149"/><line x1="125" y1="139" x2="115" y2="149"/>
+        <line x1="135" y1="139" x2="145" y2="149"/><line x1="145" y1="139" x2="135" y2="149"/>
+        <line x1="155" y1="139" x2="165" y2="149"/><line x1="165" y1="139" x2="155" y2="149"/>
+      </g>
+      <g class="sO" stroke-width="2.2" fill="none">
+        <circle cx="120" cy="164" r="6"/><circle cx="140" cy="164" r="6"/>
+      </g>
+      <line x1="113" y1="144" x2="167" y2="144" class="sX" stroke-width="2.6" opacity="0.65"/>
+      <text x="140" y="216" text-anchor="middle" class="tLblAcc">X wins &rarr; +1</text>
+
+      <!-- child B: block -->
+      <g class="grid"><use href="#lbT" x="350" y="134"/></g>
+      <g class="sX" stroke-width="2.2" stroke-linecap="round">
+        <line x1="355" y1="139" x2="365" y2="149"/><line x1="365" y1="139" x2="355" y2="149"/>
+        <line x1="375" y1="139" x2="385" y2="149"/><line x1="385" y1="139" x2="375" y2="149"/>
+        <line x1="395" y1="159" x2="405" y2="169"/><line x1="405" y1="159" x2="395" y2="169"/>
+      </g>
+      <g class="sO" stroke-width="2.2" fill="none">
+        <circle cx="360" cy="164" r="6"/><circle cx="380" cy="164" r="6"/>
+      </g>
+      <!-- child C: bottom-right -->
+      <g class="grid"><use href="#lbT" x="590" y="134"/></g>
+      <g class="sX" stroke-width="2.2" stroke-linecap="round">
+        <line x1="595" y1="139" x2="605" y2="149"/><line x1="605" y1="139" x2="595" y2="149"/>
+        <line x1="615" y1="139" x2="625" y2="149"/><line x1="625" y1="139" x2="615" y2="149"/>
+        <line x1="635" y1="179" x2="645" y2="189"/><line x1="645" y1="179" x2="635" y2="189"/>
+      </g>
+      <g class="sO" stroke-width="2.2" fill="none">
+        <circle cx="600" cy="164" r="6"/><circle cx="620" cy="164" r="6"/>
+      </g>
+
+      <!-- arrows to grandchildren -->
+      <g fill="none" class="sMut" stroke-width="1.2">
+        <path d="M 380 198 L 380 244" marker-end="url(#arwK)"/>
+        <path d="M 620 198 L 620 244" marker-end="url(#arwK)"/>
+      </g>
+      <text x="390" y="226" class="tLbl">their best reply</text>
+      <text x="630" y="226" class="tLbl">their best reply</text>
+
+      <!-- grandchild B: O blocks top-right -> heads to draw -->
+      <g class="grid"><use href="#lbT" x="350" y="250"/></g>
+      <g class="sX" stroke-width="2.2" stroke-linecap="round">
+        <line x1="355" y1="255" x2="365" y2="265"/><line x1="365" y1="255" x2="355" y2="265"/>
+        <line x1="375" y1="255" x2="385" y2="265"/><line x1="385" y1="255" x2="375" y2="265"/>
+        <line x1="395" y1="275" x2="405" y2="285"/><line x1="405" y1="275" x2="395" y2="285"/>
+      </g>
+      <g class="sO" stroke-width="2.2" fill="none">
+        <circle cx="360" cy="280" r="6"/><circle cx="380" cy="280" r="6"/><circle cx="400" cy="264" r="6"/>
+      </g>
+      <text x="380" y="336" text-anchor="middle" class="tLblInk">best play from here: draw &rarr; 0</text>
+
+      <!-- grandchild C: O completes middle row -->
+      <g class="grid"><use href="#lbT" x="590" y="250"/></g>
+      <g class="sX" stroke-width="2.2" stroke-linecap="round">
+        <line x1="595" y1="255" x2="605" y2="265"/><line x1="605" y1="255" x2="595" y2="265"/>
+        <line x1="615" y1="255" x2="625" y2="265"/><line x1="625" y1="255" x2="615" y2="265"/>
+        <line x1="635" y1="295" x2="645" y2="305"/><line x1="645" y1="295" x2="635" y2="305"/>
+      </g>
+      <g class="sO" stroke-width="2.2" fill="none">
+        <circle cx="600" cy="280" r="6"/><circle cx="620" cy="280" r="6"/><circle cx="640" cy="280" r="6"/>
+      </g>
+      <line x1="593" y1="280" x2="647" y2="280" class="sO" stroke-width="2.6" opacity="0.65"/>
+      <text x="620" y="336" text-anchor="middle" class="tLblO">O wins &rarr; &minus;1</text>
+
+      <!-- verdict -->
+      <line x1="60" y1="368" x2="700" y2="368" class="sLine"/>
+      <text x="380" y="394" text-anchor="middle" class="tLblInk">your turn &rarr; take the best of {+1, 0, &minus;1}</text>
+      <text x="380" y="414" text-anchor="middle" class="tLblAcc">this position is worth +1 &mdash; and the top-right move proves it</text>
+    </svg>
+    <figcaption>Lookahead on a game you can hold in your head. X has two in a row on top; O has two in a row in the middle. Play out each candidate: the winning move scores <span class="num">+1</span> on the spot; blocking O leads, with best play by both, to <span class="num">0</span>; ignoring the threat lets O complete the middle row, <span class="num">&minus;1</span>. Alternate &ldquo;I pick my best / they pick theirs&rdquo; all the way down and every position gets an exact value. Do this from the empty board and you have <em>solved</em> the game. The procedure has a name &mdash; minimax &mdash; but notice that you just reinvented it.</figcaption>
+  </figure>
+
+  <p>So why isn&rsquo;t every game solved this way? Size. In Ultimate Tic-Tac-Toe you usually have up to 9 choices, and up to 81 on a free move. A game can run 81 moves. The tree of &ldquo;I go here, they go there&rdquo; multiplies into more branches than anyone &mdash; or anyone&rsquo;s computer &mdash; can visit. Exhaustive lookahead drowns a few moves in.</p>
+  <p>But notice what <em>you</em> do about that. You don&rsquo;t consider every legal move. Most look silly at a glance, and you never read them at all. You look ahead along a handful of promising lines, and when a line runs deep you stop calculating and judge the resulting position by feel: &ldquo;this looks good for me.&rdquo; Two abilities are doing all the work. One is a <strong>shortlist</strong>: which moves are even worth considering? The other is a <strong>glance-evaluation</strong>: how good does this position look? Neither is calculation. Both are intuition, built from experience. To make a computer play a game it cannot solve, give it those two intuitions.</p>
+
+  <div class="concept">
+    <p class="c-tag">Concept &middot; a neural network (all you need for now)</p>
+    <p>A neural network is a big formula with a great many adjustable dials, wired so that turning the dials changes its outputs smoothly. Ours takes a board position in and produces exactly the two intuitions above. The <em>value</em> is one number saying how good this position looks for the player about to move. The <em>policy</em> is a plausibility rating for each of the 81 cells &mdash; the shortlist. &ldquo;Training&rdquo; means showing the network positions where you know what the answers should have been, and nudging the dials so its outputs drift toward those answers. That is genuinely the whole idea: a very flexible formula fitted to examples, like a curve of best fit with a million knobs. That much is all the next three parts need. Part&nbsp;6 opens the box a little, at the moment when the <em>size</em> of the formula becomes something we can change.</p>
+  </div>
+
+  <figure>
+    <svg viewBox="0 0 800 240" role="img" aria-label="A board position flows into a box labelled the network, which outputs a value dial reading plus 0.3 for the mover, and a bar chart rating each candidate move's plausibility.">
+      <defs>
+        <marker id="arwN" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" class="fMut"/>
+        </marker>
+      </defs>
+      <!-- mini 9x9 board -->
+      <g class="grid">
+        <rect x="46" y="76" width="84" height="84" rx="3"/>
+        <line x1="74" y1="76" x2="74" y2="160"/><line x1="102" y1="76" x2="102" y2="160"/>
+        <line x1="46" y1="104" x2="130" y2="104"/><line x1="46" y1="132" x2="130" y2="132"/>
+      </g>
+      <g class="sLine" stroke-width="0.6" opacity="0.8">
+        <line x1="55.3" y1="76" x2="55.3" y2="160"/><line x1="64.6" y1="76" x2="64.6" y2="160"/>
+        <line x1="83.3" y1="76" x2="83.3" y2="160"/><line x1="92.6" y1="76" x2="92.6" y2="160"/>
+        <line x1="111.3" y1="76" x2="111.3" y2="160"/><line x1="120.6" y1="76" x2="120.6" y2="160"/>
+        <line x1="46" y1="85.3" x2="130" y2="85.3"/><line x1="46" y1="94.6" x2="130" y2="94.6"/>
+        <line x1="46" y1="113.3" x2="130" y2="113.3"/><line x1="46" y1="122.6" x2="130" y2="122.6"/>
+        <line x1="46" y1="141.3" x2="130" y2="141.3"/><line x1="46" y1="150.6" x2="130" y2="150.6"/>
+      </g>
+      <g class="sX" stroke-width="1.6" stroke-linecap="round">
+        <line x1="86" y1="107" x2="90" y2="111"/><line x1="90" y1="107" x2="86" y2="111"/>
+      </g>
+      <circle cx="60" cy="90" r="3.2" fill="none" class="sO" stroke-width="1.6"/>
+      <text x="88" y="182" text-anchor="middle" class="tLbl">a position</text>
+
+      <line x1="140" y1="118" x2="196" y2="118" class="sMut" stroke-width="1.2" marker-end="url(#arwN)"/>
+
+      <!-- the network box -->
+      <rect x="204" y="66" width="220" height="104" rx="10" fill="none" class="sX" stroke-width="1.6"/>
+      <text x="314" y="102" text-anchor="middle" class="tLblInk">the network</text>
+      <text x="314" y="124" text-anchor="middle" class="tLbl">one formula, ~10&#8310; dials,</text>
+      <text x="314" y="142" text-anchor="middle" class="tLbl">tuned by examples</text>
+
+      <g fill="none" class="sMut" stroke-width="1.2">
+        <path d="M 428 96 Q 470 78 506 66" marker-end="url(#arwN)"/>
+        <path d="M 428 140 Q 470 158 506 170" marker-end="url(#arwN)"/>
+      </g>
+
+      <!-- value gauge -->
+      <text x="514" y="24" class="tTitle">value &mdash; how good for the mover?</text>
+      <line x1="514" y1="64" x2="714" y2="64" class="sLine" stroke-width="2"/>
+      <g class="tLbl" text-anchor="middle">
+        <text x="514" y="86">&minus;1</text><text x="614" y="86">0</text><text x="714" y="86">+1</text>
+      </g>
+      <circle cx="644" cy="64" r="6" class="fX"/>
+      <text x="644" y="50" text-anchor="middle" class="tLblAcc">+0.3</text>
+
+      <!-- policy bars -->
+      <text x="514" y="122" class="tTitle">policy &mdash; which moves look promising?</text>
+      <g class="fX">
+        <rect x="514" y="160" width="14" height="40" rx="2"/>
+        <rect x="536" y="184" width="14" height="16" rx="2"/>
+        <rect x="558" y="170" width="14" height="30" rx="2"/>
+        <rect x="580" y="192" width="14" height="8" rx="2"/>
+        <rect x="602" y="188" width="14" height="12" rx="2"/>
+        <rect x="624" y="194" width="14" height="6" rx="2"/>
+        <rect x="646" y="180" width="14" height="20" rx="2"/>
+        <rect x="668" y="195" width="14" height="5" rx="2"/>
+        <rect x="690" y="196" width="14" height="4" rx="2"/>
+      </g>
+      <line x1="510" y1="200" x2="712" y2="200" class="sLine"/>
+      <text x="611" y="218" text-anchor="middle" class="tLbl">one bar per legal move</text>
+    </svg>
+    <figcaption>The two intuitions, as one trained function. Feed in a position; out come a glance-evaluation and a shortlist. Everything the agent &ldquo;knows&rdquo; about Ultimate Tic-Tac-Toe lives in the dials of this formula.</figcaption>
+  </figure>
+
+  <p>Now combine intuition with lookahead. Instead of every branch, explore the shortlist. Instead of reading each line to the bitter end, stop after a while and let the glance-value stand in for the verdict. And &mdash; the clever part &mdash; keep returning to the branches whose verdicts keep coming back good, so effort flows toward the lines that earn it. This family of methods is called <strong>Monte Carlo tree search</strong>.</p>
+  <p>One round of it has a name that will recur on every later part of this page. Walk down one promising line, ask the network for a verdict where you stop, carry that verdict back up to the move it came from: that is one <strong>simulation</strong>. When this page says an agent &ldquo;thinks with 64 simulations per move&rdquo;, it means the agent does that walk 64 times, then commits to the move that came out best. (This project uses a modern variant called Gumbel MCTS, which stays reliable with remarkably few simulations. Its details do not matter here.)</p>
+  <p>The property that matters is this: <strong>a search leaning on the network&rsquo;s intuition plays a bit better than the raw intuition alone.</strong> Checking a few lines catches some of your gut&rsquo;s mistakes. Hold onto that sentence. It is about to become an engine.</p>
+</section>
+
+<!-- ============================================================ PART 3 -->
+<section>
+  <p class="eyebrow">Part 3 &middot; The idea</p>
+  <h2>The staircase that builds itself</h2>
+
+  <p>There&rsquo;s a chicken-and-egg problem hiding in Part&nbsp;2. The search needs a decent intuition to guide it. Where does the intuition come from? The obvious answer: from watching experts. In 2016, DeepMind&rsquo;s <strong>AlphaGo</strong> did exactly that. Its networks were first trained on records of strong human Go play, then sharpened by practice. It went on to defeat Lee Sedol, one of the greatest Go players in history, in a match that stunned the game&rsquo;s whole culture. Go had been expected to resist computers for another decade. It fell to intuition-plus-search.</p>
+  <p>Then, in 2017, came the twist that makes this field beautiful. <strong>AlphaGo Zero</strong> threw the human games away. No expert data, no opening books, no handcrafted wisdom &mdash; nothing but the rules, and a network whose dials start as random noise. It became <em>stronger</em> than the version taught by humanity. Here is the loop that makes starting from zero possible:</p>
+
+  <figure>
+    <svg viewBox="0 0 760 420" role="img" aria-label="The AlphaZero training loop as a cycle of four stations: the network's rough intuition guides a search, the search's sharper opinions play whole games against themselves, those games and opinions become training targets, and training nudges the network toward its own amplified judgment, closing the loop.">
+      <defs>
+        <marker id="arwZ" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" fill="var(--x)"/>
+        </marker>
+      </defs>
+
+      <!-- top-left: network -->
+      <rect x="40" y="36" width="290" height="130" rx="10" fill="none" class="sLine" stroke-width="1.4"/>
+      <text x="60" y="64" class="tTitle">the network &mdash; intuition</text>
+      <text x="60" y="84" class="tLbl">starts as random noise</text>
+      <g class="fX" opacity="0.7">
+        <rect x="60" y="112" width="16" height="34" rx="2"/>
+        <rect x="84" y="122" width="16" height="24" rx="2"/>
+        <rect x="108" y="106" width="16" height="40" rx="2"/>
+        <rect x="132" y="126" width="16" height="20" rx="2"/>
+        <rect x="156" y="116" width="16" height="30" rx="2"/>
+        <rect x="180" y="130" width="16" height="16" rx="2"/>
+      </g>
+      <line x1="56" y1="146" x2="204" y2="146" class="sLine"/>
+      <text x="216" y="134" class="tNote">hazy preferences</text>
+
+      <!-- top-right: search -->
+      <rect x="430" y="36" width="290" height="130" rx="10" fill="none" class="sX" stroke-width="1.8"/>
+      <text x="450" y="64" class="tTitle">+ lookahead = the amplifier</text>
+      <text x="450" y="84" class="tLbl">a few dozen simulations per move</text>
+      <g class="fX">
+        <rect x="450" y="98" width="16" height="48" rx="2"/>
+        <rect x="474" y="132" width="16" height="14" rx="2"/>
+        <rect x="498" y="124" width="16" height="22" rx="2"/>
+        <rect x="522" y="138" width="16" height="8" rx="2"/>
+        <rect x="546" y="140" width="16" height="6" rx="2"/>
+        <rect x="570" y="142" width="16" height="4" rx="2"/>
+      </g>
+      <line x1="446" y1="146" x2="594" y2="146" class="sLine"/>
+      <text x="606" y="134" class="tNote">sharper, checked</text>
+
+      <!-- bottom-right: self-play -->
+      <rect x="430" y="254" width="290" height="120" rx="10" fill="none" class="sLine" stroke-width="1.4"/>
+      <text x="450" y="282" class="tTitle">self-play</text>
+      <text x="450" y="304" class="tLbl">the amplified player takes both sides,</text>
+      <text x="450" y="322" class="tLbl">thousands of whole games at once</text>
+      <text x="450" y="352" class="tNote">every move and every final result recorded</text>
+
+      <!-- bottom-left: training -->
+      <rect x="40" y="254" width="290" height="120" rx="10" fill="none" class="sLine" stroke-width="1.4"/>
+      <text x="60" y="282" class="tTitle">training</text>
+      <text x="60" y="304" class="tLbl">nudge the dials so the raw network</text>
+      <text x="60" y="322" class="tLbl">imitates the search&rsquo;s choices</text>
+      <text x="60" y="340" class="tLbl">and predicts the games&rsquo; results</text>
+
+      <!-- cycle arrows -->
+      <g fill="none" class="sX" stroke-width="1.8">
+        <path d="M 334 101 L 424 101" marker-end="url(#arwZ)"/>
+        <path d="M 575 170 L 575 248" marker-end="url(#arwZ)"/>
+        <path d="M 426 314 L 336 314" marker-end="url(#arwZ)"/>
+        <path d="M 185 250 L 185 172" marker-end="url(#arwZ)"/>
+      </g>
+      <text x="379" y="92" text-anchor="middle" class="tLblAcc">guides</text>
+      <text x="587" y="212" class="tLblAcc">plays</text>
+      <text x="381" y="336" text-anchor="middle" class="tLblAcc">becomes targets</text>
+      <text x="197" y="212" class="tLblAcc">updates</text>
+
+      <!-- centre -->
+      <text x="380" y="205" text-anchor="middle" class="tNote" font-style="italic">each lap: the intuition catches up with</text>
+      <text x="380" y="224" text-anchor="middle" class="tNote" font-style="italic">the amplified version of itself</text>
+      <text x="380" y="404" text-anchor="middle" class="tNote">repeat a few hundred times</text>
+    </svg>
+    <figcaption>The AlphaZero loop. The search always plays a little better than the raw network it leans on &mdash; so the search&rsquo;s output is always valid <em>training material</em> for that same network. Train the intuition to match its amplified self, and the amplifier now amplifies a better intuition. The staircase climbs under its own weight, and the only ground truth ever consulted is who actually won each game &mdash; which the rules provide for free.</figcaption>
+  </figure>
+
+  <p>Two words from that figure will follow us to the end of the page. One trip around the loop &mdash; a batch of self-play games, then a round of training on them &mdash; is what the code calls an <em>iteration</em>. This page calls it a <strong>lap</strong>. A training run is a few hundred laps, one after another. And after every lap, the network&rsquo;s dials are saved to disk. That saved copy is a <strong>checkpoint</strong> &mdash; a snapshot of the network at that moment. Every number about a run on this page was measured on one of those snapshots, and any snapshot can be loaded and played against any other.</p>
+  <p>Why doesn&rsquo;t this loop just chase its own tail? Because of the sentence from Part&nbsp;2: <em>search amplifies intuition</em>. At every stage, checking a few lines of play catches some mistakes. That is true even at the very first lap, when the network&rsquo;s opinions are pure static. So the searched player is always a little stronger than the raw one, and that gap is the fuel. Training closes the gap from below. The amplifier immediately re-opens it from above, one step higher.</p>
+  <p>The gap never closes for good. In the finished AlphaGo Zero, the full player with search was rated about <span class="num">5,185</span> on the Elo scale. Its own raw network, playing without search, measured about <span class="num">3,055</span>. The amplifier was still worth some two thousand rating points at the end of training. (Elo is a rating scale we&rsquo;ll build properly in Part&nbsp;5. For now: two thousand points is a chasm.)</p>
+  <p>What the papers are quieter about is the cost. AlphaGo Zero&rsquo;s longer run played <strong>29 million games against itself over 40 days</strong> on Google&rsquo;s custom hardware. Its successor AlphaZero, which mastered chess and shogi the same way, used <strong>five thousand</strong> of Google&rsquo;s custom chips just to generate its self-play games. This is a datacenter recipe.</p>
+  <p><span class="mono">uttt-zero</span> is that recipe on one desktop. An RTX&nbsp;3090 graphics card runs the loop. A second, smaller card, an RTX&nbsp;3060, runs analysis. A 12-core CPU solves endgames exactly. And the project points the recipe somewhere the datacenter versions mostly didn&rsquo;t: not just at producing a strong player, but at <em>interrogating</em> one &mdash; using the trained agent as an instrument for finding out what is true about the game. That required two things the rest of this page is about. The loop had to become fast enough to be a laboratory (Part&nbsp;4). And the measurements had to be disciplined enough to keep the findings honest (Part&nbsp;5 onward).</p>
+  <div class="stats">
+    <div class="stat"><div class="v">15</div><div class="k">completed training runs mapping the recipe landscape, over four days</div></div>
+    <div class="stat"><div class="v">~13&thinsp;M</div><div class="k">self-play games across those runs</div></div>
+    <div class="stat"><div class="v">41&thinsp;M+</div><div class="k">positions cross-checked between two independently written rules engines &mdash; zero disagreements</div></div>
+    <div class="stat"><div class="v">2.3&ndash;19&thinsp;h</div><div class="k">per training run once the engineering was done &mdash; small and short, to deep and long</div></div>
+  </div>
+</section>
+
+<!-- ============================================================ PART 4 -->
+<section>
+  <p class="eyebrow">Part 4 &middot; The engineering</p>
+  <h2>The kitchen that mostly waited</h2>
+
+  <p>Here is the mental model you need for the hardware, and it&rsquo;s a restaurant. A GPU &mdash; a graphics card &mdash; is an enormous kitchen: thousands of line cooks, individually unremarkable, who can all chop in parallel, which makes the kitchen spectacular at one thing &mdash; preparing <em>four thousand identical dishes at once</em>. The Python program is the head chef, who does no cooking and only sends in orders. Every order, however tiny, costs the same fixed overhead to pass through the window. And sometimes the chef stops everything and stands at the window, waiting for a result to come back before deciding what to order next.</p>
+  <p>The first version of this project ran its lookahead as thousands of tiny orders. Profiling &mdash; timing every step of one simulation of the search &mdash; found <strong>550 separate orders</strong> sent to the GPU, and <strong>45 full stops</strong> where Python waited for an answer before continuing. The result: <strong>93&nbsp;% of the wall-clock time was spent asking, not cooking.</strong> A top-of-the-line GPU, mostly idle, drumming its fingers between micro-orders. Self-play crawled along at 25&ndash;33 games per second. The first full training run took twelve hours.</p>
+
+  <figure>
+    <svg viewBox="0 0 860 210" role="img" aria-label="Two timelines at the same scale. Sending orders one at a time: 66 milliseconds of tree work per simulation, mostly idle gaps between tiny kernels. Replaying a pre-recorded order sequence: the same work as one solid 7.4 millisecond block.">
+      <defs>
+        <marker id="arwT" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" class="fMut"/>
+        </marker>
+      </defs>
+      <text x="140" y="40" class="tTitle">one order at a time</text>
+      <text x="800" y="40" text-anchor="end" class="tLbl">550 orders + 45 waits per simulation</text>
+      <rect x="140" y="48" width="660" height="20" class="fSoft"/>
+      <g class="fX">
+        <rect x="143" y="48" width="2.5" height="20"/><rect x="176" y="48" width="2.5" height="20"/>
+        <rect x="209" y="48" width="2.5" height="20"/><rect x="242" y="48" width="2.5" height="20"/>
+        <rect x="275" y="48" width="2.5" height="20"/><rect x="308" y="48" width="2.5" height="20"/>
+        <rect x="341" y="48" width="2.5" height="20"/><rect x="374" y="48" width="2.5" height="20"/>
+        <rect x="407" y="48" width="2.5" height="20"/><rect x="440" y="48" width="2.5" height="20"/>
+        <rect x="473" y="48" width="2.5" height="20"/><rect x="506" y="48" width="2.5" height="20"/>
+        <rect x="539" y="48" width="2.5" height="20"/><rect x="572" y="48" width="2.5" height="20"/>
+        <rect x="605" y="48" width="2.5" height="20"/><rect x="638" y="48" width="2.5" height="20"/>
+        <rect x="671" y="48" width="2.5" height="20"/><rect x="704" y="48" width="2.5" height="20"/>
+        <rect x="737" y="48" width="2.5" height="20"/><rect x="770" y="48" width="2.5" height="20"/>
+      </g>
+      <text x="805" y="63" class="tLbl">66&thinsp;ms</text>
+      <text x="140" y="102" class="tTitle">the whole sequence, pre-recorded</text>
+      <text x="800" y="102" text-anchor="end" class="tLbl">one replayed order</text>
+      <rect x="140" y="110" width="74" height="20" rx="2" class="fX"/>
+      <text x="222" y="125" class="tLblAcc">7.4&thinsp;ms &mdash; the same work</text>
+      <line x1="140" y1="160" x2="810" y2="160" class="sLine" marker-end="url(#arwT)"/>
+      <g class="tLbl">
+        <text x="140" y="180" text-anchor="middle">0</text>
+        <text x="340" y="180" text-anchor="middle">20</text>
+        <text x="540" y="180" text-anchor="middle">40</text>
+        <text x="740" y="180" text-anchor="middle">60&thinsp;ms</text>
+      </g>
+      <text x="475" y="203" text-anchor="middle" class="tNote">wall clock for one simulation of tree work across thousands of parallel games (RTX 3060, under CPU load)</text>
+    </svg>
+    <figcaption>The diagnosis and the cure on one axis. Top: the thin blue slivers are the GPU actually working; all the grey is order-sending overhead. Bottom: the identical work replayed as one pre-recorded sequence &mdash; 66&thinsp;&rarr;&thinsp;7.4&thinsp;ms, and nearly immune to whatever else the computer happens to be doing.</figcaption>
+  </figure>
+
+  <p>The fix was a ladder of five changes, each moving work away from that order window, in order of payoff:</p>
+  <ol class="fixes">
+    <li><span class="n">1</span><span><span class="what">Stop waiting at the window</span>
+      <span class="how">Restructure the search so Python almost never needs an answer back mid-simulation &mdash; the chef keeps ordering without pausing.</span>
+      <span class="delta">full stops per simulation: 45 &rarr; 2</span></span></li>
+    <li><span class="n">2</span><span><span class="what">Batch the bookkeeping</span>
+      <span class="how">Keep the statistics of all four thousand parallel game trees in a few big tables, updated in single bulk operations instead of thousands of small ones.</span>
+      <span class="delta">tree work per simulation: 17.8 &rarr; 12.4 ms</span></span></li>
+    <li><span class="n">3</span><span><span class="what">Pre-record the whole order sequence</span>
+      <span class="how">The 550 orders are identical every simulation &mdash; so record them once (the GPU feature is called a &ldquo;CUDA graph&rdquo;) and replay the recording as a single order.</span>
+      <span class="delta">66 &rarr; 7.4 ms per simulation under load</span></span></li>
+    <li><span class="n">4</span><span><span class="what">Streamline the network itself</span>
+      <span class="how">Fold constant arithmetic into the dials ahead of time, compute in half-precision numbers, lay memory out the way the GPU&rsquo;s tensor hardware wants it.</span>
+      <span class="delta">16.8 &rarr; 11.6 ms per 4,096 positions evaluated</span></span></li>
+    <li><span class="n">5</span><span><span class="what">Never let a seat go empty</span>
+      <span class="how">In naive lock-step self-play, finished games idle while the longest game in the batch drags on; instead, swap a fresh game in the moment one ends.</span>
+      <span class="delta">no idle tail &mdash; the batch stays full</span></span></li>
+  </ol>
+  <p><span class="result-chip">25 &rarr; 220 games per second</span></p>
+  <p style="margin-top:14px">The GPU went from waiting to <span class="num">84&nbsp;%</span> busy, and a full training run fell from a 12-hour commitment to a <strong>2.3-hour experiment</strong>. That last number is the real prize: at 2.3 hours you can afford to test ideas one at a time and be wrong cheaply. Wall-clock stopped being the project&rsquo;s constraint. What replaced it is the subject of the next section &mdash; and it turned out to be the harder problem.</p>
+</section>
+
+<!-- ============================================================ PART 5 -->
+<section>
+  <p class="eyebrow">Part 5 &middot; The measurement</p>
+  <h2>How do you avoid fooling yourself?</h2>
+
+  <p>Suppose you change something in the recipe and train a new agent. Is it better than the old one? The obvious plan: play the two against each other and count wins. That kind of match &mdash; two specific agents, many games, one score &mdash; is what this page calls a <strong>head-to-head</strong>. Nearly everything about the obvious plan is a trap. Finding the traps <em>before</em> believing any results is the most quietly important work in the project.</p>
+  <p><strong>Trap one: the coin is bent.</strong> In this game the first player, X, has a real advantage. Put two equally strong agents against each other at the usual thinking budget, and X wins <strong>57&ndash;60&nbsp;%</strong> of the games. So whoever happens to sit as X more often looks stronger without being stronger. The fix is to make every match <em>paired</em>. Each test opening is played twice, once with each agent as X, and only the pair&rsquo;s combined score counts. The X advantage cancels out of every comparison by construction.</p>
+
+  <figure>
+    <svg viewBox="0 0 760 186" role="img" aria-label="Diagram of paired evaluation: one fixed opening is played twice with colours swapped, A as X versus B, then B as X versus A; the pair score is the mean of the two games.">
+      <defs>
+        <marker id="arwP" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" class="fMut"/>
+        </marker>
+      </defs>
+      <rect x="24" y="63" width="152" height="60" rx="6" fill="none" class="sLine" stroke-width="1.2"/>
+      <text x="100" y="89" text-anchor="middle" class="tLblInk">opening k</text>
+      <text x="100" y="108" text-anchor="middle" class="tLbl">a fixed 4-move start</text>
+      <rect x="266" y="24" width="196" height="52" rx="6" fill="none" class="sLine" stroke-width="1.2"/>
+      <text x="364" y="46" text-anchor="middle" class="tLblInk">game 1</text>
+      <text x="364" y="64" text-anchor="middle" class="tLbl">A as X &middot; B as O</text>
+      <rect x="266" y="110" width="196" height="52" rx="6" fill="none" class="sLine" stroke-width="1.2"/>
+      <text x="364" y="132" text-anchor="middle" class="tLblInk">game 2</text>
+      <text x="364" y="150" text-anchor="middle" class="tLbl">B as X &middot; A as O</text>
+      <g fill="none" class="sMut" stroke-width="1.2">
+        <path d="M 176 82 Q 220 66 260 52" marker-end="url(#arwP)"/>
+        <path d="M 176 104 Q 220 120 260 134" marker-end="url(#arwP)"/>
+        <path d="M 462 52 Q 508 66 548 82" marker-end="url(#arwP)"/>
+        <path d="M 462 134 Q 508 120 548 104" marker-end="url(#arwP)"/>
+      </g>
+      <rect x="554" y="63" width="182" height="60" rx="6" fill="none" class="sX" stroke-width="1.5"/>
+      <text x="645" y="89" text-anchor="middle" class="tLblAcc">pair score</text>
+      <text x="645" y="108" text-anchor="middle" class="tLbl">mean of the two</text>
+    </svg>
+    <figcaption>The frozen test suite. It holds <strong>516 openings</strong>: the empty board, all 15 genuinely different first moves, 250 openings taken from real games, and 250 random ones. Each opening is played twice with the colours swapped, so one pass through the suite is 1,032 games. On the 3090 that takes about a minute. The suite never changes, so every number ever measured against it stays comparable with every other.</figcaption>
+  </figure>
+
+  <p><strong>Trap two: &ldquo;beats it 55&nbsp;% of the time&rdquo; doesn&rsquo;t travel.</strong> A win rate compares two specific agents. To place <em>many</em> agents on one scale &mdash; including agents that never played each other &mdash; you want a common currency. Chess solved this decades ago with the Elo rating, and it&rsquo;s worth one minute to actually own the idea rather than nod at it.</p>
+
+  <div class="concept">
+    <p class="c-tag">Concept &middot; Elo, from scratch</p>
+    <p>Elo is nothing more than a convenient way to write down expected scores. Start by scoring a game as 1 for a win, &frac12; for a draw, 0 for a loss. Now <em>declare</em> that a rating gap of <span class="num">d</span> points means the stronger side is expected to take <span class="num">1&thinsp;/&thinsp;(1 + 10<sup>&minus;d/400</sup>)</span> of the points. Try <span class="num">d = 100</span>: 10<sup>&minus;0.25</sup> &asymp; 0.562, so the expected share is 1&thinsp;/&thinsp;1.562, which is about <strong>64&nbsp;%</strong>. That is the entire definition: a dictionary between &ldquo;points of rating&rdquo; and &ldquo;share of points won&rdquo;. The 400 in the formula is chosen so that gaps <em>add</em>. Rather than juggling &ldquo;A takes 64&nbsp;% off B, and B takes 64&nbsp;% off C&rdquo;, you say A is +100 over B and +200 over C, and every comparison lives on one number line.</p>
+  </div>
+
+  <figure>
+    <svg viewBox="0 0 720 268" role="img" aria-label="The Elo dictionary curve: expected score against rating gap, rising from 50 percent at zero gap through 64 percent at 100 points, 76 percent at 200, and 91 percent at 400.">
+      <defs>
+        <marker id="arwC" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" class="fMut"/>
+        </marker>
+      </defs>
+      <g class="sLine" opacity="0.55">
+        <line x1="60" y1="160" x2="660" y2="160"/>
+        <line x1="60" y1="130" x2="660" y2="130"/>
+        <line x1="60" y1="100" x2="660" y2="100"/>
+        <line x1="60" y1="70" x2="660" y2="70"/>
+        <line x1="60" y1="40" x2="660" y2="40"/>
+      </g>
+      <line x1="60" y1="190" x2="672" y2="190" class="sMut" stroke-width="1.2" marker-end="url(#arwC)"/>
+      <line x1="60" y1="190" x2="60" y2="28" class="sMut" stroke-width="1.2"/>
+      <g class="tLbl" text-anchor="end">
+        <text x="52" y="194">50%</text><text x="52" y="164">60%</text><text x="52" y="134">70%</text>
+        <text x="52" y="104">80%</text><text x="52" y="74">90%</text><text x="52" y="44">100%</text>
+      </g>
+      <g class="tLbl" text-anchor="middle">
+        <text x="60" y="210">0</text><text x="180" y="210">+100</text><text x="300" y="210">+200</text>
+        <text x="420" y="210">+300</text><text x="540" y="210">+400</text><text x="660" y="210">+500</text>
+      </g>
+      <polyline points="60,190 120,168.5 180,148 240,129 300,112.1 360,97.5 420,85.3 480,75.3 540,67.3 600,60.9 660,56" fill="none" class="sX" stroke-width="2.2"/>
+      <g class="sLine" stroke-dasharray="4 3">
+        <line x1="180" y1="190" x2="180" y2="148"/>
+        <line x1="300" y1="190" x2="300" y2="112.1"/>
+        <line x1="540" y1="190" x2="540" y2="67.3"/>
+      </g>
+      <circle cx="180" cy="148" r="4.5" class="fX"/>
+      <circle cx="300" cy="112.1" r="4.5" class="fX"/>
+      <circle cx="540" cy="67.3" r="4.5" class="fX"/>
+      <text x="192" y="142" class="tLblInk">+100 &rarr; 64%</text>
+      <text x="312" y="107" class="tLblInk">+200 &rarr; 76%</text>
+      <text x="552" y="62" class="tLblInk">+400 &rarr; 91%</text>
+      <text x="366" y="244" text-anchor="middle" class="tNote">rating gap in Elo points &rarr; expected share of points (win = 1, draw = &frac12;)</text>
+      <text x="366" y="262" text-anchor="middle" class="tNote">every Elo figure on this page is this curve read backwards from a measured score</text>
+    </svg>
+    <figcaption>The whole of Elo in one curve. When this page says an agent is &ldquo;+77 Elo&rdquo; over the reference, that is literally its measured suite score of 60.9&nbsp;% pushed through this dictionary. A change of units, not extra machinery.</figcaption>
+  </figure>
+
+  <p><strong>Trap three: 1,032 games is still luck-prone.</strong> Play the same match twice and the score wobbles. How much of any measured difference is real?</p>
+
+  <div class="concept">
+    <p class="c-tag">Concept &middot; a confidence interval</p>
+    <p>Imagine replaying the whole measurement in a thousand parallel universes: same agents, same procedure, fresh luck each time. The scores would scatter. A <em>95&nbsp;% confidence interval</em> is the range that the middle 95&nbsp;% of those universes land in. We can&rsquo;t visit parallel universes, but we can fake them. Take the 516 opening pairs, draw 516 of them at random <em>with replacement</em> (so some pairs appear twice and some not at all), and score that alternative suite. Do it a thousand times. Each draw is a plausible version of the suite you might have had, and the spread of their scores is the interval. The trick is called the bootstrap. For the full suite it says a score is trustworthy to about <strong>&plusmn;2.8 points</strong>. Whenever this page gives an interval, that is what it is: the range where the middle 95&nbsp;% of the replays land.</p>
+  </div>
+
+  <p><strong>Trap four &mdash; the deepest one: the ruler itself wobbles.</strong> Three separate things add noise before a single game of the test is played. Train the <em>identical</em> recipe twice from different random starting dials, and the two &ldquo;identical&rdquo; agents differ by a couple of suite points. Compare two snapshots of one training run taken minutes apart, and they can differ by up to 4 points. Even re-running the same match in a fresh process shifts the score by &plusmn;0.4. (The GPU&rsquo;s fast arithmetic is not perfectly reproducible. A single rounding that lands differently can change one move, and one move can change one game.) Before trusting any experiment, the project measured all of this:</p>
+
+  <figure>
+    <svg viewBox="-20 0 780 212" role="img" aria-label="Bar chart of noise sources on the paired suite: rerunning a match in a new process plus-minus 0.4 points, retraining with a new random start plus-minus 2.5, the suite's own confidence interval about plus-minus 2.8, adjacent snapshots of one run up to 4. A dashed line at 3 points marks the belief threshold.">
+      <g class="tLbl" text-anchor="end">
+        <text x="228" y="47">same match, new process</text>
+        <text x="228" y="83">same recipe, new random start</text>
+        <text x="228" y="119">the suite&rsquo;s own 95&thinsp;% interval</text>
+        <text x="228" y="155">snapshots of one run, minutes apart</text>
+      </g>
+      <g class="fX">
+        <rect x="240" y="34" width="38" height="18" rx="2"/>
+        <rect x="240" y="70" width="240" height="18" rx="2"/>
+        <rect x="240" y="106" width="269" height="18" rx="2"/>
+        <rect x="240" y="142" width="384" height="18" rx="2"/>
+      </g>
+      <g class="tLblInk">
+        <text x="284" y="47">&plusmn;0.4</text>
+        <text x="486" y="83">&plusmn;2.5</text>
+        <text x="538" y="119">&asymp;&thinsp;&plusmn;2.8</text>
+        <text x="630" y="155">up to 4</text>
+      </g>
+      <line x1="528" y1="24" x2="528" y2="168" class="sInk" stroke-width="1.3" stroke-dasharray="5 4"/>
+      <text x="528" y="16" text-anchor="middle" class="tLblInk">believe nothing below +3</text>
+      <line x1="240" y1="172" x2="720" y2="172" class="sLine"/>
+      <g class="tLbl" text-anchor="middle">
+        <text x="240" y="190">0</text><text x="336" y="190">1</text><text x="432" y="190">2</text>
+        <text x="528" y="190">3</text><text x="624" y="190">4</text><text x="720" y="190">5</text>
+      </g>
+      <text x="480" y="208" text-anchor="middle" class="tNote">suite points (1 point = 1&thinsp;% of the score)</text>
+    </svg>
+    <figcaption>The noise floor, measured before any experiment was trusted. A &ldquo;point&rdquo; here is one percent of the suite score. The rule that governs every claim on this page: <strong>believe a change only if it moves the full paired suite by more than +3 points, comparing final trained agents.</strong> Three points is where a real effect finally pokes above everything that isn&rsquo;t one.</figcaption>
+  </figure>
+
+  <p>Two more instruments pin the scale to something outside the project&rsquo;s own bubble. The first is an <strong>exact endgame set</strong>. It holds 3,000 late-game positions that are simple enough for the CPU solver to work out the <em>perfect</em> answer by brute force. On those, the agent can be graded against ground truth instead of against other agents.</p>
+  <p>The second is an <strong>independent anchor</strong>: a search engine written from scratch that shares no network and no code with the agent. It judges a move in the simplest way imaginable. From each candidate move it plays thousands of completely random games to the end, and it prefers the move whose random games win more often. That is crude. But its strength grows with its budget in a strikingly regular way &mdash; about <strong>+440 Elo for every tenfold increase in random games</strong> &mdash; which makes it a fixed external yardstick. Measured against that yardstick, the trained agents come out hundreds of Elo strong, in units a stranger could check for themselves.</p>
+</section>
+
+<!-- ============================================================ PART 6 -->
+<section>
+  <p class="eyebrow">Part 6 &middot; The levers</p>
+  <h2>Four things worked. A long list didn&rsquo;t.</h2>
+
+  <p>With the ruler calibrated, the experiments begin &mdash; and immediately deliver a humbling result. The project trained the small starter network four times, each time changing something that <em>felt</em> important: a fresh random start, feeding the solver&rsquo;s perfect endgame answers into training, careful removal of duplicate positions from the training data. All four landed within &plusmn;3 points of one another. That is a plateau, and the &plusmn;3 rule had earned the right to call it one. Whatever was limiting the agent, it was none of those things.</p>
+  <p>Four changes eventually broke through. Two were found on the second day, in two-hour experiments. The other two took the third and fourth days, and each cost between six and nineteen hours of the GPU.</p>
+
+  <h3>Lever one: a default nobody had questioned</h3>
+  <p>Recall what the loop trains the network on. After each search, the search&rsquo;s conclusions become the target that the network&rsquo;s policy &mdash; its shortlist &mdash; is nudged toward. The formula that builds this target contains a dial. Call it by its code name, <span class="mono">c_scale</span>. It controls <em>how strongly the target commits to what the search discovered</em>, as opposed to staying close to the network&rsquo;s own prior hunch. A widely used reference implementation ships with <span class="num">c_scale = 0.1</span>: the search whispers. The original paper&rsquo;s own text uses <span class="num">1.0</span>: the search speaks at full volume. This project inherited the whisper without noticing.</p>
+
+  <figure>
+    <svg viewBox="0 0 760 244" role="img" aria-label="Two schematic policy distributions over the same candidate moves. With c underscore scale 0.1 the training target barely leaves the network's prior hunch; with 1.0 it commits sharply to the move the search found best.">
+      <g class="tTitle"><text x="70" y="26">c_scale = 0.1 &mdash; the inherited default</text><text x="430" y="26">c_scale = 1.0 &mdash; the paper&rsquo;s value</text></g>
+      <g class="tNote"><text x="70" y="44">the target barely leaves the hunch</text><text x="430" y="44">the target commits to what the search found</text></g>
+      <g class="fX">
+        <rect x="70" y="112" width="28" height="78" rx="2"/>
+        <rect x="108" y="128" width="28" height="62" rx="2"/>
+        <rect x="146" y="140" width="28" height="50" rx="2"/>
+        <rect x="184" y="150" width="28" height="40" rx="2"/>
+        <rect x="222" y="156" width="28" height="34" rx="2"/>
+        <rect x="260" y="164" width="28" height="26" rx="2"/>
+        <rect x="430" y="42" width="28" height="148" rx="2"/>
+        <rect x="468" y="164" width="28" height="26" rx="2"/>
+        <rect x="506" y="173" width="28" height="17" rx="2"/>
+        <rect x="544" y="178" width="28" height="12" rx="2"/>
+        <rect x="582" y="181" width="28" height="9" rx="2"/>
+        <rect x="620" y="184" width="28" height="6" rx="2"/>
+      </g>
+      <g fill="none" class="sMut" stroke-width="1.4" stroke-dasharray="4 3">
+        <rect x="70" y="120" width="28" height="70"/><rect x="108" y="132" width="28" height="58"/>
+        <rect x="146" y="140" width="28" height="50"/><rect x="184" y="148" width="28" height="42"/>
+        <rect x="222" y="154" width="28" height="36"/><rect x="260" y="162" width="28" height="28"/>
+        <rect x="430" y="120" width="28" height="70"/><rect x="468" y="132" width="28" height="58"/>
+        <rect x="506" y="140" width="28" height="50"/><rect x="544" y="148" width="28" height="42"/>
+        <rect x="582" y="154" width="28" height="36"/><rect x="620" y="162" width="28" height="28"/>
+      </g>
+      <line x1="60" y1="190" x2="298" y2="190" class="sLine"/>
+      <line x1="420" y1="190" x2="658" y2="190" class="sLine"/>
+      <g class="tLbl"><text x="184" y="208" text-anchor="middle">candidate moves</text><text x="544" y="208" text-anchor="middle">candidate moves</text></g>
+      <rect x="70" y="224" width="16" height="10" class="fX"/>
+      <text x="92" y="233" class="tLbl">training target</text>
+      <rect x="280" y="224" width="16" height="10" fill="none" class="sMut" stroke-width="1.4" stroke-dasharray="4 3"/>
+      <text x="302" y="233" class="tLbl">the network&rsquo;s prior hunch</text>
+    </svg>
+    <figcaption>The shapes are schematic; the measurement is not. Turning the dial to 1.0 makes the agent stronger by <strong>+40 Elo</strong>, with the interval running from +20 to +60, and it costs no extra computing at all. Think back to the loop. Its fuel is the gap between raw intuition and amplified intuition, and the whisper was throwing most of that amplification away before it ever reached the network. Two checks nail the story down. Using 1.0 only when <em>playing</em>, not when training, changes nothing &mdash; so the entire gain lives in the training target. And the sharper target is <em>harder</em> for the network to fit: the policy&rsquo;s training error rises from 0.92 to 1.15. Yet it produces a stronger player. A tidy reminder that a lower training error is not the goal. Moral: check every inherited default that shapes what your model learns from.</figcaption>
+  </figure>
+
+  <h3>Lever two: a bigger brain</h3>
+  <p>The other thing that worked is the least glamorous lever in machine learning: make the network bigger. So far the network has been a box with dials in it. To say what &ldquo;bigger&rdquo; means, the box has to be opened a little.</p>
+
+  <figure>
+    <svg viewBox="0 0 870 352" role="img" aria-label="The network's anatomy. The board enters as seven 9-by-9 layers, passes through a stem of 3-by-3 filters, then through N identical blocks, then fans out into four heads: policy (one score per square), value (win, draw or loss), ownership of each of the nine boards, and the margin of boards won minus lost. Below, one block opened up: a 3-by-3 conv, normalise, ReLU, another 3-by-3 conv, normalise, then the block's input is added back through a shortcut and a final ReLU is applied.">
+      <defs>
+        <marker id="arwB" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"/>
+        </marker>
+      </defs>
+
+      <!-- input: a stack of 7 planes, three drawn -->
+      <g class="tTitle"><text x="76" y="44" text-anchor="middle">input</text></g>
+      <text x="76" y="60" text-anchor="middle" class="tLbl">7 layers of 9 &times; 9</text>
+      <rect x="40" y="88" width="56" height="56" class="fSoft sLine"/>
+      <rect x="48" y="80" width="56" height="56" class="fSoft sLine"/>
+      <rect x="56" y="72" width="56" height="56" class="fXt sLine"/>
+      <g class="grid">
+        <line x1="74.7" y1="72" x2="74.7" y2="128"/><line x1="93.3" y1="72" x2="93.3" y2="128"/>
+        <line x1="56" y1="90.7" x2="112" y2="90.7"/><line x1="56" y1="109.3" x2="112" y2="109.3"/>
+      </g>
+      <line x1="116" y1="100" x2="148" y2="100" class="sMut" stroke-width="1.4" marker-end="url(#arwB)"/>
+
+      <!-- stem -->
+      <rect x="152" y="72" width="70" height="56" rx="4" fill="none" class="sInk" stroke-width="1.2"/>
+      <text x="187" y="96" text-anchor="middle" class="tLblInk">stem</text>
+      <text x="187" y="112" text-anchor="middle" class="tLbl">7 &rarr; F</text>
+      <line x1="226" y1="100" x2="254" y2="100" class="sMut" stroke-width="1.4" marker-end="url(#arwB)"/>
+
+      <!-- N blocks -->
+      <g class="tTitle"><text x="347" y="44" text-anchor="middle">N blocks deep</text></g>
+      <text x="347" y="60" text-anchor="middle" class="tLbl">6, 8 or 10 in this project</text>
+      <g class="fXt">
+        <rect x="258" y="72" width="46" height="56" rx="4" class="sX" stroke-width="1.2"/>
+        <rect x="314" y="72" width="46" height="56" rx="4" class="sX" stroke-width="1.2"/>
+        <rect x="390" y="72" width="46" height="56" rx="4" class="sX" stroke-width="1.2"/>
+      </g>
+      <g class="tLblInk" text-anchor="middle">
+        <text x="281" y="96">block</text><text x="337" y="96">block</text><text x="413" y="96">block</text>
+      </g>
+      <g class="tLbl" text-anchor="middle">
+        <text x="281" y="112">1</text><text x="337" y="112">2</text><text x="413" y="112">N</text>
+        <text x="375" y="104">&middot;&middot;&middot;</text>
+      </g>
+      <line x1="440" y1="100" x2="472" y2="100" class="sMut" stroke-width="1.4"/>
+
+      <!-- four heads on a bus -->
+      <line x1="474" y1="38" x2="474" y2="152" class="sMut" stroke-width="1.4"/>
+      <g class="sMut" stroke-width="1.4" marker-end="url(#arwB)">
+        <line x1="474" y1="38" x2="498" y2="38"/><line x1="474" y1="76" x2="498" y2="76"/>
+        <line x1="474" y1="114" x2="498" y2="114"/><line x1="474" y1="152" x2="498" y2="152"/>
+      </g>
+      <g fill="none" class="sInk" stroke-width="1.2">
+        <rect x="502" y="24" width="98" height="28" rx="4"/><rect x="502" y="62" width="98" height="28" rx="4"/>
+        <rect x="502" y="100" width="98" height="28" rx="4"/><rect x="502" y="138" width="98" height="28" rx="4"/>
+      </g>
+      <g class="tLblInk" text-anchor="middle">
+        <text x="551" y="42">policy</text><text x="551" y="80">value</text>
+        <text x="551" y="118">ownership</text><text x="551" y="156">margin</text>
+      </g>
+      <g class="tLbl">
+        <text x="612" y="42">which move? one score per square</text>
+        <text x="612" y="80">who wins? win / draw / loss</text>
+        <text x="612" y="118">who will own each of the 9 boards?</text>
+        <text x="612" y="156">boards won minus lost: &minus;9 &hellip; +9</text>
+      </g>
+
+      <!-- zoom into block 2 -->
+      <g class="sLine" stroke-dasharray="4 3">
+        <line x1="314" y1="128" x2="24" y2="224"/><line x1="360" y1="128" x2="660" y2="224"/>
+        <rect x="24" y="224" width="636" height="116" rx="6" fill="none"/>
+      </g>
+      <text x="36" y="242" class="tTitle">inside one block</text>
+
+      <!-- the chain -->
+      <text x="30" y="300" class="tLbl">in</text>
+      <line x1="48" y1="296" x2="70" y2="296" class="sMut" stroke-width="1.4" marker-end="url(#arwB)"/>
+      <g fill="none" class="sInk" stroke-width="1.2">
+        <rect x="72" y="278" width="70" height="36" rx="4"/>
+        <rect x="160" y="278" width="80" height="36" rx="4"/>
+        <rect x="258" y="278" width="56" height="36" rx="4"/>
+        <rect x="332" y="278" width="70" height="36" rx="4"/>
+        <rect x="420" y="278" width="80" height="36" rx="4"/>
+        <rect x="562" y="278" width="56" height="36" rx="4"/>
+      </g>
+      <circle cx="530" cy="296" r="12" fill="none" class="sInk" stroke-width="1.2"/>
+      <g class="tLblInk" text-anchor="middle">
+        <text x="107" y="300">3&times;3 conv</text><text x="200" y="300">normalise</text><text x="286" y="300">ReLU</text>
+        <text x="367" y="300">3&times;3 conv</text><text x="460" y="300">normalise</text><text x="530" y="300.5">+</text><text x="590" y="300">ReLU</text>
+      </g>
+      <g class="sMut" stroke-width="1.4" marker-end="url(#arwB)">
+        <line x1="142" y1="296" x2="158" y2="296"/><line x1="240" y1="296" x2="256" y2="296"/>
+        <line x1="314" y1="296" x2="330" y2="296"/><line x1="402" y1="296" x2="418" y2="296"/>
+        <line x1="500" y1="296" x2="516" y2="296"/><line x1="542" y1="296" x2="560" y2="296"/>
+        <line x1="618" y1="296" x2="634" y2="296"/>
+      </g>
+      <text x="638" y="300" class="tLbl">out</text>
+      <!-- the shortcut -->
+      <path d="M 60 296 V 264 H 530 V 282" fill="none" class="sX" stroke-width="1.4" marker-end="url(#arwB)"/>
+      <text x="360" y="258" text-anchor="middle" class="tLblAcc">shortcut: the input skips ahead and is added back</text>
+      <text x="342" y="332" text-anchor="middle" class="tLbl">3&times;3 conv = F pattern detectors, each 3 cells by 3, slid over the whole board</text>
+    </svg>
+    <figcaption>What is inside the box. The seven input layers are: my stones, the opponent&rsquo;s, the small boards each side has already won, the boards that are closed, the cells where the next move may go, and one layer of plain ones. The two extra heads at the bottom right, ownership and margin, are the &ldquo;auxiliary prediction outputs&rdquo; of the ledger further down: they do not make the agent stronger, but they make it easier to interrogate, and Part&nbsp;8 leans on them. &ldquo;Normalise&rdquo; rescales the numbers so that no layer runs away; &ldquo;ReLU&rdquo; keeps what is positive and zeroes the rest. A single 3&times;3 filter sees only a cell and its neighbours, but by the fourth block every cell has heard from every other cell on the board.</figcaption>
+  </figure>
+
+  <p>Two words from the figure carry the rest of this part. A <strong>filter</strong> is a small pattern detector, three cells by three, that is slid over the whole board and reports how strongly its pattern is present at every spot: &ldquo;two of mine in a row with the third cell open&rdquo;, say, or &ldquo;an opponent stone next to a board that is already lost&rdquo;. A layer holds many filters, and the number it holds is the network&rsquo;s <strong>width</strong>: 64 in the starter net. A <strong>block</strong> is one round of &ldquo;look at the neighbours, then update the picture&rdquo;: two layers of filters in a row, plus a shortcut that lets the block&rsquo;s input pass straight through and be added back at the end. The shortcut means a block only has to learn the <em>correction</em> to the picture it was handed, not the whole picture over again, and that is what lets many blocks stack without training going astray. The number of blocks is the network&rsquo;s <strong>depth</strong>: six in the starter net. &ldquo;Bigger&rdquo;, then, means wider or deeper, and the two are different levers. This lever pulls width. The next pulls depth.</p>
+  <p>Width alone, going from 64 filters to 96, was worth +36 Elo. Width and the full-volume target from lever one together were worth +59. Widening again, to 128 filters, gave +77 Elo, the widest size tried. In dials that is half a million, then 1.1 million, then 1.9 million. The gains stack, though a little sub-additively: +36 and +40 combine to +59, not +76. That was where the second day ended, and where the first version of this page ended too. The next two levers needed the following two days, and whole nights of the GPU.</p>
+
+  <h3>Lever three: a deeper brain</h3>
+  <p>Width is one way to add dials. Depth is the other. A wider block notices more things at once. An extra block notices things <em>about</em> those things: a threat, then the send that the threat forces, then what that send costs. Every net on the ladder so far was six blocks deep. The experiment: keep the widest net, and stack eight blocks instead of six. That is 2.5 million dials.</p>
+  <p>It worked, narrowly. Head to head, the eight-block net beats the six-block net <strong>53.3&thinsp;%</strong> of the time, with the interval running from 50.5 to 56.0&thinsp;%. In Elo that is <strong>+23</strong>, interval +4 to +42. The interval excludes zero, every secondary measure points the same way, and the 3.3-point margin just clears the rule from Part&nbsp;5. It cost 1.36&times; the run time, which is almost exactly the extra arithmetic: the kitchen from Part&nbsp;4 is now fully busy, so cost simply tracks work. Two more blocks, ten in all and 3.0 million dials, trained on the longer schedule described next, were worth another <strong>+35</strong> over eight, interval +16 to +54. Neither step is dramatic. Both are real. And per point of Elo, depth turned out cheaper than width at this size &mdash; on the ladder&rsquo;s instrument, which gives both sides the same number of simulations. Part&nbsp;9 charges for the cost of each simulation as well, and the last of these steps does not survive the bill.</p>
+
+  <h3>Lever four: keep going</h3>
+  <p>Every run above stopped after 150 laps of the loop. Each lap moves 4,096 games forward by 64 moves apiece, which adds about a quarter of a million positions to a memory holding the most recent two million, and then trains the network on about as many positions drawn from that memory. The number 150 dated from when a run took twelve hours, and nobody had re-examined it once a run took two.</p>
+  <p>Training also follows a schedule. Each nudge to the dials has a size, called the <strong>learning rate</strong>. It starts large and is cut twice near the end of the run, so that the network can stop bouncing around and settle. In the 150-lap schedule the cuts came at laps 100 and 140. The experiment changed exactly one thing: take the eight-block recipe and run it for 300 laps, with the cuts at 200 and 280, so that each cut lands on a network that has seen twice as many games.</p>
+  <p>This was the single largest gain of the project. The 300-lap net beats its own 150-lap parent <strong>67.5&thinsp;%</strong> of the time, interval 65.0 to 70.0&thinsp;%. That is <strong>+127 Elo</strong>, interval +108 to +147. Each learning-rate cut produced a visible step in the in-run curve. Against the reference, the 300-lap net stands at <strong>+211</strong>.</p>
+  <p>(Adding rungs on the ladder would predict +111 for that step, not +127. Elo is a dictionary for expected scores between <em>pairs</em>, not a conservation law. The two figures&rsquo; intervals overlap, and this much looseness is normal &mdash; worth knowing before you ever add two Elo gaps together.)</p>
+  <p><em>Why should that be?</em> The honest answer is that the network was still learning. The 150-lap schedule had been ending runs before they had finished, and the evidence is an endgame statistic in Part&nbsp;8 that moved twelve points with nothing else changed. The uncomfortable corollary: every comparison between architectures earlier on this page was made between networks that had not finished learning. When a 150-lap run said a net had &ldquo;hit its ceiling&rdquo;, some of the time it meant only that the net had stopped improving <em>under that schedule</em>. The ranking of the levers survived that correction. One belief about the game did not, and Part&nbsp;8 tells that story in full.</p>
+
+  <p>Here are the seven networks the four days produced, drawn to the same scale: each box is one block, and a box&rsquo;s width is the block&rsquo;s width in filters.</p>
+
+  <figure>
+    <svg viewBox="0 0 860 372" role="img" aria-label="Seven networks side by side on one baseline, drawn as stacks of blocks. From left to right: dev1, six blocks of 64 filters, half a million parameters, 200 laps, minus 95 Elo; v2b, six by 64, half a million, 150 laps, the zero reference; wide96_c1, six by 96, 1.1 million, 150 laps, plus 59; wide128_c1, six by 128, 1.9 million, 150 laps, plus 77; deep8_c1, eight by 128, 2.5 million, 150 laps, plus 100; deep8_c1_300, eight by 128, 2.5 million, 300 laps, plus 211; deep10_c1_300, ten by 128, 3.0 million, 300 laps, plus 242. The 300-lap nets are drawn solid, the others faded.">
+      <defs>
+        <marker id="arwG" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"/>
+        </marker>
+      </defs>
+      <line x1="30" y1="24" x2="830" y2="24" class="sMut" stroke-width="1.2" marker-end="url(#arwG)"/>
+      <text x="30" y="16" class="tLbl">earlier in the four days</text>
+      <text x="830" y="16" text-anchor="end" class="tLbl">later</text>
+
+      <!-- shared baseline -->
+      <line x1="30" y1="260" x2="830" y2="260" class="sInk" stroke-width="1.2"/>
+
+      <!-- dev1: 6 x 64, 200 laps -->
+      <g class="fX" opacity="0.45">
+        <rect x="52" y="238" width="48" height="20" rx="2"/><rect x="52" y="216" width="48" height="20" rx="2"/>
+        <rect x="52" y="194" width="48" height="20" rx="2"/><rect x="52" y="172" width="48" height="20" rx="2"/>
+        <rect x="52" y="150" width="48" height="20" rx="2"/><rect x="52" y="128" width="48" height="20" rx="2"/>
+      </g>
+      <!-- v2b: 6 x 64, 150 laps -->
+      <g class="fX" opacity="0.45">
+        <rect x="168" y="238" width="48" height="20" rx="2"/><rect x="168" y="216" width="48" height="20" rx="2"/>
+        <rect x="168" y="194" width="48" height="20" rx="2"/><rect x="168" y="172" width="48" height="20" rx="2"/>
+        <rect x="168" y="150" width="48" height="20" rx="2"/><rect x="168" y="128" width="48" height="20" rx="2"/>
+      </g>
+      <!-- wide96_c1: 6 x 96 -->
+      <g class="fX" opacity="0.45">
+        <rect x="272" y="238" width="72" height="20" rx="2"/><rect x="272" y="216" width="72" height="20" rx="2"/>
+        <rect x="272" y="194" width="72" height="20" rx="2"/><rect x="272" y="172" width="72" height="20" rx="2"/>
+        <rect x="272" y="150" width="72" height="20" rx="2"/><rect x="272" y="128" width="72" height="20" rx="2"/>
+      </g>
+      <!-- wide128_c1: 6 x 128 -->
+      <g class="fX" opacity="0.45">
+        <rect x="376" y="238" width="96" height="20" rx="2"/><rect x="376" y="216" width="96" height="20" rx="2"/>
+        <rect x="376" y="194" width="96" height="20" rx="2"/><rect x="376" y="172" width="96" height="20" rx="2"/>
+        <rect x="376" y="150" width="96" height="20" rx="2"/><rect x="376" y="128" width="96" height="20" rx="2"/>
+      </g>
+      <!-- deep8_c1: 8 x 128 -->
+      <g class="fX" opacity="0.45">
+        <rect x="492" y="238" width="96" height="20" rx="2"/><rect x="492" y="216" width="96" height="20" rx="2"/>
+        <rect x="492" y="194" width="96" height="20" rx="2"/><rect x="492" y="172" width="96" height="20" rx="2"/>
+        <rect x="492" y="150" width="96" height="20" rx="2"/><rect x="492" y="128" width="96" height="20" rx="2"/>
+        <rect x="492" y="106" width="96" height="20" rx="2"/><rect x="492" y="84" width="96" height="20" rx="2"/>
+      </g>
+      <!-- deep8_c1_300: 8 x 128, 300 laps -->
+      <g class="fX">
+        <rect x="608" y="238" width="96" height="20" rx="2"/><rect x="608" y="216" width="96" height="20" rx="2"/>
+        <rect x="608" y="194" width="96" height="20" rx="2"/><rect x="608" y="172" width="96" height="20" rx="2"/>
+        <rect x="608" y="150" width="96" height="20" rx="2"/><rect x="608" y="128" width="96" height="20" rx="2"/>
+        <rect x="608" y="106" width="96" height="20" rx="2"/><rect x="608" y="84" width="96" height="20" rx="2"/>
+      </g>
+      <!-- deep10_c1_300: 10 x 128, 300 laps -->
+      <g class="fX">
+        <rect x="724" y="238" width="96" height="20" rx="2"/><rect x="724" y="216" width="96" height="20" rx="2"/>
+        <rect x="724" y="194" width="96" height="20" rx="2"/><rect x="724" y="172" width="96" height="20" rx="2"/>
+        <rect x="724" y="150" width="96" height="20" rx="2"/><rect x="724" y="128" width="96" height="20" rx="2"/>
+        <rect x="724" y="106" width="96" height="20" rx="2"/><rect x="724" y="84" width="96" height="20" rx="2"/>
+        <rect x="724" y="62" width="96" height="20" rx="2"/><rect x="724" y="40" width="96" height="20" rx="2"/>
+      </g>
+
+      <!-- names -->
+      <g class="tLblInk" text-anchor="middle">
+        <text x="76" y="282">dev1</text><text x="192" y="282">v2b</text><text x="308" y="282">wide96_c1</text>
+        <text x="424" y="282">wide128_c1</text><text x="540" y="282">deep8_c1</text><text x="656" y="282">deep8_c1_300</text>
+        <text x="772" y="282" class="tLblAcc">deep10_c1_300</text>
+      </g>
+      <!-- blocks x filters -->
+      <g class="tLbl" text-anchor="middle">
+        <text x="76" y="300">6 &times; 64</text><text x="192" y="300">6 &times; 64</text><text x="308" y="300">6 &times; 96</text>
+        <text x="424" y="300">6 &times; 128</text><text x="540" y="300">8 &times; 128</text><text x="656" y="300">8 &times; 128</text>
+        <text x="772" y="300">10 &times; 128</text>
+      </g>
+      <!-- parameters -->
+      <g class="tLbl" text-anchor="middle">
+        <text x="76" y="318">0.53 M dials</text><text x="192" y="318">0.53 M</text><text x="308" y="318">1.09 M</text>
+        <text x="424" y="318">1.87 M</text><text x="540" y="318">2.46 M</text><text x="656" y="318">2.46 M</text>
+        <text x="772" y="318">3.05 M</text>
+      </g>
+      <!-- training length -->
+      <g class="tLbl" text-anchor="middle">
+        <text x="76" y="336">200 laps</text><text x="192" y="336">150 laps</text><text x="308" y="336">150</text>
+        <text x="424" y="336">150</text><text x="540" y="336">150</text><text x="656" y="336" class="tLblInk">300</text>
+        <text x="772" y="336" class="tLblInk">300</text>
+      </g>
+      <!-- Elo -->
+      <g class="tLblInk" text-anchor="middle">
+        <text x="76" y="358">&minus;95 Elo</text><text x="192" y="358">0 (reference)</text><text x="308" y="358">+59</text>
+        <text x="424" y="358">+77</text><text x="540" y="358">+100</text><text x="656" y="358">+211</text>
+        <text x="772" y="358" class="tLblAcc">+242</text>
+      </g>
+    </svg>
+    <figcaption>Seven networks, one baseline. Each box is one block, and the box&rsquo;s width is the block&rsquo;s width in filters. The arithmetic of one evaluation grows with the <em>square</em> of that width, so the wide stacks cost more than their area suggests. The stem and the four heads are the same for every net and are left out of the drawing; they add about 90,000 dials to each. &ldquo;M dials&rdquo; counts the trainable parameters in the saved checkpoint. The 300-lap nets are drawn solid because the schedule, not the shape, is what separates them from their neighbours: deep8_c1 and deep8_c1_300 are the same network, one trained twice as long. Two runs from the ladder are not drawn because they look identical to a neighbour: abl_cscale1 is v2b&rsquo;s shape with the full-volume target (+40), and wide96 is wide96_c1&rsquo;s shape with the whispering one (+36). dev1 was the twelve-hour first run: the same shape as v2b, trained before the fast pipeline of Part&nbsp;4 existed and before the margin head was added, so it has about six thousand fewer dials than v2b (both round to 0.53&thinsp;M).</figcaption>
+  </figure>
+
+  <p>And here is the whole ladder on one axis, everything measured the same way:</p>
+
+  <figure>
+    <svg viewBox="0 0 800 640" role="img" aria-label="Vertical Elo ladder relative to the v2b reference at 64 simulations, every rung with a 95 percent confidence whisker. From bottom: the rollout anchor at minus 169, dev1 minus 95, v2a minus 35, v2b zero, wide96 plus 36, the c-scale change alone plus 40, wide96 with c-scale plus 59, wide128 with c-scale plus 77, the eight-block net plus 100, the eight-block net at 300 laps plus 211, the ten-block net at 300 laps plus 242. A dashed line at plus 224 marks the v2b net searched four times deeper; it used to point off the top of this chart and now sits inside the axis, level with the 300-lap eight-block net. A bracket marks the plus 127 duration step.">
+      <g class="sLine" opacity="0.55">
+        <line x1="160" y1="60" x2="780" y2="60"/><line x1="160" y1="120" x2="780" y2="120"/>
+        <line x1="160" y1="180" x2="780" y2="180"/><line x1="160" y1="240" x2="780" y2="240"/>
+        <line x1="160" y1="300" x2="780" y2="300"/><line x1="160" y1="360" x2="780" y2="360"/>
+        <line x1="160" y1="420" x2="780" y2="420"/><line x1="160" y1="480" x2="780" y2="480"/>
+        <line x1="160" y1="540" x2="780" y2="540"/><line x1="160" y1="600" x2="780" y2="600"/>
+      </g>
+      <line x1="160" y1="34" x2="160" y2="606" class="sMut" stroke-width="1.2"/>
+      <g class="tLbl" text-anchor="end">
+        <text x="148" y="64">+250</text><text x="148" y="124">+200</text><text x="148" y="184">+150</text>
+        <text x="148" y="244">+100</text><text x="148" y="304">+50</text><text x="148" y="364">0</text>
+        <text x="148" y="424">&minus;50</text><text x="148" y="484">&minus;100</text>
+        <text x="148" y="544">&minus;150</text><text x="148" y="604">&minus;200</text>
+      </g>
+
+      <!-- the arrow that used to point off the top of this chart -->
+      <line x1="160" y1="91.2" x2="596" y2="91.2" class="sMut" stroke-width="1.2" stroke-dasharray="5 4"/>
+      <text x="604" y="95" class="tLbl">v2b at 4&times; the search: +224</text>
+
+      <!-- whiskers -->
+      <g stroke-width="1.6">
+        <line x1="170" y1="39.6" x2="170" y2="98.4" class="sX"/>
+        <line x1="186" y1="80.4" x2="186" y2="132" class="sX" opacity="0.7"/>
+        <line x1="170" y1="216" x2="170" y2="264" class="sX"/>
+        <line x1="186" y1="244.8" x2="186" y2="291.6" class="sX" opacity="0.7"/>
+        <line x1="202" y1="266.4" x2="202" y2="312" class="sX" opacity="0.55"/>
+        <line x1="218" y1="288" x2="218" y2="336" class="sX" opacity="0.55"/>
+        <line x1="234" y1="292.8" x2="234" y2="340.8" class="sX" opacity="0.55"/>
+        <line x1="170" y1="380.4" x2="170" y2="426" class="sMut"/>
+        <line x1="170" y1="448.8" x2="170" y2="499.2" class="sMut"/>
+        <line x1="170" y1="535.2" x2="170" y2="589.2" class="sMut"/>
+      </g>
+      <!-- dots -->
+      <circle cx="170" cy="69.6" r="5" class="fX"/>
+      <circle cx="186" cy="106.8" r="4" class="fX"/>
+      <circle cx="170" cy="240" r="4" class="fX"/>
+      <circle cx="186" cy="267.6" r="4" class="fX"/>
+      <circle cx="202" cy="289.2" r="4" class="fX"/>
+      <circle cx="218" cy="312" r="4" class="fX"/>
+      <circle cx="234" cy="316.8" r="4" class="fX"/>
+      <circle cx="170" cy="360" r="4.5" class="fInk"/>
+      <circle cx="170" cy="402" r="4" class="fMut"/>
+      <circle cx="170" cy="474" r="4" class="fMut"/>
+      <circle cx="170" cy="562.8" r="4" class="fMut"/>
+
+      <!-- the duration step -->
+      <path d="M 712 106.8 H 720 V 240 H 712" fill="none" class="sMut" stroke-width="1.2"/>
+      <text x="728" y="170" class="tLbl">laps &times;2</text>
+      <text x="728" y="186" class="tLblInk">+127</text>
+
+      <!-- labels -->
+      <g class="tLblInk">
+        <text x="256" y="74"><tspan class="tLblAcc">deep10_c1_300</tspan> &middot; 10 blocks, 300 laps &middot; +242 [+218, +267]</text>
+        <text x="256" y="111">deep8_c1_300 &middot; 8 blocks, 300 laps &middot; +211 [+190, +233]</text>
+        <text x="256" y="244">deep8_c1 &middot; 8 blocks, 150 laps &middot; +100 [+80, +120]</text>
+        <text x="256" y="272">wide128_c1 &middot; widest net + full-volume target &middot; +77 [+57, +96]</text>
+        <text x="256" y="293">wide96_c1 &middot; both day-two levers &middot; +59</text>
+        <text x="256" y="316">abl_cscale1 &middot; the c_scale dial alone &middot; +40</text>
+        <text x="268" y="338">wide96 &middot; wider net alone &middot; +36</text>
+        <text x="256" y="364">v2b &middot; the small-net reference &middot; 0</text>
+        <text x="256" y="406">v2a &middot; first fast-pipeline run &middot; &minus;35</text>
+        <text x="256" y="478">dev1 &middot; the 12-hour first run &middot; &minus;95</text>
+        <text x="256" y="567">random-rollout search, 100&thinsp;k games/move &middot; &minus;169</text>
+      </g>
+      <g class="tLbl">
+        <line x1="240" y1="318" x2="262" y2="334" class="sLine"/>
+        <text x="256" y="585">independent anchor: no network, no shared code</text>
+      </g>
+      <text x="470" y="630" text-anchor="middle" class="tNote">Elo vs the v2b reference &middot; paired suite at 64 simulations per move &middot; whiskers: 95&thinsp;% confidence intervals</text>
+    </svg>
+    <figcaption>The strength ladder. Its top has been pulled up by 170 points since the first version of this page. Everything above the reference cleared the +3-point rule. The four look-alike runs of the small net still sit on v2b, inside the noise band, and are left off. The dashed line used to be an arrow pointing off the top of the chart; the two long runs have climbed past it. That it lands level with the 300-lap eight-block net is a coincidence of the drawing, not an equation: Elo gaps are measured pairwise and never add perfectly, and +224 sits comfortably inside the +211 rung&rsquo;s interval. The warning the line carries is real on this instrument. Four times the <em>search</em> bought the small net as much as two days of training levers bought the big ones. Part&nbsp;9 asks whether that still holds at the top of the ladder.</figcaption>
+  </figure>
+
+  <h3>And the ledger of nothing</h3>
+  <p>Just as important is the list of reasonable-sounding ideas that did <em>not</em> move playing strength. Each row is a clean experiment that changed one thing. For most of them the project also measured <em>why</em> nothing happened, and that column is the useful one.</p>
+  <div class="tbl-wrap">
+  <table class="nulls">
+    <tr><th>intervention</th><th>result vs reference</th><th>why it did nothing</th></tr>
+    <tr><td>feed the solver&rsquo;s perfect endgame answers into training</td><td class="r">48.7&thinsp;% &rarr; &minus;9 Elo</td><td class="why">measured: in 98.7&thinsp;% of near-end positions, the self-play games&rsquo; own outcomes already match the perfect answer &mdash; the &ldquo;better&rdquo; labels barely change what the network is taught</td></tr>
+    <tr><td>data hygiene (de-duplication, extra input features&hellip;)</td><td class="r">48.2&thinsp;% &rarr; &minus;12 Elo</td><td class="why">the value output&rsquo;s training error improves; play does not &mdash; the opening diversity it targeted was already fixed by an exploration floor</td></tr>
+    <tr><td>remove the auxiliary prediction outputs</td><td class="r">50.3&thinsp;% &rarr; +2 Elo</td><td class="why">neutral either way &mdash; kept, because they make the agent easier to interrogate</td></tr>
+    <tr><td>recalibrate the network&rsquo;s draw estimates after training</td><td class="r">48.8&thinsp;% &rarr; 0</td><td class="why">lifts endgame <em>classification</em> accuracy 75&thinsp;&rarr;&thinsp;80&thinsp;% &mdash; but the search never needed the correction to pick good moves (Part&nbsp;8 explains why)</td></tr>
+    <tr><td>let the self-play search think harder (96 simulations instead of 64) for the final 50 laps</td><td class="r">50.2&thinsp;% vs its parent &rarr; +1 Elo</td><td class="why">a better teacher for the same student &mdash; but dosed after the learning-rate cuts, where the network moves least; an honest null for <em>this dose</em>, not a verdict on the idea</td></tr>
+    <tr><td>average the last few training snapshots together</td><td class="r">45.9&thinsp;% &rarr; &minus;28 Elo</td><td class="why">actively hurts: snapshots from different phases of training don&rsquo;t mix</td></tr>
+  </table>
+  </div>
+  <p>Every row but the last sits inside the &plusmn;3-point band. That is exactly why the band was measured first. Without it, half of this table would have been announced as discoveries.</p>
+  <p>One null never became a row, because it never became a run. Doubling the number of games in flight, from 4,096 to 8,192, looked like free speed: more dishes per order, the same logic that made Part&nbsp;4 work. A fifteen-minute probe on the wide net measured only +1 to +4&thinsp;% more positions per second. The regime had flipped. With a wide network the cooks, not the order window, are the bottleneck, and a fuller kitchen cannot cook faster when every cook is already busy. That probe cancelled a planned nine-hour run, which makes it the best-value experiment on this page.</p>
+</section>
+
+<!-- ============================================================ PART 7 -->
+<section>
+  <p class="eyebrow">Part 7 &middot; The survival</p>
+  <h2>Three faults, one lost run, and a lesson about saving your work</h2>
+
+  <p>Two-hour experiments forgive almost anything. The long runs of the last two levers did not: six to nineteen hours each, overnight, unattended. And on the third night the hardware started fighting back. Three times, the GPU driver reported an <em>illegal memory access</em> and the process died on the spot. That error is the graphics card&rsquo;s equivalent of a cook reaching for a shelf that isn&rsquo;t there. All three faults happened in the same place. Not in self-play, which ran the pre-recorded order sequences of Part&nbsp;4 for some sixty hours without incident. They struck in the periodic <em>evaluation</em> that a run performs on itself every few laps, which replays its own, differently shaped recordings at small batch sizes. Why that surface and not the other is still unproven. It could be a race inside the driver, or hardware that is marginal under exactly this load, and the response had to cover both.</p>
+  <p>The first suspect was churn. Each evaluation built four recording-and-replaying players from scratch and threw them away afterwards, and the third night was the first with four rather than three. Building them once per run and reusing them removed the churn entirely. As a bonus, it made every evaluation after the first about twice as fast. Then the third fault arrived anyway, on a run using the rebuilt code. That exonerated churn and left the evaluation recordings themselves as the suspect. The final, ten-block run therefore ran its evaluations without recordings at all. Zero faults in nineteen and a half hours, at a measured cost: evaluations six times slower, about three hours added to the run. In hindsight that was probably the worse trade, because the recovery machinery described next had already made a fault cost at most ten laps.</p>
+  <p>That machinery existed because the first two faults, forty minutes apart, had been expensive. They killed both runs queued that night, and one of them, the eight-block run, 79 laps in, could not be resumed. The reason is worth a picture. The network is small and was saved after every lap. The replay buffer of recent games is large and was saved only every tenth lap. Both went to the <em>same file</em>. So laps 71 through 78 had each overwritten the last save that contained any games, and the newest file on disk held a network with nothing to train on. Three hours of GPU time, gone, to a decision about file names.</p>
+
+  <figure>
+    <svg viewBox="0 0 760 292" role="img" aria-label="Two checkpoint schemes over laps 70 to 79, with a fault at lap 79. Before: one file, saved every lap with the buffer included only at lap 70; each later save overwrites the last, so at the fault the newest file has a network but no games and the run cannot resume, losing 79 laps. After: two files, a light one every lap and a full one with the buffer every tenth lap that is not written again until lap 80; after the fault the run resumes from the full file at lap 70, losing at most 10 laps.">
+      <defs>
+        <marker id="arwS" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" class="fMut"/>
+        </marker>
+      </defs>
+      <g class="tLbl" text-anchor="middle">
+        <text x="218" y="28">lap 70</text><text x="268" y="28">71</text><text x="318" y="28">72</text>
+        <text x="368" y="28">73</text><text x="418" y="28">74</text><text x="468" y="28">75</text>
+        <text x="518" y="28">76</text><text x="568" y="28">77</text><text x="618" y="28">78</text>
+        <text x="668" y="28">79</text>
+      </g>
+
+      <text x="20" y="72" class="tTitle">before: one file</text>
+      <rect x="200" y="54" width="36" height="26" rx="3" class="fX"/>
+      <g class="fSoft sLine">
+        <rect x="250" y="54" width="36" height="26" rx="3"/><rect x="300" y="54" width="36" height="26" rx="3"/>
+        <rect x="350" y="54" width="36" height="26" rx="3"/><rect x="400" y="54" width="36" height="26" rx="3"/>
+        <rect x="450" y="54" width="36" height="26" rx="3"/><rect x="500" y="54" width="36" height="26" rx="3"/>
+        <rect x="550" y="54" width="36" height="26" rx="3"/><rect x="600" y="54" width="36" height="26" rx="3"/>
+      </g>
+      <g class="sO" stroke-width="2.4">
+        <line x1="660" y1="59" x2="676" y2="75"/><line x1="676" y1="59" x2="660" y2="75"/>
+      </g>
+      <text x="218" y="100" text-anchor="middle" class="tLblAcc">net + buffer</text>
+      <text x="300" y="100" class="tLbl">net only &mdash; each save overwrites the last</text>
+      <text x="668" y="100" text-anchor="middle" class="tLblO">fault</text>
+      <text x="200" y="122" class="tNote">newest file: a network with no games to train on &rarr; cannot resume &rarr; 79 laps lost</text>
+
+      <text x="20" y="156" class="tTitle">after: two files</text>
+      <text x="20" y="176" class="tLblInk">latest.pt</text>
+      <text x="20" y="190" class="tLbl">net only, every lap</text>
+      <g class="fSoft sLine">
+        <rect x="200" y="164" width="36" height="26" rx="3"/><rect x="250" y="164" width="36" height="26" rx="3"/>
+        <rect x="300" y="164" width="36" height="26" rx="3"/><rect x="350" y="164" width="36" height="26" rx="3"/>
+        <rect x="400" y="164" width="36" height="26" rx="3"/><rect x="450" y="164" width="36" height="26" rx="3"/>
+        <rect x="500" y="164" width="36" height="26" rx="3"/><rect x="550" y="164" width="36" height="26" rx="3"/>
+        <rect x="600" y="164" width="36" height="26" rx="3"/>
+      </g>
+      <g class="sO" stroke-width="2.4">
+        <line x1="660" y1="169" x2="676" y2="185"/><line x1="676" y1="169" x2="660" y2="185"/>
+      </g>
+      <text x="20" y="218" class="tLblInk">latest_full.pt</text>
+      <text x="20" y="232" class="tLbl">+ buffer, every 10th lap</text>
+      <rect x="200" y="206" width="36" height="26" rx="3" class="fX"/>
+      <text x="250" y="224" class="tNote">not written again until lap 80 &mdash; so it survives</text>
+      <path d="M 668 194 C 668 258, 218 270, 218 240" fill="none" class="sMut" stroke-width="1.2" marker-end="url(#arwS)"/>
+      <text x="450" y="282" text-anchor="middle" class="tLblAcc">resume from here: at most 10 laps lost</text>
+    </svg>
+    <figcaption>The checkpoint bug, and the fix. Before: one file, so every light save between buffer saves destroyed the only copy that could restart the run &mdash; nine laps out of ten, the run was unresumable, and it took one fault to find out. After: the light save and the full save go to different files (each written under a temporary name and renamed, so a crash mid-write cannot corrupt either), and a restart prefers the full one.</figcaption>
+  </figure>
+
+  <p>With the two files in place, a wrapper script simply restarts a dead run in a fresh process, up to six times. The third fault, during the 300-lap run, was handled that way while nobody was watching: the run resumed from lap 99, lost at most ten laps, and finished. The same week added the other unglamorous machinery. Every run&rsquo;s configuration is now recorded together with the exact code version that produced it, and a configuration refuses to be overwritten. That took thirty minutes on day three and should have existed on day one. The whole survival chapter is a case for doing the boring part first.</p>
+</section>
+
+<!-- ============================================================ PART 8 -->
+<section>
+  <p class="eyebrow">Part 8 &middot; The game itself</p>
+  <h2>What the agent believes about Ultimate Tic-Tac-Toe</h2>
+
+  <p>This was the point of the whole exercise: turn the trained agent around and point it at the questions from Part&nbsp;1. Most of the findings below survived every change of network, search depth, random start and, now, training length. Each one gets the question every finding deserves: <em>why should that be?</em> One finding did not survive. It gets its own section at the end of this part, because how it fell is the most instructive thing here.</p>
+
+  <figure>
+    <svg viewBox="0 0 620 280" role="img" aria-label="An 81-cell board with the centre cell of the centre board highlighted as the best first move everywhere, the centre cells of the four edge boards hatched as the worst opening class, and three further cells outlined as the rest of the stable top four.">
+      <defs>
+        <g id="lbM">
+          <rect x="0" y="0" width="66" height="66" rx="3"/>
+          <line x1="22" y1="0" x2="22" y2="66"/><line x1="44" y1="0" x2="44" y2="66"/>
+          <line x1="0" y1="22" x2="66" y2="22"/><line x1="0" y1="44" x2="66" y2="44"/>
+        </g>
+        <pattern id="hM" width="7" height="7" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+          <line x1="0" y1="0" x2="0" y2="7" class="sMut" stroke-width="1" opacity="0.5"/>
+        </pattern>
+      </defs>
+      <g class="grid">
+        <use href="#lbM" x="30" y="26"/><use href="#lbM" x="106" y="26"/><use href="#lbM" x="182" y="26"/>
+        <use href="#lbM" x="30" y="102"/><use href="#lbM" x="106" y="102"/><use href="#lbM" x="182" y="102"/>
+        <use href="#lbM" x="30" y="178"/><use href="#lbM" x="106" y="178"/><use href="#lbM" x="182" y="178"/>
+      </g>
+      <rect x="128" y="124" width="22" height="22" class="fX"/>
+      <rect x="128" y="48" width="22" height="22" fill="url(#hM)"/>
+      <rect x="52" y="124" width="22" height="22" fill="url(#hM)"/>
+      <rect x="204" y="124" width="22" height="22" fill="url(#hM)"/>
+      <rect x="128" y="200" width="22" height="22" fill="url(#hM)"/>
+      <g fill="none" class="sX" stroke-width="1.5" stroke-dasharray="3 3">
+        <rect x="30" y="26" width="22" height="22"/>
+        <rect x="106" y="102" width="22" height="22"/>
+        <rect x="128" y="102" width="22" height="22"/>
+      </g>
+      <rect x="304" y="50" width="14" height="14" class="fX"/>
+      <g class="tLblInk">
+        <text x="328" y="62">centre of the centre: best first move</text>
+        <text x="328" y="79">in every net &times; search depth &times; seed</text>
+      </g>
+      <rect x="304" y="136" width="14" height="14" fill="url(#hM)" class="sLine" stroke-width="1"/>
+      <g class="tLbl">
+        <text x="328" y="148">centre of an edge board &mdash; last everywhere,</text>
+        <text x="328" y="165">the only opening that loses ground</text>
+      </g>
+      <rect x="304" y="200" width="14" height="14" fill="none" class="sX" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <g class="tLbl">
+        <text x="328" y="212">the rest of the stable top four:</text>
+        <text x="328" y="229">ranks 1&ndash;5 in every configuration tested</text>
+      </g>
+    </svg>
+    <figcaption>The opening atlas, compressed. The <em>ordering</em> of first moves is a property of the game: it came out identical across every network, search budget and random start, even though the exact evaluations drift between agents. Report the ordering; distrust the magnitudes.</figcaption>
+  </figure>
+
+  <ul class="beliefs">
+    <li><span class="b-head">The folk wisdom is right: centre of the centre is the best first move.</span> <span class="b-body">It came first in every single configuration tested.</span>
+      <span class="b-why"><span class="q">Why should that be?</span> Any centre <em>cell</em> sends your opponent into the centre <em>board</em>. The centre board is the one that sits on the most lines of boards: four, where a corner board touches three and an edge board only two. So every centre cell hands the opponent the prize board. Centre-of-centre is the only version of that gift where you took the prize board&rsquo;s best cell for yourself first. Its evil twin explains the worst opening too. The centre of an <em>edge</em> board buys the best cell of the least connected board, and still hands your opponent the centre.</span></li>
+    <li><span class="b-head">The openings are nearly flat.</span> <span class="b-body">After any decent first move, the top replies are almost equally good. The gap between them, on the network&rsquo;s &minus;1 to +1 scale where +1 is a certain win, is 0.02 or less. You cannot win this game in the opening. You can only lose it slightly.</span>
+      <span class="b-why"><span class="q">Why should that be?</span> The send rule keeps handing the initiative back. Every strong move ships a choice to your opponent, so early advantages cannot be locked in, only banked in tiny increments. <em>(That part is intuition. The &le;&thinsp;0.02 is measurement.)</em></span></li>
+    <li><span class="b-head">Games are decided late &mdash; a marathon with a sprint finish.</span> <span class="b-body">On games the agent had never seen, nothing is settled at move 30. The typical game is only called correctly from move 38, which is 78&thinsp;% of the way through. And the network&rsquo;s glance-evaluation stays near the base rate until about move 28 (the timeline below shows this).</span>
+      <span class="b-why"><span class="q">Why should that be?</span> The decisive currency of this game only becomes spendable at the end. Boards close in cascades, free moves and drawn boards crystallise, and the count comes into view. Until then almost everything is still negotiable.</span></li>
+    <li><span class="b-head">A free move is worth +0.16 &plusmn; 0.03.</span> <span class="b-body">A free move is a turn where the send rule does not apply and you may play anywhere. Its value was measured on the same &minus;1 to +1 scale, by comparing thousands of real positions that are alike in every controllable respect except the free move. It is worth most late in the game, when ahead.</span>
+      <span class="b-why"><span class="q">Why should that be?</span> A free move is the one moment you pick the battlefield instead of your opponent. But the measurement smuggles in a lovely statistics lesson. The <em>naive</em> correlation says free moves are bad, because they cluster in late positions that are already lost, the way hospital stays correlate with being ill. Only comparing like with like flips the sign and gives the honest +0.16. An earlier, cruder probe said +0.27; it was answering a different question.</span></li>
+    <li><span class="b-head">The &ldquo;board hierarchy&rdquo; is line-counting in disguise.</span> <span class="b-body">Centre board &gt; corner board &gt; edge board looks like deep positional truth. Control for the actual threats on the board of boards, and owning any class of board is worth about zero by itself. What carries value is each live line of boards: about &plusmn;0.17 per line, on the same scale.</span>
+      <span class="b-why"><span class="q">Why should that be?</span> A board has no intrinsic value. Only the lines through it can win the game. Centre&thinsp;&gt;&thinsp;corner&thinsp;&gt;&thinsp;edge is just 4&thinsp;&gt;&thinsp;3&thinsp;&gt;&thinsp;2 lines wearing a mystical costume, the same reason the centre square matters in ordinary tic-tac-toe.</span></li>
+    <li><span class="b-head">X&rsquo;s advantage is real &mdash; and stronger play means more draws, settled by counting.</span> <span class="b-body">X, who moves first, takes 57&ndash;60&thinsp;% of games between equal agents. Raise both sides&rsquo; search budget and draws double, to 20&thinsp;%. About a third of strong games are decided by the board count rather than by any line of boards. The two strongest nets, playing each other at the standard budget, drew 19&thinsp;% of their games, where the same nets drew 12&ndash;16&thinsp;% against weaker opponents. The strongest agents increasingly <em>prove</em> draws.</span>
+      <span class="b-why"><span class="q">Why should that be?</span> Strong defence makes three boards <em>in a row</em> very hard to force. So the second scoring system inherits the verdict, like a knockout tournament where most finals go to penalties. The tiebreak rule is not a footnote to this game. At high level it <em>is</em> the game, a third of the time.</span></li>
+  </ul>
+
+  <figure>
+    <svg viewBox="0 0 760 152" role="img" aria-label="A timeline of game moves from 0 to 50. The network's evaluation sits near the base rate until about move 28; 27 percent of games are settled by move 32; the median game settles at move 38, which is 78 percent of its length; 69 percent by move 40.">
+      <rect x="50" y="88" width="375" height="24" class="fSoft"/>
+      <text x="237" y="104" text-anchor="middle" class="tLbl">glance-evaluation stuck at the base rate</text>
+      <line x1="50" y1="100" x2="720" y2="100" class="sMut" stroke-width="1.2"/>
+      <g class="sMut" stroke-width="1.2">
+        <line x1="478" y1="92" x2="478" y2="108"/>
+        <line x1="586" y1="92" x2="586" y2="108"/>
+      </g>
+      <circle cx="559" cy="100" r="6" class="fX"/>
+      <line x1="559" y1="92" x2="559" y2="56" class="sX" stroke-width="1.2"/>
+      <text x="566" y="48" text-anchor="end" class="tLblAcc">median game settled: move 38 &mdash; 78&thinsp;% of its length</text>
+      <line x1="478" y1="92" x2="450" y2="72" class="sLine"/>
+      <text x="446" y="66" text-anchor="end" class="tLbl">27&thinsp;% by move 32</text>
+      <text x="596" y="128" class="tLbl">69&thinsp;% by move 40</text>
+      <g class="tLbl" text-anchor="middle">
+        <text x="50" y="146">0</text><text x="184" y="146">10</text><text x="318" y="146">20</text>
+        <text x="452" y="146">30</text><text x="586" y="146">40</text><text x="720" y="146">50 moves</text>
+      </g>
+    </svg>
+    <figcaption>When are games decided? &ldquo;Settled&rdquo; is a <em>prediction test</em> on games the agent had not seen in training: the earliest move from which the searching agent&rsquo;s verdict stays correct all the way to the end. Nothing is settled at move 30. Most games are by move 40.</figcaption>
+  </figure>
+
+  <h3>The belief that didn&rsquo;t survive</h3>
+  <p>The first version of this page carried one more entry in the list above. It is reproduced here exactly, because the point of what follows is how convincing it was.</p>
+  <ul class="beliefs revised">
+    <li><span class="b-tag">as this page stated it on 2026-08-30</span>
+      <span class="b-head">The intuition is draw-blind &mdash; and the search covers for it.</span> <span class="b-body">Shown endgames that are provably drawn, the network&rsquo;s value output recognises only about 55&thinsp;% of them &mdash; at every network size tried. Yet in actual play with 256 simulations, the agent handles solved endgames 99.8&thinsp;% perfectly.</span>
+      <span class="b-why"><span class="q">Why should that be?</span> A draw is a proof, not a pattern: &ldquo;neither side can achieve anything from here&rdquo; means checking every idea and watching each one fail &mdash; which is precisely what lookahead does and a glance cannot. The division of labour between intuition and search, visible in a single statistic.</span></li>
+  </ul>
+  <p>It is a good story. It has a mechanism. It matched a statistic that had held across six different recipes. It flattered the architecture of the whole project, and both outside reviewers accepted it. It was wrong in the part that mattered. The clue was hiding in the phrase &ldquo;at every network size tried&rdquo;: every size had been tried for the same 150 laps. Then lever four ran the eight-block recipe for 300 laps, with nothing else changed &mdash; same network, same labels, same loss. The value output&rsquo;s draw recognition went from 55.6&thinsp;% to 67.5&thinsp;%. Two more blocks on the same schedule took it to 68.7&thinsp;%.</p>
+
+  <figure>
+    <svg viewBox="0 0 800 300" role="img" aria-label="Bar chart of exact-draw recognition by the raw value output across eight networks. Six recipes trained for 150 laps score between 49.9 and 55.9 percent; the two 300-lap nets, eight and ten blocks, score 67.5 and 68.7 percent. A dashed line near 55 percent marks the wall this page previously believed in; the only change between the two groups is 150 versus 300 laps.">
+      <g class="sLine" opacity="0.55">
+        <line x1="90" y1="183.75" x2="606" y2="183.75"/>
+        <line x1="90" y1="127.5" x2="606" y2="127.5"/>
+        <line x1="90" y1="71.25" x2="606" y2="71.25"/>
+      </g>
+      <g class="tLbl" text-anchor="end">
+        <text x="86" y="187.75">25&thinsp;%</text><text x="86" y="131.5">50&thinsp;%</text><text x="86" y="75.25">75&thinsp;%</text>
+      </g>
+      <line x1="90" y1="116.25" x2="606" y2="116.25" class="sMut" stroke-width="1.2" stroke-dasharray="5 4"/>
+      <text x="614" y="113" class="tLbl">the wall this page</text>
+      <text x="614" y="128" class="tLbl">believed in: ~55&thinsp;%</text>
+
+      <g class="fMut" opacity="0.5">
+        <rect x="96" y="127.7" width="44" height="112.3"/>
+        <rect x="162" y="114.2" width="44" height="125.8"/>
+        <rect x="228" y="125.5" width="44" height="114.5"/>
+        <rect x="294" y="117.6" width="44" height="122.4"/>
+        <rect x="360" y="118.5" width="44" height="121.5"/>
+        <rect x="426" y="114.9" width="44" height="125.1"/>
+      </g>
+      <g class="fX">
+        <rect x="492" y="88.1" width="44" height="151.9"/>
+        <rect x="558" y="85.4" width="44" height="154.6"/>
+      </g>
+      <g class="tLblInk" text-anchor="middle">
+        <text x="118" y="104">49.9</text><text x="184" y="104">55.9</text><text x="250" y="104">50.9</text>
+        <text x="316" y="104">54.4</text><text x="382" y="104">54.0</text><text x="448" y="104">55.6</text>
+        <text x="514" y="81.1">67.5</text><text x="580" y="78.4">68.7</text>
+      </g>
+      <line x1="90" y1="240" x2="606" y2="240" class="sMut" stroke-width="1.2"/>
+
+      <line x1="481" y1="72" x2="481" y2="240" class="sLine" stroke-dasharray="3 3"/>
+      <text x="481" y="60" text-anchor="middle" class="tLblAcc">the only change: 150 &rarr; 300 laps</text>
+
+      <g fill="none" class="sMut" stroke-width="1.2">
+        <path d="M 96 250 v 6 H 470 v -6"/>
+        <path d="M 492 250 v 6 H 602 v -6"/>
+      </g>
+      <g class="tLbl" text-anchor="middle">
+        <text x="283" y="272">six recipes, 150 laps each</text>
+        <text x="283" y="288">50&ndash;56&thinsp;%</text>
+        <text x="547" y="272">300 laps</text>
+        <text x="547" y="288">8 blocks &middot; 10 blocks</text>
+      </g>
+    </svg>
+    <figcaption>How often the raw value output calls a drawn position a draw, on the 1,000 provably drawn positions of the endgame set. Left to right: the c_scale run, the wider net without and then with c_scale, the widest net, its harder-teacher variant from the nulls table, and the eight-block net. Those six recipes were all trained for 150 laps, and all sit in a band that looked like a wall. Then the same eight-block recipe at 300 laps, and ten blocks at 300. No architecture, label or loss was touched between the sixth bar and the seventh.</figcaption>
+  </figure>
+
+  <p><em>Why should that be?</em> This time the answer is offered as a guess, clearly labelled. A draw is the subtlest label a position can carry. A win and a loss each have a signature the network can pick up early: a line about to close, a count that cannot be caught. &ldquo;Nothing works for either side&rdquo; has no signature at all. It can only be learned from many drawn examples that look, on the surface, like everything else. That makes it the slowest thing in the game to learn, not an impossible one. This story fits the evidence better than the old one did. It is still a story.</p>
+  <p>What the withdrawal teaches is more certain than any replacement, and it is the reason this section exists:</p>
+  <ul class="lessons">
+    <li><strong>A why-story that fits is not evidence.</strong> The draw-is-a-proof story explained a real number with a real mechanism, and was accepted by everyone who read it. Nothing about a story&rsquo;s elegance tells you whether the number it explains would move under a change nobody had tried.</li>
+    <li><strong>Never diagnose what a network cannot learn from runs that were never trained to the end.</strong> &ldquo;At every size tried&rdquo; was true and meaningless. The thing that stayed constant was the schedule, not the networks. The honest phrasing of any such result is <em>under this training budget</em>.</li>
+    <li><strong>&ldquo;Search covers for intuition&rdquo; is still real &mdash; but smaller than the page claimed.</strong> The best net&rsquo;s raw shortlist picks the perfect endgame move 96.7&thinsp;% of the time. With 256 simulations that becomes 99.9&thinsp;%. The average <em>regret</em>, meaning the value given away compared with the perfect move on the &minus;1 to +1 scale, is 0.001. The search still closes a gap. It is three points wide, not the chasm the old entry implied.</li>
+    <li><strong>The earlier &ldquo;capacity&rdquo; conclusions were really conclusions about training.</strong> That is why Part&nbsp;6 now says the small net&rsquo;s four-run plateau held <em>under that schedule</em>, and why Part&nbsp;9 has to ask one of its questions a second time.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ PART 9 -->
+<section>
+  <p class="eyebrow">Part 9 &middot; The standing</p>
+  <h2>&ldquo;Strongest&rdquo; is a claim about a budget</h2>
+
+  <p>So the deepest network on the longest schedule is the best agent. It stands +242 Elo over the reference, and its raw shortlist alone picks the perfect move in 96.7&thinsp;% of solved endgames. Time to declare victory? Two independent outside reviews of the project forced a sharper question, back on the second day when the best agent was only +77. (One review filed sixteen findings; each was answered in writing.) The question: <em>best under what conditions?</em> Every ladder comparison gives each agent 64 simulations per move. But the wide network of that day cost about four times the arithmetic <em>per</em> simulation of the small reference net, because a block&rsquo;s cost grows with the square of its width and 128&sup2; is four times 64&sup2;. So here is the fair fight: give the small net four times the simulations, so that both sides spend the same total arithmetic per move. Who wins?</p>
+
+  <figure>
+    <svg viewBox="0 0 760 208" role="img" aria-label="Two boxes at matched total compute: the big net with 64 simulations loses to the small net with 256 simulations by 101 Elo.">
+      <rect x="40" y="44" width="280" height="88" rx="8" fill="none" class="sLine" stroke-width="1.2"/>
+      <text x="180" y="72" text-anchor="middle" class="tLblInk">big net &middot; 64 simulations</text>
+      <text x="180" y="92" text-anchor="middle" class="tLbl">richer intuition, shallower lookahead</text>
+      <text x="180" y="115" text-anchor="middle" class="tLbl">scores 35.9&thinsp;% [33.2, 38.5]</text>
+      <text x="380" y="94" text-anchor="middle" class="tNote" font-style="italic">vs</text>
+      <rect x="440" y="44" width="280" height="88" rx="8" fill="none" class="sX" stroke-width="1.8"/>
+      <text x="580" y="72" text-anchor="middle" class="tLblAcc">small net &middot; 256 simulations</text>
+      <text x="580" y="92" text-anchor="middle" class="tLbl">lighter intuition, 4&times; the lookahead</text>
+      <text x="580" y="115" text-anchor="middle" class="tLblInk">wins &mdash; +101 Elo</text>
+      <path d="M 40 148 v 8 H 720 v -8" fill="none" class="sMut" stroke-width="1.2"/>
+      <text x="380" y="180" text-anchor="middle" class="tLbl">same total arithmetic per move &mdash; 4&times; simulations offsets 4&times; net cost</text>
+    </svg>
+    <figcaption>At matched compute, on the second day, the small net that thinks longer won decisively. This is the dashed line from the ladder, cashed in. Width was still the right <em>training</em> lever: the small net had plateaued across four runs, <em>under that schedule</em>, as Part&nbsp;8 taught us to add. But &ldquo;strongest agent&rdquo; is meaningless without quoting the search budget. Anything deployed under a real time limit should be tuned for that limit, not for the ladder.</figcaption>
+  </figure>
+
+  <p>The rest of the honest fine print, straight from the review and still true:</p>
+  <ul class="lessons">
+    <li><strong>Only the ends of the width trend are settled.</strong> Smallest to widest is worth +5.1 points, with the interval running from +1.2 to +9.1. The individual steps in between sit inside the noise band.</li>
+    <li><strong>None of the wide, deep or long runs has been repeated from a second random start.</strong> On the small net, repeating a recipe from a different random start moves the result by up to &plusmn;2.5 points. The +127 and +35 steps dwarf that band, so the ladder&rsquo;s <em>shape</em> is safe. Its small steps are not individually settled.</li>
+    <li><strong>The endgame set is no longer a clean test.</strong> It has been consulted so often while the recipes were being tuned that it now counts as a development set, not a held-out one. Confirmation is owed on a fresh one.</li>
+    <li><strong>A suspected bias in the test suite was hunted down and bounded.</strong> The worry was that the suite&rsquo;s board orientations might favour one side. The effect was measured at 0.6 points or less: a real concern, of negligible size.</li>
+  </ul>
+
+  <h3>The fair fight, asked again</h3>
+  <p>Two days and two levers later, the question deserved a second asking. It produced the last measurements on this page: three ten-minute matches run on the morning of the pause. Per simulation, the ten-block net costs about 6.7 times the small reference net. The cost grows with the number of blocks and with the <em>square</em> of the width, since each of 128 features is computed from all 128 inputs of the previous block, so the ratio is 10&thinsp;&times;&thinsp;128&sup2; against 6&thinsp;&times;&thinsp;64&sup2;. The fair fight is therefore the small net at 427 simulations against the deep net at 64. This time the deep net wins. It scores <strong>56.0&thinsp;%</strong>, interval 53.2 to 58.6&thinsp;%, which is <strong>+42 Elo</strong>, interval +23 to +61. The second day&rsquo;s story, that the small net which thinks longer beats the big one, was true of six-block nets at 150 laps. It does not survive depth and duration.</p>
+  <p><em>Why should that be?</em> Search amplifies what the network&rsquo;s glance provides. It cannot manufacture what the glance lacks. Four hundred simulations is a long look, but a bounded one, and a search that trusts wrong verdicts at the ends of its lines multiplies them rather than fixing them. The small net, remember, misjudged nearly half of all drawn endgames. Give the search a net that knows the endgame, and 64 simulations goes further than 427 without. That is a mechanism that fits. After Part&nbsp;8, hold it as loosely as the last one.</p>
+  <p>The second match is the other half of the lesson, and it is a null. At equal compute, the last rung of the ladder disappears. Ten blocks cost 1.25 times eight, so the match is the ten-block net at 64 simulations against the eight-block 300-lap net at 80. The ten-block net scores <strong>48.4&thinsp;%</strong>, interval 45.7 to 51.1&thinsp;%, which is &minus;11 Elo, interval &minus;30 to +7: inside the noise band. The +35 that depth bought at equal simulations is exactly what its extra cost per simulation buys back as search. Duration is different. Going from 150 to 300 laps costs nothing extra per move, and was worth +127. So &ldquo;neither depth nor duration is exhausted&rdquo; needs its own qualifier. On the ladder&rsquo;s instrument, both still pay. At a fixed thinking budget, only duration has shown that it does.</p>
+
+  <figure>
+    <svg viewBox="0 0 820 284" role="img" aria-label="Three equal-compute matches on one Elo axis, each with a 95 percent whisker, the bigger net's Elo against the smaller one. Day 2: wide128_c1 at 64 simulations against v2b at 256, minus 101, the small net wins. Day 4: deep10_c1_300 at 64 against v2b at 427, plus 42, the deep net wins. Day 4: deep10_c1_300 at 64 against deep8_c1_300 at 80, minus 11, inside the plus or minus 3 point noise band around zero.">
+      <rect x="518" y="40" width="84" height="182" class="fSoft"/>
+      <text x="560" y="34" text-anchor="middle" class="tLbl">&plusmn;3-point noise band</text>
+      <line x1="560" y1="40" x2="560" y2="222" class="sMut" stroke-width="1.2" stroke-dasharray="4 3"/>
+      <line x1="280" y1="222" x2="740" y2="222" class="sMut" stroke-width="1.2"/>
+      <g class="tLbl" text-anchor="middle">
+        <text x="360" y="240">&minus;100</text><text x="460" y="240">&minus;50</text>
+        <text x="560" y="240">0</text><text x="660" y="240">+50 Elo</text>
+      </g>
+
+      <g class="tLblInk">
+        <text x="20" y="66">day 2 &middot; wide128_c1 @64 vs v2b @256</text>
+        <text x="20" y="126">day 4 &middot; deep10_c1_300 @64 vs v2b @427</text>
+        <text x="20" y="186">day 4 &middot; deep10_c1_300 @64 vs deep8_c1_300 @80</text>
+      </g>
+      <g class="tLbl">
+        <text x="20" y="82">4&times; the net cost, 4&times; the simulations</text>
+        <text x="20" y="142">6.7&times; the net cost, 6.7&times; the simulations</text>
+        <text x="20" y="202">1.25&times; the net cost, 1.25&times; the simulations</text>
+      </g>
+
+      <g stroke-width="1.6">
+        <line x1="318" y1="70" x2="398" y2="70" class="sMut"/>
+        <line x1="606" y1="130" x2="682" y2="130" class="sX"/>
+        <line x1="500" y1="190" x2="574" y2="190" class="sMut"/>
+      </g>
+      <circle cx="358" cy="70" r="5" class="fMut"/>
+      <circle cx="644" cy="130" r="5" class="fX"/>
+      <circle cx="538" cy="190" r="5" class="fMut"/>
+      <g class="tLblInk">
+        <text x="406" y="74">&minus;101 [&minus;121, &minus;81]</text>
+        <text x="690" y="134">+42 [+23, +61]</text>
+        <text x="612" y="194">&minus;11 [&minus;30, +7]</text>
+      </g>
+      <text x="510" y="260" text-anchor="middle" class="tNote">Elo of the bigger net against the smaller one, at equal arithmetic per move</text>
+      <text x="510" y="277" text-anchor="middle" class="tNote">left of zero: the smaller net that thinks longer wins</text>
+    </svg>
+    <figcaption>The fair fight, three times. On the second day the small net with four times the search won by a wide margin. On the fourth, the deep and long-trained net wins even when the small net gets 6.7 times the search &mdash; and the ladder&rsquo;s last rung, ten blocks over eight, vanishes into the noise once its extra cost is charged. All three are paired-suite matches on the same 516 openings.</figcaption>
+  </figure>
+
+  <h3>Spending the search where the game is decided</h3>
+  <p>One more play-time idea came from the timeline in Part&nbsp;8. If nothing is settled before move 30 and the typical game is decided at move 38, why give every move the same number of simulations? The schedule tested gives the first 24 moves 128 simulations each, and every move after that 384. Over a typical fifty-move game that is about the same total as a flat 256 per move. On the small reference net the schedule was worth +50 Elo. Part of that, it turned out, was simply extra simulations in games that ran long. On the eight-block 300-lap net it scored <strong>53.7&thinsp;%</strong>, interval 51.2 to 56.2&thinsp;%, which is <strong>+26 Elo</strong>, interval +8 to +43: a real, modest gain at no extra cost. On the best net, in the third match of the pause morning, it scored 51.4&thinsp;%, interval 48.9 to 53.7&thinsp;%, which is +10 Elo, interval &minus;7 to +26. That is below the rule. The gain shrinks as the net grows stronger, and on the strongest one it is not a claim, so the agent plays a flat 256. <em>Why should that be?</em> A guess: at 256 simulations the best net already plays solved endgames 99.9&thinsp;% perfectly, so the extra late simulations have little left to buy, while the thinner early search still costs something.</p>
+
+  <figure>
+    <svg viewBox="0 0 760 262" role="img" aria-label="Simulations per move across a fifty-move game. A dashed flat line at 256 for every move; against it a phased schedule of 128 simulations for the first 24 moves then 384 for the rest, with the same total. A vertical mark shows the median game settled at move 38. The phased schedule beat flat by 50 Elo on the small reference net, 26 on the eight-block 300-lap net, and 10 on the best net, the last inside the noise.">
+      <rect x="60" y="150" width="307.2" height="40" class="fXt"/>
+      <rect x="367.2" y="70" width="332.8" height="120" class="fXt"/>
+      <polyline points="60,150 367.2,150 367.2,70 700,70" fill="none" class="sX" stroke-width="2"/>
+      <line x1="60" y1="110" x2="700" y2="110" class="sMut" stroke-width="1.2" stroke-dasharray="5 4"/>
+      <text x="66" y="104" class="tLbl">flat: 256 every move</text>
+      <text x="214" y="172" text-anchor="middle" class="tLblAcc">128 simulations</text>
+      <text x="534" y="130" text-anchor="middle" class="tLblAcc">384 simulations</text>
+      <text x="367" y="60" text-anchor="middle" class="tLbl">move 24: switch</text>
+      <line x1="546.4" y1="50" x2="546.4" y2="190" class="sLine" stroke-dasharray="3 3"/>
+      <text x="546" y="44" text-anchor="middle" class="tLbl">median game settled (move 38)</text>
+      <line x1="60" y1="190" x2="700" y2="190" class="sMut" stroke-width="1.2"/>
+      <g class="tLbl" text-anchor="middle">
+        <text x="60" y="210">0</text><text x="188" y="210">10</text><text x="316" y="210">20</text>
+        <text x="444" y="210">30</text><text x="572" y="210">40</text><text x="700" y="210">50 moves</text>
+      </g>
+      <g class="tLbl" text-anchor="end">
+        <text x="52" y="194">0</text><text x="52" y="154">128</text><text x="52" y="114">256</text><text x="52" y="74">384</text>
+      </g>
+      <text x="380" y="236" text-anchor="middle" class="tNote">simulations per move &middot; roughly the same total per ~50-move game</text>
+      <text x="380" y="254" text-anchor="middle" class="tNote">phased minus flat: +50 on the small reference net &middot; +26 [+8, +43] on the 8-block 300-lap net &middot; +10 [&minus;7, +26] on the best net</text>
+    </svg>
+    <figcaption>Think less where nothing is decided, more where everything is. The idea is sound, and the measurements are honest about its size: a clear gain on weaker nets, shrinking to inside the noise band on the strongest. The page reports the trend rather than the best of the three numbers.</figcaption>
+  </figure>
+
+  <p>And then the loop stopped turning &mdash; by decision, not by accident. Four days: two spent building and calibrating, two scaling under review. Fifteen completed training runs. A ladder whose last four rungs climbed from +77 to +242 along two directions, depth and duration, and neither has been shown to be exhausted on the ladder&rsquo;s own terms. The obvious next experiments write themselves: twelve blocks, or 600 laps. Each is a committed GPU-day, which is exactly why the project paused at this fork instead of sleepwalking through it.</p>
+  <p>One branch keeps climbing. The morning&rsquo;s equal-compute matches say that if it does, the run to buy is the longer one, not the deeper one. The other branch turns the agent around: redraw the opening atlas with a net 240 points stronger than the one that drew it; re-run every belief in Part&nbsp;8 on the strongest net, with a written note beforehand of what &ldquo;moved&rdquo; would look like; and find out, from the checkpoints already on disk, what the value output learned about draws between lap 150 and lap 300. The plan written at the pause leans toward the second branch, on the grounds that Part&nbsp;8&rsquo;s withdrawn belief was exactly what building higher on unverified beliefs looks like. This page should not pretend the answer is settled. Whichever comes next will be judged the way everything here was: on the frozen paired suite, against the anchors, believing nothing below +3.</p>
+  <p>That discipline is the actual result of the project. The strong player is nice, and will be replaced the next time a GPU-day is spent. Knowing <em>which</em> beliefs about an unsolved game deserve belief, exactly how much, and how one of them was withdrawn the day the evidence moved: that is the part that generalises to everything else you will ever measure.</p>
+</section>
+
+<hr class="rule">
+
+<footer>
+  <p>Every number on this page is from the project&rsquo;s own records as of 2026-09-02 &mdash; PLAN2&ndash;PLAN5, RETROSPECTIVE, NOTES-v2, the knowledge base (rules &amp; game theory; the AlphaZero literature), and the run logs they cite (<span class="mono">runs/*/analysis.out</span>, <span class="mono">runs/plan4_retune.out</span>, <span class="mono">runs/plan5_A8.out</span>). Elo figures are relative to the <span class="mono">v2b</span> reference on the frozen 516-opening paired suite at 64 simulations per move unless another budget is quoted. AlphaGo&nbsp;/ AlphaGo Zero&nbsp;/ AlphaZero figures are from the published papers as summarised in the knowledge base; the whole-game solving estimate is Nelson Elhage&rsquo;s.</p>
+</footer>
+
+</main>
+</body>
+</html>
