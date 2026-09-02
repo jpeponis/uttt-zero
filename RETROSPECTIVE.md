@@ -33,8 +33,10 @@ called for. Sources: PLAN2–PLAN4, NOTES-v2, the three reviews, `runs/*/analysi
 
 Absolute anchor: v2b@64 ≈ +169 over a 100 k-playout rollout UCT (the CodinGame-Legend
 recipe), so the current best is very roughly +400 over it. Play agent: `deep10_c1_300/
-net_0300.pt` with the phased schedule `"0:128,24:384"` (+26 Elo over uniform 256 at equal
-mean cost — verified on deep8_c1_300; assumed to transfer).
+net_0300.pt`. *(Addendum 2026-09-02, PLAN5 §2 A8: the phased schedule `"0:128,24:384"`,
++26 on deep8_c1_300, was re-verified on this net at +10 [−7, +26] — below the rule, so
+the play config is flat 256. Equal-compute: deep10@64 beats v2b@427 by +42 [+23, +61];
+deep10@64 vs deep8_c1_300@80 is −11 [−30, +7] — the last rung is a wash at fixed budget.)*
 
 ## 3. What makes an AlphaZero recipe stronger here — the validated ledger
 
@@ -128,9 +130,9 @@ Unchanged from PLAN3 §5 except where noted:
 
 ## 7. Where things stand, and the open list for whenever work resumes
 
-- **Best net** `runs/deep10_c1_300/net_0300.pt`; best play config: phased
-  `"0:128,24:384"` (re-verify on this net, 15 min). Web UI: `python web/server.py
-  runs/deep10_c1_300/net_0300.pt --sims 800 --device cuda:1`.
+- **Best net** `runs/deep10_c1_300/net_0300.pt`; best play config: flat `--sims 256`
+  or more (phased re-verified 2026-09-02, not confirmed — §2 addendum). Web UI:
+  `python web/server.py runs/deep10_c1_300/net_0300.pt --sims 800 --device cuda:1`.
 - **Neither depth nor duration is exhausted** — 12-block and 600-iteration runs are the
   obvious continuations, each a committed GPU-day, both on hold per the pause.
 - Also open, cheaper: seed replicate of the final recipe (rigor); analysis second pass
