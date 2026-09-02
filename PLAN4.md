@@ -122,7 +122,8 @@ run's `log.jsonl` may contain a few replayed iteration lines (append mode) — h
 ## 3. State of the ladder (unchanged from PLAN3 §3, with corrected wording)
 
 Ladder at 64 sims vs v2b (superseding PLAN3 §3's top): wide128_c1 +77 → deep8_c1 +100
-(§4.1) → **deep8_c1_300 +211** (§4.2) — current best `runs/deep8_c1_300/net_0300.pt`.
+(§4.1) → deep8_c1_300 +211 (§4.2) → **deep10_c1_300 +242** (§4.3d) — current best
+`runs/deep10_c1_300/net_0300.pt`.
 The stacked levers: c_scale 1.0 (+40, free), width (endpoint +5.1 pts), depth (+23),
 **duration (+127)**. PLAN3 §2 (measurement kit) and §5 (game beliefs) stand as written,
 with one revision: the "draw blindness at every net size" belief — the 300-iteration run
@@ -172,6 +173,15 @@ optimization/duration artefact, not a representational wall.
 3b. **Done — next 3090 run chosen** (owner, 2026-09-01): 10×128 at 300 iterations
    (`runs/queue6.sh`, ~18 h, `--eval_graph 0`, `--eval_every 20`, anchors v2b /
    wide128_c1 / deep8_c1_300).
+3d. **Done — queue6 (2026-09-02): 10 blocks wins.** `deep10_c1_300` vs deep8_c1_300
+   head-to-head: **55.0 % [52.3, 57.7] = +35 Elo [+16, +54]** — clears the ±3 rule.
+   vs v2b 80.1 % (+242), wide128_c1 73.9 %, dev1 85.5 %. Endgame: raw WDL **84.6**,
+   raw regret 0.037, raw optimal 96.7 %, draws 68.7 %; search@64 regret 0.002. Zero
+   faults, zero retries in 19.5 h — `--eval_graph 0` removed the fault surface at the
+   measured cost of ~925 s/eval (6× graph-eval; ~3 h over the run — with hindsight,
+   graph eval + retries was the cheaper trade). **New best: `deep10_c1_300/net_0300.pt`**;
+   the §4.4 phased play schedule is assumed to transfer (verified on two nets, not this
+   one). Depth is not exhausted at 10 blocks; duration not exhausted at 300 — both open.
 3c. **OWNER DIRECTIVE (2026-09-01): after queue6 and its analysis, PAUSE.** No further
    training runs — no duration-600, no seed replicate — until a full retrospective is
    written: everything done and learned across the project (engineering, measurement
