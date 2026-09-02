@@ -1,25 +1,43 @@
 # uttt-zero — Retrospective (2026-09-02, at the owner-directed pause)
 
-Four days of work: two building (PLAN2/PLAN3 era), two scaling under review discipline
-(PLAN4 era). This document is the "what did we actually learn" synthesis the pause was
-called for. Sources: PLAN2–PLAN4, NOTES-v2, the three reviews, `runs/*/analysis.out`.
+Four days of work: two building (the PLAN2/PLAN3 era), two scaling the network under
+review discipline (the PLAN4 era). This document is the "what did we actually learn"
+synthesis the pause was called for. Sources: PLAN2–PLAN4, NOTES-v2, the three reviews,
+`runs/*/analysis.out`. Terms are explained where they first appear; PLAN5's glossary has
+the full set.
 
 ## 1. The arc in six lines
 
-1. **Build** (day 1–2): engines cross-checked to 41 M+ positions, batched Gumbel search,
-   CUDA-graph replay, continuous self-play, GPU replay buffer — 25 → 220 games/s.
-2. **Measure** (day 2): paired opening suite, exact endgame set, rollout anchor, seed
-   replicates → the ±3-point rule. The measurement kit outlived every other decision.
-3. **Map the recipe** (day 2): ten runs; two levers real (c_scale, width), five nulls.
-4. **Review** (day 3): two independent model reviews adjudicated; claims corrected,
-   probes run, ops hardened, git established.
-5. **Scale** (day 3–4): depth +23, duration +127, depth-at-duration +35 — the ladder
-   went v2b → +242 in four runs.
-6. **Survive** (day 3–4): three GPU faults, all in eval-path CUDA graphs; the recovery
-   machinery (full-state checkpoints + retries) turned them from run-killers into
-   ≤ 10-iteration blips.
+1. **Build** (day 1–2): two game engines cross-checked against each other on 41 M+
+   positions; batched Gumbel search (many games searched at once on the GPU); CUDA-graph
+   replay (recorded GPU command sequences, replayed to cut launch overhead); continuous
+   self-play; a replay buffer held on the GPU. Throughput went from 25 to 220 games/s.
+2. **Measure** (day 2): the paired opening suite (516 fixed openings, each played from
+   both sides), the exact endgame set (solved positions), the rollout anchor (a fixed
+   opponent with no neural net), and seed replicates (the same recipe rerun with another
+   random seed). Together these produced the ±3-point rule: believe no result under
+   3 percentage points on the full suite. The measurement kit outlived every other
+   decision.
+3. **Map the recipe** (day 2): ten runs. Two levers were real (c_scale, width); five
+   changes were nulls (no measurable effect).
+4. **Review** (day 3): two independent model reviews were adjudicated — each finding
+   accepted, rejected or deferred with a measured reason. Claims were corrected, probes
+   run, operations hardened, git established.
+5. **Scale** (day 3–4): depth +23 Elo, duration +127, depth-at-duration +35 — the ladder
+   went from v2b to +242 in four runs.
+6. **Survive** (day 3–4): three GPU driver faults, all in eval-path CUDA graphs. The
+   recovery machinery (full-state checkpoints plus automatic retries) turned them from
+   run-killers into blips of at most 10 lost iterations.
 
 ## 2. Final strength ladder (paired suite vs v2b @64 sims, final checkpoints)
+
+Each row is one training run; each run changed one thing from the row above it ("recipe"
+lists the change). Elo is measured on the paired suite against the `v2b` net, both sides
+searching 64 simulations per move, using each run's final checkpoint. A difference of
++100 Elo means roughly a 64 % expected score; +242 is about 80 %. The last column is the
+net's raw value head (no search) on the exact endgame set: WDL accuracy is the share of
+positions where it names the right result, and regret is the average value lost by
+playing its preferred move instead of the best one (0 = perfect).
 
 | net | recipe | Elo | endgame raw WDL / regret |
 |---|---|---|---|
@@ -31,8 +49,9 @@ called for. Sources: PLAN2–PLAN4, NOTES-v2, the three reviews, `runs/*/analysi
 | deep8_c1_300 | + 300 iters (drops 200/280) | +211 | 84.0 / 0.045 |
 | **deep10_c1_300** | **+ blocks 10** | **+242** | **84.6 / 0.037** |
 
-Absolute anchor: v2b@64 ≈ +169 over a 100 k-playout rollout UCT (the CodinGame-Legend
-recipe), so the current best is very roughly +400 over it. Play agent: `deep10_c1_300/
+Absolute anchor: v2b@64 is ≈ +169 over a rollout UCT with 100 k playouts per move (the
+recipe of the strong CodinGame bots, which run plain tree search with random playouts),
+so the current best is very roughly +400 over it. Play agent: `deep10_c1_300/
 net_0300.pt`. *(Addendum 2026-09-02, PLAN5 §2 A8: the phased schedule `"0:128,24:384"`,
 +26 on deep8_c1_300, was re-verified on this net at +10 [−7, +26] — below the rule, so
 the play config is flat 256. Equal-compute: deep10@64 beats v2b@427 by +42 [+23, +61];
@@ -41,63 +60,83 @@ deep10@64 vs deep8_c1_300@80 is −11 [−30, +7] — the last rung is a wash at
 ## 3. What makes an AlphaZero recipe stronger here — the validated ledger
 
 **Worked, in order of discovery:**
-- **Exploration floor + opening sampling** (v2 era): the first-order fix; without it the
-  policy collapses onto one opening and starves the buffer.
-- **Gumbel c_scale 0.1 → 1.0: +40 Elo, free.** A sharper improved-policy *training
-  target*. Play-time c_scale is irrelevant — the entire effect is in what the student is
-  asked to fit. Lesson: audit every inherited library default that shapes the target.
-- **Width 64 → 128: +77 endpoint** (adjacent steps individually inside noise — Sol's
-  catch; only the endpoint is a claim).
+- **Exploration floor + opening sampling** (v2 era): the first-order fix. Opening
+  sampling picks the first moves of each self-play game at random in proportion to the
+  search's policy, rather than always taking its top move; the floor mixes 15 % uniform
+  randomness into that choice, so every legal opening keeps a minimum chance of being
+  played. Without them the policy collapses onto one opening and starves the buffer of
+  variety.
+- **Gumbel c_scale 0.1 → 1.0: +40 Elo, free.** `c_scale` controls how sharply the
+  search's improved policy — the *training target* the net is asked to imitate —
+  concentrates on the best moves. Play-time c_scale is irrelevant; the entire effect is
+  in what the student is asked to fit. Lesson: audit every inherited library default
+  that shapes the target.
+- **Width 64 → 128: +77 endpoint.** The adjacent steps (64 → 96, 96 → 128) were each
+  individually inside the noise — Sol's catch; only the endpoint is a claim. (+77 is
+  wide128_c1's rung on the §2 ladder, measured against v2b, so it includes the +40 from
+  c_scale above it. The width step on its own is about +37: PLAN5 §0, PLAN4 §3.)
 - **Depth 6 → 8 → 10 blocks: +23, then +35 at 300 iters.** Cheaper per Elo than width at
-  this scale (FLOP-proportional cost, measured 1.36× and 1.19×).
+  this scale. The cost grows in proportion to the network's arithmetic (FLOPs): the two
+  steps measured 1.36× and 1.19× their parent's cost.
 - **Duration 150 → 300 iters: +127 — the single largest gain in the project.** Both LR
-  drops delivered visible steps; the 150-iteration schedule was starving every earlier
-  architecture comparison of convergence. Corollary: some "capacity" conclusions from
-  150-iteration runs were really optimization conclusions.
+  drops (reductions of the learning rate, at iterations 200 and 280) delivered visible
+  steps. The 150-iteration schedule had been starving every earlier architecture
+  comparison of convergence. Corollary: some "capacity" conclusions from 150-iteration
+  runs were really optimization conclusions — the nets had not finished learning.
 - **Phased play-time search: +50 Elo (v2b), +26 (deep8_300)** at equal mean cost —
-  spend simulations late, where games are decided.
+  spend fewer simulations early and more late, where games are decided.
 
-**Did nothing (each a clean, CI-bounded null):** exact endgame labels (self-play z is
-already exact in 98.7 % of ≤14-empty positions at 64 sims); symmetric dedup, early-α,
-extra input planes, 4-class ownership; auxiliary heads off; SWA (−28: LR phases don't
-mix); a 96-sim final self-play phase (+1, though dosed post-drop); `--games 8192`
-(+1–4 % throughput — the GPU-bound regime made "free batch scaling" a myth).
+**Did nothing (each a clean, CI-bounded null):** exact endgame labels (replacing the
+self-play outcome z with solver values as the value target — z was already exact in
+98.7 % of ≤14-empty positions at 64 sims); symmetric dedup, early-α, extra input planes,
+4-class ownership (four data-hygiene changes: treating symmetric positions as duplicates
+in the buffer, applying duplicate down-weighting from the start, more input planes, and a
+four-class ownership head); auxiliary heads off; SWA (averaging the last checkpoints:
+−28, because LR phases don't mix); a 96-sim final self-play phase (+1, though dosed after
+the LR drops); `--games 8192` (+1–4 % throughput — the GPU-bound regime made "free batch
+scaling" a myth).
 
 **The revised belief:** "draw blindness" — the value head recognising only ~55 % of exact
-draws at every size — was called representational for two days. The 300-iteration runs
-lifted it to 67–69 % without touching architecture, labels, or loss. It was substantially
-an *optimization/duration* artefact. Lesson: never diagnose capacity from runs that were
-never trained to convergence.
+draws, at every network size — was called representational for two days: a limit of what
+the net *could* express. The 300-iteration runs lifted it to 67–69 % without touching
+architecture, labels, or loss. It was substantially an *optimization/duration* artefact.
+Lesson: never diagnose capacity from runs that were never trained to convergence.
 
 ## 4. Engineering lessons
 
-- **Windows + PyTorch is launch-bound until you make it not be.** The fix ladder
+- **Windows + PyTorch is launch-bound until you make it not be.** Launch-bound means the
+  GPU sits idle waiting for the CPU to issue each small piece of work. The fix ladder
   (sync-free search → CUDA-graph replay → fused fp16 inference → continuous self-play)
-  was worth 9×. But once the net is wide, the regime flips to GPU-bound and a different
-  economics applies: batch scaling stops paying, FLOP ratios predict run cost to within
-  a few percent, and phased budgets become affordable.
-- **Measure before committing GPU-days.** The 15-minute probes (`probe_g8192`,
-  `probe_b8`) killed one planned 9-hour run and priced two others. Every cost estimate
-  in PLAN4 §4 came from a probe and landed within ~10 %.
-- **CUDA-graph faults are real and survivable.** Three `nvlddmkm` faults, all in
-  eval-path graph replay (depth-cap-24, small batch), zero in ~60 h of self-play graphs.
-  Neither churn elimination (EvalKit) nor anything in our code was proven causal;
-  `--eval_graph 0` removed the surface at a measured 6× eval cost (~3 h/run) — in
-  hindsight graph eval + auto-retry (≤10 iterations lost per fault) was the better
-  trade. The durable win: **two-file checkpointing** (`latest.pt` light every iteration,
-  `latest_full.pt` with buffer every 10th, atomic writes) + retry wrappers made every
-  run finish unattended. The old single-file scheme silently destroyed the buffer nine
-  iterations out of ten — it bit exactly once, and cost a 79-iteration run.
-- **Provenance costs nothing if you start early.** git + `_provenance` in config.json +
-  no-clobber configs took 30 minutes to add on day 3 and should have existed on day 1.
+  was worth 9×. But once the net is wide, the regime flips to GPU-bound — the GPU's
+  arithmetic is the bottleneck — and a different economics applies: batch scaling stops
+  paying, FLOP ratios predict run cost to within a few percent, and phased budgets become
+  affordable.
+- **Measure before committing GPU-days.** The 15-minute throughput probes
+  (`probe_g8192`, `probe_b8`; three-iteration runs made only to measure speed) killed
+  one planned 9-hour run and priced two others. Every cost estimate in PLAN4 §4 came
+  from a probe and landed within ~10 %.
+- **CUDA-graph faults are real and survivable.** Three `nvlddmkm` (NVIDIA Windows
+  driver) faults, all in eval-path graph replay (depth-cap-24, small batch), zero in
+  ~60 h of self-play graphs. Neither churn elimination (EvalKit, which builds the
+  evaluation players once and reuses them) nor anything in our code was proven causal.
+  `--eval_graph 0` removed the surface at a measured 6× eval cost (~3 h/run); in
+  hindsight graph eval + auto-retry (≤10 iterations lost per fault) was the better trade.
+  The durable win: **two-file checkpointing** (`latest.pt`, light, every iteration;
+  `latest_full.pt`, with the replay buffer, every 10th; atomic writes) + retry wrappers
+  made every run finish unattended. The old single-file scheme silently destroyed the
+  buffer nine iterations out of ten. It bit exactly once, and cost a 79-iteration run.
+- **Provenance costs nothing if you start early.** git + `_provenance` in config.json
+  (the exact command line, torch version and commit that started the run) + no-clobber
+  configs took 30 minutes to add on day 3 and should have existed on day 1.
 
 ## 5. Measurement lessons (the real star of the project)
 
 - **The paired suite + noise band is what made every claim above possible.** 516 openings
   × both colours, bootstrap over pairs, ±2.8-point CI, and the rule *believe nothing
-  under +3 points on the full suite, final checkpoints only*. Every adopt/null verdict
-  in §3 is a sentence because this exists.
-- **In-run curves are for shape, not conclusions** (432 games, ±6; checkpoints ±4).
+  under +3 points on the full suite, final checkpoints only*. Every adopt/null verdict in
+  §3 is a sentence because this exists.
+- **In-run curves are for shape, not conclusions.** The evaluation run inside training
+  is small (432 games, ±6; checkpoints ±4), enough to see a trend, not to call a result.
 - **"Strongest" is budget-relative.** At equal inference FLOPs, a small net with 4× the
   search beat the wide net (+101 Elo, v2b@256 vs wide128_c1@64). The ladder is an
   equal-sims instrument; deployment claims need the budget attached. (Sol's best catch.)
@@ -108,19 +147,28 @@ never trained to convergence.
   both accepting and dismissing.
 - Known open debts, accepted: no seed replicate of any wide/deep/300 recipe (the +127
   and +35 results dwarf the ±2.5-point seed band, so the ladder's shape is safe; the
-  small steps are not individually resolved); suites all descend from v2a-era games;
+  small steps are not individually resolved); the suites all descend from v2a-era games;
   endgame_v1 is a development set after ~50 in-run reads.
 
 ## 6. What we learned about the game (levels: behavioural / predictive / search-relative / exact)
 
-Unchanged from PLAN3 §5 except where noted:
-- Centre-of-centre (m=40) is the best first move in every net × budget × seed tested;
-  openings are otherwise flat (root Q-gaps ≤ 0.02). Ordering is stable, values are not.
-- Games are decided late: median settled at ply 38 of ~51 (64-sim best-child Q);
-  nothing is settled at ply 30.
-- A free move is worth +0.16 ± 0.03 (matched natural positions, cluster-robust) —
-  half the naive tensor-probe estimate, largest late when ahead.
-- Board "value hierarchy" is macro-line counting in disguise (±0.17 per line).
+Each belief carries a level: *behavioural* (what the agent does), *predictive* (what its
+value head forecasts), *search-relative* (the number depends on the search budget it was
+measured with), or *exact* (checked against the solver). Unchanged from PLAN3 §5 except
+where noted:
+- Centre-of-centre (m=40, the centre cell of the centre board) is the best first move in
+  every net × budget × seed tested; openings are otherwise flat (root Q-gaps ≤ 0.02 —
+  the search's values for the best and next-best replies differ by at most 0.02).
+  Ordering is stable, values are not.
+- Games are decided late: median settled at ply 38 of ~51 (64-sim best-child Q, the
+  point from which the search's favourite move's value stops changing side); nothing is
+  settled at ply 30.
+- A free move is worth +0.16 ± 0.03 in expected score (matched natural positions,
+  cluster-robust standard errors that allow for positions from the same game being
+  related) — half the naive tensor-probe estimate, and largest late in the game when
+  ahead.
+- The board "value hierarchy" (centre worth more than corners, corners more than edges)
+  is macro-line counting in disguise (±0.17 per line).
 - The count tiebreak decides ~30 % of strong games and rises with strength; draws rise
   with strength too (12 % at 64-sim eval, 19–22 % between the newest nets — the
   strongest agents increasingly *prove* draws).
@@ -135,10 +183,11 @@ Unchanged from PLAN3 §5 except where noted:
   `python web/server.py runs/deep10_c1_300/net_0300.pt --sims 800 --device cuda:1`.
 - **Neither depth nor duration is exhausted** — 12-block and 600-iteration runs are the
   obvious continuations, each a committed GPU-day, both on hold per the pause.
-- Also open, cheaper: seed replicate of the final recipe (rigor); analysis second pass
-  with the new net (atlas / decision / freemove / puzzles → `puzzles_v2_dev`, suites
-  refresh with dev/test split); the 6×64 endgame-overfit diagnostic (now largely mooted
-  by §3's revision); CodinGame port (needs the batch-1 latency budget, not the ladder).
+- Also open, cheaper: a seed replicate of the final recipe (rigor); an analysis second
+  pass with the new net (atlas / decision / freemove / puzzles → `puzzles_v2_dev`, suites
+  refresh with a dev/test split); the 6×64 endgame-overfit diagnostic (now largely
+  mooted by §3's revision); the CodinGame port (needs the batch-1 latency budget — one
+  position at a time under a per-move time limit — not the ladder).
 - Everything is committed; `runs/` holds ~11 GB (games corpora + checkpoints); the
   explainer artifact tells the story through queue5 and does not yet include the
   10-block result or the draw-blindness revision.
