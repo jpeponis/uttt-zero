@@ -2,8 +2,9 @@
 
 Written at the pause called in PLAN4 §3c, after RETROSPECTIVE.md. Sections: §0 the
 decision (more training, or use the net we have?) with a recommendation; §1 a full review
-of the work so far; §2–§4 the analysis programme in three phases; §5 the training runs
-still worth doing and the ones that are not; §6 housekeeping; §7 order and budget.
+of the work so far; §2–§4 the analysis programme in three phases (A, B, C); §5 Phase D,
+the training that may follow — provisional until A–C report; §6 housekeeping; §7 order
+and budget; §8 operational notes.
 Nothing here has been started except A8 (three 10-minute matches, §2). Numbers are from
 RETROSPECTIVE.md, PLAN4 §3–§4, `runs/*/analysis.out` and `runs/plan5_A8.out`.
 
@@ -76,7 +77,7 @@ beliefs is the wrong order.** We already know what a 600-iteration run would tel
 - **Run the analysis programme (§2–§4) now, on `deep10_c1_300/net_0300.pt`**, with
   `deep8_c1_300` as the second strong net wherever a two-net comparison is cheap.
 - **One training run is still worth doing, and it is not a rung: a seed replicate of the
-  final recipe** (§5), because it is the *control* the analysis needs — a concept, value
+  final recipe** (Phase D, §5, item D1), because it is the *control* the analysis needs — a concept, value
   weight or opening preference found in one seed is a fact about the game only if it
   appears in the other. It runs unattended on the otherwise idle 3090 while the analysis
   runs on the 3060; nothing in Phase A waits for it. Owner's call — it is optional.
@@ -283,24 +284,48 @@ behavioural one (§1c); nothing in Phase B is reported from probe accuracy alone
   head an exact grader far deeper than `endgame_v1`. A multi-day build; do it only if B3
   shows the value head's late-game error is where the remaining regret lives.
 
-## 5. Training: the run that is worth doing, and the ones that are not
+## 5. Phase D — training (provisional: rewrite this section after Phases A–C)
 
-- **Worth doing (optional, owner's call): `deep10_c1_300_s1`** — the identical queue6
-  recipe with a different seed, on the 3090, ≈ 19 h unattended. Changes from queue6:
-  `--seed`, `--eval_graph 1` with the retry wrapper (a fault costs ≤ 10 iterations and we
-  learn whether the surface is still live; saves ~3 h), `--eval_every 10` for a denser
+Training comes last because the analysis decides what training is *for*. Everything
+below is a best guess made before Phase A has run; expect the details — and possibly the
+list itself — to change once the results of A, B and C are in. Three rules hold
+regardless: one change per run against a named parent; judged on the frozen paired
+suite by the ±3-point rule, final checkpoints only; no run starts without the owner's
+approval (the pause called in PLAN4 §3c is still in effect).
+
+- **D1. Seed replicate `deep10_c1_300_s1`** — the identical queue6 recipe with a
+  different `--seed`, on the 3090, ≈ 19 h unattended. Other changes from queue6:
+  `--eval_graph 1` with the retry wrapper (a fault costs ≤ 10 iterations and we learn
+  whether the fault surface is still live; saves ~3 h), `--eval_every 10` for a denser
   timeline, anchors v2b / deep8_c1_300 / **deep10_c1_300**. Purpose, in order: (1) the
-  control for B2/B3/B5 — a concept, coefficient or opening preference is a fact about
+  *control* for B2/B3/B5 — a concept, coefficient or opening preference is a fact about
   the game only if both seeds have it; (2) the seed band at 10×128, which no wide/deep
-  recipe has; (3) a second measurement of +35 vs deep8_c1_300. It is not a rung; nothing
-  in Phase A waits for it. Judged by the ±3 rule like everything else.
-- **Not now: 600 iterations (≈ 38 h), 12 blocks (≈ 23 h).** Resume criteria are §0's
-  (i)–(iii). If resumed, duration first — it has the better Elo/h record *and* it is the
-  lever that pays at equal inference compute (A8b: depth 8 → 10 did not) — with graph
-  eval + retries, deep10 added to the anchors and to `eval_run.sh`.
-- **Not at all, still**: exact labels, hygiene, aux-head ablations, SWA, games-8192 — the
-  nulls stay null; a sims-96 phase dosed from iteration 60 remains the one un-run
-  variant of a null and is not worth a GPU-day now.
+  recipe has; (3) a second measurement of +35 vs deep8_c1_300. It is not a rung of the
+  ladder. This is the one Phase D item whose case does not depend on A–C's outcome
+  (its job is to check A–C's findings), so it may be started early — during Phase B, on
+  the otherwise idle 3090 — if the owner wants the control ready when B2/B3 finish.
+  Add the `eval_run.sh` line for it (§6) before it ends.
+- **D2. Resume the ladder — only if §0's criteria (i)–(iii) fire.** If they do, the run
+  is **600 iterations on the current 10-block recipe (≈ 38 h), not 12 blocks (≈ 23 h)**:
+  duration has the better Elo/hour record *and* is the lever that pays at equal
+  inference compute (A8b: blocks 8 → 10 did not). Graph eval + retries; deep10 added to
+  the anchors. A 12-block run would need a new argument.
+- **D3. Runs the analysis may suggest** (pure speculation until A–C report):
+  - if B1 shows draw recognition and endgame accuracy *stepping* at the LR drops rather
+    than climbing between them → a longer or earlier final annealing phase is the
+    cheapest test (same iteration count, different `--lr_drops`);
+  - if A9 shows the v1 endgame numbers were overfit by selection → nothing to train,
+    but every future eval reads `endgame_v2_dev`;
+  - if B3 finds the value head's remaining error is concentrated in the last-board
+    phase → the C5 tablebase spliced in as a terminal lookup is a *search* change, not
+    a training one, and should be tried first;
+  - if B6's distilled rules capture most of the strength → a smaller net trained longer
+    may be the better deployment target, which reopens the width/depth question at
+    equal compute rather than equal sims.
+- **Not at all, still**: exact endgame labels, symmetric dedup / early-α / extra planes /
+  4-class ownership, auxiliary-head ablations, SWA, `--games 8192` — the nulls stay null
+  (RETROSPECTIVE §3). A sims-96 phase dosed from iteration 60 remains the one un-run
+  variant of a null and is not worth a GPU-day.
 
 ## 6. Housekeeping (first hour)
 
