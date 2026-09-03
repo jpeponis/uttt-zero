@@ -14,6 +14,13 @@ runs/**
 !runs/*/log.jsonl
 !runs/*/*.out
 !runs/*/paired_*.json
+!runs/*/timeline.json
+!runs/*/timeline.png
+!runs/*/probes.json
+!runs/*/probes_mlp.json
+!runs/*/probes.png
+!runs/*/value_decomp.json
+!runs/*/value_decomp.png
 !runs/*/net_0150.pt
 !runs/*/net_0200.pt
 !runs/*/net_0300.pt
