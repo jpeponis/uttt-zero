@@ -115,18 +115,36 @@ class EndgameSet:
         return b * 6 + r * 2 + (self.player == -1)
 
 
+def split_games(cands: dict, split: str, split_seed: int = 0) -> np.ndarray:
+    """Boolean mask of the candidates whose *source game* falls in the `split` half ("dev" or "test"). Games are
+    assigned at random, half each, so the two halves share no game (PLAN5 §2 A9: split before solving)."""
+    assert split in ("dev", "test"), split
+    key = cands["file"].astype(np.int64) * (1 << 20) + cands["game"].astype(np.int64)
+    games = np.unique(key)
+    is_dev = np.random.default_rng(split_seed).random(len(games)) < 0.5
+    dev_games = set(games[is_dev].tolist())
+    in_dev = np.array([k in dev_games for k in key.tolist()])
+    return in_dev if split == "dev" else ~in_dev
+
+
 def build_set(corpus: str, last: int = 5, per_stratum: int = 125, per_game: int = 2, min_empty: int = 6, max_empty: int = 16,
-              max_solve: int = 15000, processes: int = 8, seed: int = 0, log=print) -> EndgameSet:
+              max_solve: int = 15000, processes: int = 8, seed: int = 0, log=print, split: str = "", split_seed: int = 0) -> EndgameSet:
     """Balanced over BUCKETS × {win, draw, loss} × {X, O to move}: up to per_stratum positions each. Candidates are
-    solved in random order until every stratum is full or max_solve positions have been solved."""
+    solved in random order until every stratum is full or max_solve positions have been solved. With split="dev" or
+    "test", only candidates from that half of the source games are used (see split_games)."""
     files = sorted(glob.glob(os.path.join(corpus, "games", "games_*.npz")))
     if last:
         files = files[-last:]
     rng = np.random.default_rng(seed)
     t = time.perf_counter()
     cands = collect_candidates(files, per_game, min_empty, max_empty, rng)
+    K_all = len(cands["empties"])
+    if split:
+        keep = split_games(cands, split, split_seed)
+        cands = {k: v[keep] for k, v in cands.items()}
     K = len(cands["empties"])
-    log(f"{K} candidate positions from {len(files)} files ({time.perf_counter() - t:.0f}s)")
+    log(f"{K_all} candidate positions from {len(files)} files ({time.perf_counter() - t:.0f}s)"
+        + (f"; {K} in the {split} half of the source games" if split else ""))
     order = rng.permutation(K)
     n_strata = len(BUCKETS) * 6
     chosen = {s: [] for s in range(n_strata)}
@@ -153,6 +171,7 @@ def build_set(corpus: str, last: int = 5, per_stratum: int = 125, per_game: int 
     counts = {f"{BUCKETS[b][0]}-{BUCKETS[b][1]}": [len(chosen[b * 6 + r * 2 + p]) for r in range(3) for p in range(2)] for b in range(len(BUCKETS))}
     meta = {"corpus": corpus, "corpus_files": [os.path.basename(f) for f in files], "per_stratum": per_stratum, "per_game": per_game,
             "min_empty": min_empty, "max_empty": max_empty, "seed": seed, "solved": solved, "built": time.strftime("%Y-%m-%d %H:%M"),
+            "split": split or "none", "split_seed": split_seed, "candidates": int(K_all),
             "strata_counts (bucket -> [W_X, W_O, D_X, D_O, L_X, L_O])": counts}
     return EndgameSet(cands["cells"][sel], cands["macro"][sel], cands["next_board"][sel], cands["player"][sel], exact, child,
                       cands["empties"][sel], game_id, cands["ply"][sel], meta)

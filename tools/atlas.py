@@ -138,9 +138,9 @@ def main() -> None:
         row = " ".join(f"{V1[c][i]:+.3f}({ranks[c][i]:2d})" for c in cols)
         print(f"  [{reps[i]:2d}]  {row}   {mean_rank[i]:5.1f}")
     print("\nKendall tau between columns (first-move ranking):")
-    print(" " * 14 + " ".join(f"{nm[:4]}@{b // 1024}k".rjust(9) for nm, b in cols))
+    print(" " * 14 + " ".join(f"{nm[:6]}@{b // 1024}k".rjust(9) for nm, b in cols))
     for c1 in cols:
-        print(f"  {c1[0][:4]}@{c1[1] // 1024}k".ljust(14) + " ".join(f"{kendall_tau(V1[c1], V1[c2]):9.2f}" for c2 in cols))
+        print(f"  {c1[0][:6]}@{c1[1] // 1024}k".ljust(14) + " ".join(f"{kendall_tau(V1[c1], V1[c2]):9.2f}" for c2 in cols))
     top = [reps[int(np.argmax(V1[c]))] for c in cols]
     print(f"\nbest first move per column: {top}  (stable: {len(set(top)) == 1})")
     # ---- table 2: replies ----
@@ -156,7 +156,7 @@ def main() -> None:
         agree = np.mean([best[c] == best[ref] for c in cols])
         agree_all.append(agree)
         pairs = replies[m]
-        print(f"  after [{m:2d}] ({k} reply classes): " + "  ".join(f"{c[0][:4]}@{c[1] // 1024}k:{pairs[best[c]][1]:2d}({vals[c][best[c]]:+.2f})" for c in cols)
+        print(f"  after [{m:2d}] ({k} reply classes): " + "  ".join(f"{c[0][:6]}@{c[1] // 1024}k:{pairs[best[c]][1]:2d}({vals[c][best[c]]:+.2f})" for c in cols)
               + f"   agreement {agree:.2f}")
         off += k
     print(f"mean best-reply agreement with {ref[0]}@{ref[1]}: {np.mean(agree_all):.2f}")

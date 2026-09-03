@@ -1,6 +1,7 @@
 """Frozen exact-label endgame set: build it once from a game corpus, then score checkpoints on it.
 
     .venv/Scripts/python.exe tools/endgame.py build --corpus runs/v2a --last 5 --per_stratum 125 --out suites/endgame_v1.npz
+    .venv/Scripts/python.exe tools/endgame.py build --corpus runs/deep8_c1_300 --last 20 --split dev,test --out suites/endgame_v2
     .venv/Scripts/python.exe tools/endgame.py eval runs/v2b/net_0150.pt [--sims 32,64,256] [--rollout 100000] [--device cuda:1]
 
 Metrics (uttt.endgame): WDL-argmax accuracy, Brier, log-loss of the value head; 3-way accuracy of scalar
@@ -30,12 +31,20 @@ def load(path, device):
 
 
 def cmd_build(a) -> None:
-    es = build_set(a.corpus, a.last, a.per_stratum, a.per_game, a.min_empty, a.max_empty, a.max_solve, a.processes, a.seed)
-    es.save(a.out)
-    print(f"wrote {a.out}: {es.n} positions; exact W/D/L for the mover {(es.exact == 1).mean():.3f}/{(es.exact == 0).mean():.3f}/"
-          f"{(es.exact == -1).mean():.3f}; {len(set(es.game_id.tolist()))} source games")
-    for k, v in es.meta["strata_counts (bucket -> [W_X, W_O, D_X, D_O, L_X, L_O])"].items():
-        print(f"  empties {k}: {v}")
+    parts = [p for p in a.split.split(",") if p]
+    stem = os.path.splitext(a.out)[0]
+    outs = {p: f"{stem}_{p}.npz" for p in parts} if parts else {"": a.out}
+    for out in outs.values():  # suites are frozen: a build never overwrites an existing yardstick
+        if os.path.exists(out):
+            sys.exit(f"refusing to overwrite {out} (a rebuilt suite is a new, incomparable one; pick a new name)")
+    for part, out in outs.items():
+        es = build_set(a.corpus, a.last, a.per_stratum, a.per_game, a.min_empty, a.max_empty, a.max_solve, a.processes, a.seed,
+                       split=part, split_seed=a.split_seed)
+        es.save(out)
+        print(f"wrote {out}: {es.n} positions; exact W/D/L for the mover {(es.exact == 1).mean():.3f}/{(es.exact == 0).mean():.3f}/"
+              f"{(es.exact == -1).mean():.3f}; {len(set(es.game_id.tolist()))} source games")
+        for k, v in es.meta["strata_counts (bucket -> [W_X, W_O, D_X, D_O, L_X, L_O])"].items():
+            print(f"  empties {k}: {v}")
 
 
 def cmd_eval(a) -> None:
@@ -80,6 +89,9 @@ def main() -> None:
     b.add_argument("--processes", type=int, default=8)
     b.add_argument("--seed", type=int, default=0)
     b.add_argument("--out", default=DEFAULT_SET)
+    b.add_argument("--split", default="", help='"dev,test": build one set per half of the source games (split before solving); '
+                   "--out is then a stem, e.g. suites/endgame_v2 -> suites/endgame_v2_dev.npz + _test.npz")
+    b.add_argument("--split_seed", type=int, default=0)
     e = sub.add_parser("eval")
     e.add_argument("checkpoint")
     e.add_argument("--set", default=DEFAULT_SET)

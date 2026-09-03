@@ -25,6 +25,7 @@ from uttt.model import UniformEvaluator, load_checkpoint  # noqa: E402
 from uttt.openings import Suite, build_suite, format_report, per_opening_records, play_paired, summarize  # noqa: E402
 from uttt.rollout import RolloutPlayer  # noqa: E402
 from uttt.search import SearchConfig  # noqa: E402
+from uttt.symmetry import SymmetryAveragedEvaluator  # noqa: E402
 
 DEFAULT_SUITE = "suites/openings_v1.npz"
 
@@ -36,19 +37,21 @@ def load(path, device):
     return FusedEvaluator(net, device)
 
 
-def player(spec, sims, n, device, mode="gumbel", graph=True, c_scale=0.1):
-    """spec: checkpoint path | "uct" | "rollout" | "random". sims: int, or a phase schedule "0:32,24:96" (sims from ply)."""
+def player(spec, sims, n, device, mode="gumbel", graph=True, c_scale=0.1, sym=False):
+    """spec: checkpoint path | "uct" | "rollout" | "random". sims: int, or a phase schedule "0:32,24:96" (sims from ply).
+    sym: evaluate all 8 D4 images and average (uttt.symmetry; 8x the inference cost)."""
     if spec == "random":
         return RandomPlayer(device)
+    ev = lambda: SymmetryAveragedEvaluator(load(spec, device)) if sym else load(spec, device)  # noqa: E731
     if isinstance(sims, str) and ":" in sims:
         sched = {int(k): int(v) for k, v in (x.split(":") for x in sims.split(","))}
         cfg = SearchConfig(n_sims=max(sched.values()), mode=mode, gumbel_scale=0.0, c_scale=c_scale, cuda_graph=graph and device.type == "cuda", depth_cap=24)
-        return PhasedSearchPlayer(load(spec, device), n, cfg, sched, device)
+        return PhasedSearchPlayer(ev(), n, cfg, sched, device)
     sims = int(sims)
     if spec == "rollout":  # independent UCT + random-playout anchor; sims = playouts per move
         return RolloutPlayer(playouts=sims)
     cfg = SearchConfig(n_sims=sims, mode=mode, gumbel_scale=0.0, c_scale=c_scale, cuda_graph=graph and device.type == "cuda", depth_cap=min(sims, 24))
-    return SearchPlayer(load(spec, device), n, cfg, device)
+    return SearchPlayer(ev(), n, cfg, device)
 
 
 def cmd_build(a) -> None:
@@ -72,14 +75,16 @@ def cmd_match(a) -> None:
         suite = suite.subset(a.cap)
     a_sims, b_sims = a.a_sims or a.sims, a.b_sims or a.sims
     t = time.perf_counter()
-    r = play_paired(player(a.a, a_sims, suite.n, device, a.mode, bool(a.graph), a.a_cscale),
-                    player(a.b, b_sims, suite.n, device, a.mode, bool(a.graph), a.b_cscale), suite, device)
+    r = play_paired(player(a.a, a_sims, suite.n, device, a.mode, bool(a.graph), a.a_cscale, a.a_sym),
+                    player(a.b, b_sims, suite.n, device, a.mode, bool(a.graph), a.b_cscale, a.b_sym), suite, device)
     s = summarize(r)
-    print(f"paired suite {suite.meta['name']} ({suite.n} openings, {2 * suite.n} games): A={a.a}@{a_sims} vs B={a.b}@{b_sims}  "
+    print(f"paired suite {suite.meta['name']} ({suite.n} openings, {2 * suite.n} games): A={a.a}@{a_sims}{' sym' if a.a_sym else ''} vs "
+          f"B={a.b}@{b_sims}{' sym' if a.b_sym else ''}  "
           f"[{time.perf_counter() - t:.0f}s]")
     print(format_report(s))
     if a.out:
         rec = {"suite": {k: v for k, v in suite.meta.items() if k != "ids"}, "a": a.a, "a_sims": a_sims, "b": a.b, "b_sims": b_sims,
+               "a_sym": a.a_sym, "b_sym": a.b_sym,
                "mode": a.mode, "summary": s, "openings": per_opening_records(r)}
         with open(a.out, "w") as f:
             json.dump(rec, f, indent=1)
@@ -110,6 +115,8 @@ def main() -> None:
     m.add_argument("--mode", default="gumbel")
     m.add_argument("--a_cscale", type=float, default=0.1, help="Gumbel c_scale of A's play-time search (training default 0.1)")
     m.add_argument("--b_cscale", type=float, default=0.1)
+    m.add_argument("--a_sym", action="store_true", help="A evaluates with symmetry averaging over the 8 D4 images (8x cost)")
+    m.add_argument("--b_sym", action="store_true")
     m.add_argument("--device", default="cuda:0")
     m.add_argument("--graph", type=int, default=1)
     m.add_argument("--seed", type=int, default=0)
