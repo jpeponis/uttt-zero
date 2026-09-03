@@ -5,9 +5,20 @@ Ultimate Tic-Tac-Toe. This plan proposes to stop doing that for now and to use t
 strongest network we have, `runs/deep10_c1_300/net_0300.pt`, to study the game instead.
 It was written at the pause the owner called in PLAN4 §3c, after RETROSPECTIVE.md. If you
 are picking the project up: read §0 for the decision and the recommendation, then start
-with §6 (housekeeping, one hour) and Phase A (§2). Nothing in this plan has been started
-except A8, three 10-minute matches described in §2. Training is paused by owner directive.
+with §6 (housekeeping, one hour) and Phase A (§2). Training is paused by owner directive.
 No training run may be launched without the owner's approval (§5).
+
+*Progress note (2026-09-03).* §6 is done (backup at `C:/Users/John Peponis/uttt-zero-backup/`,
+local only; history files in `docs/history/`). Phase A is complete — results table and verdicts
+at the end of §2: every ordering and sign held; the free-move value and the board-ownership
+residual moved (both up), and two opening orbits show a visible edge. Phase B is complete
+except B6 (the distilled surrogate): B1–B5 results are at the end of §3, replicated on both
+300-iteration nets where the plan asked for it (`tools/timeline.py`, `uttt/concepts.py`,
+`tools/probe.py`, `tools/probe_report.py`, `tools/value_decomp.py`; logs `runs/plan5_B*.out`).
+Phase C: the opening book (C1, `tools/book.py`, `tools/book_stats.py`), the folk claims (C2,
+`tools/principles.py`), the annotated hard puzzles (C3, `tools/annotate.py`,
+`docs/positions.md`) and `KNOWLEDGE.md` (C4) exist; C5 (the tablebase) and B6 are not
+started. Neither §0 resume criterion fired. Nothing has been committed.
 
 **How this file is organised.** §0 states the decision to be made (more training, or use
 the net we have?) and recommends an answer. §1 reviews the work so far. §2–§4 describe the
@@ -371,6 +382,36 @@ Files: `runs/deep10_c1_300/paired_vs_v2b_flopmatched.json`, `paired_vs_deep8c1_3
 `paired_phased_vs_256.json`; log `runs/plan5_A8.out`. Note the draw rate rising down the
 table — deep10 against itself draws a quarter of the suite.
 
+**Phase A results, rows A1–A7 and A9 (run 2026-09-03, `runs/plan5_A_3060.sh` +
+`runs/plan5_A_3090.sh`, log `runs/plan5_A.out`, one `runs/plan5_A<row>_*.out` per tool).**
+Net under test `deep10_c1_300/net_0300.pt`; second column `deep8_c1_300/net_0300.pt`. Every
+row was judged against the pre-written criterion in the table above.
+
+| row | measured (deep10 unless said) | earlier (v2b) | verdict |
+|---|---|---|---|
+| A1 | [40] rank 1 and [13] rank 15 in all 9 columns (v2b / deep8_300 / deep10 × 1k / 4k / 16k, symmetry-averaged); Kendall τ deep10@16k vs v2b@16k **0.96**, deep8_300@16k vs v2b@16k 0.92; top four identical in order: [40] > [36] > [0] > [37]. Values for X rose (+0.354 → +0.447 after [40]) — magnitudes, as always, untrusted | same ordering | **held** |
+| A2 | root Q-gap at 16k ≤ 0.03 in **13 / 15** orbits. The two exceptions are the orbits whose best reply is to take centre-of-centre: after [13] the gap grew 0.079 → **0.116**, after [4] 0.017 → **0.057** | 13 / 15 ≤ 0.03; max 0.079 | **held** — with a footnote: the only opening edges a stronger net finds are "answer by taking [40]" |
+| A3 | best-child-Q settling median **ply 36** (quartiles 30–41) on the same 4000 v2a games; raw-value median 41; on deep8_300's late games (mean length 51.9): Q median 36 (28–41), raw 42, search-root 47. deep8_300 on the v2a games: Q 36, raw 41 — identical to deep10 | Q 38 (32–42), raw 43 | **held**, at the edge of the band; the 2-ply shift is a strength effect that has saturated (deep8_300 = deep10). Caveat: the 3-way threshold (±0.33) now sits below deep10's opening value for X, so 10–17 % of X-win games count as "settled at ply 0" |
+| A4 | free move **+0.196 ± 0.028** (search, 256 sims, 30 000 positions from deep8_300's late games); raw head +0.290 ± 0.030; raw − search gap 0.094; stratified check +0.130, up to +0.25 late when level or ahead. Second column, deep8_300 on deep10's late games: **+0.192 ± 0.027**, raw +0.290 | +0.163 ± 0.027; raw +0.256; gap 0.094 | **held** (CI overlaps [0.10, 0.22]); magnitude up a third and identical on both strong nets, the search-corrects-intuition gap unchanged |
+| A5 | macro-line threats +0.154 / −0.140 per line (CIs overlap ±0.17; deep8_300 +0.145 / −0.139). With threats controlled, owning a board is no longer zero: deep10 centre_self **+0.070 ± 0.040**, corners_self **+0.065 ± 0.030**, edges_self **+0.056 ± 0.027**, net worth centre +0.092 / corner +0.078 / edge +0.053; deep8_300 +0.051 / +0.030 / +0.037 (all three significant), net worth +0.038 / +0.035 / +0.056. Opponent-owned boards ≈ 0 on both | ±0.17 per line; ownership +0.008 / +0.011 / +0.033 | lines **held**; ownership **moved** — a small positive residual per own board beyond the lines it sits on (+0.03 … +0.07, a fifth to a third of a threat line) on both strong nets. The centre > corner > edge order appears on deep10 only (deep8_300 has edge highest), so the *class* ordering is not a finding. The self / opponent asymmetry is unexplained (B3 revisits it with the full concept set) |
+| A6 | deep10 iterations 280–299 self-play: X 63.0 / O 23.9 / draw 13.1 %; ends by line 72.8 %, count 14.1 %, equal 13.1 % (count rule + equal = 27 %); mean length 51.9; 4.42 free moves per game; [40] opened 83 % of games (the rest is the 15 % exploration floor). deep8_300: 61.1 / 25.8 / 13.0, 27 %, 51.9. v2a last 20: 60.1 / 28.6 / 11.4, 26 %, 49.4. Paired matches between the strong nets (A8): draws 15–25 %, count 11–13 % | — | descriptive: X share up, draws up, games 2.5 plies longer, count-rule share flat at ~27 % of self-play |
+| A7 | 6000 strong-play positions ≤ 14 empties (deep8_300's late games): **126 puzzles (2.1 %), 7 hard at 64 sims (0.12 %)**; motifs tiebreak_conversion 71 > gives_free_move 61 > draw_hold 51 > denies_free_move 37 > local_win 20 > closes_board 4 > macro_win 0; regret 1 in 68 % | 3.5 %, 13 hard (0.22 %); same order (110 > 92 > 71 > 68 > 55 > 4 > 2) | **held** — the count rule and free-move tempo remain what the raw policy misses; local tactics fell most (26 → 16 % of puzzles). `suites/puzzles_v2_dev.npz` (+ `.json`, 5 hard puzzles) |
+| A9 | `endgame_v2_{dev,test}` built from deep8_300's iterations 280–299, split by source game before solving (3000 positions each, balanced strata). deep10 on v2_dev: raw WDL **84.7 [83.4, 85.9]**, draws 72.2, regret 0.048, optimal 95.7; search-256 optimal 99.7. deep8_300 on v2_dev: 84.7 [83.4, 86.0] (symmetry-averaged; plain 83.5), draws 70.4, regret 0.050. Both re-scored on v1 in the same session: 84.6 / 0.037 and 84.0 / 0.045, reproducing `analysis.out` | v1: 84.6 / 68.7 / 0.037 | **held** — the ~50 in-run reads did not flatter v1 (WDL within 0.1); the strong-play set is harder for the raw *policy* (regret 0.037 → 0.048) and easier for draw recognition. **v2_test is unread.** |
+
+What moved, in one paragraph: nothing that was an *ordering* or a *sign*. [40] is still the
+best first move and [13] the worst on every net and budget; games are still decided late; a
+free move is still worth about +0.2; the value head's endgame numbers were not a selection
+artefact; the raw policy's failures are still the count rule and tempo. Two magnitudes moved,
+both in the direction of a sharper net: the free-move value (+0.16 → +0.20, CIs touching)
+and, the one genuine revision, **board ownership carries a small value of its own once
+macro-line threats are controlled** (+0.03 … +0.07 per own board on both strong nets,
+previously indistinguishable from zero; which board class is worth most is not resolved).
+Two orbits also acquired a visible opening edge ([13] and [4],
+both "reply by taking the centre of the centre board"). For §0's resume criterion (i): no
+belief's magnitude moved between deep8_c1_300 and deep10_c1_300 by more than its CI — A3, A4,
+A9 and the atlas all give the two nets the same numbers — so the analysis is not
+strength-limited and the ladder stays paused on this evidence.
+
 ## 3. Phase B — the network on its own terms (new tooling; both GPUs free)
 
 Three questions: *what* does the net compute, *how*, and *when* did it learn it. The
@@ -432,6 +473,238 @@ Three questions: *what* does the net compute, *how*, and *when* did it learn it.
 Order: B1 → B2 → B3 → B4/B5 → B6. All of it pairs a decodability result with a
 behavioural one (§1c); nothing in Phase B is reported from probe accuracy alone.
 
+**B1 results (2026-09-03; `tools/timeline.py`, outputs `runs/<run>/timeline.{json,png}`,
+logs `runs/plan5_B1_timeline_*.out`).** deep10_c1_300 has 15 checkpoints (every 20
+iterations), deep8_c1_300 has 30 (every 10); the second resolves the timing. Held-out
+positions for the policy statistics: 20 000 from the other run's iteration-280+ games; D4
+statistics on 4096 of them; endgame numbers on `endgame_v1` (raw head only).
+
+- **Where +127 came from.** Two things, and the timeline separates them. (i) *More
+  iterations at the constant LR*: deep8_300's in-run score vs v2b climbs 62.5 (it 150) →
+  69.2 (it 200), deep10's 67.7 → 70.5 — about +5 points that a 150-iteration run never
+  gets. (ii) *The first LR drop*: a clean step at the first post-drop checkpoint — deep8_300
+  69.2 → 77.0 (net_0200 → net_0210), deep10 70.5 → 78.9 (net_0200 → net_0220) — about +8
+  points, and the same step shows in every other curve at the same checkpoint: raw WDL
+  79.7 → 82.7, draw recognition 58.8 → 65.7, regret 0.057 → 0.051, opening-ply policy
+  entropy 1.71 → 1.35 bits, D4 policy divergence 0.051 → 0.030 bits (deep8_300 numbers;
+  deep10's are 81.7 → 83.1, 62.5 → 65.5, 1.80 → 1.35, 0.052 → 0.030). After that step
+  every curve is flat to iteration 300 on both runs. (iii) *The second LR drop (280) does
+  nothing visible*: deep8_300 77.8 → 75.5 → 77.3, WDL 83.6 → 83.7 → 84.0; deep10 76.7 →
+  80.6 with WDL 84.2 → 84.6 — inside the ±6 in-run noise. RETROSPECTIVE §3's "both LR
+  drops delivered visible steps" is therefore half right: the first drop is the event, the
+  second is not resolved by these curves (the paired-suite result for the final checkpoint
+  still stands; it just cannot be attributed to the 280 drop).
+- **Draw recognition is an annealing product, not a slow climb — and it is a noisy metric
+  at constant LR.** On deep8_300 it wobbles between 38 % and 63 % from iteration 100 to
+  200 (adjacent checkpoints differ by up to 20 points on the 1000-position draw stratum),
+  then steps to 66–68 % at the drop and stays there. deep10 shows the same: 53–57 % flat
+  from 100 to 180, 62.5 at 200 (still LR 0.02 — inside the wobble), 65.5 → 68.3 after the
+  drop, flat to 300. So "≈ 55 % on every 150-iteration net" was the un-annealed plateau
+  read through noise, which is why it looked like a wall. This is the §5 D3 trigger: the
+  step is at the drop, so the cheapest training experiment is an *earlier* first drop (or a
+  longer low-LR phase), not more iterations at 0.02.
+- **D4 consistency is also annealing.** Policy JS across the 8 orientations sits at
+  0.05 bits for 200 iterations on both runs and halves at the drop (0.030), ending at 0.027;
+  the value's orientation spread goes 0.073 → 0.052. By ply it is smallest in the opening
+  (0.010 bits at plies 0–7) and largest in the middlegame (0.034 at plies 20–31).
+  Symmetry-averaging at play time therefore has less left to add on the annealed nets
+  (B5 measures how much).
+- **Opening narrowing is immediate.** Both nets put ≥ 0.95 of the first-move policy on [40]
+  from iteration 20–30 on (deep8_300: 0.09 at it 10, 0.79 at 20, 0.98 at 30); it never
+  broadens again except a dip to 0.86 at deep10's iterations 140–160. The opening is
+  learned in the first 10 % of training; what the rest of the run buys is the middlegame
+  (regret) and the endgame (WDL, draws).
+- **Policy entropy on held-out positions** drops in the opening (plies 0–7: 2.6 → 1.2 bits
+  over the run, half of it at the LR drop) and hardly at all late (plies 44+: 1.7 → 1.4
+  bits, flat from iteration 50) — the late-game entropy is the game's, not the net's.
+- **For §0's resume criterion (ii):** nothing appears late. Every curve is flat from
+  iteration 220 (deep8_300) / 240 (deep10) to 300; the last 60–80 iterations sharpen
+  nothing measurable here. Criterion (ii) does not fire. B2's layer × checkpoint grid is
+  the finer test.
+
+**B4 results, first half (2026-09-03; `runs/plan5_B4_probe_value_deep10.out`,
+`runs/plan5_B4_surprise_deep10.out`; positions from deep8_c1_300's replay buffer, held-out
+for deep10; the v2a-era comparison is `runs/v2a/probe_surprise_rerun.out`).**
+
+- *Counterfactual tensor edits, raw symmetry-averaged value head, 48 576 positions.* Grant a
+  free move instead of confinement: **+0.413** mean (median +0.324; v2a-era +0.269) —
+  twice the regression estimate of +0.20 on natural positions (A4), the same overstatement
+  the earlier nets showed, so "the tensor edit overstates the free move by ~2×" is itself a
+  stable finding. Flip the owner of a won board: centre **+1.05**, corner **+0.94**, edge
+  **+0.83** (v2a: +1.03 / +0.91 / +0.79); centre − corner +0.111, corner − edge +0.114
+  (v2a: +0.116 / +0.116). The raw head's ownership hierarchy is unchanged to the second
+  decimal across 340 Elo — and A5 says the *search* value with threats controlled sees only
+  a residual +0.03 … +0.07 per board, so the hierarchy is a property of the intuition
+  (the raw head), most of which the lines explain. Removing an open board for both sides:
+  +0.017 (v2a +0.06) — an open board is worth nothing to the mover once it is nobody's.
+- *Surprise (raw vs 256-sim search), 7188 positions.* Search move ≠ raw argmax in
+  **33.6 %** of positions (v2a on its own buffer: 29.8 %), mean |search − raw value|
+  0.185 (0.172); the disagreement peaks at plies 30–39 (43.8 %; v2a 37.5 %) and the raw
+  policy's probability on the search's move is lowest there (0.44). The two position sets
+  differ (deep8_300's late games are more contested), so the rise is not a strength
+  comparison; the shape — intuition and search part company in the middlegame, agree in
+  the opening and the late endgame — is the same on both. The top-30 disagreements are
+  in the `.out` as boards; the largest value surprises are mostly late tactics the raw
+  head misreads by a full point (e.g. ply 50, raw −0.62, search +0.97: a forced local
+  win the policy ranks second). The hand-annotated *Game Changer*-style write-up is still
+  to do (C3).
+
+**B5 results (2026-09-03).** *Decodability half* — from B1: the policy's D4 divergence is
+0.05 bits for 200 iterations and halves at the first LR drop to 0.027 at the end; by ply
+it is 0.010 in the opening and 0.034 in the middlegame. *Behavioural half*
+(`runs/plan5_B5_sym_vs_plain.out`, `runs/deep10_c1_300/paired_sym_vs_plain_64.json`):
+deep10 with symmetry-averaged evaluation @64 vs plain deep10 @64 on the paired suite scores
+**55.0 % [52.4, 57.7], +35 Elo [+17, +54]** — above the ±3 rule, at 8× the inference cost
+per simulation. On the endgame set the same averaging adds +0.4 WDL points (84.6 → 85.0 on
+v1, 84.7 → 85.1 on v2_dev; deep8_300 +1.2). So the 0.027 bits of residual orientation
+inconsistency are not cosmetic: the net has *not* fully learned D4, and averaging is worth
+a rung of the ladder at equal sims. **At equal compute it is a bad trade**
+(`runs/plan5_B5b_sym_equal_compute.out`, `paired_sym64_vs_plain512.json`): symmetry-averaged
+deep10 @64 against plain deep10 @512 — the same inference per move — scores **23.9 %
+[21.8, 26.2], −201 Elo [−222, −180]**. Eight times the search buys far more than eight
+evaluations per node spent on orientation-averaging. So the +35 is real and only matters
+when inference is not the bottleneck (analysis, the atlas, the book — where it is used).
+*Interpretation:* the D4 gap is the one place where the training data's symmetry (the
+buffer is not symmetrised; the null "symmetric dedup" only changed duplicate weighting)
+leaves a measurable strength on the table — small, and cheaper to close by search than by
+averaging.
+
+**B2 results, deep10 linear probes (2026-09-03; `tools/probe.py`, `tools/probe_report.py`;
+`runs/probe_data_deep8late.npz` = 60 000 positions from deep8_300's iteration-280+ games,
+50 000 / 10 000 by source game; `runs/deep10_c1_300/probes.{json,png}`,
+`runs/plan5_B2_fit_deep10.out`).** Linear read-outs at the input planes, the stem and each
+of the 10 blocks, for all 15 checkpoints and a randomly initialised 10×128 net (the
+control). Every number below is *gain over the control at the same layer* (test accuracy
+or R²), as §1c requires.
+
+- **What the encoding already exposes (gain ≈ 0, so the probe cannot speak):** the count
+  margin (R² 1.000 on the input planes — it is linear in the won-board planes), open
+  boards, empties, per-board status, the target board (99.5 % on the control) and the
+  free-move flag (98.4 % on the control, 99.8 % trained). These concepts are *inputs*, not
+  things the net learned; any claim that "the net represents the free move" is empty.
+- **What is computed, where, and when** (gain at the best layer; "learned by" = the
+  checkpoint reaching 90 % of the final gain there):
+
+  | concept | control → final | gain | best layer | learned by |
+  |---|---|---|---|---|
+  | dead boards (count; R²) | 0.01 → 0.49 | **+0.48** | block05 | 180 |
+  | exact value, ≤ 14 empties (3-class) | 64.5 → 89.4 % | **+0.25** | block10 | 180 |
+  | search's best move now (81-class) | 55.6 → 71.2 % | +0.16 | block10 | 220 |
+  | macro threats for / against (count; R²) | 0.68 → 0.84 / 0.71 → 0.86 | +0.15 | block07 / 08 | 100 / 140 |
+  | local win available now | 86.2 → 99.4 % | +0.13 | block05 | 60 |
+  | any macro threat for | 91.2 → 96.8 % | +0.06 | block10 | 80 |
+  | opponent local threat | 92.8 → 98.4 % | +0.06 | block08 | 80 |
+  | game result z (3-class) | 59.9 → 64.9 % | +0.05 | block10 | 220 |
+  | best move two plies on (81-class) | 33.8 → 38.3 % | +0.05 | block08 | 240 |
+  | macro win available now | 92.5 → 95.9 % | +0.03 | block10 | 100 |
+  | final owner of the centre board (3-class) | 60.8 → 62.0 % | +0.01 | block06 | — |
+
+  Tactical, local concepts (a local win, an opponent's local threat) are linearly readable
+  by block05 and learned by iteration 60–80; the macro-line threats sharpen through the
+  middle of the trunk (peak at block07–08, then *fade* toward block10 — the trunk has
+  used them by the time the heads read it) and are learned by 100–140; the value-like
+  concepts (dead boards, the exact value, z) live in the deepest blocks and are the last
+  to settle (180–220), stepping at the LR drop as B1 showed (exact-value gain at block10:
+  0.229 at it 200 → 0.246 at 220 → 0.249 at 300). Nothing appears after 240; the policy
+  read-out creeps (+0.009 from 220 to 300). **§0 criterion (ii) does not fire.**
+- **Look-ahead.** The search's current best move is decodable at 71 % from block10 (the
+  policy head's job, unsurprisingly); the move two plies on only at 38 % vs 34 % on the
+  control — the trunk carries little of the line it is about to follow, in the linear
+  sense. (Jenner et al.'s chess result was for a much deeper net; here the "future" is
+  mostly the *target-board* constraint, which is in the input.)
+- **Comparison (i), the ownership head.** The net's own ownership head predicts the final
+  owner of each board at **60.3 %** on the test positions (majority class 41.2 %). The best
+  linear trunk probe gets 60.1 % (mean over boards) — the head reads what the trunk has.
+  But the same probe on the *random* net's trunk already gets **59.0 %**: final ownership
+  is about 59 % predictable from the board encoding alone, and 300 iterations add one
+  point. The auxiliary ownership head is therefore learning almost nothing beyond the
+  current board, which is why turning the auxiliary heads off was a null (RETROSPECTIVE
+  §3) — the target is nearly a function of the input.
+- **Draw blindness, seen from inside.** The exact value becomes linearly readable from
+  block10 at 89 % (control 64 %). Its "learned by 180" and the step at the drop match B1's
+  draw-recognition curve; the representation *and* the head arrive together, which is
+  what "optimisation, not capacity" predicts.
+
+**Replication on deep8_c1_300** (`runs/deep8_c1_300/probes.{json,png}`; positions from
+deep10's late games, look-ahead labels from deep8_300's own 256-sim search; 16 checkpoints
++ control × 10 layers). The grid is the same to within a few points: dead boards +0.48 at
+block 5 (deep10 +0.48, block 5), the exact value +0.25 at the last block (+0.25, last
+block), the search's best move +0.13 at the last block (+0.16), macro threats +0.14 / +0.13
+at blocks 6 / 5 (+0.15 / +0.15 at 7 / 8), local win +0.12 at block 5 (+0.13, block 5),
+opponent local threat +0.06 (+0.06), z +0.04 (+0.05), the move two plies on +0.05 (+0.05),
+final ownership of the centre +0.02 (+0.01). The "learned by" checkpoints match as well:
+local tactics 60–80 (deep10 60–80), macro threats 80–120 (100–140), dead boards 200 (180),
+the exact value 180 (180), z 220 (220), the best move 200 (220). Ownership head 59.9 %,
+best trunk probe 61.8 %, random-trunk probe 60.9 %, majority 41.2 % (deep10: 60.3 / 60.1 /
+59.0 / 41.2). Every §8 claim in KNOWLEDGE.md about what the trunk computes, where and
+when, therefore holds on both strong nets.
+
+**Non-linear probes** (`runs/deep10_c1_300/probes_mlp.json`, one hidden layer of 256, six
+deep10 checkpoints + control, `runs/plan5_B2_fit_deep10_mlp.out`). The point of the
+non-linear control is to separate *concepts the trunk computes* from *concepts a probe can
+compute from the input planes if allowed one layer of its own*. With the MLP probe the
+random net already yields macro threats at R² 0.81–0.83 (linear: 0.68–0.70) and
+macro-win-now at 98 %, so the trained net's gain over the control shrinks from +0.15 to
++0.06 (threats) and from +0.03 to +0.02 (macro win): these are simple functions of the
+board that the trunk *linearises* rather than discovers. The gains that survive the
+non-linear control are the real computations: dead boards R² +0.58 (control 0.05 → 0.56),
+the exact value +0.21 (0.68 → 0.89), the search's best move +0.17, an available local win
++0.13, the move two plies on +0.06, z +0.05. (The 81-class MLP heads fit slightly worse
+than the linear ones in 10 epochs — 66 vs 71 % for the best move — which is a probe
+budget effect, not a finding.) KNOWLEDGE claims 37–38 are stated with this split.
+
+**B3 results, deep10 (2026-09-03; `tools/value_decomp.py`; 20 000 of the B2 positions,
+256-sim search; `runs/deep10_c1_300/value_decomp.{json,png}`,
+`runs/plan5_B3_value_deep10.out`).** The raw WDL expectation and the search value, each
+regressed on the concept set (free move, ply, count margin, open boards, empties, side,
+macro threats for / against, dead boards, local win now, opponent local threat, macro win
+now, full boards), per checkpoint, cluster-robust by game. R² at net_0300: raw 0.59,
+search 0.56 — the same share as freemove.py's smaller model, so the added concepts
+re-attribute rather than explain more.
+
+- **The free move decomposes.** With the immediate-tactics concepts in the model the
+  free-move coefficient on the search value is **+0.084 ± 0.026** (A4's model, without
+  them: +0.196). The difference is carried by *macro win now* (**+0.675 ± 0.059** — the
+  mover can end the game this move), which a free move makes far more available. So
+  about half of "a free move is worth +0.2" is the option to cash a macro threat at once,
+  and the residual tempo value is ≈ +0.08. The raw head weighs the free move at +0.140
+  (gap +0.056) and a macro-win-in-one at +0.764 (gap +0.089): intuition over-credits both.
+- **Coefficient paths over training** (figure): macro threats for / against are at their
+  final values (+0.10 / −0.14) by iteration 20 — line counting is learned first and never
+  moves. The count margin *falls* from +0.106 (raw, it 20) to +0.037 (300): the early net
+  counts boards, the trained net counts lines and tempo, and discounts the raw count to a
+  third. The free move on the search value *rises* from +0.04 to +0.09 while the raw head's
+  falls from +0.19 to +0.14, the raw − search gap shrinking from 0.15 to 0.06: intuition
+  converges toward search here, as A4 observed for the earlier nets. Macro-win-now is
+  constant at +0.68 on the search value from iteration 20 (the search sees a one-move win
+  regardless of the net) while the raw head takes 80 iterations to reach it.
+- **Small or null:** local win available now −0.026 ± 0.017 (once the macro win is separate,
+  an available local win is worth nothing by itself); dead boards +0.04 ± 0.08 (null);
+  opponent local threat −0.099 ± 0.014 (real, a third of a macro threat).
+- **Ownership by class** (count margin replaced by boards owned per class, as A5): search
+  value centre_self +0.076 ± 0.044, corners_self +0.079 ± 0.032, edges_self +0.066 ± 0.029,
+  opponent-owned ≈ 0; net worth +0.066 / +0.090 / +0.066 — A5's residual reproduced on an
+  independent 20 000-position sample with the fuller model, again with no class ordering.
+  On the *raw* value the asymmetry flips (self ≈ 0, opponent −0.05), so the self/opponent
+  asymmetry is not robust and should not be reported; the symmetric statement — *an owned
+  board is worth ≈ +0.07 of expected score beyond the lines it lies on* — is.
+- **What the value head still under-weights relative to search:** the largest raw − search
+  gaps are the ply and empties terms (the raw head does not scale its confidence with how
+  much game is left) and the macro-win-in-one (+0.09), not any positional concept. The
+  remaining regret is tactical-horizon, which is what a search is for and what C5's
+  tablebase would grade exactly.
+- **Replication on deep8_c1_300** (`runs/plan5_B3_value_deep8.out`; 20 000 positions from
+  deep10's late games, 11 checkpoints): free move on the search value **+0.102 ± 0.026**
+  (deep10 +0.084), raw +0.170; macro win now +0.625 ± 0.056 (+0.675); threats +0.125 /
+  −0.141; opponent local threat −0.082 ± 0.014 (−0.099); count margin +0.021 ± 0.011
+  (+0.036). Ownership by class on the search value: centre_self +0.031 ± 0.043 (n.s.),
+  corners_self +0.044 ± 0.032, edges_self +0.041 ± 0.029; net worth +0.005 / +0.049 /
+  +0.035. Same coefficient paths (count margin falling from +0.078 at iteration 20, threats
+  flat from the start, the raw free-move coefficient above the search's throughout). The
+  ownership residual is therefore *small and positive on both nets but not sharp*: +0.07
+  on deep10, +0.04 on deep8_300 for corners and edges and nothing for the centre. KNOWLEDGE
+  claim 14 is stated at that strength.
+
 ## 4. Phase C — what the agent knows about the game (the product)
 
 - **C1. Opening book.** The 15 first-move orbits, with replies to depth 4–6, at ≥ 16 k
@@ -441,19 +714,52 @@ behavioural one (§1c); nothing in Phase B is reported from probe accuracy alone
   share from the paired-suite openings that start there, best reply class, agreement with
   deep8_c1_300. Compared line-by-line with the informal human/engine tables in
   knowledge/05 §3 (centre-centre vs centre-corner etc.).
+  **Done 2026-09-03** (`tools/book.py`, `runs/book_deep10.{json,md}`, `runs/book_deep8.{json,md}`,
+  `runs/plan5_C1*.out`; depth 4, top-3 replies per node, 16 384 sims, symmetry-averaged;
+  459 and 437 nodes; 17 min on the 3090 / 29 min on the 3060). First-move values from
+  deep10: [40] +0.447, [36] +0.336, [0] +0.282, [37] +0.258, [5] +0.197, [8] +0.196,
+  [10] +0.188, [2] +0.183, [4] +0.162, [1] +0.128, [12] +0.113, [16] +0.099, [15] +0.083,
+  [9] +0.046, [13] −0.047 — the atlas ordering, and the paired-suite X score by opening
+  (deep10 self-play at 256 sims) follows it: 74 % after [40] and [36], 69 % after [0],
+  45–51 % after [9], [8], [13]. **The two nets agree on the most-visited move in 75 % of
+  the 341 nodes they share** (depth 1: 0.60, depths 2–4: 0.75–0.79; mean |value
+  difference| 0.016), and the disagreements are where the book is flat: after [40] the
+  top reply has a visit share of 0.19 (deep10: 37) / 0.14 (deep8: 41), after [0] 0.27 /
+  0.32; where the reply's share is ≥ 0.7 (after [4], [13], [37], [10], [9], [1], [16]) the
+  nets pick the same move. The reply principle the book contains (`tools/book_stats.py`):
+  the most-visited reply is the **self-send** — the cell whose index equals the board the
+  mover was sent to, which sends the opponent back into that same board — in 52 % (deep10)
+  / 57 % (deep8) of the nodes where that cell is free, at every depth, and with a higher
+  visit share when chosen (0.83 vs 0.73). Giving a free move is never the top reply in
+  the first four plies (no board is closed yet), and "send them back to the board they
+  played from" is the top reply in 8–9 %.
 - **C2. Named principles with effect sizes**, each tagged behavioural / predictive /
   search-relative / exact and each with its CI and the nets it held across: free move,
   macro line, centre-of-centre, decided-late, tiebreak share, X advantage at strong play,
   plus the untested folk claims — never send to a board where one move wins (minimax.dev's
   pruning rule: is it ever violated by deep10?), the Orlin gambit (deliberately conceding
   the centre board: what does the net say it costs?), what drawn games look like (count
-  ties: which boards, how early are they foreseeable).
+  ties: which boards, how early are they foreseeable). **Done 2026-09-03**: the principles
+  are KNOWLEDGE.md §1–§7; the folk claims are `tools/principles.py` →
+  `runs/principles_deep10.json`, `runs/principles_deep8.json` (the sending rule is false
+  as a rule — 24 % of the search's moves and 69 % of the solver's optimal moves violate
+  it — and true as a macro-line rule and an opening rule; the Orlin gambit costs what its
+  lines cost; 97 % of draws are 4–4 with one full board), plus the self-send reply rule
+  from C1.
 - **C3. Puzzle collection v2** (A7's output) with motifs; the *hard* set — where 64-sim
-  search still fails — as the game's genuinely difficult ideas, with solver PVs.
+  search still fails — as the game's genuinely difficult ideas, with solver PVs. **Done
+  2026-09-03:** `suites/puzzles_v2_dev.npz` (126 puzzles, 5 hard); `tools/annotate.py`
+  prints the board, the exact value of every legal move and the solver's lines after the
+  best and the net's move (`docs/positions_raw.md`); `docs/positions.md` is the commentary
+  on the five hard positions — three of the five winning moves hand the opponent a free
+  move, none is a local tactic.
 - **C4. `KNOWLEDGE.md` — "What uttt-zero believes about Ultimate Tic-Tac-Toe."** The
   deliverable. One claim per line, with its level, effect size, CI, held-across list,
   tool and output file. The explainer's Part 7 is rewritten from it. This replaces the
-  beliefs sections of PLAN2/3/4/RETROSPECTIVE as the place a claim lives.
+  beliefs sections of PLAN2/3/4/RETROSPECTIVE as the place a claim lives. **Drafted
+  2026-09-03** (45 claims from Phases A and B, C2's folk claims included via
+  `tools/principles.py`); the opening book (C1) and the deep8 replications are still to
+  go in, and the explainer rewrite has not been done.
 - **C5. Stretch: the ≤ 1-open-board tablebase** (knowledge/06 §5: ≈ 1.2 × 10¹⁰
   positions, ≈ 12 GB at a byte each, Numba backward induction over a DAG). A tablebase is
   a precomputed table of the exact result of every position in some class — here every
@@ -494,7 +800,12 @@ approval (the pause called in PLAN4 §3c is still in effect).
 - **D3. Runs the analysis may suggest** (pure speculation until A–C report):
   - if B1 shows draw recognition and endgame accuracy *stepping* at the LR drops rather
     than climbing between them → a longer or earlier final annealing phase is the
-    cheapest test (same iteration count, different `--lr_drops`);
+    cheapest test (same iteration count, different `--lr_drops`). **B1 says yes** (§3):
+    the step is at the first drop (200), the second drop (280) shows nothing, and every
+    curve is flat from 220/240 on. The candidate run is therefore `--lr_drops 150,250` at
+    300 iterations (or 200 iterations with drops at 120/180 — the same annealed net at
+    two-thirds the cost, if the constant-LR climb from 150 to 200 turns out to be worth
+    less than its 3 h). Owner's call, like every run;
   - if A9 shows the v1 endgame numbers were overfit by selection → nothing to train,
     but every future eval reads `endgame_v2_dev`;
   - if B3 finds the value head's remaining error is concentrated in the last-board

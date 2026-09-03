@@ -83,6 +83,11 @@ deep10@64 vs deep8_c1_300@80 is −11 [−30, +7] — the last rung is a wash at
   steps. The 150-iteration schedule had been starving every earlier architecture
   comparison of convergence. Corollary: some "capacity" conclusions from 150-iteration
   runs were really optimization conclusions — the nets had not finished learning.
+  *(Addendum 2026-09-03, PLAN5 §3 B1: the checkpoint timelines split the +127 into ≈ +5
+  points from iterations 150–200 at the constant LR and ≈ +8 from the first drop, at which
+  every curve — score, endgame WDL, draw recognition, opening entropy, D4 consistency —
+  steps once and then stays flat to 300. The second drop at 280 produces nothing visible
+  in-run; "both drops delivered steps" is not supported by the curves.)*
 - **Phased play-time search: +50 Elo (v2b), +26 (deep8_300)** at equal mean cost —
   spend fewer simulations early and more late, where games are decided.
 
@@ -168,7 +173,10 @@ where noted:
   related) — half the naive tensor-probe estimate, and largest late in the game when
   ahead.
 - The board "value hierarchy" (centre worth more than corners, corners more than edges)
-  is macro-line counting in disguise (±0.17 per line).
+  is macro-line counting in disguise (±0.17 per line). *(Addendum 2026-09-03, PLAN5 §2 A5:
+  on the two strong nets the lines are still ±0.15 each, but with them controlled an own
+  board now carries a small residual of its own, +0.03 … +0.07 — a fifth to a third of a
+  line; which class of board is worth most is not resolved between the nets.)*
 - The count tiebreak decides ~30 % of strong games and rises with strength; draws rise
   with strength too (12 % at 64-sim eval, 19–22 % between the newest nets — the
   strongest agents increasingly *prove* draws).

@@ -1,0 +1,34 @@
+plan5 Phase A (3090 chain) started Thu Sep  3 00:19:44 EDT 2026
+plan5 Phase A (3060 chain) started Thu Sep  3 00:19:44 EDT 2026
+=== 2026-09-03 00:19:44 .venv/Scripts/python.exe tools/corpus_stats.py runs/deep10_c1_300 --last 20
+=== 2026-09-03 00:19:44 .venv/Scripts/python.exe tools/decision.py runs/deep10_c1_300/net_0300.pt --corpus runs/v2a --last 2 --games 4000 --sims 64 --device cuda:1
+    -> runs/plan5_A6_corpus_deep10_last20.out (0)
+=== 2026-09-03 00:20:22 .venv/Scripts/python.exe tools/corpus_stats.py runs/deep8_c1_300 --last 20
+    -> runs/plan5_A6_corpus_deep8_300_last20.out (0)
+=== 2026-09-03 00:20:59 .venv/Scripts/python.exe tools/corpus_stats.py runs/v2a --last 20
+    -> runs/plan5_A6_corpus_v2a_last20.out (0)
+=== 2026-09-03 00:21:34 .venv/Scripts/python.exe tools/endgame.py build --corpus runs/deep8_c1_300 --last 20 --per_stratum 125 --split dev,test --processes 12 --out suites/endgame_v2
+    -> runs/plan5_A3a_decision_deep10_on_v2a.out (0)
+=== 2026-09-03 00:27:53 .venv/Scripts/python.exe tools/decision.py runs/deep10_c1_300/net_0300.pt --corpus runs/deep8_c1_300 --last 20 --games 4000 --sims 64 --device cuda:1
+    -> runs/plan5_A9_build_endgame_v2.out (0)
+=== 2026-09-03 00:34:04 .venv/Scripts/python.exe tools/endgame.py eval runs/deep10_c1_300/net_0300.pt --set suites/endgame_v2_dev.npz --device cuda:0
+    -> runs/plan5_A9_eval_deep10_v2dev.out (0)
+=== 2026-09-03 00:34:37 .venv/Scripts/python.exe tools/endgame.py eval runs/deep8_c1_300/net_0300.pt --set suites/endgame_v2_dev.npz --device cuda:0
+    -> runs/plan5_A9_eval_deep8_v2dev.out (0)
+=== 2026-09-03 00:35:06 .venv/Scripts/python.exe tools/endgame.py eval runs/deep10_c1_300/net_0300.pt --set suites/endgame_v1.npz --device cuda:0
+    -> runs/plan5_A9_eval_deep10_v1.out (0)
+=== 2026-09-03 00:35:36 .venv/Scripts/python.exe tools/endgame.py eval runs/deep8_c1_300/net_0300.pt --set suites/endgame_v1.npz --device cuda:0
+    -> runs/plan5_A9_eval_deep8_v1.out (0)
+=== 2026-09-03 00:36:04 .venv/Scripts/python.exe tools/atlas.py --nets runs/v2b/net_0150.pt,runs/deep8_c1_300/net_0300.pt,runs/deep10_c1_300/net_0300.pt --budgets 1024,4096,16384 --device cuda:0 --out runs/plan5_A1_atlas.json
+    -> runs/plan5_A3b_decision_deep10_on_deep8late.out (0)
+=== 2026-09-03 00:36:37 .venv/Scripts/python.exe tools/decision.py runs/deep8_c1_300/net_0300.pt --corpus runs/v2a --last 2 --games 4000 --sims 64 --device cuda:1
+    -> runs/plan5_A3c_decision_deep8_on_v2a.out (0)
+=== 2026-09-03 00:43:20 .venv/Scripts/python.exe tools/freemove.py runs/deep10_c1_300/net_0300.pt --corpus runs/deep8_c1_300 --last 20 --sims 256 --device cuda:1
+    -> runs/plan5_A4_freemove_deep10_on_deep8late.out (0)
+=== 2026-09-03 00:48:21 .venv/Scripts/python.exe tools/puzzles.py runs/deep10_c1_300/net_0300.pt --corpus runs/deep8_c1_300 --last 20 --max_empty 14 --n 6000 --processes 12 --device cuda:1 --out suites/puzzles_v2_dev.npz
+    -> runs/plan5_A7_puzzles_deep10_on_deep8late.out (0)
+=== 2026-09-03 00:49:03 .venv/Scripts/python.exe tools/freemove.py runs/deep8_c1_300/net_0300.pt --corpus runs/deep10_c1_300 --last 20 --sims 256 --device cuda:1
+    -> runs/plan5_A1_atlas.out (0)
+plan5 Phase A (3090 chain) done Thu Sep  3 00:52:39 EDT 2026
+    -> runs/plan5_A4b_freemove_deep8_on_deep10late.out (0)
+plan5 Phase A (3060 chain) done Thu Sep  3 00:53:18 EDT 2026

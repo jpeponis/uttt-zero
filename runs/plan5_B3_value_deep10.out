@@ -1,0 +1,45 @@
+20000 positions from 12072 games (runs/probe_data_deep8late.npz); 15 checkpoints of runs/deep10_c1_300; 14 regressors
+  net_0020: R2 raw 0.584 search 0.525 | free_move +0.191/+0.040  count_margin +0.106/+0.076  threats_for +0.112/+0.092  threats_against -0.147/-0.146  local_win_now +0.026/+0.004  macro_win_now +0.565/+0.689  (663s)
+  net_0040: R2 raw 0.590 search 0.552 | free_move +0.145/+0.056  count_margin +0.078/+0.057  threats_for +0.110/+0.094  threats_against -0.158/-0.136  local_win_now +0.024/-0.010  macro_win_now +0.611/+0.681  (1157s)
+  net_0060: R2 raw 0.597 search 0.548 | free_move +0.162/+0.051  count_margin +0.065/+0.052  threats_for +0.101/+0.092  threats_against -0.142/-0.140  local_win_now +0.033/-0.012  macro_win_now +0.714/+0.692  (1353s)
+  net_0080: R2 raw 0.605 search 0.543 | free_move +0.061/+0.053  count_margin +0.060/+0.050  threats_for +0.141/+0.100  threats_against -0.121/-0.146  local_win_now +0.016/-0.012  macro_win_now +0.849/+0.688  (1549s)
+  net_0100: R2 raw 0.589 search 0.547 | free_move +0.168/+0.072  count_margin +0.043/+0.040  threats_for +0.110/+0.105  threats_against -0.142/-0.145  local_win_now +0.010/-0.018  macro_win_now +0.744/+0.682  (1745s)
+  net_0120: R2 raw 0.596 search 0.565 | free_move +0.136/+0.073  count_margin +0.048/+0.039  threats_for +0.091/+0.100  threats_against -0.140/-0.140  local_win_now +0.013/-0.022  macro_win_now +0.730/+0.679  (1942s)
+  net_0140: R2 raw 0.627 search 0.564 | free_move +0.133/+0.073  count_margin +0.070/+0.055  threats_for +0.113/+0.097  threats_against -0.123/-0.137  local_win_now +0.011/-0.014  macro_win_now +0.856/+0.674  (2138s)
+  net_0160: R2 raw 0.591 search 0.557 | free_move +0.132/+0.080  count_margin +0.046/+0.046  threats_for +0.108/+0.097  threats_against -0.136/-0.135  local_win_now +0.013/-0.023  macro_win_now +0.745/+0.679  (2334s)
+  net_0180: R2 raw 0.577 search 0.555 | free_move +0.121/+0.082  count_margin +0.040/+0.036  threats_for +0.097/+0.107  threats_against -0.151/-0.145  local_win_now +0.004/-0.024  macro_win_now +0.776/+0.678  (2531s)
+  net_0200: R2 raw 0.585 search 0.561 | free_move +0.112/+0.081  count_margin +0.046/+0.040  threats_for +0.120/+0.101  threats_against -0.110/-0.139  local_win_now +0.009/-0.026  macro_win_now +0.758/+0.677  (2727s)
+  net_0220: R2 raw 0.597 search 0.566 | free_move +0.130/+0.095  count_margin +0.040/+0.037  threats_for +0.100/+0.101  threats_against -0.124/-0.136  local_win_now +0.008/-0.030  macro_win_now +0.810/+0.672  (2923s)
+  net_0240: R2 raw 0.587 search 0.561 | free_move +0.140/+0.088  count_margin +0.041/+0.037  threats_for +0.110/+0.103  threats_against -0.122/-0.138  local_win_now +0.004/-0.029  macro_win_now +0.768/+0.673  (3119s)
+  net_0260: R2 raw 0.584 search 0.559 | free_move +0.174/+0.093  count_margin +0.030/+0.034  threats_for +0.119/+0.104  threats_against -0.120/-0.139  local_win_now +0.002/-0.031  macro_win_now +0.751/+0.674  (3315s)
+  net_0280: R2 raw 0.580 search 0.556 | free_move +0.141/+0.086  count_margin +0.036/+0.035  threats_for +0.098/+0.106  threats_against -0.132/-0.140  local_win_now +0.009/-0.028  macro_win_now +0.745/+0.676  (3511s)
+  net_0300: R2 raw 0.588 search 0.558 | free_move +0.140/+0.084  count_margin +0.037/+0.036  threats_for +0.106/+0.104  threats_against -0.128/-0.137  local_win_now +0.009/-0.026  macro_win_now +0.764/+0.675  (3707s)
+
+final checkpoint net_0300: coefficient (95 % CI) of the raw value | the 256-sim search value | gap raw-search
+  intercept              -0.4127 +- 0.2150 | -1.2430 +- 0.2157 | +0.8303
+  free_move              +0.1401 +- 0.0283 | +0.0841 +- 0.0262 | +0.0560
+  ply/10                 +0.0573 +- 0.0622 | +0.2139 +- 0.0622 | -0.1567
+  (ply/10)^2             -0.0099 +- 0.0045 | -0.0157 +- 0.0045 | +0.0058
+  count_margin           +0.0367 +- 0.0101 | +0.0360 +- 0.0104 | +0.0007
+  open_boards            +0.0215 +- 0.0263 | -0.0341 +- 0.0262 | +0.0556
+  empties/10             -0.0164 +- 0.0529 | +0.1475 +- 0.0526 | -0.1639
+  is_X                   +0.6560 +- 0.0110 | +0.6205 +- 0.0114 | +0.0355
+  threats_for            +0.1065 +- 0.0233 | +0.1040 +- 0.0248 | +0.0025
+  threats_against        -0.1280 +- 0.0187 | -0.1373 +- 0.0180 | +0.0093
+  dead_boards            -0.0214 +- 0.0805 | +0.0425 +- 0.0771 | -0.0639
+  local_win_now          +0.0092 +- 0.0160 | -0.0259 +- 0.0168 | +0.0351
+  local_threat_against   -0.0808 +- 0.0146 | -0.0993 +- 0.0143 | +0.0184
+  macro_win_now          +0.7641 +- 0.0518 | +0.6754 +- 0.0586 | +0.0886
+  full_boards            +0.0600 +- 0.0851 | +0.1765 +- 0.0857 | -0.1165
+
+ownership-by-class model (count_margin replaced by boards owned per class), final checkpoint: raw | search
+  centre_self            -0.0011 +- 0.0424 | +0.0764 +- 0.0441
+  centre_opp             -0.0484 +- 0.0412 | +0.0102 +- 0.0418
+  corners_self           +0.0105 +- 0.0316 | +0.0791 +- 0.0317
+  corners_opp            -0.0657 +- 0.0319 | -0.0105 +- 0.0318
+  edges_self             +0.0155 +- 0.0287 | +0.0662 +- 0.0286
+  edges_opp              -0.0538 +- 0.0287 | -0.0002 +- 0.0287
+  net worth of owning (self - opp, raw value): centre +0.047, corner +0.076, edge +0.069
+  net worth of owning (self - opp, search value): centre +0.066, corner +0.090, edge +0.066
+wrote runs/deep10_c1_300\value_decomp.json  [3707s]
+wrote runs/deep10_c1_300\value_decomp.png

@@ -1,0 +1,21 @@
+48576 distinct positions, plies 6-60, from runs/deep8_c1_300/latest_full.pt
+baseline value (side to move): mean +0.017
+
+free move instead of being confined          n= 43252  mean +0.413  p10 +0.095  median +0.324  p90 +0.853   [ply 0-19: +0.280, ply 20-34: +0.327, ply 35-81: +0.604]
+    with 2 open boards: +0.467 (n=491)
+    with 3 open boards: +0.604 (n=1524)
+    with 4 open boards: +0.660 (n=2614)
+    with 5 open boards: +0.652 (n=3602)
+    with 6 open boards: +0.579 (n=4268)
+    with 7 open boards: +0.478 (n=5426)
+    with 8 open boards: +0.348 (n=7251)
+    with 9 open boards: +0.281 (n=18030)
+
+owning a centre board vs opponent owning it  n= 10807  mean +1.052  p10 +0.004  median +1.050  p90 +1.988   [ply 0-19: +1.549, ply 20-34: +1.113, ply 35-81: +1.043]
+owning a corner board vs opponent owning it  n= 41099  mean +0.941  p10 +0.003  median +0.999  p90 +1.939   [ply 0-19: +1.122, ply 20-34: +0.999, ply 35-81: +0.931]
+owning a edge board vs opponent owning it    n= 49030  mean +0.827  p10 +0.003  median +0.851  p90 +1.694   [ply 0-19: +1.024, ply 20-34: +0.921, ply 35-81: +0.801]
+    centre - corner: +0.111   corner - edge: +0.114
+
+open centre board removed (drawn) for both   n= 33947  mean +0.017  p10 -0.647  median +0.008  p90 +0.677   [ply 0-19: -0.002, ply 20-34: +0.055, ply 35-81: -0.020]
+open corner board removed (drawn) for both   n=133431  mean +0.012  p10 -0.544  median +0.000  p90 +0.563   [ply 0-19: -0.002, ply 20-34: +0.046, ply 35-81: -0.019]
+open edge board removed (drawn) for both     n=124861  mean +0.014  p10 -0.429  median +0.001  p90 +0.454   [ply 0-19: +0.003, ply 20-34: +0.043, ply 35-81: -0.013]

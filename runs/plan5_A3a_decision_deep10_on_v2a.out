@@ -1,0 +1,35 @@
+4000 held-out games from ['games_0148.npz', 'games_0149.npz'] (runs/v2a); net runs/deep10_c1_300/net_0300.pt; search 64 sims
+result X/O/draw: 0.611/0.278/0.112; mean length 49.4
+
+ ply  alive  WDL logloss  WDL acc  raw sign  srch sign  Q sign  settled raw  settled srch  settled Q
+   0   4000        0.909    0.611     0.611      0.611   0.611        0.140         0.000      0.188
+   4   4000        0.909    0.611     0.611      0.611   0.611        0.140         0.038      0.188
+   8   4000        0.913    0.610     0.610      0.611   0.610        0.141         0.038      0.188
+  12   4000        0.913    0.610     0.610      0.611   0.611        0.141         0.038      0.188
+  16   4000        0.913    0.610     0.610      0.610   0.611        0.141         0.038      0.188
+  20   4000        0.912    0.611     0.611      0.610   0.611        0.142         0.039      0.190
+  24   4000        0.904    0.611     0.611      0.610   0.610        0.148         0.045      0.204
+  28   4000        0.895    0.611     0.612      0.615   0.617        0.169         0.059      0.244
+  32   4000        0.869    0.617     0.617      0.630   0.639        0.207         0.083      0.330
+  36   3999        0.800    0.650     0.647      0.658   0.704        0.298         0.127      0.508
+  40   3946        0.639    0.730     0.711      0.688   0.776        0.492         0.222      0.728
+  44   3497        0.398    0.840     0.781      0.709   0.830        0.699         0.373      0.885
+  48   2293        0.241    0.902     0.801      0.725   0.851        0.836         0.507      0.960
+  52    986        0.151    0.943     0.801      0.718   0.862        0.904         0.612      0.980
+  56    239        0.104    0.971     0.803      0.724   0.858        0.925         0.640      0.996
+  60     47        0.037    0.979     0.723      0.617   0.830        0.979         0.702      1.000
+
+settling ply (raw value): median 41, quartiles 35-45; as a fraction of game length: median 0.84, p10 0.00, p90 0.93; never settled before the last ply: 0.001
+  X wins : median settling ply 38, fraction 0.79 (n=2442)
+  O wins : median settling ply 43, fraction 0.88 (n=1112)
+  draws  : median settling ply 45, fraction 0.88 (n=446)
+
+settling ply (search root value): median 45, quartiles 41-49; as a fraction of game length: median 0.95, p10 0.71, p90 1.00; never settled before the last ply: 0.324
+  X wins : median settling ply 43, fraction 0.91 (n=2442)
+  O wins : median settling ply 46, fraction 0.96 (n=1112)
+  draws  : median settling ply 49, fraction 0.98 (n=446)
+
+settling ply (best-child Q): median 36, quartiles 30-41; as a fraction of game length: median 0.75, p10 0.00, p90 0.87; never settled before the last ply: 0.000
+  X wins : median settling ply 32, fraction 0.68 (n=2442)
+  O wins : median settling ply 39, fraction 0.80 (n=1112)
+  draws  : median settling ply 41, fraction 0.80 (n=446)

@@ -1,0 +1,11 @@
+=== B5: deep10 symmetry-averaged @64 vs deep10 plain @64 (paired suite)
+paired suite openings_v1 (516 openings, 1032 games): A=runs/deep10_c1_300/net_0300.pt@64 sym vs B=runs/deep10_c1_300/net_0300.pt@64  [1200s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1   50.0%       n/a        n/a                 100.0%   0.0%   100.0%    0.0%      0 /   1 /   0
+  orbits      15   56.7%  [ 43.3,  70.0]    +47 [ -47, +147]   73.3%  40.0%    66.7%   20.0%      5 /   7 /   3
+  natural    250   54.5%  [ 50.7,  58.5]    +31 [  +5,  +60]   67.8%  41.2%    63.3%   16.2%     87 /  98 /  65
+  random     250   55.5%  [ 51.8,  59.2]    +38 [ +13,  +65]   65.6%  45.4%    60.1%   20.2%     96 /  96 /  58
+  all        516   55.0%  [ 52.4,  57.7]    +35 [ +17,  +54]   67.0%  43.1%    61.9%   18.2%    188 / 202 / 126
+  end reasons: line 66.1%  count 15.7%  equal 18.2%  |  mean length 50.7
+wrote runs/deep10_c1_300/paired_sym_vs_plain_64.json
+B5 done at Thu Sep  3 01:23:00 EDT 2026

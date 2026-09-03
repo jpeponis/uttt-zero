@@ -22,20 +22,26 @@ Read in this order:
 2. **`PLAN5.md`** — the live plan. It opens with a glossary of the project's terms (Elo,
    the paired suite, sims, iterations, checkpoints, the ±3-point rule and so on), then
    states the decision in front of the project and the analysis programme that follows.
-3. **`RETROSPECTIVE.md`** — what was learned over the four days of work: the strength
+3. **`KNOWLEDGE.md`** — what the agent believes about the game: one claim per line with
+   its level, effect size, confidence interval, the nets it held across, and the tool and
+   file that produced it. This is where a claim lives; the other files hold the working
+   notes behind it.
+4. **`RETROSPECTIVE.md`** — what was learned over the four days of work: the strength
    ladder, which training changes worked and which did nothing, engineering and
-   measurement lessons, and what the agent believes about the game.
-4. **`docs/explainer.html`** — the public explainer (a 3Blue1Brown-style page for a
+   measurement lessons, and the earlier form of the game beliefs.
+5. **`docs/explainer.html`** — the public explainer (a 3Blue1Brown-style page for a
    reader with no background), also published at
    https://claude.ai/code/artifact/d3d1bef5-2140-48ee-b55b-ed09d2982791. Opens from
    disk. Its Part 8 is the plain-language version of the game beliefs; PLAN5 §4 C4 will
    rewrite it from `KNOWLEDGE.md` when that exists.
-5. History, only as needed: `PLAN4.md` (hand-off and review adjudication, superseded by
-   PLAN5), `PLAN3.md` (measurement kit, strength ladder, game beliefs; corrections in
-   PLAN4), `PLAN2.md` (detailed result sections 2b-2k), `PLAN.md` and `NOTES-v2.md`
-   (original plan and notes), `RESULTS-dev1.md` and `RESULTS-v2a.md` (early run results),
-   `REVIEW-codex.md`, `REVIEW-sol.md`, `REVIEW-claude.md` (outside reviews: codex in the
-   v2a era; sol and claude in the PLAN3 era, adjudicated in PLAN4).
+6. History, only as needed, all under `docs/history/` (index in its README): `PLAN4.md`
+   (hand-off and review adjudication, superseded by PLAN5), `PLAN3.md` (measurement kit,
+   strength ladder, game beliefs; corrections in PLAN4), `PLAN2.md` (detailed result
+   sections 2b-2k), `PLAN.md` and `NOTES-v2.md` (original plan and notes),
+   `RESULTS-dev1.md` and `RESULTS-v2a.md` (early run results), `REVIEW-codex.md`,
+   `REVIEW-sol.md`, `REVIEW-claude.md` (outside reviews: codex in the v2a era; sol and
+   claude in the PLAN3 era, adjudicated in PLAN4). References such as "PLAN4 §3c" in the
+   live files mean these.
 
 ## Current state (2026-09-02)
 
@@ -49,6 +55,14 @@ Read in this order:
 - **Training is PAUSED by owner directive.** No training run is to be launched without
   the owner's approval (PLAN4 §3c, PLAN5 §5). The next work is the analysis programme in
   PLAN5 §2–§4.
+- **Analysis programme (2026-09-03):** PLAN5 Phase A is complete — every ordering and sign
+  from the earlier nets held on the +242 net; two magnitudes moved (free-move value up to
+  +0.20, and a small residual value per owned board once macro lines are controlled); the
+  endgame yardstick was not flattered by its in-run reads (`suites/endgame_v2_{dev,test}`
+  now exist, test unread). Phase B (the network on its own terms) is in progress: the
+  checkpoint timeline shows the +127 duration gain coming from the first LR drop plus the
+  constant-LR climb, with the second drop adding nothing visible. Results live in PLAN5 §2
+  and §3; `KNOWLEDGE.md` (PLAN5 §4 C4) will collect the claims.
 
 The strength ladder. Each run changed one thing from the run above it. Elo is measured on
 the paired opening suite (516 fixed openings, each played from both sides) against `v2b`,
@@ -88,8 +102,13 @@ uttt/rollout.py independent anchor: Numba bitboard UCT with random playouts (no 
 uttt/endgame.py frozen exact-label endgame set (balanced strata, per-move exact values, cluster-bootstrap metrics)
 uttt/train.py   v1 training loop (run dev1)
 uttt/train2.py  v2 training loop (game persistence, margin head, LR schedule, paired-suite anchor evaluation)
+uttt/concepts.py hand-written concept labels from the board state (free move, threats, dead boards, ...) for probing
 tools/          openings.py (build the suite, paired matches with CIs; players: checkpoint | uct | rollout | random;
-                sims may be a ply schedule "0:32,24:96"), endgame.py (build / eval the exact endgame set),
+                sims may be a ply schedule "0:32,24:96"; --a_sym/--b_sym for symmetry-averaged play),
+                endgame.py (build / eval the exact endgame set; --split dev,test splits by source game),
+                timeline.py (PLAN5 B1: every checkpoint of a run on one iteration axis), probe.py (B2: concept
+                probes on the residual stream, random-init control), value_decomp.py (B3: value regressed on
+                concepts per checkpoint), book.py (C1: opening book to depth d at deep search),
                 atlas.py (opening atlas: first-move and reply orbits, rank stability across nets/budgets),
                 decision.py (when games become predictable, held-out games), freemove.py (free-move effect,
                 prespecified regression with cluster-robust SE), puzzles.py (surprise -> solver-validated puzzles),
