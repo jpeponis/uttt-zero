@@ -103,12 +103,16 @@ uttt/endgame.py frozen exact-label endgame set (balanced strata, per-move exact 
 uttt/train.py   v1 training loop (run dev1)
 uttt/train2.py  v2 training loop (game persistence, margin head, LR schedule, paired-suite anchor evaluation)
 uttt/concepts.py hand-written concept labels from the board state (free move, threats, dead boards, ...) for probing
+uttt/surrogate.py per-move and per-position features in torch + a linear surrogate evaluator (PLAN5 B6)
+uttt/tablebase.py exact one-open-board tablebase (1 MB) and an evaluator wrapper that splices it into the search (C5)
 tools/          openings.py (build the suite, paired matches with CIs; players: checkpoint | uct | rollout | random;
                 sims may be a ply schedule "0:32,24:96"; --a_sym/--b_sym for symmetry-averaged play),
                 endgame.py (build / eval the exact endgame set; --split dev,test splits by source game),
                 timeline.py (PLAN5 B1: every checkpoint of a run on one iteration axis), probe.py (B2: concept
                 probes on the residual stream, random-init control), value_decomp.py (B3: value regressed on
-                concepts per checkpoint), book.py (C1: opening book to depth d at deep search),
+                concepts per checkpoint), book.py (C1: opening book to depth d at deep search), book_stats.py,
+                principles.py (C2: folk claims), annotate.py (C3: solver-annotated puzzles), distill.py (B6: fit and
+                play the legible surrogate), tablebase_grade.py (C5: grade a net on one-open-board positions),
                 atlas.py (opening atlas: first-move and reply orbits, rank stability across nets/budgets),
                 decision.py (when games become predictable, held-out games), freemove.py (free-move effect,
                 prespecified regression with cluster-robust SE), puzzles.py (surprise -> solver-validated puzzles),

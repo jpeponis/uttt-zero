@@ -1,0 +1,76 @@
+=== B6 distil
+60000 positions (50000 train / 10000 test); 256-sim targets from runs/deep10_c1_300/net_0300.pt  [605s]
+C:\Users\John Peponis\Desktop\uttt-zero\tools\distill.py:98: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\torch\csrc\autograd\generated\python_variable_methods.cpp:823.)
+  return w.detach(), wv.detach(), float(bv), mu, sd, res
+round 0: test top-1 agreement 0.413, prob on the search move 0.209, policy CE 1.854, value R2 0.557  [613s]
+DAgger round 1: 9048 positions from 2048 surrogate self-play games; the old surrogate agreed with the net on 0.513 of them
+round 1: test top-1 agreement 0.414, prob on the search move 0.211, policy CE 1.854, value R2 0.549  [814s]
+
+policy weights (score of a move = sum of feature x weight; softmax over legal moves):
+  target_empties_after     +0.980
+  wins_game                +0.890
+  self_send                +0.846
+  opp_macro_win_next       -0.810
+  my_local_threats_after   +0.703
+  wins_board               +0.617
+  count_margin_after       +0.617
+  ends_game_lost           -0.352
+  fills_board              +0.259
+  send_to_centre           -0.226
+  cell_centre              -0.226
+  dead_boards_after        +0.192
+  opp_threats_after        +0.171
+  opp_threat_boards_next   -0.139
+  send_to_corner           -0.119
+  cell_corner              -0.119
+  gives_free_move          +0.118
+  opp_local_win_next       +0.042
+  my_threats_after         +0.041
+  ends_game_draw           -0.038
+value weights (standardised features; value = tanh(sum + bias)):
+  is_X                     +0.366
+  threats_against          -0.154
+  open_boards              +0.151
+  macro_win_now            +0.147
+  count_margin             +0.088
+  threats_for              +0.080
+  empties                  -0.055
+  local_threat_against     -0.047
+  free_move                +0.026
+  full_boards              +0.024
+  dead_boards              +0.008
+  local_win_now            -0.004
+  bias                     -0.138
+wrote runs/surrogate_deep10.json  [814s]
+=== B6 match: surrogate @64 vs v2b @64
+paired suite openings_v1 (516 openings, 1032 games): A=surrogate:runs/surrogate_deep10.json@64 vs B=runs/v2b/net_0150.pt@64  [74s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1    0.0%       n/a        n/a                   0.0%   0.0%    50.0%    0.0%      0 /   0 /   1
+  orbits      15    3.3%  [  0.0,  10.0]   -585 [-1200, -382]   6.7%   0.0%    53.3%    0.0%      0 /   1 /  14
+  natural    250    3.3%  [  1.9,   4.9]   -587 [-685, -515]    5.6%   1.0%    52.3%    1.0%      0 /  14 / 236
+  random     250    1.0%  [  0.3,   1.9]   -798 [-1009, -685]   1.4%   0.6%    50.4%    0.4%      0 /   4 / 246
+  all        516    2.2%  [  1.4,   3.1]   -661 [-745, -601]    3.6%   0.8%    51.4%    0.7%      0 /  19 / 497
+  end reasons: line 90.0%  count 9.3%  equal 0.7%  |  mean length 46.2
+wrote runs/paired_surrogate_vs_v2b_64.json
+=== B6 match: surrogate @64 vs deep10 @64
+paired suite openings_v1 (516 openings, 1032 games): A=surrogate:runs/surrogate_deep10.json@64 vs B=runs/deep10_c1_300/net_0300.pt@64  [118s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1    0.0%       n/a        n/a                   0.0%   0.0%    50.0%    0.0%      0 /   0 /   1
+  orbits      15    0.0%  [  0.0,   0.0]  -1200 [-1200, -1200]   0.0%   0.0%    50.0%    0.0%      0 /   0 /  15
+  natural    250    0.9%  [  0.2,   1.8]   -817 [-1079, -695]   1.8%   0.0%    50.9%    0.2%      0 /   4 / 246
+  random     250    0.0%  [  0.0,   0.0]  -1200 [-1200, -1200]   0.0%   0.0%    50.0%    0.0%      0 /   0 / 250
+  all        516    0.4%  [  0.1,   0.9]   -943 [-1200, -822]   0.9%   0.0%    50.4%    0.1%      0 /   4 / 512
+  end reasons: line 94.4%  count 5.5%  equal 0.1%  |  mean length 45.0
+wrote runs/paired_surrogate_vs_deep10_64.json
+=== B6 match: surrogate @64 vs rollout UCT 10k playouts (an absolute anchor)
+paired suite openings_v1 (516 openings, 1032 games): A=surrogate:runs/surrogate_deep10.json@64 vs B=rollout@10000  [82s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1    0.0%       n/a        n/a                   0.0%   0.0%    50.0%    0.0%      0 /   0 /   1
+  orbits      15   15.0%  [  3.3,  26.7]   -301 [-585, -176]   10.0%  20.0%    45.0%    3.3%      0 /   4 /  11
+  natural    250   15.5%  [ 12.3,  18.7]   -295 [-341, -255]   21.0%  10.0%    55.5%    2.2%      9 /  55 / 186
+  random     250   13.1%  [ 10.4,  16.0]   -329 [-374, -288]   16.6%   9.6%    53.5%    2.6%      5 /  50 / 195
+  all        516   14.3%  [ 12.2,  16.6]   -311 [-343, -281]   18.5%  10.1%    54.2%    2.4%     14 / 109 / 393
+  end reasons: line 79.0%  count 18.6%  equal 2.4%  |  mean length 46.8
+wrote runs/paired_surrogate_vs_rollout10k.json
+B6 done at Thu Sep  3 08:39:49 EDT 2026

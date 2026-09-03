@@ -1,0 +1,23 @@
+=== C5: deep10 @64 with the K=1 tablebase vs deep10 @64 plain
+paired suite openings_v1 (516 openings, 1032 games): A=runs/deep10_c1_300/net_0300.pt@64 tb vs B=runs/deep10_c1_300/net_0300.pt@64  [163s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1   50.0%       n/a        n/a                   0.0% 100.0%     0.0%    0.0%      0 /   1 /   0
+  orbits      15   50.0%  [ 50.0,  50.0]     +0 [  +0,   +0]   56.7%  43.3%    56.7%    6.7%      0 /  15 /   0
+  natural    250   49.9%  [ 49.7,  50.0]     -1 [  -2,   +0]   61.2%  38.6%    61.3%   13.8%      0 / 249 /   1
+  random     250   50.2%  [ 50.0,  50.5]     +1 [  +0,   +3]   62.4%  38.0%    62.2%   21.6%      2 / 248 /   0
+  all        516   50.0%  [ 49.9,  50.2]     +0 [  -1,   +2]   61.5%  38.6%    61.5%   17.3%      2 / 513 /   1
+  end reasons: line 68.9%  count 13.8%  equal 17.3%  |  mean length 51.0
+  A: tablebase hit 30955 of 2305488 evaluated positions (1.3 %)
+wrote runs/deep10_c1_300/paired_tb_vs_plain_64.json
+=== C5: v2b @64 with the K=1 tablebase vs v2b @64 plain
+paired suite openings_v1 (516 openings, 1032 games): A=runs/v2b/net_0150.pt@64 tb vs B=runs/v2b/net_0150.pt@64  [64s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1   50.0%       n/a        n/a                  50.0%  50.0%    50.0%  100.0%      0 /   1 /   0
+  orbits      15   50.0%  [ 50.0,  50.0]     +0 [  +0,   +0]   73.3%  26.7%    73.3%   13.3%      0 /  15 /   0
+  natural    250   49.9%  [ 49.4,  50.3]     -1 [  -4,   +2]   61.0%  38.8%    61.1%   17.4%      2 / 245 /   3
+  random     250   50.2%  [ 50.0,  50.5]     +1 [  +0,   +3]   53.8%  46.6%    53.6%   15.2%      2 / 248 /   0
+  all        516   50.0%  [ 49.8,  50.3]     +0 [  -1,   +2]   57.8%  42.2%    57.8%   16.4%      4 / 509 /   3
+  end reasons: line 71.6%  count 12.0%  equal 16.4%  |  mean length 49.5
+  A: tablebase hit 29423 of 2204868 evaluated positions (1.3 %)
+wrote runs/v2b/paired_tb_vs_plain_64.json
+C5 done at Thu Sep  3 08:43:56 EDT 2026

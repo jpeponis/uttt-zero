@@ -198,6 +198,13 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     210), and the draw metric wobbles by up to 20 points between adjacent checkpoints at
     constant LR. *Exact; deep8_300 and deep10 timelines.* `runs/*/timeline.json`,
     RETROSPECTIVE §3.
+31a. **The last-board phase is solved outright.** On every position with exactly one open
+    board in 60 000 held-out positions (701, 1.2 % of them; exact values from the
+    one-open-board tablebase, `uttt/tablebase.py`), deep10's raw value head is 100 % exact
+    (draws included), its raw policy plays an optimal move 100 % of the time, and the
+    64-sim search 100 %; v2b 99.0 / 99.6 / 100 %, dev1 94.0 / 98.7 / 100 %. A tablebase
+    spliced into the search as a terminal lookup therefore has nothing to add to any of
+    these nets. *Exact; all nets.* `tools/tablebase_grade.py`.
 32. **What the raw policy still gets wrong late is the count rule and tempo, not local
     tactics.** On 6000 strong-play positions with ≤ 14 empties, deep10's raw move loses
     exact value in 2.1 % (v2b 3.5 %); the 64-sim search in 0.12 % (7 positions). Motifs of
@@ -275,6 +282,18 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     Elo**: the residual asymmetry is real and is cheaper to search through than to average
     away. *Behavioural; deep10.* `runs/deep10_c1_300/timeline.json`,
     `runs/plan5_B5_sym_vs_plain.out`, `runs/plan5_B5b_sym_equal_compute.out`.
+41a. **The named concepts do not carry the strength.** A legible surrogate — a linear
+    score over 20 hand-written per-move features (wins the board, wins the game, gives a
+    free move, lets the opponent win next, threats after, count after, the self-send, cell
+    and target classes …) with a linear value on the position concepts, fitted to deep10's
+    256-sim search on 50 000 held-out positions — reproduces the search's move in **41 %**
+    of positions (the net's own raw policy: 66 %) and the value with R² 0.55, and then,
+    playing with the same 64-sim search, scores **2.2 % vs v2b (−661 Elo), 0.4 % vs deep10
+    (−943 Elo)** and 14 % against a 10 000-playout random-rollout search (−311). Its largest
+    weights are readable and agree with the rest of this file (self-send +0.85, a macro win
+    +0.89, letting the opponent win next −0.81, keeping local threats +0.70, a board won
+    +0.62, count +0.62; a free move given +0.12). *Behavioural; deep10.* `tools/distill.py`,
+    `runs/surrogate_deep10.json`, `runs/paired_surrogate_vs_*.json`.
 42. **Where +127 Elo of "duration" came from:** ≈ +5 points of paired score from iterations
     150–200 at the constant learning rate and ≈ +8 from the first LR drop, at which every
     curve (score, endgame WDL, draw recognition, opening-policy entropy, D4 consistency)
@@ -306,7 +325,5 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
 - `endgame_v2_test` is unread; it is read once, at the end of PLAN5.
 - The five hard puzzles are annotated in `docs/positions.md` (C3); a larger annotated set
   (the top surprises of B4) is not.
-- A legible surrogate's Elo (B6) — not built.
-- The ≤ 1-open-board tablebase (C5) — not built; B3 says the value head's remaining
-  error is tactical-horizon (the ply and empties terms and the macro-win-in-one), which
-  is what it would grade.
+- A two-open-board tablebase (the useful frontier after 31a) — not built; it needs
+  reachable-only generation, not enumeration.

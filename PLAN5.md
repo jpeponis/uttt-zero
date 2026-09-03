@@ -11,14 +11,16 @@ No training run may be launched without the owner's approval (§5).
 *Progress note (2026-09-03).* §6 is done (backup at `C:/Users/John Peponis/uttt-zero-backup/`,
 local only; history files in `docs/history/`). Phase A is complete — results table and verdicts
 at the end of §2: every ordering and sign held; the free-move value and the board-ownership
-residual moved (both up), and two opening orbits show a visible edge. Phase B is complete
-except B6 (the distilled surrogate): B1–B5 results are at the end of §3, replicated on both
-300-iteration nets where the plan asked for it (`tools/timeline.py`, `uttt/concepts.py`,
-`tools/probe.py`, `tools/probe_report.py`, `tools/value_decomp.py`; logs `runs/plan5_B*.out`).
-Phase C: the opening book (C1, `tools/book.py`, `tools/book_stats.py`), the folk claims (C2,
-`tools/principles.py`), the annotated hard puzzles (C3, `tools/annotate.py`,
-`docs/positions.md`) and `KNOWLEDGE.md` (C4) exist; C5 (the tablebase) and B6 are not
-started. Neither §0 resume criterion fired. Nothing has been committed.
+residual moved (both up), and two opening orbits show a visible edge. Phase B is complete:
+B1–B6 results are at the end of §3, replicated on both 300-iteration nets where the plan
+asked for it (`tools/timeline.py`, `uttt/concepts.py`, `tools/probe.py`,
+`tools/probe_report.py`, `tools/value_decomp.py`, `uttt/surrogate.py`, `tools/distill.py`;
+logs `runs/plan5_B*.out`). Phase C is complete: the opening book (C1, `tools/book.py`,
+`tools/book_stats.py`), the folk claims (C2, `tools/principles.py`), the annotated hard
+puzzles (C3, `tools/annotate.py`, `docs/positions.md`), `KNOWLEDGE.md` (C4) and the
+one-open-board tablebase (C5, `uttt/tablebase.py` — which turned out to add nothing, §4).
+Neither §0 resume criterion fired. D1 (the seed replicate) is owner-approved and scripted
+(`runs/queue7.sh`), to be launched by the owner. Committed through the B6/C5 tooling.
 
 **How this file is organised.** §0 states the decision to be made (more training, or use
 the net we have?) and recommends an answer. §1 reviews the work so far. §2–§4 describe the
@@ -705,6 +707,34 @@ re-attribute rather than explain more.
   on deep10, +0.04 on deep8_300 for corners and edges and nothing for the centre. KNOWLEDGE
   claim 14 is stated at that strength.
 
+**B6 results (2026-09-03; `uttt/surrogate.py`, `tools/distill.py`, `runs/surrogate_deep10.json`,
+`runs/plan5_B6_distill.out`, `runs/paired_surrogate_vs_*.json`).** The surrogate is a
+conditional logit over 20 hand-written *per-move* features (the position after the move
+from the mover's view: wins the board / the game, ends it lost or drawn, gives a free move,
+lets the opponent win a board or the game next, threats for and against after, count margin
+after, dead boards after, the self-send, cell and target-board classes, the target board's
+emptiness) plus a tanh-linear value on the B2 position concepts — everything in torch so
+it sits inside the batched search like a net. Fitted to deep10's 256-sim root visits and
+value on the 50 000 held-out B2 positions, one DAgger round (2048 surrogate self-play
+games, 9048 positions labelled by the net; it changed nothing measurable). *Imitation:*
+top-1 agreement with the search's move **41.3 %** on the 10 000 test positions (the net's
+own raw policy agrees with its search 66 % of the time, B4), probability on the search's
+move 0.21, value R² 0.55. *Play* (paired suite, 64 sims each side): vs v2b **2.2 %
+[1.4, 3.1], −661 Elo [−745, −601]**; vs deep10 **0.4 %, −943 Elo**; vs the rollout anchor
+at 10 000 playouts per move 14.3 % [12.2, 16.6], **−311 Elo**. So the named concepts
+account for two fifths of the move choices and for essentially none of the strength:
+the surrogate is ~660 Elo under the small reference net and ~940 under deep10, and loses
+to random-playout search with a tenth of the anchor's budget. The legible part is the
+weight table (score of a move, before the softmax): send to an emptier board +0.98, wins
+the game +0.89, **self-send +0.85** (the book's rule, C1), lets the opponent win the game
+next −0.81, local threats kept +0.70, wins a board +0.62, count margin after +0.62, ends the
+game lost −0.35; a free move given is +0.12 (not negative — consistent with A4/C2). Value:
+side to move is X +0.37, threats against −0.15, open boards +0.15, macro win now +0.15,
+count +0.09, threats for +0.08. *Reading:* what the net knows that a linear rule-set
+cannot say is not any one of these features but their interaction over several plies —
+which is the same conclusion B2 reached from the inside (the concepts that survive the
+non-linear control are look-ahead quantities: dead boards, the exact value, the best move).
+
 ## 4. Phase C — what the agent knows about the game (the product)
 
 - **C1. Opening book.** The 15 first-move orbits, with replies to depth 4–6, at ≥ 16 k
@@ -769,6 +799,28 @@ re-attribute rather than explain more.
   (free strength) and gives the value head an exact grader far deeper than `endgame_v1`.
   A multi-day build; do it only if B3 shows the value head's late-game error is where the
   remaining regret lives.
+  **Built 2026-09-03, and it corrects itself** (`uttt/tablebase.py`, `tests/test_tablebase.py`,
+  `tools/tablebase_grade.py`, `tools/openings.py --a_tb/--b_tb`). Two corrections first.
+  (i) *The count.* With one board open every legal move is in it, so the value depends only
+  on that board's cells, the side to move and the map from its three outcomes (X wins it /
+  O wins it / it fills) to the game result — 19 683 × 2 × 27 = **1.06 million entries, 1 MB**,
+  built by backward induction in 0.2 s. knowledge/06's 1.2 × 10¹⁰ counted the closed
+  boards' identities and the send, neither of which changes the value. (ii) *The reach.* A
+  one-open-board position has ≤ 9 empties, which `uttt/solver.py` already solves exactly;
+  what the table adds is a GPU-batched lookup (one gather per search batch), which is what
+  a terminal lookup inside the search needs. It agrees with the solver on every one of 300
+  random positions. **The finding:** on the 701 one-open-board positions among the 60 000
+  held-out B2 positions (1.2 %), deep10's raw value head is **100 %** exact (3-way and
+  draws), its raw policy plays the optimal move **100 %** of the time, and so does the
+  64-sim search — and even v2b is at 99.0 / 99.6 / 100 % and dev1 at 94.0 / 98.7 / 100 %.
+  The last-board phase is already solved by every net's search and by the strong nets'
+  raw heads; a terminal lookup there has nothing to add to deep10. The splice match
+  confirms it (`runs/plan5_C5_tablebase.out`): deep10 @64 with the table vs without,
+  **50.0 % [49.9, 50.2]**, 513 of 516 pairs identical, the table consulted on 1.3 % of the
+  2.3 M positions the search evaluated; v2b the same, 50.0 %, 509 pairs identical. The
+  useful frontier is two open boards
+  (≤ 18 empties, where the solver starts to struggle), which needs reachable-only
+  generation, not enumeration — knowledge/06's stretch goal, not built.
 
 ## 5. Phase D — training (provisional: rewrite this section after Phases A–C)
 
