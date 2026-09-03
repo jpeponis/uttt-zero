@@ -8,19 +8,66 @@ are picking the project up: read §0 for the decision and the recommendation, th
 with §6 (housekeeping, one hour) and Phase A (§2). Training is paused by owner directive.
 No training run may be launched without the owner's approval (§5).
 
-*Progress note (2026-09-03).* §6 is done (backup at `C:/Users/John Peponis/uttt-zero-backup/`,
-local only; history files in `docs/history/`). Phase A is complete — results table and verdicts
-at the end of §2: every ordering and sign held; the free-move value and the board-ownership
-residual moved (both up), and two opening orbits show a visible edge. Phase B is complete:
-B1–B6 results are at the end of §3, replicated on both 300-iteration nets where the plan
-asked for it (`tools/timeline.py`, `uttt/concepts.py`, `tools/probe.py`,
-`tools/probe_report.py`, `tools/value_decomp.py`, `uttt/surrogate.py`, `tools/distill.py`;
-logs `runs/plan5_B*.out`). Phase C is complete: the opening book (C1, `tools/book.py`,
-`tools/book_stats.py`), the folk claims (C2, `tools/principles.py`), the annotated hard
-puzzles (C3, `tools/annotate.py`, `docs/positions.md`), `KNOWLEDGE.md` (C4) and the
-one-open-board tablebase (C5, `uttt/tablebase.py` — which turned out to add nothing, §4).
-Neither §0 resume criterion fired. D1 (the seed replicate) is owner-approved and scripted
-(`runs/queue7.sh`), to be launched by the owner. Committed through the B6/C5 tooling.
+## Handover (2026-09-03, end of the analysis session)
+
+**State.** Phases A, B and C are complete and written up in this file (results blocks at the
+end of §2, §3 and §4) and distilled into `KNOWLEDGE.md` (49 claims). §6 is done except the
+off-machine copy of the backup (local copy at `C:/Users/John Peponis/uttt-zero-backup/`).
+Neither §0 resume criterion fired: no belief's magnitude moved between deep8_c1_300 and
+deep10_c1_300 by more than its CI, and nothing appears late in the checkpoint timelines.
+Everything is committed (last commit: the B6/C5 results). The explainer artifact is
+republished; the owner moves the share pin.
+
+**Running now: D1, the seed replicate** — `runs/deep10_c1_300_s1`, launched 2026-09-03
+≈ 08:50 by `runs/queue7.sh` (log `runs/deep10_c1_300_s1.out`, wrapper log
+`runs/queue7.out`), on the 3090. ≈ 19 h; expect `runs/deep10_c1_300_s1/DONE` around
+2026-09-04 04:00, after which `eval_run.sh` runs by itself and writes
+`runs/deep10_c1_300_s1/analysis.out` (paired matches vs v2b, wide128_c1, deep8_c1,
+deep8_c1_300, deep10_c1_300, dev1, and the endgame set). Graph eval is *on* with the retry
+wrapper: if the run dies, it resumes from `latest_full.pt` by itself (up to 6 attempts);
+check the `.out` for "attempt … died" lines — a fault costs ≤ 10 iterations and tells us
+the fault surface is still live. Do not touch its config while it runs.
+
+**What the next instance does, in order.**
+1. *While D1 runs* (3060 free; nothing else is queued): nothing is required. Optional: the
+   Game-Changer-style annotation of B4's top surprises (C3, not done); a two-open-board
+   reachable-only tablebase design (C5's real frontier, not started).
+2. *When D1 finishes*: read `analysis.out`. The numbers that matter: its score vs v2b @64
+   (deep10_c1_300's was 80.6 % in-run / +242 Elo on the suite), vs deep8_c1_300 (+35 was
+   the last rung — this is its second measurement) and vs deep10_c1_300 (the **seed band
+   at 10×128**, previously unmeasured; the 6×64 band was ±2.5 points). Record all three in
+   §5 D1 and in RETROSPECTIVE §2.
+3. *The control for Phase B*: run the same three tools on the replicate and compare with
+   `runs/deep10_c1_300/`'s outputs — `tools/timeline.py runs/deep10_c1_300_s1 --corpus
+   runs/deep8_c1_300 --last 20`, `tools/probe.py fit --data runs/probe_data_deep8late.npz
+   --run runs/deep10_c1_300_s1 --control`, `tools/value_decomp.py runs/deep10_c1_300_s1
+   --data runs/probe_data_deep8late.npz`, then `tools/probe_report.py`. A concept, layer,
+   "learned by" checkpoint or coefficient is a fact about the game only if both seeds have
+   it (§1c "two seeds or it's a seed"). Update KNOWLEDGE claims 14–17, 37–42 with "both
+   seeds" or the disagreement. Also `tools/atlas.py`/`tools/book.py` on the replicate if the
+   agreement question (claim 7) is worth a third net.
+4. *Then* the sealed test set: `tools/endgame.py eval <net> --set suites/endgame_v2_test.npz`
+   for deep10_c1_300, deep8_c1_300 and the replicate — **once**, log the reading in §2 A9
+   and KNOWLEDGE claim 30. After that it is a development set like the others.
+5. *Then* decide with the owner: the ladder stays paused unless §0's criteria fire; the
+   cheapest training experiment on B1's evidence is an earlier first LR drop
+   (`--lr_drops 150,250`, §5 D3), not more iterations.
+
+**Traps.** `runs/probe_*` nets are untrained; `suites/` v1 files are never rewritten;
+`endgame_v2_test` is read once; every analysis tool defaults to `--device cuda:1` (the 3060)
+except `tools/openings.py match` and `tools/book.py` (cuda:0 — pass `--device cuda:1`
+while D1 holds the 3090); held-out positions for deep10 come from deep8_c1_300's late games
+and vice versa (§8) — for the replicate, deep8_c1_300's games are held out too. The
+auto-mode classifier blocks launching multi-hour training from a shell; the owner launches.
+
+**Files added this session** (all in git): tools `timeline`, `probe`, `probe_report`,
+`value_decomp`, `book`, `book_stats`, `principles`, `annotate`, `distill`,
+`tablebase_grade`; modules `uttt/concepts.py`, `uttt/surrogate.py`, `uttt/tablebase.py`
+(+ tests); `tools/endgame.py --split`, `tools/openings.py --a_sym/--b_sym/--a_tb/--b_tb`
+and `surrogate:<file>` players; suites `endgame_v2_{dev,test}`, `puzzles_v2_dev`; docs
+`KNOWLEDGE.md`, `docs/positions.md`, `docs/history/`; queue scripts `runs/plan5_*.sh`,
+`runs/queue7.sh`; every `runs/plan5_*.out`, `runs/book_*`, `runs/principles_*`,
+`runs/surrogate_deep10.json` and the per-run `timeline / probes / value_decomp` outputs.
 
 **How this file is organised.** §0 states the decision to be made (more training, or use
 the net we have?) and recommends an answer. §1 reviews the work so far. §2–§4 describe the
@@ -843,7 +890,10 @@ approval (the pause called in PLAN4 §3c is still in effect).
   ladder. This is the one Phase D item whose case does not depend on A–C's outcome (its
   job is to check A–C's findings), so it may be started early — during Phase B, on the
   otherwise idle 3090 — if the owner wants the control ready when B2/B3 finish. Add the
-  `eval_run.sh` line for it (§6) before it ends.
+  `eval_run.sh` line for it (§6) before it ends. **Launched 2026-09-03 ≈ 08:50**
+  (`runs/queue7.sh` → `runs/deep10_c1_300_s1`, owner-approved); the `eval_run.sh` line is
+  in place and runs automatically at the end. Results go here when it finishes (see the
+  Handover at the top for what to record).
 - **D2. Resume the ladder — only if §0's criteria (i)–(iii) fire.** If they do, the run
   is **600 iterations on the current 10-block recipe (≈ 38 h), not 12 blocks (≈ 23 h)**.
   Duration has the better Elo/hour record *and* is the lever that pays at equal inference

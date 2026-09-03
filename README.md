@@ -20,8 +20,9 @@ Read in this order:
 1. **This file** — what the project is, its current state, where things live, how to
    run it.
 2. **`PLAN5.md`** — the live plan. It opens with a glossary of the project's terms (Elo,
-   the paired suite, sims, iterations, checkpoints, the ±3-point rule and so on), then
-   states the decision in front of the project and the analysis programme that follows.
+   the paired suite, sims, iterations, checkpoints, the ±3-point rule and so on), then a
+   **Handover** section (what is running, what to do next, in order), then the decision in
+   front of the project and the analysis programme with its results.
 3. **`KNOWLEDGE.md`** — what the agent believes about the game: one claim per line with
    its level, effect size, confidence interval, the nets it held across, and the tool and
    file that produced it. This is where a claim lives; the other files hold the working
@@ -52,17 +53,24 @@ Read in this order:
   (`"0:128,24:384"`, fewer simulations early and more late) helped earlier nets but was
   **not** confirmed on this one (+10 [−7, +26], below the project's ±3-point rule;
   PLAN5 §2 A8c).
-- **Training is PAUSED by owner directive.** No training run is to be launched without
-  the owner's approval (PLAN4 §3c, PLAN5 §5). The next work is the analysis programme in
-  PLAN5 §2–§4.
-- **Analysis programme (2026-09-03):** PLAN5 Phase A is complete — every ordering and sign
-  from the earlier nets held on the +242 net; two magnitudes moved (free-move value up to
-  +0.20, and a small residual value per owned board once macro lines are controlled); the
-  endgame yardstick was not flattered by its in-run reads (`suites/endgame_v2_{dev,test}`
-  now exist, test unread). Phase B (the network on its own terms) is in progress: the
-  checkpoint timeline shows the +127 duration gain coming from the first LR drop plus the
-  constant-LR climb, with the second drop adding nothing visible. Results live in PLAN5 §2
-  and §3; `KNOWLEDGE.md` (PLAN5 §4 C4) will collect the claims.
+- **The ladder is paused by owner directive** (PLAN4 §3c, PLAN5 §5): no new rung without the
+  owner's approval. **One owner-approved run is in progress: D1, the seed replicate**
+  `runs/deep10_c1_300_s1` (same recipe as the best net, `--seed 1`; launched 2026-09-03
+  ≈ 08:50 by `runs/queue7.sh`, ≈ 19 h on the 3090, then `eval_run.sh` runs by itself). It
+  is the control for the analysis, not a rung. PLAN5's Handover section says what to do
+  with it when it finishes.
+- **Analysis programme (PLAN5 Phases A–C): complete, 2026-09-03.** Every ordering and sign
+  from the earlier nets held on the +242 net; two magnitudes moved (the free-move value,
+  +0.16 → +0.20, and a small residual value per owned board once macro lines are
+  controlled); the endgame yardstick was not flattered by its in-run reads
+  (`suites/endgame_v2_dev`; `endgame_v2_test` is sealed until after D1). The checkpoint
+  timelines put the +127 duration gain at the first LR drop plus the constant-LR climb;
+  probes with a random-init control say what the trunk computes and when; the opening
+  book to depth 4 has the two strong nets agreeing on 75 % of nodes and a reply rule (the
+  self-send); a legible linear surrogate captures 41 % of the search's moves and none of
+  the strength (−661 Elo vs v2b); the one-open-board tablebase adds nothing because every
+  net already plays that phase perfectly. **`KNOWLEDGE.md` holds the claims** (49, each with
+  level, effect size, CI, nets, tool and file); PLAN5 §2–§4 hold the working notes.
 
 The strength ladder. Each run changed one thing from the run above it. Elo is measured on
 the paired opening suite (516 fixed openings, each played from both sides) against `v2b`,
