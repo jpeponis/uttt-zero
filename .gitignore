@@ -10,6 +10,7 @@ runs/**
 !runs/*.out
 !runs/*.json
 !runs/*.log
+!runs/*.md
 !runs/*/config*.json
 !runs/*/log.jsonl
 !runs/*/*.out
