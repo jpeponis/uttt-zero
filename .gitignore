@@ -25,3 +25,6 @@ runs/**
 !runs/*/net_0150.pt
 !runs/*/net_0200.pt
 !runs/*/net_0300.pt
+!runs/*.vbs
+!runs/*.cmd
+.claude/scheduled_tasks.lock

@@ -56,9 +56,13 @@ Read in this order:
 - **The ladder is paused by owner directive** (PLAN4 §3c, PLAN5 §5): no new rung without the
   owner's approval. **One owner-approved run is in progress: D1, the seed replicate**
   `runs/deep10_c1_300_s1` (same recipe as the best net, `--seed 1`; launched 2026-09-03
-  ≈ 08:50 by `runs/queue7.sh`, ≈ 19 h on the 3090, then `eval_run.sh` runs by itself). It
-  is the control for the analysis, not a rung. PLAN5's Handover section says what to do
-  with it when it finishes.
+  11:52 by `runs/queue7.sh`, ≈ 19 h on the 3090, then `eval_run.sh` runs by itself). A
+  power loss stopped it at iteration 94 on 2026-09-03, and a closed console window stopped
+  the first relaunch at iteration 128 on 2026-09-04; it is running again since 2026-09-04
+  19:49 from its full checkpoint at iteration 119, with a hidden console
+  (`runs/launch_queue7_hidden.vbs`), expected to finish ≈ 2026-09-05 07:30. It is the
+  control for the analysis, not a rung. PLAN5's Handover section says what to do with it
+  when it finishes.
 - **Analysis programme (PLAN5 Phases A–C): complete, 2026-09-03.** Every ordering and sign
   from the earlier nets held on the +242 net; two magnitudes moved (the free-move value,
   +0.16 → +0.20, and a small residual value per owned board once macro lines are

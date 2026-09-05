@@ -19,14 +19,35 @@ Everything is committed (last commit: the B6/C5 results). The explainer artifact
 republished; the owner moves the share pin.
 
 **Running now: D1, the seed replicate** — `runs/deep10_c1_300_s1`, launched 2026-09-03
-≈ 08:50 by `runs/queue7.sh` (log `runs/deep10_c1_300_s1.out`, wrapper log
-`runs/queue7.out`), on the 3090. ≈ 19 h; expect `runs/deep10_c1_300_s1/DONE` around
-2026-09-04 04:00, after which `eval_run.sh` runs by itself and writes
+11:52 by `runs/queue7.sh` (log `runs/deep10_c1_300_s1.out`, wrapper log
+`runs/queue7.out`), on the 3090. **Interrupted by a power loss 2026-09-03 ≈ 15:52** (unclean
+shutdown, Kernel-Power event 41; iteration 94 was the last logged; the retry wrapper died
+with the machine, so nothing restarted by itself). **Relaunched 2026-09-04 16:33** by the
+same `queue7.sh` through a Task Scheduler job; `train2` resumed from `latest_full.pt`
+(iteration 89, buffer 2 M). **Killed again 2026-09-04 19:00** at iteration 128: that
+launcher had opened a *visible* console window, and seconds after a VNC connection to the
+desktop the whole console process group exited with `STATUS_CONTROL_C_EXIT` (a window
+close or Ctrl-C; the `PermissionError` tracebacks in the `.out` are the exact-label pool
+respawning workers from a dying parent — not a fault). **Relaunched 2026-09-04 19:49** with a
+hidden console: `runs/launch_queue7_hidden.vbs` (wscript, window style 0) →
+`runs/launch_queue7_run.cmd` → `queue7.sh`, resumed from `latest_full.pt` at iteration
+119. Replayed iterations (90–94, 120–128) appear twice in `log.jsonl`; the last row wins
+(the deep8_c1_300 convention); `config_resume_*.json` records each re-invocation. Expect
+`runs/deep10_c1_300_s1/DONE` around 2026-09-05 07:30, after which `eval_run.sh` runs by
+itself and writes
 `runs/deep10_c1_300_s1/analysis.out` (paired matches vs v2b, wide128_c1, deep8_c1,
 deep8_c1_300, deep10_c1_300, dev1, and the endgame set). Graph eval is *on* with the retry
 wrapper: if the run dies, it resumes from `latest_full.pt` by itself (up to 6 attempts);
 check the `.out` for "attempt … died" lines — a fault costs ≤ 10 iterations and tells us
-the fault surface is still live. Do not touch its config while it runs.
+the fault surface is still live. Do not touch its config while it runs. *Operating it:*
+nothing is visible on the desktop (hidden console, by design); `python
+tools/run_status.py runs/deep10_c1_300_s1` is the one-line status, `bash runs/watch_d1.sh`
+the event stream. It was started through a Task Scheduler job `uttt-queue7` (action:
+`wscript runs/launch_queue7_hidden.vbs`, no trigger of its own) so that it outlives any
+terminal or Claude session; if it ever needs relaunching, `schtasks /Run /TN uttt-queue7`
+resumes from `latest_full.pt`. To stop it deliberately, end the `bash queue7.sh` wrapper
+first (it would otherwise restart the trainer after 60 s), then `uttt.train2`. When it is
+done, `schtasks /Delete /TN uttt-queue7 /F` removes the job.
 
 **What the next instance does, in order.**
 1. *While D1 runs* (3060 free; nothing else is queued): nothing is required. Optional: the
@@ -890,10 +911,16 @@ approval (the pause called in PLAN4 §3c is still in effect).
   ladder. This is the one Phase D item whose case does not depend on A–C's outcome (its
   job is to check A–C's findings), so it may be started early — during Phase B, on the
   otherwise idle 3090 — if the owner wants the control ready when B2/B3 finish. Add the
-  `eval_run.sh` line for it (§6) before it ends. **Launched 2026-09-03 ≈ 08:50**
+  `eval_run.sh` line for it (§6) before it ends. **Launched 2026-09-03 11:52**
   (`runs/queue7.sh` → `runs/deep10_c1_300_s1`, owner-approved); the `eval_run.sh` line is
   in place and runs automatically at the end. Results go here when it finishes (see the
-  Handover at the top for what to record).
+  Handover at the top for what to record). Power loss 2026-09-03 ≈ 15:52 at iteration 94
+  (not a GPU fault: an unclean shutdown of the whole machine); relaunched 2026-09-04 16:33
+  from `latest_full.pt` at iteration 89; killed by a console-window close at 19:00
+  (iteration 128); relaunched 19:49 with a hidden console from iteration 119 — details in
+  the Handover. Lesson for launchers: a scheduled task or `cmd` start opens a console
+  window that anyone can close, and closing it ends every process attached to it; launch
+  training through `wscript` with window style 0 (`runs/launch_queue7_hidden.vbs`).
 - **D2. Resume the ladder — only if §0's criteria (i)–(iii) fire.** If they do, the run
   is **600 iterations on the current 10-block recipe (≈ 38 h), not 12 blocks (≈ 23 h)**.
   Duration has the better Elo/hour record *and* is the lever that pays at equal inference
