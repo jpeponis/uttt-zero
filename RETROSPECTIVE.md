@@ -24,7 +24,8 @@ the full set.
    accepted, rejected or deferred with a measured reason. Claims were corrected, probes
    run, operations hardened, git established.
 5. **Scale** (day 3–4): depth +23 Elo, duration +127, depth-at-duration +35 — the ladder
-   went from v2b to +242 in four runs.
+   went from v2b to +242 in four runs. (The +35 was re-measured on a second seed on
+   2026-09-05 at +9: inside the seed band, §2 addendum.)
 6. **Survive** (day 3–4): three GPU driver faults, all in eval-path CUDA graphs. The
    recovery machinery (full-state checkpoints plus automatic retries) turned them from
    run-killers into blips of at most 10 lost iterations.
@@ -82,7 +83,10 @@ confirmed rung is duration, +211; deep10_c1_300 remains the strongest single net
   wide128_c1's rung on the §2 ladder, measured against v2b, so it includes the +40 from
   c_scale above it. The width step on its own is about +37: PLAN5 §0, PLAN4 §3.)
 - **Depth 6 → 8 → 10 blocks: +23, then +35 at 300 iters.** Cheaper per Elo than width at
-  this scale. The cost grows in proportion to the network's arithmetic (FLOPs): the two
+  this scale — *as measured on one seed.* The seed replicate of the 10-block recipe
+  (2026-09-05, PLAN5 §5 D1) scores +9 [−10, +28] over eight blocks and is even with the
+  first seed head-to-head, so the 8 → 10 step is inside the ≈ 3-point seed band at this
+  size and is not established; the +23 for 6 → 8 was never replicated either. The cost grows in proportion to the network's arithmetic (FLOPs): the two
   steps measured 1.36× and 1.19× their parent's cost.
 - **Duration 150 → 300 iters: +127 — the single largest gain in the project.** Both LR
   drops (reductions of the learning rate, at iterations 200 and 280) delivered visible
@@ -156,10 +160,12 @@ Lesson: never diagnose capacity from runs that were never trained to convergence
   the micro-optimization ones were measurably not worth it; the orientation-bias worry
   was bounded at ≤ 0.6 points by a 20-minute experiment. Adjudicating with data beat
   both accepting and dismissing.
-- Known open debts, accepted: no seed replicate of any wide/deep/300 recipe (the +127
-  and +35 results dwarf the ±2.5-point seed band, so the ladder's shape is safe; the
-  small steps are not individually resolved); the suites all descend from v2a-era games;
-  endgame_v1 is a development set after ~50 in-run reads.
+- Known open debts, accepted at the time: no seed replicate of any wide/deep/300 recipe
+  (the +127 and +35 results were taken to dwarf the ±2.5-point seed band measured at
+  6×64); the suites all descend from v2a-era games; endgame_v1 is a development set after
+  ~50 in-run reads. *Paid 2026-09-05:* the 10×128 replicate put the band at ≈ 3 points and
+  the +35 inside it (+127 still dwarfs it); the v2 endgame suite's sealed half was read
+  once and agreed with the dev half (PLAN5 §2 A9).
 
 ## 6. What we learned about the game (levels: behavioural / predictive / search-relative / exact)
 
@@ -197,11 +203,13 @@ where noted:
   `python web/server.py runs/deep10_c1_300/net_0300.pt --sims 800 --device cuda:1`.
 - **Neither depth nor duration is exhausted** — 12-block and 600-iteration runs are the
   obvious continuations, each a committed GPU-day, both on hold per the pause.
-- Also open, cheaper: a seed replicate of the final recipe (rigor); an analysis second
+- Also open, cheaper: a seed replicate of the final recipe (rigor — *done 2026-09-05*,
+  PLAN5 §5 D1); an analysis second
   pass with the new net (atlas / decision / freemove / puzzles → `puzzles_v2_dev`, suites
   refresh with a dev/test split); the 6×64 endgame-overfit diagnostic (now largely
   mooted by §3's revision); the CodinGame port (needs the batch-1 latency budget — one
   position at a time under a per-move time limit — not the ladder).
 - Everything is committed; `runs/` holds ~11 GB (games corpora + checkpoints); the
   explainer artifact tells the story through queue5 and does not yet include the
-  10-block result or the draw-blindness revision.
+  10-block result or the draw-blindness revision (since added; the 2026-09-05 revision
+  carries the seed replicate too).

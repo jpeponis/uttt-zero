@@ -293,7 +293,7 @@ learned, or how.
   concept, value weight or opening preference found in one seed is a fact about the game
   only if it appears in the other. It runs unattended on the otherwise idle 3090 while the
   analysis runs on the 3060; nothing in Phase A waits for it. Owner's call — it is
-  optional.
+  optional. *(Approved and run: §5 D1, done 2026-09-05.)*
 - **Resume the ladder only if** one of three things happens. (i) Phase A finds beliefs
   whose *magnitudes* moved between deep8_c1_300 and deep10_c1_300 by more than their
   CIs — meaning the analysis is strength-limited. (ii) The checkpoint timeline (§3 B1)
@@ -349,6 +349,9 @@ learned, or how.
    score) is +5.0 points against a ±2.5-point seed band measured at 6×64 — about 2σ, two
    standard deviations: probably real, not certainly. The seed band at 10×128 is
    unmeasured. The +23 (deep8_c1 vs wide128_c1) sits at the edge of the ±3 rule. → §5.
+   *Measured 2026-09-05 (§5 D1): the band at 10×128 is ≈ 3 points / ≈ 30 Elo, and the
+   second seed scores +9 [−10, +28] over deep8_300 — "probably real" became "inside the
+   band". The +127 is unaffected.*
 4. **The equal-compute question was open at 10 blocks — now closed (A8, §2).** Per
    simulation, deep10 costs ≈ 6.7× v2b (cost scales as blocks × filters²: 10·128² /
    6·64²). The fair fight, v2b@427 vs deep10@64, went to deep10 by +42 [+23, +61]. So the
@@ -1020,7 +1023,10 @@ approval (the pause called in PLAN4 §3c is still in effect).
   is **600 iterations on the current 10-block recipe (≈ 38 h), not 12 blocks (≈ 23 h)**.
   Duration has the better Elo/hour record *and* is the lever that pays at equal inference
   compute (A8b: blocks 8 → 10 did not). Graph eval + retries; deep10 added to the
-  anchors. A 12-block run would need a new argument.
+  anchors. A 12-block run would need a new argument. *Note 2026-09-05:* with D1's result
+  the 10-block recipe's own last step is inside the seed band, so a 600-iteration run on
+  8 blocks (≈ 32 h) would test duration at lower cost with no established loss; the
+  choice is open if D2 is ever triggered.
 - **D3. Runs the analysis may suggest** (pure speculation until A–C report):
   - if B1 shows draw recognition and endgame accuracy *stepping* at the LR drops rather
     than climbing between them → a longer or earlier final annealing phase is the
@@ -1029,7 +1035,24 @@ approval (the pause called in PLAN4 §3c is still in effect).
     curve is flat from 220/240 on. The candidate run is therefore `--lr_drops 150,250` at
     300 iterations (or 200 iterations with drops at 120/180 — the same annealed net at
     two-thirds the cost, if the constant-LR climb from 150 to 200 turns out to be worth
-    less than its 3 h). Owner's call, like every run;
+    less than its 3 h). Owner's call, like every run. **Approved 2026-09-05** (after D1):
+    run `deep10_c1_300_lr150` — the deep10_c1_300 recipe unchanged except
+    `--lr_drops 150,250` (300 iterations, seed 0, graph eval with retries, `--eval_every 10`,
+    anchors v2b / deep8_c1_300 / deep10_c1_300; `runs/queue8.sh`, ≈ 14 h; `eval_run.sh` now
+    also plays the replicate). *Pre-registered reading.* Primary: the final checkpoint on
+    the full paired suite @64 against **both** 10-block seeds. "Helped" only if it scores
+    ≥ 53 % against both (the ±3 rule against each); "no effect" if inside ±3 of both;
+    "hurt" if ≤ 47 % against either. The seed band is ≈ 3 points, so one run resolves only
+    an effect larger than the band — a null therefore means "the constant-LR climb from
+    150 to 200 plus a 50-iteration-earlier drop are together worth < 3 points", which is
+    itself useful: it licenses the 200-iteration recipe (drops at 120/180) at two-thirds
+    the cost. Secondary, from the timeline (±6 in-run): the step should land at the first
+    post-drop checkpoint (net_0160) with the reference's size (in-run vs v2b +7–8, raw
+    WDL +3–4, draw recognition +10, D4 divergence halved); and after it, the 100
+    low-LR iterations either stay flat (the reference's shape after 220: the drop is the
+    event) or keep climbing (a longer annealing phase pays) — the shape question this run
+    exists to answer. Tertiary: endgame_v1 raw WDL / regret at 300 against 84.6 / 0.037
+    (deep10) and 83.9 / 0.047 (replicate). Launch waits for the 3090 idle-power check;
   - if A9 shows the v1 endgame numbers were overfit by selection → nothing to train,
     but every future eval reads `endgame_v2_dev`;
   - if B3 finds the value head's remaining error is concentrated in the last-board
