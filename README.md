@@ -62,7 +62,10 @@ Read in this order:
   ("+ blocks 10", +35 on the first seed) is inside it — not an established rung; duration
   (+211) is the last confirmed one. `deep10_c1_300/net_0300.pt` stays the play agent. Its
   checkpoint timeline repeats the reference's (PLAN5 §3 B1); the probe and
-  value-decomposition controls are in §3 B2/B3.
+  value-decomposition controls are in §3 B2/B3. **Running now (owner-approved, PLAN5 §5 D3):
+  `runs/deep10_c1_300_lr150`**, the reference recipe with the LR drops moved earlier
+  (`--lr_drops 150,250`), launched 2026-09-05 12:12, ≈ 14 h; its reading is pre-registered
+  in §5 D3 (a result only if it clears +3 against both 10-block seeds).
 - **Analysis programme (PLAN5 Phases A–C): complete, 2026-09-03.** Every ordering and sign
   from the earlier nets held on the +242 net; two magnitudes moved (the free-move value,
   +0.16 → +0.20, and a small residual value per owned board once macro lines are

@@ -1,0 +1,3 @@
+evaluation: paired openings from suites/openings_v1.npz {'empty': 1, 'orbits': 15, 'natural': 100, 'random': 100} -> 432 games per anchor at 64 sims
+evaluation: exact endgame set suites/endgame_v1.npz (3000 positions)
+exact labels: <= 14 empties, <= 8192 positions/iteration, 12 workers, weight x2.0, policy replaced

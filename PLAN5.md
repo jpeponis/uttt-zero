@@ -57,7 +57,13 @@ done, `schtasks /Delete /TN uttt-queue7 /F` removes the job.
 §5 D1 (strength; RETROSPECTIVE §2, KNOWLEDGE 43–44), §3 B1 / B2 / B3 "replication on the
 seed replicate" (KNOWLEDGE 14–17, 19, 37–42 now say which facts held on both seeds: all of
 them, with one deep10-only coefficient path noted in B3), §2 A9 (the sealed test half, read
-once; KNOWLEDGE 30). Step 5 is the owner's decision; nothing is running. Outputs:
+once; KNOWLEDGE 30). Step 5 decided: the ladder stays paused; **D3, the earlier-LR-drop run
+`runs/deep10_c1_300_lr150`, is running** (launched 2026-09-05 12:12 via the scheduled job
+`uttt-queue8` -> `runs/launch_queue8_hidden.vbs` -> `runs/queue8.sh`; log
+`runs/deep10_c1_300_lr150.out`, status `python tools/run_status.py runs/deep10_c1_300_lr150`,
+events `bash runs/watch_train.sh deep10_c1_300_lr150 queue8`; ~14 h, then `eval_run.sh` by
+itself, including a match against the seed replicate). When it finishes, read its result
+against the pre-registered criterion in §5 D3 and record it there. Outputs of steps 2-4:
 `runs/plan5_D1_control.{sh,out}`, `runs/plan5_B1_timeline_s1.out`, `plan5_B2_fit_s1.out`,
 `plan5_B2_report_s1.out`, `plan5_B3_value_s1.out`, `plan5_A9_test_{deep10,deep8,s1}.out`.
 1. *While D1 runs* (3060 free; nothing else is queued): nothing is required. Optional: the
@@ -1052,7 +1058,9 @@ approval (the pause called in PLAN4 §3c is still in effect).
     low-LR iterations either stay flat (the reference's shape after 220: the drop is the
     event) or keep climbing (a longer annealing phase pays) — the shape question this run
     exists to answer. Tertiary: endgame_v1 raw WDL / regret at 300 against 84.6 / 0.037
-    (deep10) and 83.9 / 0.047 (replicate). Launch waits for the 3090 idle-power check;
+    (deep10) and 83.9 / 0.047 (replicate). **Launched 2026-09-05 12:12** (after the 3090's
+    Afterburner overclock was reset: memory 9751 MHz, power limit 350 W; the driver's
+    "prefer maximum performance" mode was left on — irrelevant under load);
   - if A9 shows the v1 endgame numbers were overfit by selection → nothing to train,
     but every future eval reads `endgame_v2_dev`;
   - if B3 finds the value head's remaining error is concentrated in the last-board
