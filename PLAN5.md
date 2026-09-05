@@ -15,10 +15,14 @@ end of §2, §3 and §4) and distilled into `KNOWLEDGE.md` (49 claims). §6 is d
 off-machine copy of the backup (local copy at `C:/Users/John Peponis/uttt-zero-backup/`).
 Neither §0 resume criterion fired: no belief's magnitude moved between deep8_c1_300 and
 deep10_c1_300 by more than its CI, and nothing appears late in the checkpoint timelines.
+The seed replicate (D1, 2026-09-05) changes nothing there: every Phase B fact is on both
+seeds, nothing appears late on the third run either, and the last rung of the ladder turns
+out to be inside the seed band (§5 D1) — which argues *against* resuming the ladder for
+depth; §5 D3 (an earlier first LR drop) remains the cheapest experiment if any.
 Everything is committed (last commit: the B6/C5 results). The explainer artifact is
 republished; the owner moves the share pin.
 
-**Running now: D1, the seed replicate** — `runs/deep10_c1_300_s1`, launched 2026-09-03
+**D1, the seed replicate — done 2026-09-05 07:40, results in §5 D1** — `runs/deep10_c1_300_s1`, launched 2026-09-03
 11:52 by `runs/queue7.sh` (log `runs/deep10_c1_300_s1.out`, wrapper log
 `runs/queue7.out`), on the 3090. **Interrupted by a power loss 2026-09-03 ≈ 15:52** (unclean
 shutdown, Kernel-Power event 41; iteration 94 was the last logged; the retry wrapper died
@@ -49,7 +53,13 @@ resumes from `latest_full.pt`. To stop it deliberately, end the `bash queue7.sh`
 first (it would otherwise restart the trainer after 60 s), then `uttt.train2`. When it is
 done, `schtasks /Delete /TN uttt-queue7 /F` removes the job.
 
-**What the next instance does, in order.**
+**What the next instance does, in order.** *Status 2026-09-05 10:00:* steps 2–4 are done —
+§5 D1 (strength; RETROSPECTIVE §2, KNOWLEDGE 43–44), §3 B1 / B2 / B3 "replication on the
+seed replicate" (KNOWLEDGE 14–17, 19, 37–42 now say which facts held on both seeds: all of
+them, with one deep10-only coefficient path noted in B3), §2 A9 (the sealed test half, read
+once; KNOWLEDGE 30). Step 5 is the owner's decision; nothing is running. Outputs:
+`runs/plan5_D1_control.{sh,out}`, `runs/plan5_B1_timeline_s1.out`, `plan5_B2_fit_s1.out`,
+`plan5_B2_report_s1.out`, `plan5_B3_value_s1.out`, `plan5_A9_test_{deep10,deep8,s1}.out`.
 1. *While D1 runs* (3060 free; nothing else is queued): nothing is required. Optional: the
    Game-Changer-style annotation of B4's top surprises (C3, not done); a two-open-board
    reachable-only tablebase design (C5's real frontier, not started).
@@ -466,7 +476,7 @@ row was judged against the pre-written criterion in the table above.
 | A5 | macro-line threats +0.154 / −0.140 per line (CIs overlap ±0.17; deep8_300 +0.145 / −0.139). With threats controlled, owning a board is no longer zero: deep10 centre_self **+0.070 ± 0.040**, corners_self **+0.065 ± 0.030**, edges_self **+0.056 ± 0.027**, net worth centre +0.092 / corner +0.078 / edge +0.053; deep8_300 +0.051 / +0.030 / +0.037 (all three significant), net worth +0.038 / +0.035 / +0.056. Opponent-owned boards ≈ 0 on both | ±0.17 per line; ownership +0.008 / +0.011 / +0.033 | lines **held**; ownership **moved** — a small positive residual per own board beyond the lines it sits on (+0.03 … +0.07, a fifth to a third of a threat line) on both strong nets. The centre > corner > edge order appears on deep10 only (deep8_300 has edge highest), so the *class* ordering is not a finding. The self / opponent asymmetry is unexplained (B3 revisits it with the full concept set) |
 | A6 | deep10 iterations 280–299 self-play: X 63.0 / O 23.9 / draw 13.1 %; ends by line 72.8 %, count 14.1 %, equal 13.1 % (count rule + equal = 27 %); mean length 51.9; 4.42 free moves per game; [40] opened 83 % of games (the rest is the 15 % exploration floor). deep8_300: 61.1 / 25.8 / 13.0, 27 %, 51.9. v2a last 20: 60.1 / 28.6 / 11.4, 26 %, 49.4. Paired matches between the strong nets (A8): draws 15–25 %, count 11–13 % | — | descriptive: X share up, draws up, games 2.5 plies longer, count-rule share flat at ~27 % of self-play |
 | A7 | 6000 strong-play positions ≤ 14 empties (deep8_300's late games): **126 puzzles (2.1 %), 7 hard at 64 sims (0.12 %)**; motifs tiebreak_conversion 71 > gives_free_move 61 > draw_hold 51 > denies_free_move 37 > local_win 20 > closes_board 4 > macro_win 0; regret 1 in 68 % | 3.5 %, 13 hard (0.22 %); same order (110 > 92 > 71 > 68 > 55 > 4 > 2) | **held** — the count rule and free-move tempo remain what the raw policy misses; local tactics fell most (26 → 16 % of puzzles). `suites/puzzles_v2_dev.npz` (+ `.json`, 5 hard puzzles) |
-| A9 | `endgame_v2_{dev,test}` built from deep8_300's iterations 280–299, split by source game before solving (3000 positions each, balanced strata). deep10 on v2_dev: raw WDL **84.7 [83.4, 85.9]**, draws 72.2, regret 0.048, optimal 95.7; search-256 optimal 99.7. deep8_300 on v2_dev: 84.7 [83.4, 86.0] (symmetry-averaged; plain 83.5), draws 70.4, regret 0.050. Both re-scored on v1 in the same session: 84.6 / 0.037 and 84.0 / 0.045, reproducing `analysis.out` | v1: 84.6 / 68.7 / 0.037 | **held** — the ~50 in-run reads did not flatter v1 (WDL within 0.1); the strong-play set is harder for the raw *policy* (regret 0.037 → 0.048) and easier for draw recognition. **v2_test is unread.** |
+| A9 | `endgame_v2_{dev,test}` built from deep8_300's iterations 280–299, split by source game before solving (3000 positions each, balanced strata). deep10 on v2_dev: raw WDL **84.7 [83.4, 85.9]**, draws 72.2, regret 0.048, optimal 95.7; search-256 optimal 99.7. deep8_300 on v2_dev: 84.7 [83.4, 86.0] (symmetry-averaged; plain 83.5), draws 70.4, regret 0.050. Both re-scored on v1 in the same session: 84.6 / 0.037 and 84.0 / 0.045, reproducing `analysis.out` | v1: 84.6 / 68.7 / 0.037 | **held** — the ~50 in-run reads did not flatter v1 (WDL within 0.1); the strong-play set is harder for the raw *policy* (regret 0.037 → 0.048) and easier for draw recognition. **v2_test read once, 2026-09-05** (`runs/plan5_A9_test_*.out`): deep10 raw WDL **85.0 [83.7, 86.3]**, draws 72.3, regret 0.047, optimal 95.8, search-256 optimal 99.7; deep8_300 84.8 [83.5, 86.0], draws 71.1, regret 0.050; the seed replicate 85.1 [83.8, 86.3], draws 69.6, regret 0.044, optimal 96.1. Test agrees with dev within 0.3 (deep10) / 1.3 (deep8_300, plain head) points, and the three strong nets are within 0.3 points of each other on the sealed half. It is a development set from here on. |
 
 What moved, in one paragraph: nothing that was an *ordering* or a *sign*. [40] is still the
 best first move and [13] the worst on every net and budget; games are still decided late; a
@@ -591,6 +601,22 @@ statistics on 4096 of them; endgame numbers on `endgame_v1` (raw head only).
   iteration 220 (deep8_300) / 240 (deep10) to 300; the last 60–80 iterations sharpen
   nothing measurable here. Criterion (ii) does not fire. B2's layer × checkpoint grid is
   the finer test.
+- **Replication on the seed replicate `deep10_c1_300_s1` (2026-09-05;
+  `runs/deep10_c1_300_s1/timeline.{json,png}`, `runs/plan5_B1_timeline_s1.out`, 30
+  checkpoints).** Every feature above is on the third run. The first LR drop is the event:
+  in-run score vs v2b 71.2 (net_0200) → 75.5 (0210) → 78.1 (0220), raw WDL 77.6 → 81.9 →
+  83.0, draw recognition 52.5 → 62.6 → 65.9, regret 0.064 → 0.049 → 0.047, opening-ply
+  policy entropy 1.84 → 1.38 bits, D4 policy divergence 0.055 → 0.032 bits (deep10: 70.5 →
+  78.9, 81.7 → 83.1, 62.5 → 65.5, 1.80 → 1.35, 0.052 → 0.030). Every curve is flat from 220
+  to 300 (v2b 75.3–80.1, WDL 82.0–83.9, draws 62.6–68.3, D4 0.028–0.034) and the second
+  drop at 280 does nothing (79.5 → 78.7 → 77.5; WDL 83.3 → 83.4 → 83.9). Draw recognition at
+  the constant LR wobbles even more than on the earlier runs — 37–62 % between adjacent
+  checkpoints from iteration 100 to 200 — then settles at 66–68 % after the drop. Opening
+  narrowing: [21] at net_0010, [40] at 0.68 from net_0020 and ≥ 0.88 from net_0030 on, with
+  the same mid-run dips (0.88–0.90 at 130 and 160; deep10 0.86 at 140–160). Constant-LR
+  gain, iterations 150 → 200: 61.1 → 71.2 (deep10 67.7 → 70.5; the replicate was in its
+  mid-run trough at 150). Nothing appears late. §0 criterion (ii) does not fire on the
+  third run either.
 
 **B4 results, first half (2026-09-03; `runs/plan5_B4_probe_value_deep10.out`,
 `runs/plan5_B4_surprise_deep10.out`; positions from deep8_c1_300's replay buffer, held-out
@@ -709,6 +735,26 @@ best trunk probe 61.8 %, random-trunk probe 60.9 %, majority 41.2 % (deep10: 60.
 59.0 / 41.2). Every §8 claim in KNOWLEDGE.md about what the trunk computes, where and
 when, therefore holds on both strong nets.
 
+**Replication on the seed replicate `deep10_c1_300_s1`** (2026-09-05;
+`runs/deep10_c1_300_s1/probes.{json,png}`, `runs/plan5_B2_fit_s1.out`,
+`runs/plan5_B2_report_s1.out`; the same 60 000 deep8_300-late positions, 30 checkpoints +
+control × 12 layers). The grid is the reference's to within a few points and one or two
+blocks: dead boards **+0.47** at block 6 (deep10 +0.48, block 5), the exact value **+0.25**
+at block 10 (+0.25, block 10), the search's best move +0.14 at block 10 (+0.16), macro
+threats +0.15 / +0.15 at block 6 (+0.15 / +0.15 at 7 / 8) with the same fade toward the
+heads (+0.15 at block 6 → +0.13 / +0.11 at block 10), local win +0.13 at block 5 (+0.13,
+block 5), opponent local threat +0.06 at block 7 (+0.06, block 8), any macro threat +0.06,
+z +0.05 at block 10 (+0.05), the move two plies on +0.04 (+0.05), macro win now +0.04
+(+0.03), final ownership of the centre +0.01 (+0.01); the input-exposed concepts (count
+margin, open boards, empties, board status, target board, free move) have gain ≈ 0 on all
+three runs. "Learned by" (the replicate has a checkpoint every 10 iterations, the reference
+every 20): local tactics 40–80 (deep10 60–80), macro threats 110–140 (100–140), the exact
+value 180 (180), dead boards 200 (180), z 180 (220), the best move 180 (220), the move two
+plies on 180 (240). Nothing appears after 200. So the layer × checkpoint picture — tactics
+shallow and early, lines mid-trunk and fading, value deep and last — is a fact about
+training this net on this game, not about one seed: KNOWLEDGE 37–39 are stated for all
+three strong nets.
+
 **Non-linear probes** (`runs/deep10_c1_300/probes_mlp.json`, one hidden layer of 256, six
 deep10 checkpoints + control, `runs/plan5_B2_fit_deep10_mlp.out`). The point of the
 non-linear control is to separate *concepts the trunk computes* from *concepts a probe can
@@ -774,6 +820,31 @@ re-attribute rather than explain more.
   ownership residual is therefore *small and positive on both nets but not sharp*: +0.07
   on deep10, +0.04 on deep8_300 for corners and edges and nothing for the centre. KNOWLEDGE
   claim 14 is stated at that strength.
+- **Replication on the seed replicate `deep10_c1_300_s1`** (2026-09-05;
+  `runs/plan5_B3_value_s1.out`, `runs/deep10_c1_300_s1/value_decomp.{json,png}`; the same
+  20 000 positions, 30 checkpoints). The final coefficients are the reference's to the
+  second decimal: free move on the search value **+0.088 ± 0.026** (deep10 +0.084), raw
+  +0.140 (+0.140), gap +0.052 (+0.056); macro win now +0.676 ± 0.058 (+0.675), raw +0.782
+  (+0.764); threats +0.103 / −0.138 (+0.10 / −0.14); opponent local threat −0.098 ± 0.014
+  (−0.099); local win now −0.028 ± 0.017 (−0.026); dead boards +0.044 ± 0.076 (null on
+  both); count margin +0.036 ± 0.010 on the search value, +0.033 raw (+0.036 / +0.037);
+  R² raw 0.59 / search 0.56 (0.59 / 0.56). Ownership by class on the search value:
+  centre_self **+0.076 ± 0.044**, corners_self **+0.078 ± 0.032**, edges_self **+0.065 ±
+  0.028** (deep10 +0.076 / +0.079 / +0.066), opponent-owned ≈ 0, net worth +0.070 / +0.089
+  / +0.067 (+0.066 / +0.090 / +0.066); on the raw value the same flip as on deep10 (self
+  ≈ 0, opponent −0.04 … −0.05). The class order is corner > centre ≈ edge here, centre >
+  corner > edge on deep10, edge highest on deep8_300 — all inside the CIs, so the
+  non-ordering (claim 15) holds a third time. Coefficient paths: the threats are at their
+  final values at net_0010 (+0.111 / −0.132); the count margin on the raw value falls from
+  +0.137 (net_0010) / +0.090 (0020) to +0.033 (0300), the search's from +0.097 to +0.036;
+  the free move on the search value rises from +0.01 (0010) / +0.05 (0020) to +0.09;
+  macro-win-now on the search value is +0.67–0.69 at every checkpoint while the raw head
+  reaches it by net_0020–0030 (deep10: by 80). One deep10 observation is *not* on the
+  replicate: the raw head's free-move coefficient falling from +0.19 (iteration 20) to
+  +0.14 — here it wanders between +0.06 and +0.18 at the constant LR and settles at
+  +0.13–0.14 after the drop. The search-value rise and the +0.05 raw − search gap at the end
+  are on both seeds; "intuition converges toward search on the free move" is a one-seed
+  path and is not claimed. KNOWLEDGE 14, 16, 17, 19 are stated for both seeds.
 
 **B6 results (2026-09-03; `uttt/surrogate.py`, `tools/distill.py`, `runs/surrogate_deep10.json`,
 `runs/plan5_B6_distill.out`, `runs/paired_surrogate_vs_*.json`).** The surrogate is a
@@ -921,6 +992,30 @@ approval (the pause called in PLAN4 §3c is still in effect).
   the Handover. Lesson for launchers: a scheduled task or `cmd` start opens a console
   window that anyone can close, and closing it ends every process attached to it; launch
   training through `wscript` with window style 0 (`runs/launch_queue7_hidden.vbs`).
+  **Result (2026-09-05; `runs/deep10_c1_300_s1/analysis.out`; 300 iterations, 43.9 h wall
+  including the two interruptions; no GPU fault in 30 graph evals).** Final checkpoint on the
+  paired suite @64: **vs v2b 77.3 % [75.0, 79.5], +213 Elo [+190, +236]** (deep10_c1_300:
+  80.1 %, +242 [+218, +267]); vs wide128_c1 71.4 %, +159 (73.9 %, +181); vs deep8_c1 67.2 %,
+  +125 (69.2 %, +141); **vs deep8_c1_300 51.4 % [48.6, 54.0], +9 [−10, +28]** (55.0 %, +35
+  [+16, +54]); **vs deep10_c1_300 50.6 % [48.1, 53.1], +4 [−13, +22]**; vs dev1 83.8 %, +286
+  (85.5 %, +308). Endgame set, raw head: WDL 83.9 [82.5, 85.2], draws 68.3 %, regret 0.047
+  [0.038, 0.056], optimal 95.9 % (deep10_c1_300 84.6 / 68.7 / 0.037 / 96.7; deep8_c1_300 84.0
+  / 0.045); search @256 optimal 99.9 % on both. Readings, in the Handover's order: (1) *the
+  seed band at 10×128* — the two seeds are even head-to-head (+4 [−13, +22]) and 2–4 points
+  apart against every older opponent (v2b 2.8, wide128 2.5, deep8_c1 2.0, deep8_300 3.6,
+  dev1 1.7, always in the reference's favour), so the band on the v2b yardstick is ≈ 3
+  points / ≈ 30 Elo, the same size as the ±2.5 measured at 6×64; (2) *the second
+  measurement of the last rung* — +9 [−10, +28] vs deep8_c1_300 is below the ±3-point rule:
+  **"+ blocks 10" is +35 on one seed and +9 on the other, i.e. inside the seed band**, and
+  with A8b's equal-compute result (deep10@64 vs deep8_300@80 −11) the 8 → 10 step is not an
+  established rung; duration (+211) is the last confirmed one. `deep10_c1_300/net_0300.pt`
+  stays the play agent — still the strongest single net measured — what changes is the
+  attribution. (3) *In-run* — the replicate ran 4–10 points under the reference on the
+  432-game v2b evals from iteration 110 to 160 with identical self-play statistics (game
+  length, result mix, buffer diversity, losses within 0.03), caught up by 189 and matched it
+  after the LR drop: a slower trajectory, not a different one; the in-run read and the full
+  suite agree at the end (0.775 vs 77.3 %). The control analyses on the replicate are in §3
+  (B1, B2, B3 "replication on the seed replicate").
 - **D2. Resume the ladder — only if §0's criteria (i)–(iii) fire.** If they do, the run
   is **600 iterations on the current 10-block recipe (≈ 38 h), not 12 blocks (≈ 23 h)**.
   Duration has the better Elo/hour record *and* is the lever that pays at equal inference

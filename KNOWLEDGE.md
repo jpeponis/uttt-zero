@@ -17,7 +17,8 @@ Every line carries:
   line says otherwise. Elo is always *vs a named opponent at a named number of sims*;
 - **held across** — the nets on which the claim was tested. "Both strong nets" means
   `deep10_c1_300/net_0300.pt` (+242 Elo vs v2b @64) and `deep8_c1_300/net_0300.pt` (+211);
-  "all nets" adds dev1, v2a, v2b (250–340 Elo weaker). A claim that held from dev1 to deep10
+  "all three strong nets" or "both seeds" adds the seed replicate
+  `deep10_c1_300_s1/net_0300.pt` (+213, PLAN5 §5 D1); "all nets" adds dev1, v2a, v2b (250–340 Elo weaker). A claim that held from dev1 to deep10
   survived a 340-Elo span; a magnitude is quoted from the strongest net;
 - **the tool and the output file** so the number can be regenerated.
 
@@ -111,13 +112,16 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     sits on, and the number is not sharp.** With threats controlled, an own board adds:
     deep10 centre +0.070 ± 0.040, corner +0.065 ± 0.030, edge +0.056 ± 0.027 (A4's model),
     +0.076 / +0.079 / +0.066 (B3's fuller model, other positions); deep8_300 +0.051 /
-    +0.030 / +0.037 and +0.031 (n.s.) / +0.044 / +0.041. Positive in all four fits,
-    significant in most, centre not significant on deep8_300. On v2b this was
+    +0.030 / +0.037 and +0.031 (n.s.) / +0.044 / +0.041; the seed replicate +0.076 ± 0.044 /
+    +0.078 ± 0.032 / +0.065 ± 0.028 (B3's model) — the reference's numbers to the third
+    decimal. Positive in all five fits, significant in most, centre not significant on
+    deep8_300. On v2b this was
     indistinguishable from zero (+0.008 / +0.011 / +0.033). *Search-relative; moved with
-    strength — both strong nets, at different sizes.* `plan5_A4_*.out`,
-    `plan5_B3_value_deep10.out`, `plan5_B3_value_deep8.out`.
+    strength — all three strong nets, smaller on deep8_300.* `plan5_A4_*.out`,
+    `plan5_B3_value_deep10.out`, `plan5_B3_value_deep8.out`, `plan5_B3_value_s1.out`.
 15. **Which class of board is worth most is not resolved.** deep10 orders centre > corner >
-    edge, deep8_300 has edge highest; the differences are inside the CIs. The raw head's
+    edge, deep8_300 has edge highest, the seed replicate corner > centre ≈ edge; the
+    differences are inside the CIs on all three. The raw head's
     *counterfactual* hierarchy (flip a won board's owner: centre +1.05, corner +0.94, edge
     +0.83) is unchanged to the second decimal since v2a and is the line-count ordering
     (4 / 3 / 2 lines through the board) in disguise. *Predictive; all nets.*
@@ -125,16 +129,19 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
 16. **The raw board count is discounted as the net gets stronger.** The count-margin
     coefficient on the raw value falls from +0.106 (iteration 20) to +0.037 ± 0.010
     (iteration 300); the search's from +0.076 to +0.036. Early nets count boards; trained
-    nets count lines and tempo. *Predictive / search-relative; deep10 checkpoints.*
-    `plan5_B3_value_deep10.out`.
+    nets count lines and tempo. The seed replicate: +0.137 (iteration 10) → +0.033 ± 0.010,
+    the search's +0.097 → +0.036; deep8_300 +0.078 → +0.021. *Predictive / search-relative;
+    all three runs' checkpoints.* `plan5_B3_value_deep10.out`, `plan5_B3_value_s1.out`.
 17. **Line counting is learned first and never moves:** the threat coefficients are at
-    their final values by iteration 20 of 300. *Descriptive of training; deep10.* Same.
+    their final values by iteration 10–20 of 300 on both seeds and on deep8_300.
+    *Descriptive of training; all three strong nets.* Same; `plan5_B3_value_s1.out`.
 18. **An open board that becomes nobody's is worth nothing to the mover:** removing an open
     board for both sides moves the raw value by +0.017 (v2a: +0.06). *Predictive.*
     `plan5_B4_probe_value_deep10.out`.
 19. **An opponent's immediate local threat costs ≈ −0.10** (−0.099 ± 0.014); an own
     immediate local win, once the macro win is separated, is worth nothing by itself
-    (−0.026 ± 0.017). *Search-relative; deep10.* `plan5_B3_value_deep10.out`.
+    (−0.026 ± 0.017). Seed replicate: −0.098 ± 0.014 and −0.028 ± 0.017; deep8_300 −0.082
+    ± 0.014. *Search-relative; all three strong nets.* `plan5_B3_value_*.out`.
 
 ## 4. When games are decided
 
@@ -190,7 +197,10 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     fresh strong-play set `endgame_v2_dev` (split from `_test` by source game before
     solving) deep10 scores 84.7 [83.4, 85.9] — within 0.1 of v1. Draw recognition is
     higher there (72 %), raw-policy regret worse (0.048). *Exact.* `plan5_A9_*.out`.
-    `endgame_v2_test` has not been read.
+    **`endgame_v2_test`, read once (2026-09-05):** deep10 85.0 [83.7, 86.3] (draws 72.3,
+    regret 0.047), deep8_300 84.8 [83.5, 86.0], the seed replicate 85.1 [83.8, 86.3] —
+    within 0.3 / 1.3 points of the dev half and within 0.3 of each other. It is a
+    development set from here on. `plan5_A9_test_*.out`.
 31. **"Draw blindness" was never a capacity limit.** The 150-iteration nets recognised
     ~55 % of exact draws at every width and depth; the annealed 300-iteration nets
     recognise 67–72 % with the same architecture, loss and labels. The step happens at
@@ -249,12 +259,17 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     +5 points at block 10, by 220. deep8_300, probed on deep10's games, gives the same
     gains within a few points, the same layers (tactics at block 5, value at the last block)
     and the same learned-by checkpoints (tactics 60–80, lines 80–120, value 180–220).
-    *Decodability; both strong nets.* Same files; `runs/deep8_c1_300/probes.{json,png}`.
+    The seed replicate gives the grid a third time (dead boards +0.47 at block 6 by 200,
+    the exact value +0.25 at block 10 by 180, the best move +0.14, threats +0.15 at block 6
+    by 110–140, local win +0.13 at block 5 by 40, z +0.05 by 180). *Decodability; all three
+    strong nets.* Same files; `runs/deep8_c1_300/probes.{json,png}`,
+    `runs/deep10_c1_300_s1/probes.{json,png}`.
 38. **Tactics are shallow and early, value is deep and late:** local concepts are readable
     by block 5 and learned in the first 60–80 iterations; macro-line threats peak in the
     middle of the trunk and fade toward the heads; the value-like concepts live in the last
     blocks and step at the LR drop, together with the endgame metrics they explain.
-    Nothing new appears after iteration 240. *Decodability; both strong nets.* Same.
+    Nothing new appears after iteration 240 (200 on the seed replicate). *Decodability; all
+    three strong nets.* Same.
 38a. **Which of those the trunk actually computes, and which it merely re-formats.** A
     probe with one hidden layer of its own reads macro threats off a *random* net at R²
     0.81–0.83 and "the mover can win the game this move" at 98 %: those are simple
@@ -266,7 +281,8 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     non-linear control; deep10, six checkpoints.* `runs/deep10_c1_300/probes_mlp.json`.
 39. **The trunk carries little of the line it is about to follow:** the move two plies
     down the search's principal variation is decodable at 38 % vs 34 % on the control
-    (the current best move: 71 vs 56 %). *Decodability; deep10.* Same.
+    (the current best move: 71 vs 56 %; seed replicate 38 vs 34 % and 70 vs 56 %).
+    *Decodability; both seeds.* Same.
 40. **The auxiliary ownership head learns almost nothing beyond the board.** It predicts
     the final owner of each board at 60.3 % (majority 41 %); a linear probe on the trained
     trunk gets 60.1 % — and on a *random* trunk 59.0 % (deep8_300: 59.9 / 61.8 / 60.9 %).
@@ -274,7 +290,8 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     null; both strong nets.* Same; RETROSPECTIVE §3.
 41. **The net has not fully learned the board's symmetry, and it costs a rung.** The
     policy's Jensen–Shannon divergence across the 8 orientations is 0.05 bits for 200
-    iterations, halves at the LR drop and ends at 0.027 (smallest in the opening, 0.010;
+    iterations, halves at the LR drop and ends at 0.027 (0.028 on the seed replicate, by the same path;
+    smallest in the opening, 0.010;
     largest in the middlegame, 0.034). Averaging the 8 orientations at play time beats the
     plain net **55.0 % [52.4, 57.7], +35 Elo [+17, +54]** at equal sims (8× the inference
     per sim) and adds +0.4 WDL points on the endgame set — but at equal inference the
@@ -298,17 +315,25 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     150–200 at the constant learning rate and ≈ +8 from the first LR drop, at which every
     curve (score, endgame WDL, draw recognition, opening-policy entropy, D4 consistency)
     steps once; the second drop at 280 produces nothing visible. *Descriptive of training;
-    both 300-iteration runs.* `runs/*/timeline.{json,png}`, PLAN5 §3 B1.
+    all three 300-iteration runs (the seed replicate: 71.2 → 78.1 at the first drop, every
+    curve flat after 220, nothing at 280).* `runs/*/timeline.{json,png}`, PLAN5 §3 B1.
 
 ## 9. Strength (for reference; the full ladder is in RETROSPECTIVE §2)
 
 43. **The ladder, vs v2b @64 sims on the frozen paired suite, final checkpoints:** dev1 −95,
     v2b 0, +c_scale 1.0 +40, +width 128 +77, +8 blocks +100, +300 iterations +211, +10
-    blocks **+242** (≈ 80 % expected score). *Behavioural.* `runs/*/analysis.out`.
+    blocks **+242** (≈ 80 % expected score). **The seed replicate of the last rung**
+    (`deep10_c1_300_s1`, same recipe, seed 1) scores +213 [+190, +236] vs v2b, +9 [−10, +28]
+    vs deep8_300 and +4 [−13, +22] against the other seed: the seed band at 10×128 is ≈ 3
+    points / ≈ 30 Elo, and "+ blocks 10" (+35 on one seed, +9 on the other) is inside it —
+    not an established rung. Duration (+211) is the last confirmed rung; deep10_c1_300 is
+    still the strongest single net measured. *Behavioural.* `runs/*/analysis.out`.
 44. **At equal compute the deep, long-trained net wins for the first time:** deep10@64
     beats v2b@427 (6.7× the sims) by +42 [+23, +61]; but deep10@64 vs deep8_300@80 is −11
     [−30, +7] — the last rung is a wash at a fixed inference budget; duration, not depth,
-    is where deployment strength came from. *Behavioural.* `runs/plan5_A8.out`.
+    is where deployment strength came from. The seed replicate agrees from the other side:
+    at equal sims the 8 → 10 step is inside the seed band (43). *Behavioural.*
+    `runs/plan5_A8.out`, `runs/deep10_c1_300_s1/analysis.out`.
 45. **The phased search schedule ("0:128,24:384") is not confirmed on the best net:** +10
     [−7, +26] vs a flat 256 (was +50 on v2b, +26 on deep8_300) — the stronger the raw
     policy, the less late search adds. Play config: flat `--sims 256` or more.
@@ -318,11 +343,13 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
 
 - The opening book stops at depth 4 with three replies per node; nothing is claimed about
   lines beyond it.
-- Whether the +0.03 … +0.08 per owned board (14) and the class order (15) survive a seed replicate
-  (PLAN5 §5 D1 — not run; owner's call).
+- The per-owned-board residual (14) survived the seed replicate to the third decimal; the
+  class order (15) did not appear on it either, so it stays unresolved. One coefficient
+  path is deep10-only — the raw head's free-move weight falling from +0.19 to +0.14 over
+  training (PLAN5 §3 B3); the search value's rise +0.05 → +0.09 is on both seeds.
 - The self/opponent asymmetry in the ownership coefficients flips between the raw and the
   search value and is not reported.
-- `endgame_v2_test` is unread; it is read once, at the end of PLAN5.
+- `endgame_v2_test` was read once (30); no sealed set remains.
 - The five hard puzzles are annotated in `docs/positions.md` (C3); a larger annotated set
   (the top surprises of B4) is not.
 - A two-open-board tablebase (the useful frontier after 31a) — not built; it needs

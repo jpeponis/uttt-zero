@@ -48,6 +48,7 @@ playing its preferred move instead of the best one (0 = perfect).
 | deep8_c1 | + blocks 8 | +100 | 77.6 / 0.064 |
 | deep8_c1_300 | + 300 iters (drops 200/280) | +211 | 84.0 / 0.045 |
 | **deep10_c1_300** | **+ blocks 10** | **+242** | **84.6 / 0.037** |
+| deep10_c1_300_s1 | same recipe, seed 1 (the replicate, PLAN5 §5 D1) | +213 | 83.9 / 0.047 |
 
 Absolute anchor: v2b@64 is ≈ +169 over a rollout UCT with 100 k playouts per move (the
 recipe of the strong CodinGame bots, which run plain tree search with random playouts),
@@ -56,6 +57,11 @@ net_0300.pt`. *(Addendum 2026-09-02, PLAN5 §2 A8: the phased schedule `"0:128,2
 +26 on deep8_c1_300, was re-verified on this net at +10 [−7, +26] — below the rule, so
 the play config is flat 256. Equal-compute: deep10@64 beats v2b@427 by +42 [+23, +61];
 deep10@64 vs deep8_c1_300@80 is −11 [−30, +7] — the last rung is a wash at fixed budget.)*
+*(Addendum 2026-09-05, PLAN5 §5 D1: the seed replicate of the last rung scores +213 [+190,
++236] vs v2b, +9 [−10, +28] vs deep8_c1_300 and +4 [−13, +22] against the other seed. The
+seed band at 10×128 is ≈ 3 points / ≈ 30 Elo on the v2b yardstick, and "+ blocks 10" is +35
+on one seed and +9 on the other — inside the band, not an established rung. The last
+confirmed rung is duration, +211; deep10_c1_300 remains the strongest single net measured.)*
 
 ## 3. What makes an AlphaZero recipe stronger here — the validated ledger
 

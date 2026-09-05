@@ -1,0 +1,20 @@
+plan5 D1 control (3060 chain) started Sat Sep  5 07:41:27 EDT 2026
+plan5 D1 control (3090 chain) waiting for eval_run.sh Sat Sep  5 07:41:27 EDT 2026
+=== 2026-09-05 07:41:27 .venv/Scripts/python.exe tools/timeline.py runs/deep10_c1_300_s1 --corpus runs/deep8_c1_300 --last 20 --device cuda:1
+    -> runs/plan5_B1_timeline_s1.out (0)
+=== 2026-09-05 07:42:34 .venv/Scripts/python.exe tools/value_decomp.py runs/deep10_c1_300_s1 --data runs/probe_data_deep8late.npz --n 20000 --sims 256 --device cuda:1
+plan5 D1 control (3090 chain) started Sat Sep  5 07:48:27 EDT 2026
+=== 2026-09-05 07:48:27 .venv/Scripts/python.exe tools/probe.py fit --data runs/probe_data_deep8late.npz --run runs/deep10_c1_300_s1 --control --device cuda:0
+    -> runs/plan5_B3_value_s1.out (0)
+plan5 D1 control (3060 chain) done Sat Sep  5 09:20:40 EDT 2026
+    -> runs/plan5_B2_fit_s1.out (0)
+=== 2026-09-05 09:51:36 .venv/Scripts/python.exe tools/probe_report.py runs/deep10_c1_300_s1/probes.json --fig runs/deep10_c1_300_s1/probes.png
+    -> runs/plan5_B2_report_s1.out (0)
+=== 2026-09-05 09:51:39 .venv/Scripts/python.exe tools/endgame.py eval runs/deep10_c1_300/net_0300.pt --set suites/endgame_v2_test.npz --device cuda:0
+    -> runs/plan5_A9_test_deep10.out (0)
+=== 2026-09-05 09:52:10 .venv/Scripts/python.exe tools/endgame.py eval runs/deep8_c1_300/net_0300.pt --set suites/endgame_v2_test.npz --device cuda:0
+    -> runs/plan5_A9_test_deep8.out (0)
+=== 2026-09-05 09:52:38 .venv/Scripts/python.exe tools/endgame.py eval runs/deep10_c1_300_s1/net_0300.pt --set suites/endgame_v2_test.npz --device cuda:0
+    -> runs/plan5_A9_test_s1.out (0)
+plan5 D1 control (3090 chain) done Sat Sep  5 09:53:10 EDT 2026
+plan5 D1 control all done Sat Sep  5 09:53:10 EDT 2026

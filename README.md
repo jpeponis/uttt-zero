@@ -44,7 +44,7 @@ Read in this order:
    claude in the PLAN3 era, adjudicated in PLAN4). References such as "PLAN4 §3c" in the
    live files mean these.
 
-## Current state (2026-09-02)
+## Current state (2026-09-05)
 
 - **Best network:** `runs/deep10_c1_300/net_0300.pt` — 10 residual blocks of 128
   filters, trained for 300 iterations. It is +242 Elo over the `v2b` reference net at 64
@@ -54,20 +54,21 @@ Read in this order:
   **not** confirmed on this one (+10 [−7, +26], below the project's ±3-point rule;
   PLAN5 §2 A8c).
 - **The ladder is paused by owner directive** (PLAN4 §3c, PLAN5 §5): no new rung without the
-  owner's approval. **One owner-approved run is in progress: D1, the seed replicate**
-  `runs/deep10_c1_300_s1` (same recipe as the best net, `--seed 1`; launched 2026-09-03
-  11:52 by `runs/queue7.sh`, ≈ 19 h on the 3090, then `eval_run.sh` runs by itself). A
-  power loss stopped it at iteration 94 on 2026-09-03, and a closed console window stopped
-  the first relaunch at iteration 128 on 2026-09-04; it is running again since 2026-09-04
-  19:49 from its full checkpoint at iteration 119, with a hidden console
-  (`runs/launch_queue7_hidden.vbs`), expected to finish ≈ 2026-09-05 07:30. It is the
-  control for the analysis, not a rung. PLAN5's Handover section says what to do with it
-  when it finishes.
+  owner's approval. **The one owner-approved run, D1 — the seed replicate
+  `runs/deep10_c1_300_s1` (same recipe as the best net, `--seed 1`) — finished 2026-09-05**
+  after a power loss and a closed console window cost it a day (PLAN5 Handover). It scores
+  +213 [+190, +236] vs v2b, **+9 [−10, +28] vs deep8_c1_300 and +4 [−13, +22] against the
+  other seed**: the seed band at 10×128 is ≈ 3 points / ≈ 30 Elo, and the last rung
+  ("+ blocks 10", +35 on the first seed) is inside it — not an established rung; duration
+  (+211) is the last confirmed one. `deep10_c1_300/net_0300.pt` stays the play agent. Its
+  checkpoint timeline repeats the reference's (PLAN5 §3 B1); the probe and
+  value-decomposition controls are in §3 B2/B3.
 - **Analysis programme (PLAN5 Phases A–C): complete, 2026-09-03.** Every ordering and sign
   from the earlier nets held on the +242 net; two magnitudes moved (the free-move value,
   +0.16 → +0.20, and a small residual value per owned board once macro lines are
   controlled); the endgame yardstick was not flattered by its in-run reads
-  (`suites/endgame_v2_dev`; `endgame_v2_test` is sealed until after D1). The checkpoint
+  (`suites/endgame_v2_dev`; the sealed `endgame_v2_test` half, read once after D1, agrees
+  within a point). The checkpoint
   timelines put the +127 duration gain at the first LR drop plus the constant-LR climb;
   probes with a random-init control say what the trunk computes and when; the opening
   book to depth 4 has the two strong nets agreeing on 75 % of nodes and a reply rule (the
@@ -92,6 +93,7 @@ perfect). Details in RETROSPECTIVE §2.
 | deep8_c1 | + blocks 8 | +100 | 77.6 / 0.064 |
 | deep8_c1_300 | + 300 iters (drops 200/280) | +211 | 84.0 / 0.045 |
 | **deep10_c1_300** | **+ blocks 10** | **+242** | **84.6 / 0.037** |
+| deep10_c1_300_s1 | same recipe, seed 1 (replicate) | +213 | 83.9 / 0.047 |
 
 ## Where things live
 
