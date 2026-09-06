@@ -1,0 +1,3 @@
+suites/endgame_v3_dev.npz: 3000 positions from 2924 games; 3000 distinct canonical positions (0 symmetric or literal duplicates within the set)
+suites/endgame_v3_test.npz: 3000 positions from 2933 games; 3000 distinct canonical positions (0 symmetric or literal duplicates within the set)
+endgame_v3_dev.npz and endgame_v3_test.npz: 0 shared canonical positions

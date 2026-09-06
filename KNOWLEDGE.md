@@ -321,11 +321,23 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     down the search's principal variation is decodable at 38 % vs 34 % on the control
     (the current best move: 71 vs 56 %; seed replicate 38 vs 34 % and 70 vs 56 %).
     *Decodability; both seeds.* Same.
-40. **The auxiliary ownership head learns almost nothing beyond the board.** It predicts
-    the final owner of each board at 60.3 % (majority 41 %); a linear probe on the trained
-    trunk gets 60.1 % — and on a *random* trunk 59.0 % (deep8_300: 59.9 / 61.8 / 60.9 %).
-    This is why switching the auxiliary heads off was a null. *Decodability + behavioural
-    null; both strong nets.* Same; RETROSPECTIVE §3.
+40. **The auxiliary ownership head learns the late game's ownership and little else — and
+    none of it showed up as strength.** Graded on *open* boards only (PLAN6 E9; the earlier
+    aggregate — head 60.3 %, trained-trunk probe 60.1 %, random-trunk probe 59.0 % — mixed in
+    the boards whose owner was already fixed), on 73 330 open boards of the held-out test
+    positions: overall the head names the final owner in 51.2 % (majority class 39.5 %, a
+    logistic on hand-written per-board features 47.8 %, a linear probe on the trained trunk
+    49.1 %, on a random trunk 47.0 %). By ply: before ply 32 the head is within 2 points of
+    the local-feature logistic and the random-trunk probe (45–52 %); at plies 32–43 it is
+    57 % against 51 / 51; at plies 44+ **68 % against 50 (local) / 50 (random trunk) / 65
+    (trained trunk)**. deep8_300 on deep10's games: 66 % late against 51 / 54 / 64, the same
+    shape. So the trunk computes late-game ownership that neither the board's local features
+    nor an untrained trunk carry, and the head reads it; early ownership is not predictable
+    from the position by any of these read-outs. Switching the auxiliary heads off was a
+    strength null (RETROSPECTIVE §3): the head's late-game knowledge is what the value head
+    needs anyway. *Decodability + behavioural null; both strong nets.*
+    `tools/ownership_grade.py` → `runs/plan6_E9_ownership_deep10.out`,
+    `runs/plan6_E9_ownership_deep8.out`.
 41. **The net has not fully learned the board's symmetry, and it costs a rung.** Training
     augments every sampled example with an independent random D4 element
     (`train2.symmetrise`); equivariance is not enforced, and what follows is the residual
@@ -386,6 +398,15 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     it; the constant-LR iterations 150–200 were worth their ≈ 5 points. *Descriptive of
     training; four 300-iteration runs.* PLAN5 §5 D3,
     `runs/deep10_c1_300_lr150/{analysis.out,timeline.json}`.
+    **Read at ±2.8 instead of ±6 (PLAN6 F2, full paired suite vs v2b @64 for the checkpoints
+    around both drops of all four runs):** the first drop is a resolved step on every run —
+    +8.5 (deep8_300, 200 → 220), +4.8 (deep10), +6.6 (the replicate), +5.9 (lr150, 150 → 160)
+    — and **the second drop does nothing resolvable**: 300 − 260 is +2.6 / +4.1 / −0.4 / −0.3
+    (lr150: 300 − 240), one run of four over the pre-registered 3 points. Checkpoint-to-
+    checkpoint wobble at a constant LR is ≈ ±3 points on the full suite (the replicate reads
+    77.7 / 75.3 / 77.3 at 260 / 280 / 300), so "flat after the drop" means "inside ±3", and
+    the in-run ±6 reads missed the full-suite value by up to 4 points. *Descriptive of
+    training; four 300-iteration runs.* `runs/*/eval_full.jsonl`, `runs/plan6/F2_second_drop.out`.
 
 ## 9. Strength (for reference; the full ladder is in RETROSPECTIVE §2)
 
@@ -420,7 +441,11 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
   training (PLAN5 §3 B3); the search value's rise +0.05 → +0.09 is on both seeds.
 - The self/opponent asymmetry in the ownership coefficients flips between the raw and the
   search value and is not reported.
-- `endgame_v2_test` was read once (30); no sealed set remains.
+- `endgame_v2_test` was read once (30). **A new sealed set exists (PLAN6 E10):** `suites/endgame_v3_test.npz`,
+  3000 solved positions from `deep10_c1_300_s1`'s iterations 280–299, split from `endgame_v3_dev` by source
+  game before solving, 0 canonical positions shared between the halves and none duplicated within them
+  (`tools/suite_overlap.py`). Held out for deep10, deep8_300 and any Phase G student — not for the seed
+  replicate, whose games it comes from. To be read once, at the end of Phase G, and logged in PLAN6.
 - The five hard puzzles are annotated in `docs/positions.md` (C3); a larger annotated set
   (the top surprises of B4) is not.
 - A two-open-board tablebase (the useful frontier after 31a) — not built; it needs

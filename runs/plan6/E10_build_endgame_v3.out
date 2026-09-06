@@ -1,0 +1,35 @@
+151292 candidate positions from 20 files (225s); 75895 in the dev half of the source games
+  solved 1000: 1000/3000 slots filled (7s)
+  solved 2000: 1768/3000 slots filled (13s)
+  solved 3000: 2185/3000 slots filled (164s)
+  solved 4000: 2496/3000 slots filled (178s)
+  solved 5000: 2656/3000 slots filled (192s)
+  solved 6000: 2742/3000 slots filled (264s)
+  solved 7000: 2829/3000 slots filled (273s)
+  solved 8000: 2870/3000 slots filled (278s)
+  solved 9000: 2915/3000 slots filled (284s)
+  solved 10000: 2960/3000 slots filled (459s)
+  solved 11000: 2980/3000 slots filled (513s)
+  solved 12000: 3000/3000 slots filled (521s)
+wrote suites/endgame_v3_dev.npz: 3000 positions; exact W/D/L for the mover 0.333/0.333/0.333; 2924 source games
+  empties 6-9: [125, 125, 125, 125, 125, 125]
+  empties 10-12: [125, 125, 125, 125, 125, 125]
+  empties 13-14: [125, 125, 125, 125, 125, 125]
+  empties 15-16: [125, 125, 125, 125, 125, 125]
+151292 candidate positions from 20 files (224s); 75397 in the test half of the source games
+  solved 1000: 1000/3000 slots filled (35s)
+  solved 2000: 1791/3000 slots filled (42s)
+  solved 3000: 2174/3000 slots filled (53s)
+  solved 4000: 2541/3000 slots filled (60s)
+  solved 5000: 2700/3000 slots filled (66s)
+  solved 6000: 2788/3000 slots filled (72s)
+  solved 7000: 2849/3000 slots filled (76s)
+  solved 8000: 2903/3000 slots filled (87s)
+  solved 9000: 2947/3000 slots filled (117s)
+  solved 10000: 2997/3000 slots filled (130s)
+  solved 11000: 3000/3000 slots filled (137s)
+wrote suites/endgame_v3_test.npz: 3000 positions; exact W/D/L for the mover 0.333/0.333/0.333; 2933 source games
+  empties 6-9: [125, 125, 125, 125, 125, 125]
+  empties 10-12: [125, 125, 125, 125, 125, 125]
+  empties 13-14: [125, 125, 125, 125, 125, 125]
+  empties 15-16: [125, 125, 125, 125, 125, 125]

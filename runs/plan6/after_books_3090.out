@@ -65,3 +65,4 @@ paired suite openings_v1 (516 openings, 1032 games): A=runs/deep10_c1_300/net_03
   end reasons: line 70.2%  count 13.4%  equal 16.5%  |  mean length 50.5
 wrote runs/deep10_c1_300/paired_canon_vs_plain_64.json
 === F1 done (13:58)
+DONE

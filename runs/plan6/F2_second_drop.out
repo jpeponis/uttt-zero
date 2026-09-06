@@ -1,0 +1,39 @@
+evaluator: suite suites/openings_v1.npz (516 openings), anchors ['v2b_net_0150'], 64 sims, endgame set off, device NVIDIA GeForce RTX 3090
+net_0200: vs v2b_net_0150 67.7 [65.0, 70.3]  (60s; 4 pending)
+net_0220: vs v2b_net_0150 76.2 [73.8, 78.4]  (54s; 3 pending)
+net_0260: vs v2b_net_0150 74.5 [72.2, 76.8]  (57s; 2 pending)
+net_0280: vs v2b_net_0150 76.4 [74.0, 78.7]  (55s; 1 pending)
+net_0300: vs v2b_net_0150 77.1 [74.9, 79.4]  (55s; 0 pending)
+done: 5 checkpoints in runs/deep8_c1_300\eval_full.jsonl
+evaluator: suite suites/openings_v1.npz (516 openings), anchors ['v2b_net_0150'], 64 sims, endgame set off, device NVIDIA GeForce RTX 3090
+net_0200: vs v2b_net_0150 73.1 [70.7, 75.5]  (66s; 4 pending)
+net_0220: vs v2b_net_0150 77.9 [75.4, 80.1]  (60s; 3 pending)
+net_0260: vs v2b_net_0150 76.0 [73.6, 78.4]  (62s; 2 pending)
+net_0280: vs v2b_net_0150 79.8 [77.6, 82.0]  (64s; 1 pending)
+net_0300: vs v2b_net_0150 80.1 [77.8, 82.3]  (61s; 0 pending)
+done: 5 checkpoints in runs/deep10_c1_300\eval_full.jsonl
+evaluator: suite suites/openings_v1.npz (516 openings), anchors ['v2b_net_0150'], 64 sims, endgame set off, device NVIDIA GeForce RTX 3090
+net_0200: vs v2b_net_0150 69.0 [66.5, 71.8]  (66s; 4 pending)
+net_0220: vs v2b_net_0150 75.6 [73.3, 77.8]  (60s; 3 pending)
+net_0260: vs v2b_net_0150 77.7 [75.4, 80.1]  (59s; 2 pending)
+net_0280: vs v2b_net_0150 75.3 [72.8, 77.7]  (61s; 1 pending)
+net_0300: vs v2b_net_0150 77.3 [75.0, 79.5]  (58s; 0 pending)
+done: 5 checkpoints in runs/deep10_c1_300_s1\eval_full.jsonl
+evaluator: suite suites/openings_v1.npz (516 openings), anchors ['v2b_net_0150'], 64 sims, endgame set off, device NVIDIA GeForce RTX 3090
+net_0150: vs v2b_net_0150 66.7 [63.7, 69.6]  (67s; 5 pending)
+net_0160: vs v2b_net_0150 72.6 [70.2, 74.9]  (59s; 4 pending)
+net_0240: vs v2b_net_0150 75.5 [73.1, 77.7]  (59s; 3 pending)
+net_0250: vs v2b_net_0150 72.4 [70.0, 75.0]  (61s; 2 pending)
+net_0260: vs v2b_net_0150 78.2 [76.1, 80.4]  (58s; 1 pending)
+net_0300: vs v2b_net_0150 75.2 [72.8, 77.4]  (59s; 0 pending)
+done: 6 checkpoints in runs/deep10_c1_300_lr150\eval_full.jsonl
+=== F2 summary: full-suite score vs v2b @64 per checkpoint
+deep8_c1_300 200: 67.7 [65.0, 70.3]  220: 76.2 [73.8, 78.4]  260: 74.5 [72.2, 76.8]  280: 76.4 [74.0, 78.7]  300: 77.1 [74.9, 79.4]
+  300 - 280: +0.7 points
+deep10_c1_300 200: 73.1 [70.7, 75.5]  220: 77.9 [75.4, 80.1]  260: 76.0 [73.6, 78.4]  280: 79.8 [77.6, 82.0]  300: 80.1 [77.8, 82.3]
+  300 - 280: +0.3 points
+deep10_c1_300_s1 200: 69.0 [66.5, 71.8]  220: 75.6 [73.3, 77.8]  260: 77.7 [75.4, 80.1]  280: 75.3 [72.8, 77.7]  300: 77.3 [75.0, 79.5]
+  300 - 280: +2.0 points
+deep10_c1_300_lr150 150: 66.7 [63.7, 69.6]  160: 72.6 [70.2, 74.9]  240: 75.5 [73.1, 77.7]  250: 72.4 [70.0, 75.0]  260: 78.2 [76.1, 80.4]  300: 75.2 [72.8, 77.4]
+  300 - 260: -3.1 points
+DONE

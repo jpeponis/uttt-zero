@@ -83,7 +83,12 @@ Read in this order:
   KNOWLEDGE claims 4, 5, 7, 7a, 9, 20, 28, 41, 42 restated — no number moves except the
   book's), then Phase F takes an hour of cheap play-time measurements, Phase G answers the
   architecture question on frozen data, and Phase H proposes runs in order: `--epochs 2` on
-  8 blocks first (H1), 600 iterations after (H3).
+  8 blocks first (H1), 600 iterations after (H3). **Done the same day:** Phase E (E1–E10; E11, the
+  off-machine backup, awaits a destination — the repository has no remote) and Phase F: exact
+  equivariance at play is a null (canonical vs plain, 49.5 % [46.7, 52.3]); at ±2.8 the first LR
+  drop is a resolved +5 … +9 on every run and the second does nothing resolvable; the ownership
+  head does learn late-game ownership (68 % on open boards after ply 44, against 50 % for local
+  features or a random trunk). See PLAN6's log.
 - **Analysis programme (PLAN5 Phases A–C): complete, 2026-09-03.** Every ordering and sign
   from the earlier nets held on the +242 net; two magnitudes moved (the free-move value,
   +0.16 → +0.20, and a small residual value per owned board once macro lines are

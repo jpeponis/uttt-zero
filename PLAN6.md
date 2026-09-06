@@ -34,6 +34,93 @@ nets. Phase G (§4) runs on the 3060 over several days and does not block anythi
 training; H1 is the run to propose to the owner first, and it can start on the otherwise idle 3090 as
 soon as E5/E7 (the operational changes it depends on) are in.
 
+**Progress (2026-09-06, same day; details in the log below).** Phase E is done except E11 (the
+off-machine backup needs a destination from the owner). Phase F is done: F1 null, F2 read at ±2.8
+(see the log), F3 recorded. Next: Phase G — G-data first (≈ 5 h of the 3090 for the symmetry-averaged
+teacher labels; the corpus is `deep10_c1_300_s1` iterations 280–299), then G0 and arms (a)–(d) on the
+3060 — and, in parallel, H1 proposed to the owner: `deep8_c1_300_e2`, `--epochs 2`, everything else as
+deep8_c1_300, run with `--eval_every 0 --ckpt_every 10` and the E7 worker on the 3060 (anchors v2b /
+deep8_c1_300 / deep10_c1_300). Nothing starts without the owner's word.
+
+## Log
+
+- **2026-09-06, E1.** `uttt/openings.py` gained the group tables (`compose`, `inverse`,
+  `transform_move`, `canonicalise` → (key, g), `reply_orbits`). A book node's replies are now orbits
+  (representative = the orbit's smallest member; for a canonical parent that is exactly the member whose
+  sequence *is* the child's canonical key, so the edge transform is the identity by construction and
+  every line stays in its first move's frame — the general composition is kept in `principal_line()` and
+  the stored transforms are audited). `tools/book.py audit()` checks every book it builds (members legal,
+  transforms map onto the child, children distinct, every principal line legal and canonicalising to the
+  node it passes through); `tests/test_book.py` builds a small book on the CPU, audits it, and checks the
+  audit catches both review bugs. Both books rebuilt (deep10 28 min on the 3090, deep8 38 min on the 3060,
+  both audit-clean): **579 nodes each (was 459), 430 shared (was 341)**; after [40] the corner orbit is
+  now expanded (+0.02 better for X than the edge reply on both nets; deep10 puts 0.75 of its root visits on
+  the edges, deep8_300 0.54). Agreement on the top reply orbit **75 % (321 / 430)**, 98 % where the top
+  orbit carries ≥ 0.9 of the visits, 35–46 % below 0.7. Self-send: 55 / 58 % (was 52 / 57).
+  KNOWLEDGE 7, 7a restated. `runs/plan6/E1_*`.
+- **E2.** `tools/atlas.py`: the in-tree gap is between the two most-visited reply *orbits*; `--report`
+  re-reads a saved atlas. From `runs/plan5_A1_atlas.json` (child-root values): deep10@16k gap ≤ 0.03
+  after 12 / 15 first moves (deep8_300 10, v2b 14); best-to-worst reply-orbit range median 0.11, 0.07–0.19
+  except [40] (0.02). The [40]-reply exceptions: [13] 0.102, [4] 0.053; [37] 0.037 at the edge.
+  `runs/plan6_E2_atlas_orbits.out`. KNOWLEDGE 4, 5 restated.
+- **E3.** Done as listed in §2 (KNOWLEDGE header + rules, 4, 5, 7, 7a, 8's unit, 9, 20, 28, 40 (from E9),
+  41, 42, 43; RETROSPECTIVE §3, §5, §7; README; explainer Part 8). No number moved except the book's.
+- **E4.** `BatchedSearch(..., generator=)`, `ContinuousSelfPlay(..., generator=)`,
+  `GPUReplayBuffer(..., generator=)`, `symmetrise(..., gen)`; a deterministic search draws nothing;
+  `load_checkpoint` under `fork_rng`; evaluation additionally under `fork_rng`. `tests/test_rng_hygiene.py`:
+  an evaluation between two iterations — even one that draws from the global RNG — changes no training
+  draw; the pre-E4 idle draw would have. Golden tests (v1 = v2 trees, eager = graph) still pass.
+- **E5.** Both checkpoint files carry `scaler`, `rng` (three generators + the exact labeler's) and
+  `attempt`; `net_NNNN.pt` atomic; `--ckpt_every` (0 = at every evaluation, the old behaviour); resumes
+  print "attempt N: a perturbed continuation".
+- **E6.** `tests/test_symmetry.py`: engine commutation over 70 random plies (free moves, closures, count
+  endings seen), encoder equivariance + colour-relabelling invariance, both exact evaluators' heads
+  (invariant value, equivariant policy, constant on orbits at the empty board and after [40]), the
+  canonical evaluator on the fused fp16 net under graph replay (bitwise identical across the 8
+  orientations), deterministic search on the exact evaluator commuting as a distribution (100 % of 128
+  positions). Passes on CPU and cuda:0.
+- **E7.** `tools/eval_worker.py`: watches `net_NNNN.pt`, full suite vs anchors at 64 sims + endgame set,
+  `eval_full.jsonl` with hash and settings, newest-first while live, backfills after DONE, `--once`.
+  Measured: 55–66 s per full-suite match on the 3090 (the ≈ 2–3 min estimate was for the 3060).
+  `tools/timeline.py` overlays the full-suite points with error bars.
+- **E8.** Per iteration the log now has `rows_sampled`, `steps` (taken) and `steps_skipped`,
+  `teacher_step`, `replay_age`, `sample_distinct_frac`, `target_entropy`, `raw_kl`, `q_range`, `attempt`.
+  Replay pre-draw (`sample_batches`) in.
+- **E9.** `tools/ownership_grade.py`. On open boards only, the head is at 51 % overall (majority 40,
+  local logistic 48, trunk probe 49, random-trunk probe 47) and the gap opens with the ply: ≤ 2 points
+  over local / random before ply 32, +6 at 32–43, **+18 at 44+ (68 vs 50 / 50)**; deep8_300 the same
+  shape (66 vs 51 / 54). KNOWLEDGE 40 restated: the head learns late-game ownership that neither local
+  features nor a random trunk carry; that knowledge did not translate into strength.
+- **E10.** `suites/endgame_v3_{dev,test}.npz` from `deep10_c1_300_s1` games 280–299 (split by game
+  before solving; `tools/endgame.py build --split dev,test`); overlap by `tools/suite_overlap.py`
+  (`runs/plan6/E10_overlap.out`): 3000 + 3000 positions, balanced 125 per stratum, 2924 / 2933 source games,
+  **0 shared canonical positions and 0 symmetric duplicates within either half**. `_test` is sealed until the end
+  of Phase G; `_dev` is the development set for every net except `deep10_c1_300_s1` (its own games).
+- **E11.** Not done: needs an off-machine destination from the owner.
+- **F1.** deep10 canonical @64 vs deep10 plain @64, full suite: **49.5 % [46.7, 52.3], −3 Elo
+  [−23, +16]** — null by the pre-registered rule, as predicted. KNOWLEDGE 41b.
+  `runs/deep10_c1_300/paired_canon_vs_plain_64.json`.
+- **F2.** Full-suite score vs v2b @64 (±2.8) by checkpoint, through the E7 worker on the 3090 (≈ 1 min per
+  match; `runs/<run>/eval_full.jsonl`, `runs/plan6/F2_second_drop.out`):
+
+  | run | 200 | 220 | 260 | 280 | 300 | first drop (220 − 200) | second drop (300 − 260) |
+  |---|---|---|---|---|---|---|---|
+  | deep8_c1_300 | 67.7 | 76.2 | 74.5 | 76.4 | 77.1 | **+8.5** | +2.6 |
+  | deep10_c1_300 | 73.1 | 77.9 | 76.0 | 79.8 | 80.1 | **+4.8** | +4.1 |
+  | deep10_c1_300_s1 | 69.0 | 75.6 | 77.7 | 75.3 | 77.3 | **+6.6** | −0.4 |
+  | deep10_c1_300_lr150 (drops 150/250) | 150: 66.7 | 160: 72.6 | 240: 75.5 | 250: 72.4 · 260: 78.2 | 75.2 | **+5.9** (160 − 150) | −0.3 (300 − 240) |
+
+  **Pre-registered reading: the second drop does nothing resolvable** — 300 − 260 ≥ 3 points on one run of
+  four (the rule asked for three). The first drop is a resolved step on every run at ±2.8 (+4.8 … +8.5,
+  median +6). Two things the in-run curves could not show: checkpoint-to-checkpoint wobble at a constant
+  LR is itself ≈ ±3 points on the full suite (s1: 77.7 → 75.3 → 77.3 across 260/280/300; lr150: 75.5 → 72.4
+  → 78.2), so a single-checkpoint 3-point criterion sits at the noise floor and "flat after 220" means
+  "inside ±3", not "constant"; and the in-run ±6 reads missed by up to 4 points (s1 at 280: 79.5 in-run,
+  75.3 full). **Consequence for H3:** a second drop earns nothing measurable; H3 is written with one drop
+  (`--lr_drops 500`), and the final 20 iterations at the low LR are its settling time, not a second step.
+  KNOWLEDGE 42 carries the numbers.
+- **F3.** Recorded in KNOWLEDGE §10.
+
 ## 0. The decision in front of the project
 
 **Three things "more strength" could be for, and they call for different work.**
@@ -268,7 +355,8 @@ stated beside it.
 - **H2. `deep8_c1_300_mask` — the closed-board mask (item 7).** ≈ 13 h. Only after G arm (c) shows
   no supervised loss. Primary vs deep8_c1_300. A null is fine: it licenses the smaller state key for
   caches and dedup at no cost.
-- **H3. `deep8_c1_600` — 600 iterations, `--lr_drops 500,580`, with H1's epochs if H1 helped.**
+- **H3. `deep8_c1_600` — 600 iterations, `--lr_drops 500` (one drop: F2 found the second one does nothing
+  resolvable on four runs), with H1's epochs if H1 helped.**
   ≈ 27 h (deep8_c1_300's self-play was 11.3 h and its late iterations run 15 % slower than its
   mean). Drops late, because D3 showed the drop is a fixed step on whatever the constant-LR phase has
   built and the low-LR phase settles in ≈ 20 iterations — so this run is, in effect, "300 more
@@ -306,8 +394,8 @@ on). Any "the net cannot represent X" claim (PLAN5 §1c).
 GPU budget: F ≈ 1 h; G ≈ 5 h of 3090 plus 3060-days; H1 ≈ 14 h; H2 ≈ 13 h; H3 ≈ 27 h; H4 only if
 gated in. Nothing in E–G waits on a training run; H1 can start as soon as E5 and E7 exist.
 
-Decision points: after F2 (the second drop — informs whether H3 keeps a second drop at all); after
-H1 (H3's shape); after G's gate (whether H4 exists).
+Decision points: after F2 — *taken 2026-09-06: the second drop does nothing resolvable at ±2.8 (log), so
+H3 keeps one drop* — ; after H1 (H3's shape); after G's gate (whether H4 exists).
 
 ## 8. Operational notes
 

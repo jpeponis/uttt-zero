@@ -100,8 +100,10 @@ confirmed rung is duration, +211; deep10_c1_300 remains the strongest single net
   intervention (PLAN6 §1 item 13). The drop is a fixed ≈ +9 step on the level the
   constant-LR phase has reached; strength settles within ≈ 20 iterations of it, while the
   raw head's endgame reads keep creeping (WDL 80.3 → 83.3 %, draw recognition 60 → 66–68 %
-  over the low-LR phase); the second drop is unresolved on all three 300-iteration runs. The
-  constant-LR iterations are where the strength is built.)* Corollary: some "capacity" conclusions from 150-iteration
+  over the low-LR phase). The second drop, read on the full suite at ±2.8 for all four
+  300-iteration runs (PLAN6 F2), does nothing resolvable — 300 − 260 clears 3 points on one run
+  of four — while the first drop is a resolved +5 … +9 on every run; "both drops delivered
+  steps" above is withdrawn. The constant-LR iterations are where the strength is built.)* Corollary: some "capacity" conclusions from 150-iteration
   runs were really optimization conclusions — the nets had not finished learning.
   *(Addendum 2026-09-03, PLAN5 §3 B1: the checkpoint timelines split the +127 into ≈ +5
   points from iterations 150–200 at the constant LR and ≈ +8 from the first drop, at which
