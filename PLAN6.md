@@ -19,9 +19,12 @@ the nets it held on, and the file that produced it.
 
 ## Handover (2026-09-06)
 
-**State (end of 2026-09-06).** Running: the G-data build on the 3090 (`tools/gdata.py` →
-`runs/gdata_v1.npz`, 500 000 positions from `deep10_c1_300_s1` games 280–299, teacher deep10 8-way
-@256 sims; ≈ 5 h from 14:30; progress in `runs/plan6/G_data.out`). The play agent is unchanged:
+**State (end of 2026-09-06).** Nothing is running. `runs/gdata_v1.npz` exists (`tools/gdata.py`,
+`runs/plan6/G_data.out`): 500 000 positions from `deep10_c1_300_s1` games 280–299 by the replay mixture,
+split by game 400 560 / 49 726 / 49 714, teacher deep10 8-way @256 sims (3.2 h on the 3090), exact labels
+where ≤ 14 empties; the splits share canonical positions through the opening plies (train ∩ dev 9410,
+train ∩ test 9499 of ≈ 43 000 distinct per slice — see the meta), which G's read-outs must report on the
+disjoint subset as well. The test slice is sealed. The play agent is unchanged:
 `runs/deep10_c1_300/net_0300.pt`, flat `--sims 256` or more. Four 300-iteration runs exist (deep8_c1_300;
 deep10_c1_300 and its seed replicate `_s1`; the earlier-LR-drop run `_lr150`), all with checkpoints every
 10–20 iterations, their games corpora on disk, and (since F2) `eval_full.jsonl` full-suite reads for the

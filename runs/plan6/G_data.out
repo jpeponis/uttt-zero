@@ -1,3 +1,19 @@
 100765 games in 20 files of runs/deep10_c1_300_s1; 500000 positions sampled by the ply mixture (0.03, 0.18, 0.25, 0.29, 0.25)
 replayed 500000 positions from 100072 games (2s); split sizes [400560, 49726, 49714]
 canonical-position overlap between splits: {'train_dev': 9410, 'train_test': 9499, 'dev_test': 3658, 'distinct': [297199, 42796, 42927]}
+  teacher: 4096/500000 (110s, 13311s left)
+  teacher: 45056/500000 (1040s, 10501s left)
+  teacher: 86016/500000 (1977s, 9514s left)
+  teacher: 126976/500000 (2917s, 8569s left)
+  teacher: 167936/500000 (3854s, 7621s left)
+  teacher: 208896/500000 (4793s, 6679s left)
+  teacher: 249856/500000 (5732s, 5739s left)
+  teacher: 290816/500000 (6671s, 4798s left)
+  teacher: 331776/500000 (7611s, 3859s left)
+  teacher: 372736/500000 (8548s, 2919s left)
+  teacher: 413696/500000 (9488s, 1979s left)
+  teacher: 454656/500000 (10425s, 1040s left)
+  teacher: 495616/500000 (11364s, 101s left)
+teacher labels done (11554s)
+exact labels for 76944 positions with <= 14 empties (11582s)
+wrote runs/gdata_v1.npz: 500000 positions  [11589s]
