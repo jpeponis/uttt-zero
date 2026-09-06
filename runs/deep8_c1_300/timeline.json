@@ -34,6 +34,9 @@
    "v2b_net_0150",
    "wide128_c1_net_0150"
   ],
+  "full_anchors": [
+   "v2b_net_0150"
+  ],
   "ply_buckets": [
    [
     0,
@@ -939,6 +942,11 @@
    "vs_dev1_net_0200": 0.742,
    "vs_v2b_net_0150": 0.692,
    "vs_wide128_c1_net_0150": 0.612,
+   "full_v2b_net_0150": 0.6773,
+   "full_ci_v2b_net_0150": [
+    0.6497,
+    0.703
+   ],
    "lr": 0.02,
    "eg_wdl_acc": 0.7966666666666666,
    "eg_draw_recognition": 0.588,
@@ -1031,6 +1039,11 @@
    "vs_dev1_net_0200": 0.831,
    "vs_v2b_net_0150": 0.74,
    "vs_wide128_c1_net_0150": 0.706,
+   "full_v2b_net_0150": 0.7621,
+   "full_ci_v2b_net_0150": [
+    0.7384,
+    0.7844
+   ],
    "lr": 0.002,
    "eg_wdl_acc": 0.8326666666666667,
    "eg_draw_recognition": 0.675,
@@ -1215,6 +1228,11 @@
    "vs_dev1_net_0200": 0.838,
    "vs_v2b_net_0150": 0.747,
    "vs_wide128_c1_net_0150": 0.69,
+   "full_v2b_net_0150": 0.7447,
+   "full_ci_v2b_net_0150": [
+    0.7219,
+    0.7679
+   ],
    "lr": 0.002,
    "eg_wdl_acc": 0.8313333333333334,
    "eg_draw_recognition": 0.658,
@@ -1307,6 +1325,11 @@
    "vs_dev1_net_0200": 0.838,
    "vs_v2b_net_0150": 0.778,
    "vs_wide128_c1_net_0150": 0.713,
+   "full_v2b_net_0150": 0.7645,
+   "full_ci_v2b_net_0150": [
+    0.7398,
+    0.7873
+   ],
    "lr": 0.002,
    "eg_wdl_acc": 0.8363333333333334,
    "eg_draw_recognition": 0.672,
@@ -1399,6 +1422,11 @@
    "vs_dev1_net_0200": 0.863,
    "vs_v2b_net_0150": 0.773,
    "vs_wide128_c1_net_0150": 0.719,
+   "full_v2b_net_0150": 0.7713,
+   "full_ci_v2b_net_0150": [
+    0.749,
+    0.7936
+   ],
    "lr": 0.0002,
    "eg_wdl_acc": 0.8403333333333334,
    "eg_draw_recognition": 0.675,

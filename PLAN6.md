@@ -19,10 +19,14 @@ the nets it held on, and the file that produced it.
 
 ## Handover (2026-09-06)
 
-**State.** Nothing is running. The play agent is unchanged: `runs/deep10_c1_300/net_0300.pt`, flat
-`--sims 256` or more. Four 300-iteration runs exist (deep8_c1_300; deep10_c1_300 and its seed
-replicate `_s1`; the earlier-LR-drop run `_lr150`), all with checkpoints every 10–20 iterations and
-their games corpora on disk. `KNOWLEDGE.md` holds 49 claims; several are restated by §2 E3 below.
+**State (end of 2026-09-06).** Running: the G-data build on the 3090 (`tools/gdata.py` →
+`runs/gdata_v1.npz`, 500 000 positions from `deep10_c1_300_s1` games 280–299, teacher deep10 8-way
+@256 sims; ≈ 5 h from 14:30; progress in `runs/plan6/G_data.out`). The play agent is unchanged:
+`runs/deep10_c1_300/net_0300.pt`, flat `--sims 256` or more. Four 300-iteration runs exist (deep8_c1_300;
+deep10_c1_300 and its seed replicate `_s1`; the earlier-LR-drop run `_lr150`), all with checkpoints every
+10–20 iterations, their games corpora on disk, and (since F2) `eval_full.jsonl` full-suite reads for the
+checkpoints around both LR drops; their `timeline.{json,png}` carry those points. `KNOWLEDGE.md` holds 51
+claims (41b and the E10 line are new); the restatements of §2 E3 are in.
 The scheduled tasks `uttt-queue7` / `uttt-queue8` no longer exist (checked 2026-09-06). The review and
 its scripts are committed under `docs/history/` (review artefacts, not pipeline code; the scripts' repo-root
 path was adjusted so they still run from the root); PLAN5 is in `docs/history/` with a line in its README,
@@ -35,12 +39,23 @@ training; H1 is the run to propose to the owner first, and it can start on the o
 soon as E5/E7 (the operational changes it depends on) are in.
 
 **Progress (2026-09-06, same day; details in the log below).** Phase E is done except E11 (the
-off-machine backup needs a destination from the owner). Phase F is done: F1 null, F2 read at ±2.8
-(see the log), F3 recorded. Next: Phase G — G-data first (≈ 5 h of the 3090 for the symmetry-averaged
-teacher labels; the corpus is `deep10_c1_300_s1` iterations 280–299), then G0 and arms (a)–(d) on the
-3060 — and, in parallel, H1 proposed to the owner: `deep8_c1_300_e2`, `--epochs 2`, everything else as
-deep8_c1_300, run with `--eval_every 0 --ckpt_every 10` and the E7 worker on the 3060 (anchors v2b /
-deep8_c1_300 / deep10_c1_300). Nothing starts without the owner's word.
+off-machine backup needs a destination from the owner — and the repository itself has no git remote, so
+the backup must include it: ≈ 2.7 GB in all — 645 MB of games corpora for the four 300-iteration runs,
+2.0 GB of `net_*.pt` across every run, 3 MB of logs and configs, 0.6 MB of suites — or, for a first
+copy, a private remote for the repo, which already tracks the code, the documents and every run's final
+checkpoints). Phase F is done: F1 null, F2 read at ±2.8 (see the log), F3 recorded.
+
+**What the next instance does, in order.** (1) When `runs/gdata_v1.npz` exists: G0 and arms (a)–(d)
+on the 3060 (§4) — the tooling for the students (`tools/gstudy.py`: a supervised trainer on the frozen
+file with `--split dev`, the metrics of §4, two seeds per arm) is *not written yet* and is the next piece
+of code; note that the opening plies repeat across games, so the splits share canonical positions
+(reported in the file's meta) — a student's dev/test numbers should also be given on the subset whose
+canonical key does not occur in train. (2) Propose H1 to the owner: `deep8_c1_300_e2`, `--epochs 2`,
+everything else as deep8_c1_300, launched through the hidden-console task with `--eval_every 0
+--ckpt_every 10`, the E7 worker on the 3060 (`tools/eval_worker.py --run runs/deep8_c1_300_e2 --anchors
+runs/v2b/net_0150.pt,runs/deep8_c1_300/net_0300.pt,runs/deep10_c1_300/net_0300.pt --device cuda:1`) and
+the pre-registered readings of §5. The 3090 is free for it once G-data is written. Nothing starts without
+the owner's word. (3) Ask the owner for E11's destination.
 
 ## Log
 
