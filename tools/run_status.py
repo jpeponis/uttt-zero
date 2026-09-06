@@ -63,13 +63,13 @@ def main():
     remaining = 0.0
     for i in range(n, iters):
         remaining += scale * ref_base.get(i, ref_base[max(ref_base)] if ref_base else base_time(last))
-        if (i + 1) % every == 0:
+        if every and (i + 1) % every == 0:  # --eval_every 0 (PLAN6 E7: evaluation out of process) has no in-run eval cost
             remaining += t_eval
     eta = now + dt.timedelta(seconds=remaining)
     elapsed_h = (now - started).total_seconds() / 3600
     state = "DONE" if done else "running"
     print(f"{name} {state}: iter {n}/{iters}  elapsed {elapsed_h:.1f}h  ETA {eta:%Y-%m-%d %H:%M} "
-          f"(+{remaining / 3600:.1f}h; ref x{scale:.2f}, eval {t_eval / 60:.0f} min x{sum(1 for i in range(n, iters) if (i + 1) % every == 0)})"
+          f"(+{remaining / 3600:.1f}h; ref x{scale:.2f}, eval {t_eval / 60:.0f} min x{sum(1 for i in range(n, iters) if every and (i + 1) % every == 0)})"
           f"  sims {last['sims']} lr {last['lr']}  t_iter {base_time(last):.0f}s  died {died}  {gpu_line()}")
     ev = [r for r in R if any(k.startswith("vs_") for k in r)]
     if ev:

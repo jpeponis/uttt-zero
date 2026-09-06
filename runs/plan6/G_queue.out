@@ -10,3 +10,8 @@ runs/gdata_v1.npz: train 400560, dev 49726 (33616 with no canonical twin in trai
   resnet8 positions 50000 passes 4 seed 0
     pass 1/4: loss_p 3.532 loss_v 0.1913 (6s)
     pass 2/4: loss_p 2.078 loss_v 0.1938 (11s)
+    pass 3/4: loss_p 1.795 loss_v 0.1874 (16s)
+    pass 4/4: loss_p 1.697 loss_v 0.1723 (22s)
+    -> KL 1.2932 top1 0.359 brier 0.1734 acc3 0.529 | disjoint KL 1.3740 | endgame WDL 44.4 regret 0.403 | D4 JS 0.0408b | 84.85 ms @4096, 0.31 ms @1 (53s)
+  resnet8 positions 50000 passes 8 seed 0
+    pass 1/8: loss_p 3.532 loss_v 0.1913 (5s)
