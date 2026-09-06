@@ -35,7 +35,7 @@ from .endgame import EndgameSet
 from .endgame import evaluate as endgame_evaluate
 from .exact import ExactLabeler
 from .infer import FusedEvaluator
-from .model import MARGIN_BINS, NetConfig, ResNet, load_checkpoint
+from .model import MARGIN_BINS, NetConfig, build_net, load_checkpoint
 from .openings import Suite, play_paired, summarize
 from .search import BatchedSearch, SearchConfig
 from .selfplay_cont import ContinuousSelfPlay, GPUReplayBuffer
@@ -62,6 +62,8 @@ class TrainConfig:
     n_planes: int = 7  # 9: + first-player and won-board-count-difference input planes (new anchors needed)
     own_classes: int = 3  # 4: self / opponent / drawn-full / open-at-end ownership target
     mask_closed: int = 0  # 1: zero the stone planes inside closed boards in the encoder (PLAN6 H2; needs G arm (c) first)
+    head_tying: int = 0  # 1: D4-tied heads (uttt.equivariant; PLAN6 H4 candidate, only past G's gate)
+    gcnn: int = 0  # > 0: group-convolutional trunk with this many base filters (filters must be 8 * gcnn; H4 candidate)
     buffer: int = 2_000_000
     dedup_alpha: float = 0.5  # sampling weight = count^-alpha over identical positions
     dedup_alpha_early: float = 0.0  # > 0: alpha used for plies < 8 (e.g. 1.0 = strictly uniform over distinct openings)
@@ -261,8 +263,8 @@ def main(cfg: TrainConfig) -> None:
         with open(cfg_path, "w") as f:
             json.dump(info, f, indent=2)
     gens = make_generators(cfg.seed, device)
-    net = ResNet(NetConfig(blocks=cfg.blocks, filters=cfg.filters, n_planes=cfg.n_planes, own_classes=cfg.own_classes,
-                           mask_closed=cfg.mask_closed)).to(device)
+    net = build_net(NetConfig(blocks=cfg.blocks, filters=cfg.filters, n_planes=cfg.n_planes, own_classes=cfg.own_classes,
+                              mask_closed=cfg.mask_closed, head_tying=cfg.head_tying, gcnn=cfg.gcnn)).to(device)
     opt = torch.optim.SGD(net.parameters(), lr=cfg.lr, momentum=cfg.momentum, weight_decay=cfg.wd, nesterov=True)
     scaler = torch.amp.GradScaler("cuda")
     buf = GPUReplayBuffer(cfg.buffer, device, generator=gens["buffer"])

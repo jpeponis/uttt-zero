@@ -13,11 +13,12 @@ import torch.nn as nn
 from torch.nn.utils.fusion import fuse_conv_bn_eval
 
 from .batch import INV_PERM, encode, legal_mask
+from .equivariant import export_plain
 from .model import ResBlock
 
 
 def _fuse(model: nn.Module) -> nn.Module:
-    m = copy.deepcopy(model).eval()
+    m = export_plain(copy.deepcopy(model).eval())  # tied / group-convolutional parts become ordinary modules first
     for mod in m.modules():
         if isinstance(mod, ResBlock):
             mod.c1 = fuse_conv_bn_eval(mod.c1, mod.b1)

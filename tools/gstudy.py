@@ -18,8 +18,9 @@ plies repeat across games); raw regret / optimal-move rate on --set (endgame_v2_
 across the 8 orientations, bits); graph-replayed inference time per evaluation at batch 4096 and batch 1. Writes one
 JSON with one record per (positions, passes, seed).
 
-Arms (--arm): resnet10 (10x128), resnet8 (8x128), resnet8_mask (8x128 with the closed-board mask, §1 item 7).
-The tied-head and G-CNN arms (d), (e) are not implemented yet; the registry below is where they plug in.
+Arms (--arm): resnet10 (10x128), resnet8 (8x128), resnet8_mask (8x128 with the closed-board mask, §1 item 7),
+resnet8_tied (8x128 with D4-tied heads, arm (d)), gcnn8x16 (the D4 group-convolutional net at activation width 128,
+arm (e)); uttt.equivariant has the constructions, tests/test_equivariant.py their checks.
 """
 from __future__ import annotations
 
@@ -39,7 +40,7 @@ from timeline import d4_consistency  # noqa: E402
 from uttt.batch import INV_PERM, BatchUTTT, encode  # noqa: E402
 from uttt.endgame import EndgameSet, evaluate as endgame_evaluate  # noqa: E402
 from uttt.infer import FusedEvaluator  # noqa: E402
-from uttt.model import NetConfig, ResNet  # noqa: E402
+from uttt.model import NetConfig, build_net  # noqa: E402
 from uttt.selfplay_cont import position_hash_sym  # noqa: E402
 from uttt.train2 import symmetrise  # noqa: E402
 
@@ -47,6 +48,8 @@ ARMS = {
     "resnet10": lambda: NetConfig(blocks=10, filters=128),
     "resnet8": lambda: NetConfig(blocks=8, filters=128),
     "resnet8_mask": lambda: NetConfig(blocks=8, filters=128, mask_closed=1),
+    "resnet8_tied": lambda: NetConfig(blocks=8, filters=128, head_tying=1),  # (d): D4-tied heads on the ordinary trunk
+    "gcnn8x16": lambda: NetConfig(blocks=8, filters=128, gcnn=16),  # (e): 16 base filters x 8 orientations = width 128
 }
 
 
@@ -70,7 +73,7 @@ def batch_dict(d, idx):
 def train_student(cfg: NetConfig, d, train_idx: torch.Tensor, passes: int, device, seed: int, batch: int = 1024, lr: float = 0.02,
                   log=print):
     torch.manual_seed(seed)
-    net = ResNet(cfg).to(device)
+    net = build_net(cfg).to(device)
     opt = torch.optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=1e-4, nesterov=True)
     scaler = torch.amp.GradScaler("cuda")
     gen = torch.Generator(device=device).manual_seed(seed)

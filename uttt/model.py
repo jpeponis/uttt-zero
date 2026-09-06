@@ -31,6 +31,8 @@ class NetConfig:
     n_planes: int = N_PLANES  # 7, or 9 with the first-player and count-difference planes (encode extra=True)
     own_classes: int = 3  # 3: self-won / neither / opponent-won; 4: self-won / opponent-won / drawn-full / open at the end
     mask_closed: int = 0  # 1: the encoder zeroes the stone planes inside closed boards (PLAN6 G arm (c) / H2)
+    head_tying: int = 0  # 1: the four head Linears are D4-tied (uttt.equivariant.TiedLinear; PLAN6 G arm (d))
+    gcnn: int = 0  # > 0: a D4 group-convolutional trunk with this many base filters x 8 orientations (arm (e)); filters = 8 * gcnn
 
     @property
     def extra_planes(self) -> bool:
@@ -77,6 +79,20 @@ class ResNet(nn.Module):
         return p, v, o, m
 
 
+def build_net(cfg: NetConfig) -> nn.Module:
+    """The network a config describes: the plain ResNet, the ResNet with tied heads, or the group-convolutional net."""
+    if cfg.gcnn:
+        from .equivariant import GResNet
+
+        return GResNet(cfg)
+    net = ResNet(cfg)
+    if cfg.head_tying:
+        from .equivariant import tie_heads
+
+        tie_heads(net)
+    return net
+
+
 def load_checkpoint(path: str, device) -> ResNet:
     """Build the ResNet a checkpoint describes (blocks, filters, n_planes, own_classes from its cfg) and load its weights.
 
@@ -85,8 +101,9 @@ def load_checkpoint(path: str, device) -> ResNet:
     ck = torch.load(path, map_location=device, weights_only=False)
     cfg = ck.get("cfg", {})
     with torch.random.fork_rng(devices=[]):
-        net = ResNet(NetConfig(blocks=cfg.get("blocks", 6), filters=cfg.get("filters", 64), n_planes=cfg.get("n_planes", N_PLANES),
-                               own_classes=cfg.get("own_classes", 3), mask_closed=cfg.get("mask_closed", 0)))
+        net = build_net(NetConfig(blocks=cfg.get("blocks", 6), filters=cfg.get("filters", 64), n_planes=cfg.get("n_planes", N_PLANES),
+                                  own_classes=cfg.get("own_classes", 3), mask_closed=cfg.get("mask_closed", 0),
+                                  head_tying=cfg.get("head_tying", 0), gcnn=cfg.get("gcnn", 0)))
     net.load_state_dict(ck["net"], strict=False)
     return net.to(device).eval()
 
