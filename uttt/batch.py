@@ -207,13 +207,15 @@ def legal_mask(cells, macro, next_board, done=None) -> torch.Tensor:
     return mask
 
 
-def encode(cells, macro, next_board, player, done=None, extra: bool = False) -> torch.Tensor:
+def encode(cells, macro, next_board, player, done=None, extra: bool = False, mask_closed: bool = False) -> torch.Tensor:
     """(n, N_PLANES, 9, 9) float32 planes from the side-to-move's perspective, grid order.
 
     0 own stones, 1 opponent stones, 2 boards won by self, 3 boards won by
     opponent, 4 boards closed full/drawn, 5 legal-move mask, 6 all ones.
     extra=True appends 7: side to move is X (first player), 8: (boards won by self
     - boards won by opponent) / 4, broadcast — the quantity the most-boards tiebreak is decided by.
+    mask_closed=True zeroes planes 0-1 inside closed boards (their stones cannot affect the game
+    any more; the macro planes carry the status) — the state abstraction of PLAN6 §1 item 7.
     """
     n = cells.shape[0]
     c = consts(cells.device)
@@ -222,6 +224,8 @@ def encode(cells, macro, next_board, player, done=None, extra: bool = False) -> 
     p = player.view(n, 1)
     grid = cells[:, perm]
     mg = macro[:, bog]
+    if mask_closed:
+        grid = torch.where(mg == 0, grid, torch.zeros_like(grid))
     legal = legal_mask(cells, macro, next_board, done)[:, perm]
     planes = [grid == p, grid == -p, mg == p, mg == -p, mg == FULL, legal, torch.ones_like(legal)]
     if extra:

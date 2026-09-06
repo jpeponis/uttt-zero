@@ -19,7 +19,31 @@ the nets it held on, and the file that produced it.
 
 ## Handover (2026-09-06)
 
-**State (end of 2026-09-06).** Nothing is running. `runs/gdata_v1.npz` exists (`tools/gdata.py`,
+**State (2026-09-06, 19:00 — hand-off).** Two things are running, both launched with the owner's
+approval:
+
+- **H1, `runs/deep8_c1_300_e2`** (`runs/queue9.sh`, started 18:51 through the hidden-console launcher
+  `runs/launch_queue9_hidden.vbs`; retry wrapper, 6 attempts): deep8_c1_300's recipe with `--epochs 2`,
+  `--eval_every 0 --ckpt_every 10 --anchors ""`. Iteration 0: 512 steps, 0 skipped, ≈ 115 s (self-play
+  82 s + training 32 s, so the extra updates cost ≈ 30 s per iteration — ≈ 12 h in all, done ≈ 07:00 on
+  2026-09-07). The E7 worker runs beside it on the 3060 (`runs/deep8_c1_300_e2_worker.out`; anchors v2b,
+  deep8_c1_300, deep10_c1_300 at 64 sims on the full suite, endgame_v2_dev; `eval_full.jsonl`). At the
+  end queue9 runs `eval_run.sh` and the endgame_v2_dev read into `analysis.out`. Status:
+  `python tools/run_status.py runs/deep8_c1_300_e2 --ref runs/deep8_c1_300`. **Read it by §5 H1's
+  pre-registered rule** — primary `paired_vs_deep8c1_300_64.json` (≥ 53 helped / ≤ 47 hurt / else null),
+  secondary vs deep10_c1_300 and `_s1`, the E7 curve at the constant LR against deep8_c1_300's
+  `eval_full.jsonl` (200: 67.7, 220: 76.2, 260: 74.5, 280: 76.4, 300: 77.1 vs v2b), tertiary
+  endgame_v2_dev raw WDL / regret vs 84.0 / 0.045 — and decide H3's shape (§5).
+- **Phase G, `runs/plan6/G_queue.sh`** (started 18:56, `runs/plan6/G_queue.out`): G0 (resnet8 at 50k /
+  100k / 200k / 400k positions × 1 / 2 / 4 / 8 passes, seed 0 → `G0_resnet8.json`), then arms (b)
+  resnet8, (a) resnet10, (c) resnet8_mask at 400k × 8, seeds 0 and 1 (`G_arm_<arm>.json`), all on the
+  dev slice with `tools/gstudy.py`. ≈ 2 h on the 3060 (shared with the worker). Arms (d) tied heads and
+  (e) the D4 G-CNN are **not implemented** — `tools/gstudy.py ARMS` is where they plug in; (e) needs the
+  weight-expanded convolution of §4 so `FusedEvaluator` stays untouched. G's gate (§4) is read on the
+  sealed test slice *once*, after every arm is in; until then `--split dev` only.
+
+E11 is deferred by the owner (2026-09-06): no backup until the research is over; the repository goes to
+GitHub with the write-up. `runs/gdata_v1.npz` exists (`tools/gdata.py`,
 `runs/plan6/G_data.out`): 500 000 positions from `deep10_c1_300_s1` games 280–299 by the replay mixture,
 split by game 400 560 / 49 726 / 49 714, teacher deep10 8-way @256 sims (3.2 h on the 3090), exact labels
 where ≤ 14 empties; the splits share canonical positions through the opening plies (train ∩ dev 9410,
@@ -48,17 +72,15 @@ the backup must include it: ≈ 2.7 GB in all — 645 MB of games corpora for th
 copy, a private remote for the repo, which already tracks the code, the documents and every run's final
 checkpoints). Phase F is done: F1 null, F2 read at ±2.8 (see the log), F3 recorded.
 
-**What the next instance does, in order.** (1) When `runs/gdata_v1.npz` exists: G0 and arms (a)–(d)
-on the 3060 (§4) — the tooling for the students (`tools/gstudy.py`: a supervised trainer on the frozen
-file with `--split dev`, the metrics of §4, two seeds per arm) is *not written yet* and is the next piece
-of code; note that the opening plies repeat across games, so the splits share canonical positions
-(reported in the file's meta) — a student's dev/test numbers should also be given on the subset whose
-canonical key does not occur in train. (2) Propose H1 to the owner: `deep8_c1_300_e2`, `--epochs 2`,
-everything else as deep8_c1_300, launched through the hidden-console task with `--eval_every 0
---ckpt_every 10`, the E7 worker on the 3060 (`tools/eval_worker.py --run runs/deep8_c1_300_e2 --anchors
-runs/v2b/net_0150.pt,runs/deep8_c1_300/net_0300.pt,runs/deep10_c1_300/net_0300.pt --device cuda:1`) and
-the pre-registered readings of §5. The 3090 is free for it once G-data is written. Nothing starts without
-the owner's word. (3) Ask the owner for E11's destination.
+**What the next instance does, in order.** (1) Read G0 and the three arms when `G_queue.out` says DONE
+(each record: policy KL / top-1 vs the teacher, value Brier, 3-way accuracy vs exact labels, the same on
+the subset with no canonical twin in train, endgame_v2_dev regret, D4 JS, ms per evaluation at batch 4096
+and 1): G0 says whether fitting a fixed teacher is data- or update-limited; the arms give the ResNet's
+two-seed spread that §4's gate is measured against, and whether the closed-board mask costs anything
+supervised (the licence for H2). Write them into the log below and KNOWLEDGE §8. (2) Implement arms (d)
+and (e) (`tools/gstudy.py`), run them, then the test slice once. (3) When H1 finishes (≈ 07:00
+2026-09-07), read it by the rule above, write it up (KNOWLEDGE 42/43, RETROSPECTIVE §3, README ladder),
+and propose H3's shape to the owner. Nothing else starts without the owner's word.
 
 ## Log
 

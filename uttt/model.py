@@ -30,6 +30,7 @@ class NetConfig:
     value_hidden: int = 128
     n_planes: int = N_PLANES  # 7, or 9 with the first-player and count-difference planes (encode extra=True)
     own_classes: int = 3  # 3: self-won / neither / opponent-won; 4: self-won / opponent-won / drawn-full / open at the end
+    mask_closed: int = 0  # 1: the encoder zeroes the stone planes inside closed boards (PLAN6 G arm (c) / H2)
 
     @property
     def extra_planes(self) -> bool:
@@ -85,7 +86,7 @@ def load_checkpoint(path: str, device) -> ResNet:
     cfg = ck.get("cfg", {})
     with torch.random.fork_rng(devices=[]):
         net = ResNet(NetConfig(blocks=cfg.get("blocks", 6), filters=cfg.get("filters", 64), n_planes=cfg.get("n_planes", N_PLANES),
-                               own_classes=cfg.get("own_classes", 3)))
+                               own_classes=cfg.get("own_classes", 3), mask_closed=cfg.get("mask_closed", 0)))
     net.load_state_dict(ck["net"], strict=False)
     return net.to(device).eval()
 
@@ -101,7 +102,7 @@ class Evaluator:
 
     @torch.no_grad()
     def __call__(self, cells, macro, next_board, player, done):
-        obs = encode(cells, macro, next_board, player, done, extra=self.net.cfg.extra_planes)
+        obs = encode(cells, macro, next_board, player, done, extra=self.net.cfg.extra_planes, mask_closed=bool(self.net.cfg.mask_closed))
         legal = legal_mask(cells, macro, next_board, done)
         with torch.autocast("cuda", dtype=torch.float16, enabled=self.amp):
             p_logits, v_logits, *_ = self.net(obs)

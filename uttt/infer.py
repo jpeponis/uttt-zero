@@ -45,6 +45,7 @@ class FusedEvaluator:
         so CUDA graphs that captured this evaluator keep seeing the current weights."""
         m = _fuse(net).to(self.device)
         self.extra = net.cfg.extra_planes
+        self.mask_closed = bool(getattr(net.cfg, "mask_closed", 0))
         if self.half:
             m = m.half()
         if self.channels_last:
@@ -61,7 +62,7 @@ class FusedEvaluator:
     @torch.no_grad()
     def __call__(self, cells, macro, next_board, player, done):
         legal = legal_mask(cells, macro, next_board, done)
-        obs = encode(cells, macro, next_board, player, done, extra=self.extra)
+        obs = encode(cells, macro, next_board, player, done, extra=self.extra, mask_closed=self.mask_closed)
         if self.half:
             obs = obs.half()
         if self.channels_last:

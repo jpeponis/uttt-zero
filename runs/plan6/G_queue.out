@@ -1,0 +1,12 @@
+=== G0 (18:56)
+runs/gdata_v1.npz: train 400560, dev 49726 (33616 with no canonical twin in train); arm resnet8
+  resnet8 positions 50000 passes 1 seed 0
+    pass 1/1: loss_p 3.995 loss_v 0.2315 (6s)
+    -> KL 1.4467 top1 0.261 brier 0.2366 acc3 0.231 | disjoint KL 1.4623 | endgame WDL 36.6 regret 0.488 | D4 JS 0.0822b | 84.71 ms @4096, 0.30 ms @1 (12s)
+  resnet8 positions 50000 passes 2 seed 0
+    pass 1/2: loss_p 3.532 loss_v 0.1913 (5s)
+    pass 2/2: loss_p 2.575 loss_v 0.1864 (11s)
+    -> KL 1.4031 top1 0.293 brier 0.1893 acc3 0.465 | disjoint KL 1.4468 | endgame WDL 42.0 regret 0.472 | D4 JS 0.0234b | 84.91 ms @4096, 0.30 ms @1 (26s)
+  resnet8 positions 50000 passes 4 seed 0
+    pass 1/4: loss_p 3.532 loss_v 0.1913 (6s)
+    pass 2/4: loss_p 2.078 loss_v 0.1938 (11s)

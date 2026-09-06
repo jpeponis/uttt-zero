@@ -61,6 +61,7 @@ class TrainConfig:
     filters: int = 64
     n_planes: int = 7  # 9: + first-player and won-board-count-difference input planes (new anchors needed)
     own_classes: int = 3  # 4: self / opponent / drawn-full / open-at-end ownership target
+    mask_closed: int = 0  # 1: zero the stone planes inside closed boards in the encoder (PLAN6 H2; needs G arm (c) first)
     buffer: int = 2_000_000
     dedup_alpha: float = 0.5  # sampling weight = count^-alpha over identical positions
     dedup_alpha_early: float = 0.0  # > 0: alpha used for plies < 8 (e.g. 1.0 = strictly uniform over distinct openings)
@@ -146,7 +147,7 @@ def train_steps(net, opt, scaler, buf: GPUReplayBuffer, cfg: TrainConfig, n_step
         for g in opt.param_groups:
             g["lr"] = lr_fn()
         cells, macro, nb, pol, own = symmetrise(b, device, gen)
-        obs = encode(cells, macro, nb, b["player"], extra=cfg.n_planes > 7)
+        obs = encode(cells, macro, nb, b["player"], extra=cfg.n_planes > 7, mask_closed=bool(cfg.mask_closed))
         with torch.autocast("cuda", dtype=torch.float16):
             p_logits, v_logits, o_logits, m_logits = net(obs)
         p_logits = p_logits.float()[:, inv]
@@ -260,7 +261,8 @@ def main(cfg: TrainConfig) -> None:
         with open(cfg_path, "w") as f:
             json.dump(info, f, indent=2)
     gens = make_generators(cfg.seed, device)
-    net = ResNet(NetConfig(blocks=cfg.blocks, filters=cfg.filters, n_planes=cfg.n_planes, own_classes=cfg.own_classes)).to(device)
+    net = ResNet(NetConfig(blocks=cfg.blocks, filters=cfg.filters, n_planes=cfg.n_planes, own_classes=cfg.own_classes,
+                           mask_closed=cfg.mask_closed)).to(device)
     opt = torch.optim.SGD(net.parameters(), lr=cfg.lr, momentum=cfg.momentum, weight_decay=cfg.wd, nesterov=True)
     scaler = torch.amp.GradScaler("cuda")
     buf = GPUReplayBuffer(cfg.buffer, device, generator=gens["buffer"])
