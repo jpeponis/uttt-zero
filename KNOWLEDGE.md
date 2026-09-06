@@ -317,6 +317,14 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     steps once; the second drop at 280 produces nothing visible. *Descriptive of training;
     all three 300-iteration runs (the seed replicate: 71.2 → 78.1 at the first drop, every
     curve flat after 220, nothing at 280).* `runs/*/timeline.{json,png}`, PLAN5 §3 B1.
+    **Moving the first drop 50 iterations earlier hurts** (`deep10_c1_300_lr150`, drops at
+    150/250, otherwise the same-seed recipe): the same ≈ +9 step arrives at 160, every curve
+    is flat after it, and the final net scores **45.4 % [42.8, 48.0], −32 Elo** against the
+    reference, −10 [−29, +9] against the replicate and +193 vs v2b. The drop is a fixed step
+    on top of whatever the constant-LR phase has built; the low-LR phase settles in ≈ 20
+    iterations and learns nothing further; the constant-LR iterations 150–200 were worth
+    their ≈ 5 points. *Descriptive of training; four 300-iteration runs.* PLAN5 §5 D3,
+    `runs/deep10_c1_300_lr150/{analysis.out,timeline.json}`.
 
 ## 9. Strength (for reference; the full ladder is in RETROSPECTIVE §2)
 
@@ -327,7 +335,8 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     vs deep8_300 and +4 [−13, +22] against the other seed: the seed band at 10×128 is ≈ 3
     points / ≈ 30 Elo, and "+ blocks 10" (+35 on one seed, +9 on the other) is inside it —
     not an established rung. Duration (+211) is the last confirmed rung; deep10_c1_300 is
-    still the strongest single net measured. *Behavioural.* `runs/*/analysis.out`.
+    still the strongest single net measured. An earlier first LR drop (`deep10_c1_300_lr150`)
+    scores +193 — below both seeds (42). *Behavioural.* `runs/*/analysis.out`.
 44. **At equal compute the deep, long-trained net wins for the first time:** deep10@64
     beats v2b@427 (6.7× the sims) by +42 [+23, +61]; but deep10@64 vs deep8_300@80 is −11
     [−30, +7] — the last rung is a wash at a fixed inference budget; duration, not depth,

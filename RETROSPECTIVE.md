@@ -50,6 +50,7 @@ playing its preferred move instead of the best one (0 = perfect).
 | deep8_c1_300 | + 300 iters (drops 200/280) | +211 | 84.0 / 0.045 |
 | **deep10_c1_300** | **+ blocks 10** | **+242** | **84.6 / 0.037** |
 | deep10_c1_300_s1 | same recipe, seed 1 (the replicate, PLAN5 §5 D1) | +213 | 83.9 / 0.047 |
+| deep10_c1_300_lr150 | LR drops at 150/250 instead of 200/280 (PLAN5 §5 D3) | +193 | 83.3 / 0.051 |
 
 Absolute anchor: v2b@64 is ≈ +169 over a rollout UCT with 100 k playouts per move (the
 recipe of the strong CodinGame bots, which run plain tree search with random playouts),
@@ -91,7 +92,11 @@ confirmed rung is duration, +211; deep10_c1_300 remains the strongest single net
 - **Duration 150 → 300 iters: +127 — the single largest gain in the project.** Both LR
   drops (reductions of the learning rate, at iterations 200 and 280) delivered visible
   steps. The 150-iteration schedule had been starving every earlier architecture
-  comparison of convergence. Corollary: some "capacity" conclusions from 150-iteration
+  comparison of convergence. *(2026-09-06, PLAN5 §5 D3: moving the first drop to 150 costs
+  ≈ 5 points — −32 Elo against the same-seed reference. The drop is a fixed ≈ +9 step on
+  the level the constant-LR phase has reached, the low-LR phase settles within ≈ 20
+  iterations and learns nothing further, and the second drop is unresolved on all three
+  300-iteration runs. The constant-LR iterations are where the learning happens.)* Corollary: some "capacity" conclusions from 150-iteration
   runs were really optimization conclusions — the nets had not finished learning.
   *(Addendum 2026-09-03, PLAN5 §3 B1: the checkpoint timelines split the +127 into ≈ +5
   points from iterations 150–200 at the constant LR and ≈ +8 from the first drop, at which
@@ -202,7 +207,10 @@ where noted:
   or more (phased re-verified 2026-09-02, not confirmed — §2 addendum). Web UI:
   `python web/server.py runs/deep10_c1_300/net_0300.pt --sims 800 --device cuda:1`.
 - **Neither depth nor duration is exhausted** — 12-block and 600-iteration runs are the
-  obvious continuations, each a committed GPU-day, both on hold per the pause.
+  obvious continuations, each a committed GPU-day, both on hold per the pause. *(2026-09-06:
+  depth 8 → 10 is inside the seed band and an earlier LR drop hurts, so the one continuation
+  the evidence supports is a longer constant-LR phase — 600 iterations, drops late — on 8
+  blocks; PLAN5 §5 D2/D3.)*
 - Also open, cheaper: a seed replicate of the final recipe (rigor — *done 2026-09-05*,
   PLAN5 §5 D1); an analysis second
   pass with the new net (atlas / decision / freemove / puzzles → `puzzles_v2_dev`, suites

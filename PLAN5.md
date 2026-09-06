@@ -57,13 +57,14 @@ done, `schtasks /Delete /TN uttt-queue7 /F` removes the job.
 §5 D1 (strength; RETROSPECTIVE §2, KNOWLEDGE 43–44), §3 B1 / B2 / B3 "replication on the
 seed replicate" (KNOWLEDGE 14–17, 19, 37–42 now say which facts held on both seeds: all of
 them, with one deep10-only coefficient path noted in B3), §2 A9 (the sealed test half, read
-once; KNOWLEDGE 30). Step 5 decided: the ladder stays paused; **D3, the earlier-LR-drop run
-`runs/deep10_c1_300_lr150`, is running** (launched 2026-09-05 12:12 via the scheduled job
-`uttt-queue8` -> `runs/launch_queue8_hidden.vbs` -> `runs/queue8.sh`; log
-`runs/deep10_c1_300_lr150.out`, status `python tools/run_status.py runs/deep10_c1_300_lr150`,
-events `bash runs/watch_train.sh deep10_c1_300_lr150 queue8`; ~14 h, then `eval_run.sh` by
-itself, including a match against the seed replicate). When it finishes, read its result
-against the pre-registered criterion in §5 D3 and record it there. Outputs of steps 2-4:
+once; KNOWLEDGE 30). Step 5 decided: the ladder stays paused. **D3, the earlier-LR-drop run
+`runs/deep10_c1_300_lr150`, ran 2026-09-05 12:12 → 2026-09-06 05:24 and *hurt*** by its
+pre-registered criterion (−32 [−50, −14] vs the same-seed reference, −10 vs the replicate,
++193 vs v2b; §5 D3): the drop is a fixed step on the level the constant-LR phase reached,
+and the iterations 150–200 at the constant LR were worth their ≈ 5 points. **Nothing is
+running.** If any training follows, the evidence now points at D2's duration run (longer
+constant-LR phase, drops late) on 8 blocks — owner's call. The scheduled jobs
+`uttt-queue7` / `uttt-queue8` are inert (no trigger) and can be deleted. Outputs of steps 2-4:
 `runs/plan5_D1_control.{sh,out}`, `runs/plan5_B1_timeline_s1.out`, `plan5_B2_fit_s1.out`,
 `plan5_B2_report_s1.out`, `plan5_B3_value_s1.out`, `plan5_A9_test_{deep10,deep8,s1}.out`.
 1. *While D1 runs* (3060 free; nothing else is queued): nothing is required. Optional: the
@@ -1060,7 +1061,38 @@ approval (the pause called in PLAN4 §3c is still in effect).
     exists to answer. Tertiary: endgame_v1 raw WDL / regret at 300 against 84.6 / 0.037
     (deep10) and 83.9 / 0.047 (replicate). **Launched 2026-09-05 12:12** (after the 3090's
     Afterburner overclock was reset: memory 9751 MHz, power limit 350 W; the driver's
-    "prefer maximum performance" mode was left on — irrelevant under load);
+    "prefer maximum performance" mode was left on — irrelevant under load).
+    **Result (2026-09-06; `runs/deep10_c1_300_lr150/analysis.out`,
+    `runs/deep10_c1_300_lr150/timeline.{json,png}`, `runs/plan5_B1_timeline_lr150.out`; 300
+    iterations, 17.05 h, no fault in 30 graph evals).** *Primary, the pre-registered reading:*
+    final checkpoint on the paired suite @64 **vs deep10_c1_300 45.4 % [42.8, 48.0], −32 Elo
+    [−50, −14]** and **vs deep10_c1_300_s1 48.5 % [45.8, 51.3], −10 [−29, +9]** — ≤ 47 %
+    against one seed and inside ±3 of the other: **"hurt"** by the rule written above (≤ 47 %
+    against *either*). The rest of the ladder agrees: vs v2b 75.2 % [72.9, 77.4], **+193
+    [+172, +214]** (the two 10-block seeds: +242, +213); vs wide128_c1 68.3 %, +133 (+181,
+    +159); vs deep8_c1 64.5 %, +104 (+141, +125); vs deep8_c1_300 49.3 %, −5 [−23, +13]
+    (+35, +9); vs dev1 84.6 %, +296 (+308, +286). Endgame set, raw head: WDL 83.3 [81.9,
+    84.8], draws 66.2 %, regret 0.051 [0.042, 0.060], optimal 95.5 % (deep10 84.6 / 68.7 /
+    0.037 / 96.7; replicate 83.9 / 68.3 / 0.047 / 95.9); search @256 optimal 99.9 %.
+    *Secondary, the timeline's shape:* the step is at the drop and has the same size wherever
+    the drop is — net_0150 → net_0160: in-run vs v2b 63.9 → 72.9 (+9.0), raw WDL 78.4 → 80.3,
+    regret 0.067 → 0.057, opening-ply policy entropy 0.82 → 0.35 bits, D4 divergence 0.053 →
+    0.030 (the reference at 200 → 220: +8.4, 81.7 → 83.1, 1.80 → 1.35, 0.052 → 0.030). After
+    it every curve is flat: vs v2b 69–77 over iterations 160–240 (mean 73.4, no trend), WDL
+    80.3 → 83.3 and draw recognition 60 → 68 creeping over 80 iterations, D4 0.030
+    throughout. The second drop at 250 shows ≈ +3 on v2b (70.8 → 76–78) and nothing on the
+    endgame set — the third run on which the second drop is unresolved. What the earlier
+    drop forgoes is the constant-LR climb between 150 and 200 (the reference: 67.7 → 70.5
+    in-run; this run's pre-drop level at 150, 63.9, is 6 points under the reference's at
+    200), and the 100 extra low-LR iterations never make it up: the run ends at 74.0 in-run
+    / 83.3 WDL against the reference's 80.6 / 84.6. *Reading:* the learning-rate drop is a
+    fixed ≈ +8–9-point step applied to whatever level the constant-LR phase has reached; the
+    constant-LR phase is where the net still learns, the low-LR phase is where it settles,
+    and it settles within ≈ 20 iterations. So the 200-iteration recipe (drops at 120/180) is
+    **not** licensed — it would give up the same climb for the same fixed step — and D2's
+    600-iteration run (a longer constant-LR phase, drops late) is the direction the evidence
+    points, on 8 blocks. KNOWLEDGE 42 is restated with this run; no other claim moves (its
+    endgame numbers are the replicate's). Not a rung; `deep10_c1_300` stays the play agent.
   - if A9 shows the v1 endgame numbers were overfit by selection → nothing to train,
     but every future eval reads `endgame_v2_dev`;
   - if B3 finds the value head's remaining error is concentrated in the last-board

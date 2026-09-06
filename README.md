@@ -62,10 +62,12 @@ Read in this order:
   ("+ blocks 10", +35 on the first seed) is inside it — not an established rung; duration
   (+211) is the last confirmed one. `deep10_c1_300/net_0300.pt` stays the play agent. Its
   checkpoint timeline repeats the reference's (PLAN5 §3 B1); the probe and
-  value-decomposition controls are in §3 B2/B3. **Running now (owner-approved, PLAN5 §5 D3):
-  `runs/deep10_c1_300_lr150`**, the reference recipe with the LR drops moved earlier
-  (`--lr_drops 150,250`), launched 2026-09-05 12:12, ≈ 14 h; its reading is pre-registered
-  in §5 D3 (a result only if it clears +3 against both 10-block seeds).
+  value-decomposition controls are in §3 B2/B3. **The one experiment the analysis suggested, D3
+  (`runs/deep10_c1_300_lr150`, the same recipe with the LR drops moved earlier to 150/250),
+  ran 2026-09-05/06 and hurt by its pre-registered criterion:** −32 Elo [−50, −14] against
+  the same-seed reference, −10 against the replicate, +193 vs v2b. The drop is a fixed ≈ +9
+  step on whatever the constant-LR phase has built, and nothing learns after it (PLAN5 §5
+  D3). Nothing is running; the ladder stays paused.
 - **Analysis programme (PLAN5 Phases A–C): complete, 2026-09-03.** Every ordering and sign
   from the earlier nets held on the +242 net; two magnitudes moved (the free-move value,
   +0.16 → +0.20, and a small residual value per owned board once macro lines are
@@ -97,6 +99,7 @@ perfect). Details in RETROSPECTIVE §2.
 | deep8_c1_300 | + 300 iters (drops 200/280) | +211 | 84.0 / 0.045 |
 | **deep10_c1_300** | **+ blocks 10** | **+242** | **84.6 / 0.037** |
 | deep10_c1_300_s1 | same recipe, seed 1 (replicate) | +213 | 83.9 / 0.047 |
+| deep10_c1_300_lr150 | LR drops at 150/250 (hurt) | +193 | 83.3 / 0.051 |
 
 ## Where things live
 
