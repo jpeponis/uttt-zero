@@ -18,6 +18,8 @@ from uttt.model import Evaluator, NetConfig, ResNet, build_net  # noqa: E402
 
 DEV = torch.device(os.environ.get("UTTT_DEV", "cuda:0" if torch.cuda.is_available() else "cpu"))
 GRID_T = torch.from_numpy(GRID)
+torch.backends.cudnn.allow_tf32 = False  # the exact checks are fp32 checks; Ampere's TF32 convolutions are ~1e-3 accurate
+torch.backends.cuda.matmul.allow_tf32 = False
 
 
 def random_games(n, plies, seed=0):

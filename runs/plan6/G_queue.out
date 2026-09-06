@@ -87,3 +87,4 @@ runs/gdata_v1.npz: train 400560, dev 49726 (33616 with no canonical twin in trai
     pass 2/8: loss_p 1.428 loss_v 0.1307 (329s)
     pass 3/8: loss_p 1.335 loss_v 0.1401 (487s)
     pass 4/8: loss_p 1.291 loss_v 0.1272 (667s)
+    pass 5/8: loss_p 1.239 loss_v 0.0995 (823s)
