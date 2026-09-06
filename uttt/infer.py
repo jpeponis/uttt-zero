@@ -18,7 +18,7 @@ from .model import ResBlock
 
 
 def _fuse(model: nn.Module) -> nn.Module:
-    m = export_plain(copy.deepcopy(model).eval())  # tied / group-convolutional parts become ordinary modules first
+    m = export_plain(copy.deepcopy(model).eval()).eval()  # tied / group-convolutional parts become ordinary modules first
     for mod in m.modules():
         if isinstance(mod, ResBlock):
             mod.c1 = fuse_conv_bn_eval(mod.c1, mod.b1)

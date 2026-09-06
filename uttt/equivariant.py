@@ -91,7 +91,7 @@ class TiedLinear(nn.Module):
         return F.linear(x, W, b)
 
     def export(self) -> nn.Linear:
-        lin = nn.Linear(self.in_ch * self.P_in, self.P_out * self.out_k)
+        lin = nn.Linear(self.in_ch * self.P_in, self.P_out * self.out_k).to(self.bank.device)
         with torch.no_grad():
             W, b = self.expanded()
             lin.weight.copy_(W)
@@ -127,7 +127,7 @@ class GConv2d(nn.Module):
         return F.conv2d(x, self.expanded(), padding=self.k // 2)
 
     def export(self) -> nn.Conv2d:
-        conv = nn.Conv2d(self.in_base * (1 if self.lift else 8), self.out_base * 8, self.k, padding=self.k // 2, bias=False)
+        conv = nn.Conv2d(self.in_base * (1 if self.lift else 8), self.out_base * 8, self.k, padding=self.k // 2, bias=False).to(self.bank.device)
         with torch.no_grad():
             conv.weight.copy_(self.expanded())
         return conv
@@ -146,12 +146,12 @@ class GBatchNorm(nn.Module):
         return self.bn(x.reshape(N, self.base, 8 * H, W)).reshape(N, C, H, W)
 
     def export(self) -> nn.BatchNorm2d:
-        bn = nn.BatchNorm2d(self.base * 8)
+        bn = nn.BatchNorm2d(self.base * 8).to(self.bn.weight.device)
         with torch.no_grad():
             for k in ("weight", "bias", "running_mean", "running_var"):
                 getattr(bn, k).copy_(getattr(self.bn, k).repeat_interleave(8))
             bn.num_batches_tracked.copy_(self.bn.num_batches_tracked)
-        return bn.eval() if not self.training else bn
+        return bn.train(self.training)
 
 
 class GResBlock(nn.Module):
@@ -232,9 +232,10 @@ class GResNet(_HeadsMixin, nn.Module):
 
     def export(self) -> PlainNet:
         seq = lambda s: nn.Sequential(s[0].export(), s[1].export(), nn.ReLU())  # noqa: E731
-        return PlainNet(self.cfg, seq(self.stem), nn.Sequential(*[b.export() for b in self.blocks]), seq(self.p_conv), self.p_pool,
-                        self.p_fc.export(), seq(self.v_conv), self.v_pool, self.v_fc1.export(), self.v_fc2, self.o_fc.export(),
-                        self.m_fc.export())
+        plain = PlainNet(self.cfg, seq(self.stem), nn.Sequential(*[b.export() for b in self.blocks]), seq(self.p_conv), self.p_pool,
+                         self.p_fc.export(), seq(self.v_conv), self.v_pool, self.v_fc1.export(), self.v_fc2, self.o_fc.export(),
+                         self.m_fc.export())
+        return plain.train(self.training)
 
 
 def tie_heads(net) -> None:

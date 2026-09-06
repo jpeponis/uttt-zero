@@ -1,1 +1,2 @@
 evaluator: suite suites/openings_v1.npz (516 openings), anchors ['v2b_net_0150', 'deep8_c1_300_net_0300', 'deep10_c1_300_net_0300'], 64 sims, endgame set suites/endgame_v2_dev.npz, device NVIDIA GeForce RTX 3060
+net_0010: vs v2b_net_0150 20.1 [17.9, 22.3]  vs deep8_c1_300_net_0300 7.7 [6.2, 9.1]  vs deep10_c1_300_net_0300 7.7 [6.2, 9.2]  endgame WDL 59.7 regret 0.162  (863s; 0 pending)
