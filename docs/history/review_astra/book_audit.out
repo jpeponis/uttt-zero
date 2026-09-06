@@ -1,0 +1,211 @@
+{
+  "common_nodes": 341,
+  "literal_agreement": 256,
+  "orbit_agreement": 258,
+  "fraction_literal": 0.750733137829912,
+  "fraction_orbit": 0.7565982404692082,
+  "by_depth": {
+    "1": {
+      "n": 15,
+      "literal": 9,
+      "orbit": 10
+    },
+    "2": {
+      "n": 33,
+      "literal": 26,
+      "orbit": 26
+    },
+    "3": {
+      "n": 81,
+      "literal": 61,
+      "orbit": 62
+    },
+    "4": {
+      "n": 212,
+      "literal": 160,
+      "orbit": 160
+    }
+  },
+  "deep10": {
+    "nodes_with_duplicate_child_orbits": 28,
+    "first_move_nodes_with_top2_same_orbit": [
+      "0",
+      "8",
+      "40"
+    ],
+    "illegal_displayed_principal_lines": [
+      {
+        "first": "0",
+        "line": [
+          0,
+          6,
+          20,
+          23
+        ],
+        "error": "illegal move 20"
+      }
+    ],
+    "after40": [
+      {
+        "move": 37,
+        "share": 0.1885986328125,
+        "q": -0.4427666962146759,
+        "child": "40 37"
+      },
+      {
+        "move": 39,
+        "share": 0.1884765625,
+        "q": -0.4427546262741089,
+        "child": "40 37"
+      },
+      {
+        "move": 41,
+        "share": 0.18841552734375,
+        "q": -0.44275808334350586,
+        "child": "40 37"
+      }
+    ]
+  },
+  "deep8": {
+    "nodes_with_duplicate_child_orbits": 29,
+    "first_move_nodes_with_top2_same_orbit": [
+      "0",
+      "40"
+    ],
+    "illegal_displayed_principal_lines": [
+      {
+        "first": "40",
+        "line": [
+          40,
+          41,
+          10,
+          16
+        ],
+        "error": "illegal move 10"
+      }
+    ],
+    "after40": [
+      {
+        "move": 41,
+        "share": 0.13555908203125,
+        "q": -0.44782987236976624,
+        "child": "40 37"
+      },
+      {
+        "move": 43,
+        "share": 0.13555908203125,
+        "q": -0.44782987236976624,
+        "child": "40 37"
+      },
+      {
+        "move": 37,
+        "share": 0.13555908203125,
+        "q": -0.44782987236976624,
+        "child": "40 37"
+      }
+    ]
+  },
+  "after40_fixed_legal_actions": [],
+  "after40_legal_action_orbits": [
+    [
+      40,
+      36
+    ],
+    [
+      40,
+      37
+    ]
+  ],
+  "atlas_child_search_values_not_parent_Q": [
+    {
+      "first": 0,
+      "best_reply": 1,
+      "gap_two_best_distinct_orbits": 0.007305175065994263,
+      "all_reply_orbit_range": 0.09320870041847229
+    },
+    {
+      "first": 1,
+      "best_reply": 10,
+      "gap_two_best_distinct_orbits": 0.0030882805585861206,
+      "all_reply_orbit_range": 0.12563291192054749
+    },
+    {
+      "first": 2,
+      "best_reply": 21,
+      "gap_two_best_distinct_orbits": 0.003210693597793579,
+      "all_reply_orbit_range": 0.06947320699691772
+    },
+    {
+      "first": 4,
+      "best_reply": 40,
+      "gap_two_best_distinct_orbits": 0.05262961983680725,
+      "all_reply_orbit_range": 0.11237333714962006
+    },
+    {
+      "first": 5,
+      "best_reply": 45,
+      "gap_two_best_distinct_orbits": 0.012966468930244446,
+      "all_reply_orbit_range": 0.14889748394489288
+    },
+    {
+      "first": 8,
+      "best_reply": 73,
+      "gap_two_best_distinct_orbits": 0.0026998817920684814,
+      "all_reply_orbit_range": 0.09051147103309631
+    },
+    {
+      "first": 9,
+      "best_reply": 5,
+      "gap_two_best_distinct_orbits": 0.009322330355644226,
+      "all_reply_orbit_range": 0.09672318398952484
+    },
+    {
+      "first": 10,
+      "best_reply": 16,
+      "gap_two_best_distinct_orbits": 0.018540427088737488,
+      "all_reply_orbit_range": 0.16899169981479645
+    },
+    {
+      "first": 12,
+      "best_reply": 28,
+      "gap_two_best_distinct_orbits": 0.010514803230762482,
+      "all_reply_orbit_range": 0.16525429487228394
+    },
+    {
+      "first": 13,
+      "best_reply": 40,
+      "gap_two_best_distinct_orbits": 0.10153849795460701,
+      "all_reply_orbit_range": 0.18348880484700203
+    },
+    {
+      "first": 15,
+      "best_reply": 55,
+      "gap_two_best_distinct_orbits": 0.0036052241921424866,
+      "all_reply_orbit_range": 0.11891445517539978
+    },
+    {
+      "first": 16,
+      "best_reply": 70,
+      "gap_two_best_distinct_orbits": 0.005695633590221405,
+      "all_reply_orbit_range": 0.1906840279698372
+    },
+    {
+      "first": 36,
+      "best_reply": 4,
+      "gap_two_best_distinct_orbits": 0.01755538582801819,
+      "all_reply_orbit_range": 0.06615340709686279
+    },
+    {
+      "first": 37,
+      "best_reply": 10,
+      "gap_two_best_distinct_orbits": 0.03726354241371155,
+      "all_reply_orbit_range": 0.06878045201301575
+    },
+    {
+      "first": 40,
+      "best_reply": 37,
+      "gap_two_best_distinct_orbits": 0.019723474979400635,
+      "all_reply_orbit_range": 0.019723474979400635
+    }
+  ]
+}

@@ -19,10 +19,12 @@ Read in this order:
 
 1. **This file** — what the project is, its current state, where things live, how to
    run it.
-2. **`PLAN5.md`** — the live plan. It opens with a glossary of the project's terms (Elo,
-   the paired suite, sims, iterations, checkpoints, the ±3-point rule and so on), then a
-   **Handover** section (what is running, what to do next, in order), then the decision in
-   front of the project and the analysis programme with its results.
+2. **`PLAN6.md`** — the live plan: the outside review adjudicated finding by finding (§1),
+   then the work in order — repair the analysis instrument (Phase E), cheap measurements
+   (F), the frozen-teacher architecture study (G) and the training runs to propose (H). Its
+   **Handover** section says what is running and what to do next. The project's glossary
+   (Elo, the paired suite, sims, iterations, checkpoints, the ±3-point rule and so on) is
+   `docs/history/PLAN5.md`'s opening section; PLAN6 refers to it rather than repeating it.
 3. **`KNOWLEDGE.md`** — what the agent believes about the game: one claim per line with
    its level, effect size, confidence interval, the nets it held across, and the tool and
    file that produced it. This is where a claim lives; the other files hold the working
@@ -33,9 +35,11 @@ Read in this order:
 5. **`docs/explainer.html`** — the public explainer (a 3Blue1Brown-style page for a
    reader with no background), also published at
    https://claude.ai/code/artifact/d3d1bef5-2140-48ee-b55b-ed09d2982791. Opens from
-   disk. Its Part 8 is the plain-language version of the game beliefs; PLAN5 §4 C4 will
-   rewrite it from `KNOWLEDGE.md` when that exists.
-6. History, only as needed, all under `docs/history/` (index in its README): `PLAN4.md`
+   disk. Its Part 8 is the plain-language version of the game beliefs in `KNOWLEDGE.md`.
+6. History, only as needed, all under `docs/history/` (index in its README): `PLAN5.md`
+   (the analysis programme, the D1/D3 training decisions and the glossary; superseded by
+   PLAN6), `REVIEW-astra.md` with `review_astra/` (the outside review PLAN6 adjudicates, and
+   its reproduction scripts), `PLAN4.md`
    (hand-off and review adjudication, superseded by PLAN5), `PLAN3.md` (measurement kit,
    strength ladder, game beliefs; corrections in PLAN4), `PLAN2.md` (detailed result
    sections 2b-2k), `PLAN.md` and `NOTES-v2.md` (original plan and notes),
@@ -44,7 +48,7 @@ Read in this order:
    claude in the PLAN3 era, adjudicated in PLAN4). References such as "PLAN4 §3c" in the
    live files mean these.
 
-## Current state (2026-09-05)
+## Current state (2026-09-06)
 
 - **Best network:** `runs/deep10_c1_300/net_0300.pt` — 10 residual blocks of 128
   filters, trained for 300 iterations. It is +242 Elo over the `v2b` reference net at 64
@@ -65,9 +69,21 @@ Read in this order:
   value-decomposition controls are in §3 B2/B3. **The one experiment the analysis suggested, D3
   (`runs/deep10_c1_300_lr150`, the same recipe with the LR drops moved earlier to 150/250),
   ran 2026-09-05/06 and hurt by its pre-registered criterion:** −32 Elo [−50, −14] against
-  the same-seed reference, −10 against the replicate, +193 vs v2b. The drop is a fixed ≈ +9
-  step on whatever the constant-LR phase has built, and nothing learns after it (PLAN5 §5
-  D3). Nothing is running; the ladder stays paused.
+  the reference (one perturbed run read against the seed band — "same seed" only fixes the
+  start here, PLAN6 §1 item 13), −10 against the replicate, +193 vs v2b. The drop is a fixed
+  ≈ +9 step on whatever the constant-LR phase has built; no strength gain resolves after it
+  (the raw head's endgame reads creep a few points; PLAN5 §5 D3, KNOWLEDGE 42). Nothing is
+  running; the ladder stays paused.
+- **PLAN6 (2026-09-06), after an outside review of the project's method and its use of the
+  game's symmetry:** the review found two bugs in the opening-book instrument (one orbit
+  listed three times as the "top three" replies; principal lines that mixed coordinate
+  frames — one illegal displayed line per book) and a confound in how "duration" had been
+  reasoned about (an iteration doubles data *and* optimizer steps *and* moves the teacher and
+  the LR phases). Phase E repairs the instrument (the book and the atlas are rebuilt by orbit;
+  KNOWLEDGE claims 4, 5, 7, 7a, 9, 20, 28, 41, 42 restated — no number moves except the
+  book's), then Phase F takes an hour of cheap play-time measurements, Phase G answers the
+  architecture question on frozen data, and Phase H proposes runs in order: `--epochs 2` on
+  8 blocks first (H1), 600 iterations after (H3).
 - **Analysis programme (PLAN5 Phases A–C): complete, 2026-09-03.** Every ordering and sign
   from the earlier nets held on the +242 net; two magnitudes moved (the free-move value,
   +0.16 → +0.20, and a small residual value per owned board once macro lines are

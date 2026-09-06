@@ -1,0 +1,67 @@
+=== tests on cuda:0 (13:53)
+--- test_rng_hygiene
+deterministic search and checkpoint loading leave the global RNG untouched
+with dedicated generators an evaluation (even one that draws from the global RNG) changes no training draw
+without them the legacy idle draw would have moved the replay sample; the E4 evaluation path draws nothing
+generator states round-trip through get_state/set_state (what the checkpoints carry, E5)
+ok
+--- test_symmetry
+engine commutes with D4 over 70 random plies of 512 games (free moves, closures, line and count endings seen)
+encoder is D4-equivariant and colour-relabelling invariant
+8-way average: value invariant, policy equivariant, constant on orbits at the empty board and after [40]
+one-call canonical: value invariant, policy equivariant, constant on orbits at the empty board and after [40]
+the plain net is not equivariant; the wrappers are
+canonical evaluator on the fused fp16 net under CUDA-graph replay: bitwise identical across the 8 orientations
+deterministic search on the exact evaluator: transported policies agree on 100.0 % of positions, root values everywhere
+ok
+--- test_search_v2
+gumbel sims=  32 net=True  selfplay=False: visits True  policy True  value True  action True
+gumbel sims=  64 net=True  selfplay=True : visits True  policy True  value True  action True
+v2 syncs per simulation: 1.0
+v1 uniform: 4096 trees x 32 sims: 0.58s = 18.1 ms/sim
+v2 uniform: 4096 trees x 32 sims: 0.56s = 17.4 ms/sim
+v1 net: 4096 trees x 32 sims: 1.30s = 40.8 ms/sim
+v2 net: 4096 trees x 32 sims: 1.11s = 34.6 ms/sim
+ok
+--- test_search_graph
+gumbel sims= 64 net=True  pass 1: visits True policy True value True action True
+gumbel sims= 64 net=True  pass 2: visits True policy True value True action True
+in-place weight refresh is seen by captured graphs
+eager uniform: 4096 trees x 32 sims: 0.56s = 17.6 ms/sim
+graph uniform: 4096 trees x 32 sims: 0.10s = 3.1 ms/sim
+eager fused net: 4096 trees x 32 sims: 0.91s = 28.3 ms/sim
+graph fused net: 4096 trees x 32 sims: 0.39s = 12.3 ms/sim
+ok
+--- test_selfplay_cont
+finished games: {'games': 455, 'x_win': 0.499, 'o_win': 0.464, 'draw': 0.037, 'end_line': 0.895, 'end_count': 0.068, 'mean_len': 55.2, 'surprise': 0.008, 'cap_hit': 0.0, 'raw_kl': 0.0258, 'q_range': 0.0193, 'target_entropy': 2.8163, 'first_move_top': 23, 'first_move_top_share': 0.024, 'first_move_distinct': 81}
+consistency ok: 455 games, 25113 positions, mean length 55.2
+dup stats: {'distinct_frac': 0.962, 'exact_frac': 0.0, 'dup_mean_ply0': 455.0, 'dup_mean_ply2': 1.6, 'dup_mean_ply4': 1.0, 'dup_mean_ply8': 1.0, 'dup_mean_ply12': 1.0}
+continuous self-play (uniform net): 4096 games x 64 steps in 37.8s -> 6936 positions/s, 107.8 finished games/s, 18.5 ms/sim
+ok
+--- test_hygiene
+symmetric hash ok
+extra planes ok
+ownership class maps ok
+net configs / fused inference / loader ok
+early-ply alpha ok
+ok
+--- test_symmetry_eval
+equivariance: max |dp| = 1.19e-07, max |dv| = 5.96e-08
+base vs averaged: mean |dv| = 0.0444, max |dv| = 0.2053, argmax agreement = 0.859
+ok
+--- test_book
+orbits after [40] ok
+book consistent: 105 nodes, 15 lines
+audit catches frame mixing and duplicated orbits
+ok
+=== F1: canonical vs plain, deep10 @64 (13:56)
+paired suite openings_v1 (516 openings, 1032 games): A=runs/deep10_c1_300/net_0300.pt@64 canon vs B=runs/deep10_c1_300/net_0300.pt@64  [88s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1  100.0%       n/a        n/a                 100.0% 100.0%    50.0%    0.0%      1 /   0 /   0
+  orbits      15   55.0%  [ 40.0,  71.7]    +35 [ -71, +161]   53.3%  56.7%    48.3%   23.3%      6 /   5 /   4
+  natural    250   49.2%  [ 45.0,  53.4]     -6 [ -35,  +24]   60.4%  38.0%    61.2%   12.4%     77 /  95 /  78
+  random     250   49.3%  [ 45.6,  53.1]     -5 [ -31,  +22]   61.4%  37.2%    62.1%   20.2%     72 / 102 /  76
+  all        516   49.5%  [ 46.7,  52.3]     -3 [ -23,  +16]   60.8%  38.3%    61.2%   16.5%    156 / 202 / 158
+  end reasons: line 70.2%  count 13.4%  equal 16.5%  |  mean length 50.5
+wrote runs/deep10_c1_300/paired_canon_vs_plain_64.json
+=== F1 done (13:58)

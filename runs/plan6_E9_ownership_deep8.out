@@ -1,0 +1,12 @@
+runs/probe_data_deep10late.npz: 60000 positions, test split 10000; open boards in test: 73749 of 90000
+
+Ownership on OPEN boards, test split, accuracy by ply bucket (net runs/deep8_c1_300/net_0300.pt; classes self / neither / opponent):
+  ply     n_open   shares(s/n/o)            majority         local          head         probe  probe_random   head_random
+  0-7      13768   [0.405, 0.186, 0.409]          40.9          43.2          44.7          43.4          44.0          32.5
+  8-19     20960   [0.407, 0.187, 0.406]          40.7          47.1          47.6          48.6          48.0          31.9
+  20-31    19376   [0.401, 0.203, 0.396]          40.1          50.3          51.4          52.8          52.7          32.2
+  32-43    14171   [0.374, 0.272, 0.353]          37.4          49.7          56.2          56.9          52.9          31.6
+  44-80     5474   [0.332, 0.392, 0.275]          39.2          51.1          66.3          64.2          53.6          30.0
+  0-80     73749   [0.393, 0.223, 0.384]          39.3          48.0          51.1          51.5          49.8          31.9
+  (19s)
+wrote runs/plan6_E9_ownership_deep8.json

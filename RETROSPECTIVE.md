@@ -93,10 +93,15 @@ confirmed rung is duration, +211; deep10_c1_300 remains the strongest single net
   drops (reductions of the learning rate, at iterations 200 and 280) delivered visible
   steps. The 150-iteration schedule had been starving every earlier architecture
   comparison of convergence. *(2026-09-06, PLAN5 §5 D3: moving the first drop to 150 costs
-  ≈ 5 points — −32 Elo against the same-seed reference. The drop is a fixed ≈ +9 step on
-  the level the constant-LR phase has reached, the low-LR phase settles within ≈ 20
-  iterations and learns nothing further, and the second drop is unresolved on all three
-  300-iteration runs. The constant-LR iterations are where the learning happens.)* Corollary: some "capacity" conclusions from 150-iteration
+  ≈ 5 points — −32 Elo [−50, −14] against the reference, −10 [−29, +9] against the seed
+  replicate: one perturbed run read against the two-seed band, "hurt" by the pre-registered
+  rule. "Same seed" here means the same start, not the same run — the pipeline is not
+  bitwise deterministic and the two runs' self-play differed from iteration 1, before the
+  intervention (PLAN6 §1 item 13). The drop is a fixed ≈ +9 step on the level the
+  constant-LR phase has reached; strength settles within ≈ 20 iterations of it, while the
+  raw head's endgame reads keep creeping (WDL 80.3 → 83.3 %, draw recognition 60 → 66–68 %
+  over the low-LR phase); the second drop is unresolved on all three 300-iteration runs. The
+  constant-LR iterations are where the strength is built.)* Corollary: some "capacity" conclusions from 150-iteration
   runs were really optimization conclusions — the nets had not finished learning.
   *(Addendum 2026-09-03, PLAN5 §3 B1: the checkpoint timelines split the +127 into ≈ +5
   points from iterations 150–200 at the constant LR and ≈ +8 from the first drop, at which
@@ -154,7 +159,17 @@ Lesson: never diagnose capacity from runs that were never trained to convergence
 - **The paired suite + noise band is what made every claim above possible.** 516 openings
   × both colours, bootstrap over pairs, ±2.8-point CI, and the rule *believe nothing
   under +3 points on the full suite, final checkpoints only*. Every adopt/null verdict in
-  §3 is a sentence because this exists.
+  §3 is a sentence because this exists. The rule is a decision rule for adopting a change,
+  not an equivalence test: a result inside the band is "not established", never "equal" —
+  the interval on the difference says how close (PLAN6 §1 item 21).
+- **"Same seed" is the same start, not the same run.** Two runs with the same seed and
+  recipe have the same initial weights and the same first iteration, differ at the fourth
+  decimal of the first loss (`cudnn.benchmark`, fp16), and have visibly different self-play
+  by iteration 1 — a 4096-game loop amplifies a last-bit difference within one iteration.
+  RNG bookkeeping cannot make trajectories reproducible on this path; the defence is
+  replication, and a "same-seed" comparison is read against the seed band, never as paired
+  (PLAN6 §1 item 13; the RNG hygiene of PLAN6 E4 makes evaluation *observationally* neutral,
+  which is a different, cheaper property).
 - **In-run curves are for shape, not conclusions.** The evaluation run inside training
   is small (432 games, ±6; checkpoints ±4), enough to see a trend, not to call a result.
 - **"Strongest" is budget-relative.** At equal inference FLOPs, a small net with 4× the
@@ -208,9 +223,11 @@ where noted:
   `python web/server.py runs/deep10_c1_300/net_0300.pt --sims 800 --device cuda:1`.
 - **Neither depth nor duration is exhausted** — 12-block and 600-iteration runs are the
   obvious continuations, each a committed GPU-day, both on hold per the pause. *(2026-09-06:
-  depth 8 → 10 is inside the seed band and an earlier LR drop hurts, so the one continuation
-  the evidence supports is a longer constant-LR phase — 600 iterations, drops late — on 8
-  blocks; PLAN5 §5 D2/D3.)*
+  depth 8 → 10 is inside the seed band and an earlier LR drop hurts, so the continuation the
+  evidence supports is more constant-LR learning on 8 blocks. "Duration" confounds data,
+  updates, teacher and LR timing (PLAN6 §0), so the first run to propose is the cheap arm
+  that separates one of them — `--epochs 2` at 300 iterations, PLAN6 H1 — and the
+  600-iteration run with late drops follows its result, PLAN6 H3.)*
 - Also open, cheaper: a seed replicate of the final recipe (rigor — *done 2026-09-05*,
   PLAN5 §5 D1); an analysis second
   pass with the new net (atlas / decision / freemove / puzzles → `puzzles_v2_dev`, suites

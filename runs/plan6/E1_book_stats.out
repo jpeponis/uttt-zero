@@ -1,0 +1,10 @@
+runs/book_deep10.json: deep10_c1_300 at 16384 sims, depth 4, top-3; 579 nodes, 579 with a confined mover
+  self-send reply (cell index = board index, opponent sent back into the same board): available in 458, chosen in 250 (55 %); by depth [nodes, available, chosen]: {1: [15, 12, 6], 2: [44, 32, 22], 3: [130, 103, 49], 4: [390, 311, 173]}
+  mean visit share of the top reply: self-send 0.84 (n=250), other 0.74 (n=329)
+  when not the self-send: {'elsewhere': 278, 'back to the board they played from': 51}
+  cell class of the top reply: {'corner': 198, 'edge': 356, 'centre': 25}
+runs/book_deep8.json: deep8_c1_300 at 16384 sims, depth 4, top-3; 579 nodes, 579 with a confined mover
+  self-send reply (cell index = board index, opponent sent back into the same board): available in 455, chosen in 263 (58 %); by depth [nodes, available, chosen]: {1: [15, 12, 9], 2: [44, 32, 22], 3: [130, 102, 61], 4: [390, 309, 171]}
+  mean visit share of the top reply: self-send 0.84 (n=263), other 0.74 (n=316)
+  when not the self-send: {'elsewhere': 273, 'back to the board they played from': 43}
+  cell class of the top reply: {'edge': 409, 'corner': 150, 'centre': 20}

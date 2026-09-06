@@ -1,0 +1,104 @@
+{
+ "data": "runs/probe_data_deep8late.npz",
+ "net": "runs/deep10_c1_300/net_0300.pt",
+ "rows": [
+  {
+   "ply": "0-7",
+   "n_open_boards": 13832,
+   "class_shares_test": [
+    0.405,
+    0.189,
+    0.406
+   ],
+   "majority": 0.4051,
+   "head": 0.4501,
+   "local": 0.4331,
+   "probe": 0.4171,
+   "probe_random": 0.4105,
+   "head_random": 0.3316
+  },
+  {
+   "ply": "8-19",
+   "n_open_boards": 20774,
+   "class_shares_test": [
+    0.41,
+    0.189,
+    0.401
+   ],
+   "majority": 0.4013,
+   "head": 0.4672,
+   "local": 0.4534,
+   "probe": 0.4563,
+   "probe_random": 0.4555,
+   "head_random": 0.3296
+  },
+  {
+   "ply": "20-31",
+   "n_open_boards": 19347,
+   "class_shares_test": [
+    0.403,
+    0.203,
+    0.394
+   ],
+   "majority": 0.4028,
+   "head": 0.5173,
+   "local": 0.5061,
+   "probe": 0.5013,
+   "probe_random": 0.4934,
+   "head_random": 0.331
+  },
+  {
+   "ply": "32-43",
+   "n_open_boards": 13899,
+   "class_shares_test": [
+    0.372,
+    0.272,
+    0.355
+   ],
+   "majority": 0.3725,
+   "head": 0.5697,
+   "local": 0.5082,
+   "probe": 0.5432,
+   "probe_random": 0.5049,
+   "head_random": 0.3339
+  },
+  {
+   "ply": "44-80",
+   "n_open_boards": 5478,
+   "class_shares_test": [
+    0.336,
+    0.387,
+    0.277
+   ],
+   "majority": 0.3868,
+   "head": 0.6798,
+   "local": 0.5044,
+   "probe": 0.6477,
+   "probe_random": 0.5031,
+   "head_random": 0.3317
+  },
+  {
+   "ply": "0-80",
+   "n_open_boards": 73330,
+   "class_shares_test": [
+    0.395,
+    0.223,
+    0.382
+   ],
+   "majority": 0.3946,
+   "head": 0.5125,
+   "local": 0.4777,
+   "probe": 0.4915,
+   "probe_random": 0.4699,
+   "head_random": 0.3313
+  }
+ ],
+ "columns": [
+  "majority",
+  "local",
+  "head",
+  "probe",
+  "probe_random",
+  "head_random"
+ ]
+}

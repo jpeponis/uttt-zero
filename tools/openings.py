@@ -7,6 +7,7 @@
 --a / --b may also be "uct" (uniform prior, our search), "rollout" (independent Numba UCT with random
 playouts; --x_sims = playouts per move, e.g. 100000) or "random". --cap N keeps the first N openings
 of every sub-suite (train2 evaluates on such a subset). Scores are A's; CIs are bootstrapped over opening pairs.
+--a_sym / --a_canon wrap A's net in the 8-way symmetry average / the one-call canonical evaluator (uttt.symmetry).
 """
 from __future__ import annotations
 
@@ -25,7 +26,7 @@ from uttt.model import UniformEvaluator, load_checkpoint  # noqa: E402
 from uttt.openings import Suite, build_suite, format_report, per_opening_records, play_paired, summarize  # noqa: E402
 from uttt.rollout import RolloutPlayer  # noqa: E402
 from uttt.search import SearchConfig  # noqa: E402
-from uttt.symmetry import SymmetryAveragedEvaluator  # noqa: E402
+from uttt.symmetry import CanonicalEvaluator, SymmetryAveragedEvaluator  # noqa: E402
 from uttt.tablebase import TablebaseEvaluator  # noqa: E402
 
 DEFAULT_SUITE = "suites/openings_v1.npz"
@@ -38,9 +39,10 @@ def load(path, device):
     return FusedEvaluator(net, device)
 
 
-def player(spec, sims, n, device, mode="gumbel", graph=True, c_scale=0.1, sym=False, tb=False):
+def player(spec, sims, n, device, mode="gumbel", graph=True, c_scale=0.1, sym=False, tb=False, canon=False):
     """spec: checkpoint path | "uct" | "rollout" | "random" | "surrogate:<file>". sims: int, or a phase schedule
     "0:32,24:96" (sims from ply). sym: evaluate all 8 D4 images and average (uttt.symmetry; 8x the inference cost).
+    canon: one-call canonical evaluator (exactly equivariant at ~1.03x the cost; PLAN6 F1).
     tb: wrap the evaluator in the one-open-board tablebase (exact value and move where one board is open)."""
     if spec == "random":
         return RandomPlayer(device)
@@ -51,7 +53,8 @@ def player(spec, sims, n, device, mode="gumbel", graph=True, c_scale=0.1, sym=Fa
 
             e = SurrogateEvaluator.load(spec[len("surrogate:"):], device)
         else:
-            e = SymmetryAveragedEvaluator(load(spec, device)) if sym else load(spec, device)
+            e = load(spec, device)
+            e = SymmetryAveragedEvaluator(e) if sym else CanonicalEvaluator(e) if canon else e
         return TablebaseEvaluator(e) if tb else e
     if isinstance(sims, str) and ":" in sims:
         sched = {int(k): int(v) for k, v in (x.split(":") for x in sims.split(","))}
@@ -85,12 +88,13 @@ def cmd_match(a) -> None:
         suite = suite.subset(a.cap)
     a_sims, b_sims = a.a_sims or a.sims, a.b_sims or a.sims
     t = time.perf_counter()
-    pa = player(a.a, a_sims, suite.n, device, a.mode, bool(a.graph), a.a_cscale, a.a_sym, a.a_tb)
-    pb = player(a.b, b_sims, suite.n, device, a.mode, bool(a.graph), a.b_cscale, a.b_sym, a.b_tb)
+    pa = player(a.a, a_sims, suite.n, device, a.mode, bool(a.graph), a.a_cscale, a.a_sym, a.a_tb, a.a_canon)
+    pb = player(a.b, b_sims, suite.n, device, a.mode, bool(a.graph), a.b_cscale, a.b_sym, a.b_tb, a.b_canon)
     r = play_paired(pa, pb, suite, device)
     s = summarize(r)
-    print(f"paired suite {suite.meta['name']} ({suite.n} openings, {2 * suite.n} games): A={a.a}@{a_sims}{' sym' if a.a_sym else ''}{' tb' if a.a_tb else ''} vs "
-          f"B={a.b}@{b_sims}{' sym' if a.b_sym else ''}{' tb' if a.b_tb else ''}  "
+    tag = lambda sym, canon, tb: f"{' sym' if sym else ''}{' canon' if canon else ''}{' tb' if tb else ''}"  # noqa: E731
+    print(f"paired suite {suite.meta['name']} ({suite.n} openings, {2 * suite.n} games): A={a.a}@{a_sims}{tag(a.a_sym, a.a_canon, a.a_tb)} vs "
+          f"B={a.b}@{b_sims}{tag(a.b_sym, a.b_canon, a.b_tb)}  "
           f"[{time.perf_counter() - t:.0f}s]")
     print(format_report(s))
     for name, p in (("A", pa), ("B", pb)):
@@ -99,7 +103,7 @@ def cmd_match(a) -> None:
             print(f"  {name}: tablebase hit {e.k1_hits} of {e.calls} evaluated positions ({100 * e.k1_hits / max(e.calls, 1):.1f} %)")
     if a.out:
         rec = {"suite": {k: v for k, v in suite.meta.items() if k != "ids"}, "a": a.a, "a_sims": a_sims, "b": a.b, "b_sims": b_sims,
-               "a_sym": a.a_sym, "b_sym": a.b_sym, "a_tb": a.a_tb, "b_tb": a.b_tb,
+               "a_sym": a.a_sym, "b_sym": a.b_sym, "a_canon": a.a_canon, "b_canon": a.b_canon, "a_tb": a.a_tb, "b_tb": a.b_tb,
                "mode": a.mode, "summary": s, "openings": per_opening_records(r)}
         with open(a.out, "w") as f:
             json.dump(rec, f, indent=1)
@@ -132,6 +136,8 @@ def main() -> None:
     m.add_argument("--b_cscale", type=float, default=0.1)
     m.add_argument("--a_sym", action="store_true", help="A evaluates with symmetry averaging over the 8 D4 images (8x cost)")
     m.add_argument("--b_sym", action="store_true")
+    m.add_argument("--a_canon", action="store_true", help="A evaluates with the one-call canonical (exactly equivariant) evaluator")
+    m.add_argument("--b_canon", action="store_true")
     m.add_argument("--a_tb", action="store_true", help="A uses the one-open-board tablebase as a terminal lookup")
     m.add_argument("--b_tb", action="store_true")
     m.add_argument("--device", default="cuda:0")

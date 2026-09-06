@@ -6,6 +6,15 @@
 
 Each iteration advances all `games` parallel games by `steps` moves (games × steps positions),
 trains ~`epochs` passes over that many positions sampled from the buffer, and logs one JSON line.
+
+PLAN6 E4/E5/E8 (2026-09-06): self-play noise, replay sampling and augmentation each draw from their own
+torch.Generator seeded from --seed, and a deterministic search draws nothing, so evaluation cannot perturb
+training (observational neutrality; trajectories are still not reproducible — PLAN6 §1 item 13). Both
+checkpoint files carry the GradScaler and generator states and an attempt counter; numbered net_NNNN.pt
+files are written atomically every --ckpt_every iterations, independently of evaluation, so an
+out-of-process evaluator (tools/eval_worker.py) can run the trainer with --eval_every 0. The log records
+the budget axes: rows sampled, optimizer steps taken and skipped, teacher step, mean replay age, the
+distinct-position fraction of the sample, policy-target entropy, raw/search KL and Q range at the root.
 """
 from __future__ import annotations
 
@@ -68,6 +77,7 @@ class TrainConfig:
     own_weight: float = 0.5
     margin_weight: float = 0.25
     eval_every: int = 10
+    ckpt_every: int = 0  # numbered net_NNNN.pt every N iterations; 0: at every in-run evaluation (the pre-PLAN6 behaviour)
     eval_games: int = 128  # per side; only used when suite == "" (unpaired random 2-ply openings)
     eval_sims: int = 64
     eval_graph: int = 1  # 0: eager eval searches (slower; fallback if graph-mode eval ever faults again)
@@ -109,10 +119,10 @@ def _git_rev() -> str | None:
 OWN_CLASS = {3: (2, 1, 0, 1), 4: (1, 3, 0, 2)}
 
 
-def symmetrise(b: dict, device):
+def symmetrise(b: dict, device, gen: torch.Generator | None = None):
     """Apply an independent random D4 symmetry to every sample of a sampled batch."""
     n = b["cells"].shape[0]
-    s = torch.randint(0, 8, (n,), device=device)
+    s = torch.randint(0, 8, (n,), device=device, generator=gen)
     cp = SYM_CELL_INV.to(device)[s]  # (n, 81)
     bp = SYM_BOARD_INV.to(device)[s]  # (n, 9)
     cells = b["cells"].gather(1, cp)
@@ -124,16 +134,18 @@ def symmetrise(b: dict, device):
     return cells, macro, nb2, policy, own
 
 
-def train_steps(net, opt, scaler, buf: GPUReplayBuffer, cfg: TrainConfig, n_steps: int, device, lr_fn):
+def train_steps(net, opt, scaler, buf: GPUReplayBuffer, cfg: TrainConfig, n_steps: int, device, lr_fn, gen=None):
+    """n_steps optimizer steps on batches from one replay draw. Returns (mean losses, steps taken, steps the
+    GradScaler skipped for a non-finite gradient)."""
     net.train()
     inv = INV_PERM.to(device)
     own_map = torch.tensor(OWN_CLASS[cfg.own_classes], device=device)
     tot = torch.zeros(6, device=device)
-    for _ in range(n_steps):
+    taken = skipped = 0
+    for b in buf.sample_batches(cfg.batch, n_steps):
         for g in opt.param_groups:
             g["lr"] = lr_fn()
-        b = buf.sample(cfg.batch)
-        cells, macro, nb, pol, own = symmetrise(b, device)
+        cells, macro, nb, pol, own = symmetrise(b, device, gen)
         obs = encode(cells, macro, nb, b["player"], extra=cfg.n_planes > 7)
         with torch.autocast("cuda", dtype=torch.float16):
             p_logits, v_logits, o_logits, m_logits = net(obs)
@@ -149,13 +161,16 @@ def train_steps(net, opt, scaler, buf: GPUReplayBuffer, cfg: TrainConfig, n_step
         loss = loss_p + cfg.value_weight * loss_v + cfg.own_weight * loss_o + cfg.margin_weight * loss_m
         opt.zero_grad(set_to_none=True)
         scaler.scale(loss).backward()
+        scale_before = scaler.get_scale()
         scaler.step(opt)
         scaler.update()
+        taken += 1
+        skipped += int(scaler.get_scale() < scale_before)  # the scaler halves its scale exactly when it skipped the step
         tot += torch.stack([loss_p.detach(), loss_v.detach(), loss_o.detach(), loss_m.detach(),
                             (v_logits.argmax(1) == v_target).float().mean(), (p_logits.argmax(1) == pol.argmax(1)).float().mean()])
     net.eval()
-    t = (tot / n_steps).tolist()
-    return dict(zip(("policy", "value", "own", "margin", "acc_v", "acc_p"), [round(x, 4) for x in t]))
+    t = (tot / max(taken, 1)).tolist()
+    return dict(zip(("policy", "value", "own", "margin", "acc_v", "acc_p"), [round(x, 4) for x in t])), taken, skipped
 
 
 class EvalKit:
@@ -205,14 +220,33 @@ class EvalKit:
         return out
 
 
+def make_generators(seed: int, device) -> dict:
+    """One torch.Generator per random stream (PLAN6 E4): self-play noise + move sampling, replay sampling, augmentation."""
+    gens = {}
+    for k, name in enumerate(("selfplay", "buffer", "aug"), start=1):
+        g = torch.Generator(device=device)
+        g.manual_seed(seed * 7919 + k)
+        gens[name] = g
+    return gens
+
+
+def _atomic_save(obj, path: str) -> None:
+    torch.save(obj, path + ".tmp")  # a crash mid-save must not destroy the file; readers only ever see a complete file
+    os.replace(path + ".tmp", path)
+
+
 def main(cfg: TrainConfig) -> None:
     torch.manual_seed(cfg.seed)
     torch.backends.cudnn.benchmark = True
     device = torch.device(cfg.device)
     os.makedirs(os.path.join(cfg.run, "games"), exist_ok=True)
-    info = dict(asdict(cfg), _provenance={"argv": sys.argv[1:], "torch": torch.__version__, "git": _git_rev(),
-                                          "started": time.strftime("%Y-%m-%d %H:%M:%S")})
+    attempt = len([f for f in os.listdir(cfg.run) if f.startswith("config_resume_")])  # 0 = the original launch
     cfg_path = os.path.join(cfg.run, "config.json")
+    if os.path.exists(cfg_path):
+        attempt += 1
+    info = dict(asdict(cfg), _provenance={"argv": sys.argv[1:], "torch": torch.__version__, "git": _git_rev(),
+                                          "started": time.strftime("%Y-%m-%d %H:%M:%S"), "attempt": attempt,
+                                          "device_name": torch.cuda.get_device_name(device) if device.type == "cuda" else "cpu"})
     if os.path.exists(cfg_path):  # never clobber the original run config; record every (re)invocation beside it
         with open(cfg_path) as f:
             old = json.load(f)
@@ -221,18 +255,20 @@ def main(cfg: TrainConfig) -> None:
                   "this one is recorded as config_resume_*.json", flush=True)
         with open(os.path.join(cfg.run, f"config_resume_{time.strftime('%Y%m%d_%H%M%S')}.json"), "w") as f:
             json.dump(info, f, indent=2)
+        print(f"attempt {attempt}: a resumed run is a perturbed continuation, not a replay (PLAN6 §1 item 13)", flush=True)
     else:
         with open(cfg_path, "w") as f:
             json.dump(info, f, indent=2)
+    gens = make_generators(cfg.seed, device)
     net = ResNet(NetConfig(blocks=cfg.blocks, filters=cfg.filters, n_planes=cfg.n_planes, own_classes=cfg.own_classes)).to(device)
     opt = torch.optim.SGD(net.parameters(), lr=cfg.lr, momentum=cfg.momentum, weight_decay=cfg.wd, nesterov=True)
     scaler = torch.amp.GradScaler("cuda")
-    buf = GPUReplayBuffer(cfg.buffer, device)
+    buf = GPUReplayBuffer(cfg.buffer, device, generator=gens["buffer"])
     scfg = SearchConfig(n_sims=cfg.sims, mode=cfg.mode, sample_moves=cfg.sample_moves, temperature=cfg.temperature,
                         sample_uniform=cfg.sample_uniform, root_prior_floor=cfg.root_prior_floor, c_scale=cfg.c_scale,
                         cuda_graph=bool(cfg.cuda_graph), depth_cap=cfg.depth_cap if cfg.cuda_graph else 32)
     fe = FusedEvaluator(net, device)
-    sp = ContinuousSelfPlay(fe, cfg.games, scfg, device, sym_hash=bool(cfg.dedup_sym))
+    sp = ContinuousSelfPlay(fe, cfg.games, scfg, device, sym_hash=bool(cfg.dedup_sym), generator=gens["selfplay"])
     def anchor_name(p):  # runs/dev1/net_0200.pt -> dev1_net_0200 (two runs may share a checkpoint name)
         return f"{os.path.basename(os.path.dirname(p))}_{os.path.splitext(os.path.basename(p))[0]}"
 
@@ -260,6 +296,7 @@ def main(cfg: TrainConfig) -> None:
     log_path = os.path.join(cfg.run, "log.jsonl")
     ckpt_path = os.path.join(cfg.run, "latest.pt")  # every iteration, no buffer (small, fast)
     full_path = os.path.join(cfg.run, "latest_full.pt")  # every save_buffer_every iterations, WITH buffer
+    ckpt_every = cfg.ckpt_every or cfg.eval_every  # numbered checkpoints (E5): independent of evaluation when set
     start_iter, global_step = 0, 0
     resume_path = full_path if os.path.exists(full_path) else ckpt_path  # prefer full state: replaying a few
     if os.path.exists(resume_path):  # iterations beats resuming with an empty buffer (bit us 2026-08-30)
@@ -271,20 +308,34 @@ def main(cfg: TrainConfig) -> None:
         else:
             print(f"WARNING: {resume_path} has no replay buffer (saved every {cfg.save_buffer_every} iterations); "
                   "resuming with an EMPTY buffer", flush=True)
+        if "scaler" in ck:
+            scaler.load_state_dict(ck["scaler"])
+        for name, state in ck.get("rng", {}).items():  # generator states (E5); absent in pre-PLAN6 checkpoints
+            if name in gens:
+                gens[name].set_state(state.cpu())
+            elif name == "exact" and labeler is not None and state is not None:
+                labeler.gen.set_state(state.cpu())
         start_iter, global_step = ck["iter"] + 1, ck.get("global_step", 0)
         fe.refresh(net)
-        print(f"resumed from iteration {ck['iter']} ({os.path.basename(resume_path)}, buffer {buf.size})", flush=True)
+        print(f"resumed from iteration {ck['iter']} ({os.path.basename(resume_path)}, buffer {buf.size}, "
+              f"scaler {'restored' if 'scaler' in ck else 'fresh'}, generators {'restored' if 'rng' in ck else 'fresh'})", flush=True)
     ekit = EvalKit(net, cfg, device, anchors, suite, es) if cfg.eval_every else None
+
+    def rng_states() -> dict:
+        d = {k: g.get_state() for k, g in gens.items()}
+        d["exact"] = labeler.gen.get_state() if labeler is not None else None
+        return d
 
     schedule = sorted((int(a), int(b)) for a, b in (x.split(":") for x in cfg.sims_schedule.split(",") if x))
     for it in range(start_iter, cfg.iters):
         sims_now = max([cfg.sims] + [v for k, v in schedule if it >= k])
         if sims_now != sp.search.cfg.n_sims:
             from dataclasses import replace
-            sp.search = BatchedSearch(fe, cfg.games, replace(scfg, n_sims=sims_now), device)
+            sp.search = BatchedSearch(fe, cfg.games, replace(scfg, n_sims=sims_now), device, generator=gens["selfplay"])
             print(f"iteration {it}: simulations per move -> {sims_now}", flush=True)
         t0 = time.perf_counter()
         sp.iteration = it
+        teacher_step = global_step  # the weights that generated this iteration's games (E8)
         pos, games, stats = sp.run(cfg.steps)
         t_sp = time.perf_counter() - t0
         np.savez_compressed(os.path.join(cfg.run, "games", f"games_{it:04d}.npz"), **games)
@@ -301,15 +352,17 @@ def main(cfg: TrainConfig) -> None:
         n_steps = max(cfg.min_steps, int(cfg.epochs * cfg.games * cfg.steps / cfg.batch))
         t1 = time.perf_counter()
         if buf.size >= cfg.batch:
-            losses = train_steps(net, opt, scaler, buf, cfg, n_steps, device, lr_fn)
+            losses, n_steps, n_skipped = train_steps(net, opt, scaler, buf, cfg, n_steps, device, lr_fn, gens["aug"])
             fe.refresh(net)
+            sample = buf.sample_stats(it)
         else:
-            losses, n_steps = {}, 0  # nothing finished yet (first iterations of a short-step run)
+            losses, n_steps, n_skipped, sample = {}, 0, 0, {}  # nothing finished yet (first iterations of a short-step run)
         t_tr = time.perf_counter() - t1
-        rec = {"iter": it, "positions_new": n_new, "buffer": buf.size, "steps": n_steps, "lr": round(base_lr, 5), "sims": sims_now,
+        rec = {"iter": it, "attempt": attempt, "positions_new": n_new, "buffer": buf.size, "steps": n_steps, "steps_skipped": n_skipped,
+               "teacher_step": teacher_step, "lr": round(base_lr, 5), "sims": sims_now,
                "t_selfplay": round(t_sp, 1), "t_train": round(t_tr, 1),
                "games_per_s": round(stats.games / t_sp, 1), "pos_per_s": round(cfg.games * cfg.steps / t_sp),
-               **stats.summary(), **dup, **{f"loss_{k}": v for k, v in losses.items()}}
+               **stats.summary(), **dup, **sample, **{f"loss_{k}": v for k, v in losses.items()}}
         if labeler and n_submitted:
             t3 = time.perf_counter()
             got = labeler.collect()  # solved while the trainer ran; waits for the remainder
@@ -320,17 +373,19 @@ def main(cfg: TrainConfig) -> None:
                             "exact_wdl": [round(float((vals == v).mean()), 3) for v in (1, 0, -1)]})
         if ekit and (it + 1) % cfg.eval_every == 0:
             t2 = time.perf_counter()
-            rec.update(ekit.run(net))
+            with torch.random.fork_rng(devices=[device.index] if device.type == "cuda" else []):  # belt and braces: E4 made
+                rec.update(ekit.run(net))  # evaluation draw-free; this makes any future draw in it invisible to training
             rec["t_eval"] = round(time.perf_counter() - t2, 1)
-            torch.save({"net": net.state_dict(), "cfg": asdict(cfg)}, os.path.join(cfg.run, f"net_{it + 1:04d}.pt"))
+        if ckpt_every and (it + 1) % ckpt_every == 0:
+            _atomic_save({"net": net.state_dict(), "cfg": asdict(cfg), "iter": it, "global_step": global_step, "attempt": attempt},
+                         os.path.join(cfg.run, f"net_{it + 1:04d}.pt"))
         t4 = time.perf_counter()
-        ck = {"net": net.state_dict(), "opt": opt.state_dict(), "iter": it, "global_step": global_step, "cfg": asdict(cfg)}
-        torch.save(ck, ckpt_path + ".tmp")  # atomic: a crash mid-save must not destroy the resume point
-        os.replace(ckpt_path + ".tmp", ckpt_path)
+        ck = {"net": net.state_dict(), "opt": opt.state_dict(), "scaler": scaler.state_dict(), "rng": rng_states(),
+              "iter": it, "global_step": global_step, "attempt": attempt, "cfg": asdict(cfg)}
+        _atomic_save(ck, ckpt_path)  # a crash mid-save must not destroy the resume point
         if cfg.save_buffer_every and (it + 1) % cfg.save_buffer_every == 0:
             ck["buffer"] = buf.state_dict()
-            torch.save(ck, full_path + ".tmp")  # separate file: later bufferless saves can no longer destroy it
-            os.replace(full_path + ".tmp", full_path)
+            _atomic_save(ck, full_path)  # separate file: later bufferless saves can no longer destroy it
         rec["t_ckpt"] = round(time.perf_counter() - t4, 1)
         rec["t_iter"] = round(time.perf_counter() - t0, 1)  # end-to-end, incl. persistence/buffer/exact/eval/ckpt
         print(json.dumps(rec), flush=True)

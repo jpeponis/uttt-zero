@@ -61,6 +61,9 @@ class SelfPlayStats:
     total_len: int = 0
     surprise: float = 0.0
     cap_hits: float = 0.0  # mean per-move fraction of simulations truncated by depth_cap
+    raw_kl: float = 0.0  # mean KL(search policy || raw policy) at the root (PLAN6 E8)
+    q_range: float = 0.0  # mean root Q range over visited children (E8)
+    target_entropy: float = 0.0  # mean entropy of the policy target, bits (E8)
     steps: int = 0
     first_moves: list = field(default_factory=list)
 
@@ -72,19 +75,23 @@ class SelfPlayStats:
             "draw": round(self.draw / g, 3), "end_line": round(self.end_line / g, 3), "end_count": round(self.end_count / g, 3),
             "mean_len": round(self.total_len / g, 1), "surprise": round(self.surprise / max(self.steps, 1), 4),
             "cap_hit": round(self.cap_hits / max(self.steps, 1), 4),
+            "raw_kl": round(self.raw_kl / max(self.steps, 1), 4), "q_range": round(self.q_range / max(self.steps, 1), 4),
+            "target_entropy": round(self.target_entropy / max(self.steps, 1), 4),
             "first_move_top": int(fm.argmax()), "first_move_top_share": round(float(fm.max() / max(fm.sum(), 1)), 3),
             "first_move_distinct": int((fm > 0).sum()),
         }
 
 
 class ContinuousSelfPlay:
-    def __init__(self, evaluator, n: int, cfg: SearchConfig, device, sym_hash: bool = False) -> None:
+    def __init__(self, evaluator, n: int, cfg: SearchConfig, device, sym_hash: bool = False,
+                 generator: torch.Generator | None = None) -> None:
         self.n = n
         self.device = torch.device(device)
         self.sym_hash = sym_hash  # duplicate counting under D4 symmetry
+        self.gen = generator  # the search's noise and move sampling draw from it (PLAN6 E4)
         d = self.device
         self.g = BatchUTTT(n, d)
-        self.search = BatchedSearch(evaluator, n, cfg, d)
+        self.search = BatchedSearch(evaluator, n, cfg, d, generator=generator)
         self.idx = torch.arange(n, device=d)
         self.len = torch.zeros(n, dtype=torch.long, device=d)
         self.st_cells = torch.zeros(n, MAX_PLY, 81, dtype=torch.int8, device=d)
@@ -126,6 +133,10 @@ class ContinuousSelfPlay:
             stats.surprise += float((res.root_value - res.raw_value).abs().mean())
             if res.cap_hits is not None:
                 stats.cap_hits += float(res.cap_hits.mean()) / self.search.cfg.n_sims
+            if res.raw_kl is not None:
+                stats.raw_kl += float(res.raw_kl.mean())
+                stats.q_range += float(res.q_range.mean())
+            stats.target_entropy += float(-(res.policy * torch.log2(res.policy.clamp(min=1e-12))).sum(1).mean())
             stats.steps += 1
             self.len = t + 1
             g.step(res.action)
@@ -190,9 +201,11 @@ class ContinuousSelfPlay:
 class GPUReplayBuffer:
     """Ring buffer on the GPU. sample() draws ∝ weight, where weight = count^-alpha of identical positions."""
 
-    def __init__(self, capacity: int, device) -> None:
+    def __init__(self, capacity: int, device, generator: torch.Generator | None = None) -> None:
         self.capacity = capacity
         self.device = torch.device(device)
+        self.gen = generator  # sampling draws from it (PLAN6 E4)
+        self.last_sample = None  # row indices of the last sample_batches() draw (for the budget log, E8)
         d = self.device
         self.size = 0
         self.pos = 0
@@ -260,8 +273,27 @@ class GPUReplayBuffer:
         return stats
 
     def sample(self, batch_size: int) -> dict:
-        idx = torch.multinomial(self.weights[: self.size], batch_size, replacement=True)
+        idx = torch.multinomial(self.weights[: self.size], batch_size, replacement=True, generator=self.gen)
         return {k: self.buf[k][idx] for k in POS_FIELDS + ("exact",)}
+
+    def sample_batches(self, batch_size: int, n: int):
+        """n batches from ONE multinomial draw (REVIEW-astra §7.5's pre-draw: the per-step draw cost 0.45 s per
+        iteration); yields the same dicts as sample(). The draw is kept in last_sample for the budget log."""
+        idx = torch.multinomial(self.weights[: self.size], batch_size * n, replacement=True, generator=self.gen)
+        self.last_sample = idx
+        idx = idx.view(n, batch_size)
+        for i in range(n):
+            yield {k: self.buf[k][idx[i]] for k in POS_FIELDS + ("exact",)}
+
+    def sample_stats(self, iteration: int) -> dict:
+        """Of the last sample_batches() draw: rows, mean replay age in iterations, distinct-position fraction (E8)."""
+        idx = self.last_sample
+        if idx is None:
+            return {}
+        age = (iteration - self.buf["iter"][idx].float()).mean()
+        distinct = torch.unique(self.buf["hash"][idx]).numel()
+        return {"rows_sampled": int(idx.numel()), "replay_age": round(float(age), 2),
+                "sample_distinct_frac": round(distinct / idx.numel(), 3)}
 
     def state_dict(self) -> dict:
         return {"size": self.size, "pos": self.pos, "buf": {k: v[: self.size].cpu() for k, v in self.buf.items()}}

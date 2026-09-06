@@ -54,6 +54,8 @@ class SearchResult:
     root_value: torch.Tensor  # (n,) search value estimate, side-to-move perspective
     raw_value: torch.Tensor  # (n,) network value at root
     cap_hits: torch.Tensor | None = None  # (n,) simulations whose descent hit depth_cap without expanding (v2 search)
+    raw_kl: torch.Tensor | None = None  # (n,) KL(search policy || raw net policy) at the root (v2 search; PLAN6 E8)
+    q_range: torch.Tensor | None = None  # (n,) max - min of the root's visited-child Q (what Gumbel's sigma rescales; E8)
 
 
 def table_of_considered_visits(m: int, n_sims: int) -> torch.Tensor:

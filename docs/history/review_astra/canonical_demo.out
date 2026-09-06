@@ -1,0 +1,9 @@
+endgame keys ['cells', 'macro', 'next_board', 'player', 'exact', 'child', 'empties', 'game_id', 'ply', 'meta']
+Traceback (most recent call last):
+  File "C:\Users\John Peponis\Desktop\uttt-zero\review_astra\canonical_demo.py", line 122, in <module>
+    main()
+  File "C:\Users\John Peponis\Desktop\uttt-zero\.venv\lib\site-packages\torch\utils\_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+  File "C:\Users\John Peponis\Desktop\uttt-zero\review_astra\canonical_demo.py", line 86, in main
+    assert worst_p < 1e-4 and worst_v < 1e-4
+AssertionError

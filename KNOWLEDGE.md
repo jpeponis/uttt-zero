@@ -1,9 +1,11 @@
 # What uttt-zero believes about Ultimate Tic-Tac-Toe
 
 *The claims file. One belief per line, with the evidence attached. Started 2026-09-03 from
-PLAN5 Phases A and B; the opening book (C1) and the deep8 replications are added as they
-finish. This is where a claim lives; PLAN5 §2–§3 hold the working notes, RETROSPECTIVE §6
-the earlier form of the same beliefs.*
+PLAN5 Phases A and B; the opening book (C1) and the deep8 replications were added as they
+finished; restated 2026-09-06 after the outside review (PLAN6 §1, E1–E3: two instrument bugs
+repaired, seven over-statements tightened — each such line says what it used to say). This is
+where a claim lives; PLAN5 §2–§3 hold the working notes, RETROSPECTIVE §6 the earlier form of
+the same beliefs.*
 
 ## How to read a claim
 
@@ -12,9 +14,12 @@ Every line carries:
 - **a level** — *behavioural* (what the agent does), *predictive* (what its value head
   forecasts), *search-relative* (the number depends on the search budget it was measured
   with), *exact* (checked against the solver), or *descriptive* (a count over games);
-- **an effect size with its 95 % CI** where there is one. Values are in units of expected
-  score for the side to move (+1 = certain win, 0 = even, −1 = certain loss) unless the
-  line says otherwise. Elo is always *vs a named opponent at a named number of sims*;
+- **an effect size with its 95 % CI** where there is one. Values are *utility* for the side
+  to move — P(win) − P(loss): +1 a certain win, 0 even, −1 a certain loss — unless the line
+  says otherwise. The expected *score* (win 1, draw ½, loss 0) is (1 + v) / 2, so a +0.20
+  utility effect is +10 points of expected score, not 20 (the earlier header called this
+  scale "expected score"; the numbers were always utilities). Elo is always *vs a named
+  opponent at a named number of sims*;
 - **held across** — the nets on which the claim was tested. "Both strong nets" means
   `deep10_c1_300/net_0300.pt` (+242 Elo vs v2b @64) and `deep8_c1_300/net_0300.pt` (+211);
   "all three strong nets" or "both seeds" adds the seed replicate
@@ -24,9 +29,13 @@ Every line carries:
 
 Rules used throughout (PLAN5 §1c): orderings and signs are trusted when they hold across
 nets; magnitudes are quoted but expected to drift with strength; no result under the
-±3-point rule on the paired suite is called a strength difference; nothing is claimed from
-probe accuracy alone; "the net cannot represent X" is never said of a net that was not
-trained to convergence.
+±3-point rule on the paired suite is called a strength difference — and the rule is a
+decision rule for adopting a change, not an equivalence test: a result inside the band is
+"not established", never "equal" (the interval on the difference is what says how close);
+nothing is claimed from probe accuracy alone; "the net cannot represent X" is never said of
+a net that was not trained to convergence; "same seed" means the same initial weights and
+the same first iteration, nothing after it (PLAN6 §1 item 13), so no two runs are read as
+paired.
 
 The board: `m = 9*board + cell`, both row-major; **[40]** is the centre cell of the centre
 board, [13] the centre cell of the top-centre board. Boards are called *centre* (4),
@@ -46,48 +55,69 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
 3. **X's edge after [40] is rated +0.447 by deep10 at 16k sims** (v2b: +0.354; dev1: +0.28).
    The *magnitude* rises with strength and is not trusted; the *sign* and the gap to the
    next move (+0.11 to [36]) are. *Search-relative.* Same files.
-4. **Openings are flat: the choice of reply hardly matters.** The root Q-gap between the
-   two most-visited replies at 16k sims is ≤ 0.03 in 13 of 15 first-move orbits.
-   *Search-relative; v2b and both strong nets.* Same files.
-5. **The two exceptions are the orbits whose best reply is to take [40]:** after [13] the
-   gap is 0.116 (v2b 0.079), after [4] it is 0.057 (v2b 0.017). The only opening edges a
-   stronger net has *found* are "answer by taking the centre of the centre board".
-   *Search-relative; grew with strength.* Same files.
+4. **After most first moves there are two or more comparably good replies — and the worst
+   reply is clearly worse.** Between the two best *distinct reply orbits* (a reply and its
+   images under the symmetries that fix the position count once) the 16k-sim value gap is
+   ≤ 0.03 after 12 of the 15 first moves on deep10 (deep8_300 10, v2b 14), but the
+   best-to-worst reply-orbit range is 0.07–0.19 after every first move except [40]
+   (0.02), median 0.11 (deep8_300 0.12, v2b 0.08). *Restated 2026-09-06:* the earlier
+   form ("the choice of reply hardly matters", gap ≤ 0.03 in 13 of 15) compared the two
+   most-visited *individual* replies, which after [0], [8] and [40] were symmetry copies of
+   one reply (REVIEW-astra §4.3). *Search-relative; v2b and both strong nets.*
+   `tools/atlas.py --report runs/plan5_A1_atlas.json` → `runs/plan6_E2_atlas_orbits.out`.
+5. **The clear exceptions are the first moves whose best reply is to take [40]:** after
+   [13] the gap between the best reply orbit ([40]) and the next is 0.102 (deep8_300 0.075,
+   v2b 0.071); after [4] it is 0.053 (deep8_300 0.048) — on v2b the best reply to [4] is
+   [36], not [40], and the gap 0.008. A third first move, [37], sits at the edge (0.037,
+   deep8_300 0.035, v2b 0.026). The only opening edges a stronger net has *found* are
+   "answer by taking the centre of the centre board". *Search-relative; grew with
+   strength.* Same file.
 6. **The opening is learned first.** Both 300-iteration nets put ≥ 0.95 of the raw
    first-move probability on [40] from iteration 20–30 on (deep8_300: 0.09 at iteration 10,
    0.79 at 20, 0.98 at 30) and never broaden again. *Descriptive of training.*
    `tools/timeline.py` → `runs/*/timeline.json`.
-7. **The opening book** (`tools/book.py`, depth 4, top-3 replies per node, 16 384 sims,
-   symmetry-averaged; `runs/book_deep10.md`, `runs/book_deep8.md`): the first-move values
-   reproduce the atlas ordering ([40] +0.447 … [13] −0.047), and the paired-suite X score
-   by opening follows it (74 % after [40] or [36], 69 % after [0], 45–51 % after [9], [8]
-   and [13]). **The two strong nets choose the same most-visited move in 75 % of the 341
-   nodes they share** (mean value difference 0.016), and disagree only where the book is
-   flat — after [40] the top reply's visit share is 0.19 / 0.14 and the nets differ; where
-   a reply's share is ≥ 0.7 they agree. *Search-relative; both strong nets.*
-7a. **The reply rule the book contains: the self-send.** The most-visited reply is the
-   cell whose index equals the board the mover was sent to — sending the opponent straight
-   back into the board you just played in — in **52 % (deep10) / 57 % (deep8_300)** of
-   the nodes where that cell is free, at every depth to 4, with a higher visit share when
-   chosen (0.83 vs 0.73 for other replies). "Take the centre of the board you were sent
-   to" is *not* the rule (the top reply is the centre cell in 4 % of nodes). *Behavioural;
-   both strong nets.* `tools/book_stats.py`.
+7. **The opening book** (`tools/book.py`, depth 4, top-3 *reply orbits* per node, 16 384
+   sims, symmetry-averaged; `runs/book_deep10.md`, `runs/book_deep8.md`; rebuilt 2026-09-06
+   after PLAN6 E1 — the earlier book listed one orbit up to three times as its "top three"
+   and printed lines that mixed coordinate frames, one of them illegal per book): the
+   first-move values reproduce the atlas ordering ([40] +0.447 … [13] −0.047), and the
+   paired-suite X score by opening follows it (74 % after [40] or [36], 69 % after [0],
+   45–51 % after [9], [8] and [13]). **The two strong nets choose the same reply orbit in
+   75 % of the 430 nodes they share** (321 / 430; by depth 73 / 78 / 73 / 75 %; mean value
+   difference 0.016), and the disagreement is where the book is flat: where the top orbit
+   carries ≥ 0.9 of the root's visits they agree in 98 % of nodes, at 0.7–0.9 in 79 %,
+   below 0.7 in 35–46 %. After [40] both prefer the edge reply (deep10 puts 0.75 of its
+   visits on the four edges and 0.25 on the corners, deep8_300 0.54 / 0.46), and the corner
+   subtree — absent from the earlier book — is worth +0.02 more to X on both nets; the
+   earlier "deep10 plays 37, deep8 plays 41 after [40]" was one reply under two names.
+   *Search-relative; both strong nets.*
+7a. **The reply rule the book contains: the self-send.** The most-visited reply orbit is
+   the cell whose index equals the board the mover was sent to — sending the opponent
+   straight back into the board you just played in — in **55 % (deep10, 250 of 458) /
+   58 % (deep8_300, 263 of 455)** of the nodes where that cell is free, at every depth to 4,
+   with a higher visit share when chosen (0.84 vs 0.74 for other replies). "Take the centre
+   of the board you were sent to" is *not* the rule (the top reply is the centre cell in
+   4 % of nodes). *Rebuilt book (was 52 / 57 % on the pre-E1 book). Behavioural; both
+   strong nets.* `tools/book_stats.py` → `runs/plan6/E1_book_stats.out`.
 
 ## 2. Tempo: the free move
 
-8. **A free move is worth about +0.2 of expected score** to the side that gets it, with
+8. **A free move is worth about +0.2 of utility (≈ +10 points of expected score)** to the side that gets it, with
    ply, count, open boards, empties, side and macro threats controlled: **+0.196 ± 0.028**
    (deep10, 256-sim values, 30 000 natural positions, cluster-robust by game); deep8_300
    +0.192 ± 0.027; v2b +0.163 ± 0.027. Same sign on every net; the magnitude grew a third
    and then stopped (the two strong nets agree to 0.004). *Search-relative; all nets.*
    `tools/freemove.py` → `runs/plan5_A4_freemove_deep10_on_deep8late.out`,
    `runs/plan5_A4b_freemove_deep8_on_deep10late.out`, `runs/step7b_freemove.out`.
-9. **Half of that is the option to end the game at once.** With "the mover can complete a
-   macro line this move" in the model (+0.675 ± 0.059 on its own; deep8_300 +0.625 ±
-   0.056), the free-move coefficient is **+0.084 ± 0.026** (deep8_300 +0.102 ± 0.026): a
-   free move is worth ≈ +0.08 … +0.10 as tempo and the rest as the chance to cash a macro
-   threat immediately. *Search-relative; both strong nets.* `tools/value_decomp.py` →
-   `runs/plan5_B3_value_deep10.out`, `runs/plan5_B3_value_deep8.out`.
+9. **Conditioning on the immediate macro win halves the coefficient.** With "the mover can
+   complete a macro line this move" in the model (+0.675 ± 0.059 on its own; deep8_300
+   +0.625 ± 0.056), the free-move coefficient falls to **+0.084 ± 0.026** (deep8_300 +0.102
+   ± 0.026). This is a conditional association in a regression on the search value, not a
+   mediation split: it says that with the immediate win in the model a free move is worth
+   ≈ +0.08 … +0.10, and ≈ +0.2 without it — not that half of a free move's value *is* the
+   option to win at once (REVIEW-astra §8.3; the earlier line said "half of that is the
+   option to end the game"). *Search-relative; both strong nets.* `tools/value_decomp.py`
+   → `runs/plan5_B3_value_deep10.out`, `runs/plan5_B3_value_deep8.out`.
 10. **It is largest late, when level or ahead:** +0.25 at plies 44–50 with the count level
     or better, +0.03 at plies 32–43 (stratified check). *Search-relative; deep10, v2b.*
     `plan5_A4_*.out`.
@@ -145,13 +175,18 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
 
 ## 4. When games are decided
 
-20. **Games are decided late — around ply 36 of ~51 — and nothing is settled by ply 30.**
-    Median ply from which the 64-sim search's best-child value stops changing sign: **36**
-    (quartiles 30–41) on 4000 held-out v2a games for both deep10 and deep8_300 (v2b: 38);
-    the raw value settles at 41 (v2b 43); the mixed root value at 45. On stronger play
-    (deep8_300's late games, mean length 51.9) the same: Q 36 (28–41), raw 42. *Predictive;
-    all nets; the 2-ply shift from v2b saturated between the two strong nets.*
-    `tools/decision.py` → `runs/plan5_A3*_decision_*.out`, `runs/step7c_decision.out`.
+20. **Games are decided late — the median game around ply 36 of ~51; a quarter are settled
+    by ply 28.** Median ply from which the 64-sim search's best-child value stops changing
+    sign: **36** (quartiles 30–41) on 4000 held-out v2a games for both deep10 and deep8_300
+    (v2b: 38); the raw value settles at 41 (v2b 43); the mixed root value at 45. On stronger
+    play (deep8_300's late games, mean length 51.9) the same: Q 36 (28–41), raw 42. The
+    fraction settled by ply, on those games: 17 % at ply 0 (see 22), 20 % at 20, 27 % at 28,
+    36 % at 32, 52 % at 36, 72 % at 40, 87 % at 44, 95 % at 48. "Settled" is retrospective
+    prediction stability — the ply from which the verdict never changes again — not the
+    ply at which the result became forced (the earlier line said "nothing is settled by
+    ply 30", which its own first quartile contradicted). *Predictive; all nets; the 2-ply
+    shift from v2b saturated between the two strong nets.* `tools/decision.py` →
+    `runs/plan5_A3*_decision_*.out`, `runs/step7c_decision.out`.
 21. **X wins settle earlier (ply 32) than O wins (39–40) and draws (39–41).** *Predictive;
     all nets.* Same files.
 22. *Caveat:* the "settled" statistic uses a ±0.33 threshold on a 3-way prediction; deep10
@@ -184,10 +219,13 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
 
 ## 6. The endgame and what the raw policy misses
 
-28. **The endgame is, in practice, solved by the agent with search:** on 3000 exactly
-    solved positions with 6–16 empties, deep10's 256-sim search plays the optimal move in
-    99.9 % (v1 set) / 99.7 % (v2_dev, strong-play positions) with regret 0.001 / 0.003;
-    64 sims: 99.8 / 99.5 %. *Exact.* `tools/endgame.py eval` →
+28. **On the solved samples the agent with search plays the endgame almost perfectly:** on
+    3000 exactly solved positions with 6–16 empties, deep10's 256-sim search plays the
+    optimal move in 99.9 % (v1 set) / 99.7 % (v2_dev, strong-play positions) with regret
+    0.001 / 0.003; 64 sims: 99.8 / 99.5 %. That is a measurement on sampled positions
+    (balanced strata from self-play), not a solution of every 6–16-empty position (the
+    earlier line said "the endgame is, in practice, solved by the agent"). *Exact on the
+    sample.* `tools/endgame.py eval` →
     `runs/plan5_A9_eval_*.out`, `runs/deep10_c1_300/analysis.out`.
 29. **The raw value head names the exact result in 84.6 % of those positions** (95 % CI
     83.2–85.9; deep8_300 84.0; v2b 75.0; dev1 71.2), recognising **69 % of exact draws**
@@ -288,10 +326,13 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     trunk gets 60.1 % — and on a *random* trunk 59.0 % (deep8_300: 59.9 / 61.8 / 60.9 %).
     This is why switching the auxiliary heads off was a null. *Decodability + behavioural
     null; both strong nets.* Same; RETROSPECTIVE §3.
-41. **The net has not fully learned the board's symmetry, and it costs a rung.** The
-    policy's Jensen–Shannon divergence across the 8 orientations is 0.05 bits for 200
-    iterations, halves at the LR drop and ends at 0.027 (0.028 on the seed replicate, by the same path;
-    smallest in the opening, 0.010;
+41. **The net has not fully learned the board's symmetry, and it costs a rung.** Training
+    augments every sampled example with an independent random D4 element
+    (`train2.symmetrise`); equivariance is not enforced, and what follows is the residual
+    that augmentation alone leaves (PLAN5 B5's "the buffer is not symmetrised" was true of
+    the buffer and misleading about training). The policy's Jensen–Shannon divergence across
+    the 8 orientations is 0.05 bits for 200 iterations, halves at the LR drop and ends at
+    0.027 (0.028 on the seed replicate, by the same path; smallest in the opening, 0.010;
     largest in the middlegame, 0.034). Averaging the 8 orientations at play time beats the
     plain net **55.0 % [52.4, 57.7], +35 Elo [+17, +54]** at equal sims (8× the inference
     per sim) and adds +0.4 WDL points on the endgame set — but at equal inference the
@@ -299,6 +340,18 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     Elo**: the residual asymmetry is real and is cheaper to search through than to average
     away. *Behavioural; deep10.* `runs/deep10_c1_300/timeline.json`,
     `runs/plan5_B5_sym_vs_plain.out`, `runs/plan5_B5b_sym_equal_compute.out`.
+41b. **Exact equivariance alone buys nothing at play; the +35 above is an ensembling gain.**
+    The one-call canonical evaluator (`uttt/symmetry.py CanonicalEvaluator`, PLAN6 F1: the net
+    evaluated once in the position's canonical orientation, the policy transported back through
+    the stabiliser coset — exactly equivariant at ≈ 1.03× the plain net's cost) scores
+    **49.5 % [46.7, 52.3], −3 Elo [−23, +16]** against the plain net at equal sims (deep10 @64,
+    full paired suite): null by the pre-registered rule (≥ 53 % adopt, ≤ 47 % hurts). On the
+    endgame set it is 0.5 points *worse* in raw-policy optimality (96.1 vs 96.7 %): picking one
+    orientation's errors consistently does not remove them. So the residual asymmetry of 41
+    costs nothing at play, averaging it away is worth +35 only because it averages eight
+    evaluations, and an exactly equivariant *architecture* has no play-time gain to promise on
+    that account — its case is sample efficiency (PLAN6 Phase G). *Behavioural; deep10.*
+    `runs/deep10_c1_300/paired_canon_vs_plain_64.json`, `docs/history/review_astra/canonical_demo.json`.
 41a. **The named concepts do not carry the strength.** A legible surrogate — a linear
     score over 20 hand-written per-move features (wins the board, wins the game, gives a
     free move, lets the opponent win next, threats after, count after, the self-send, cell
@@ -318,12 +371,20 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     all three 300-iteration runs (the seed replicate: 71.2 → 78.1 at the first drop, every
     curve flat after 220, nothing at 280).* `runs/*/timeline.{json,png}`, PLAN5 §3 B1.
     **Moving the first drop 50 iterations earlier hurts** (`deep10_c1_300_lr150`, drops at
-    150/250, otherwise the same-seed recipe): the same ≈ +9 step arrives at 160, every curve
-    is flat after it, and the final net scores **45.4 % [42.8, 48.0], −32 Elo** against the
-    reference, −10 [−29, +9] against the replicate and +193 vs v2b. The drop is a fixed step
-    on top of whatever the constant-LR phase has built; the low-LR phase settles in ≈ 20
-    iterations and learns nothing further; the constant-LR iterations 150–200 were worth
-    their ≈ 5 points. *Descriptive of training; four 300-iteration runs.* PLAN5 §5 D3,
+    150/250, otherwise the reference's recipe and seed — where "same seed" fixes only the
+    initial weights and the first iteration: the pipeline is not bitwise deterministic and
+    the two runs' self-play differs from iteration 1, before any intervention, so this is
+    one perturbed run read against the two reference seeds, not a paired comparison; PLAN6
+    §1 item 13): the same ≈ +9 step arrives at 160, and the final net scores **45.4 % [42.8,
+    48.0], −32 Elo** against the reference, −10 [−29, +9] against the replicate and +193 vs
+    v2b — "hurt" by the pre-registered rule against the reference, inside the seed band
+    against the replicate. After the drop no *strength* gain resolves on any of the four
+    runs' in-run curves (±6), while the raw head keeps creeping: lr150's endgame WDL 80.3 →
+    83.3 % and draw recognition 60 → 66–68 % over iterations 160–300 (the earlier line said
+    "every curve is flat after it" and "learns nothing further"). The drop is a fixed step
+    on whatever the constant-LR phase has built; strength settles within ≈ 20 iterations of
+    it; the constant-LR iterations 150–200 were worth their ≈ 5 points. *Descriptive of
+    training; four 300-iteration runs.* PLAN5 §5 D3,
     `runs/deep10_c1_300_lr150/{analysis.out,timeline.json}`.
 
 ## 9. Strength (for reference; the full ladder is in RETROSPECTIVE §2)
@@ -336,7 +397,8 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     points / ≈ 30 Elo, and "+ blocks 10" (+35 on one seed, +9 on the other) is inside it —
     not an established rung. Duration (+211) is the last confirmed rung; deep10_c1_300 is
     still the strongest single net measured. An earlier first LR drop (`deep10_c1_300_lr150`)
-    scores +193 — below both seeds (42). *Behavioural.* `runs/*/analysis.out`.
+    scores +193 — below both seeds: −32 [−50, −14] against the reference, −10 [−29, +9]
+    against the replicate (42). *Behavioural.* `runs/*/analysis.out`.
 44. **At equal compute the deep, long-trained net wins for the first time:** deep10@64
     beats v2b@427 (6.7× the sims) by +42 [+23, +61]; but deep10@64 vs deep8_300@80 is −11
     [−30, +7] — the last rung is a wash at a fixed inference budget; duration, not depth,
@@ -363,3 +425,9 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
   (the top surprises of B4) is not.
 - A two-open-board tablebase (the useful frontier after 31a) — not built; it needs
   reachable-only generation, not enumeration.
+- *A diagnostic of the input encoding, not a claim about the game* (PLAN6 F3): erasing the
+  stones inside closed boards while keeping their macro status — information the rules no
+  longer need — moves deep10's raw value by 0.061 on average and its policy argmax in 3.9 %
+  of 311 natural positions (REVIEW-astra §3.4, `docs/history/review_astra/checks.json`).
+  Those are out-of-distribution inputs for this net; whether a net trained on the masked
+  encoding does as well is Phase G arm (c).

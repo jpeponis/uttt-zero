@@ -23,3 +23,4 @@ Values are the deep-search value for X after the moves (search-relative: what th
 Agreement with runs/deep8_c1_300/net_0300.pt on the most-visited reply orbit: 0.75 over 430 shared nodes (by depth: 1: 0.73, 2: 0.78, 3: 0.73, 4: 0.75); mean |value difference| 0.016.
 
 Nodes: 579; built 2026-09-06 13:52 in 1677 s.
+DONE

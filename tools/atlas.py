@@ -5,6 +5,14 @@ with several nets and budgets; reports values, ranks and rank stability (Kendall
 
 Values are from X's perspective (search-relative statements: what net+search prefers, not game-theoretic).
 Symmetry-averaged evaluators are used so orbit representatives are exactly representative. Writes --out (JSON).
+
+    .venv/Scripts/python.exe tools/atlas.py --report runs/plan5_A1_atlas.json
+
+--report re-reads a saved atlas and, per column and first move, gives the reply-orbit gap done properly (PLAN6 E2):
+the difference between the two best *distinct* reply orbits and the best-to-worst orbit range, from the separately
+searched reply-orbit values. The in-tree root gap printed during a build is also by orbit since E2 (the two
+most-visited orbits, visit-weighted Q); before E2 it compared the two most-visited individual actions, which after
+[0], [8] and [40] were two symmetry copies of one reply (REVIEW-astra §4.3).
 """
 from __future__ import annotations
 
@@ -23,7 +31,7 @@ from uttt.batch import BatchUTTT  # noqa: E402
 from uttt.game import UTTT  # noqa: E402
 from uttt.infer import FusedEvaluator  # noqa: E402
 from uttt.model import load_checkpoint  # noqa: E402
-from uttt.openings import canonical, orbit_representatives  # noqa: E402
+from uttt.openings import canonical, orbit_representatives, reply_orbits  # noqa: E402
 from uttt.search import BatchedSearch, SearchConfig  # noqa: E402
 from uttt.symmetry import SymmetryAveragedEvaluator  # noqa: E402
 
@@ -74,7 +82,8 @@ def principal_variations(s: BatchedSearch, max_len: int = 10) -> list[list[int]]
 
 def deep_values(ev, seqs: list[list[int]], sims: int, device, want_pv: bool = False):
     """Search value for X after each move sequence (X's perspective); optionally the PV and the root's
-    action-value gap (Q of the best move minus Q of the second most visited, mover's perspective)."""
+    reply-orbit gap (visit-weighted Q of the most-visited reply orbit minus that of the second most visited
+    distinct orbit, mover's perspective; nan when only one orbit was visited)."""
     n = len(seqs)
     assert len({len(s) for s in seqs}) == 1, "one call = sequences of equal length"
     g = BatchUTTT(n, device)
@@ -88,11 +97,46 @@ def deep_values(ev, seqs: list[list[int]], sims: int, device, want_pv: bool = Fa
     vals = (r.root_value * sign).cpu().numpy()
     if not want_pv:
         return vals
-    N0 = s.N[:, 0]
-    Q0 = s.W[:, 0] / N0.clamp(min=1)
-    top2 = N0.topk(2, dim=1).indices
-    gap = (Q0.gather(1, top2[:, :1]) - Q0.gather(1, top2[:, 1:2])).squeeze(1).cpu().numpy()
+    N0 = s.N[:, 0].cpu().numpy()
+    Q0 = (s.W[:, 0] / s.N[:, 0].clamp(min=1)).cpu().numpy()
+    legal = g.legal_mask().cpu().numpy()
+    gap = np.full(n, np.nan)
+    for i, seq in enumerate(seqs):
+        orbs = [o for o in reply_orbits(seq, legal[i], N0[i], Q0[i]) if o["share"] > 0]
+        if len(orbs) >= 2:
+            gap[i] = orbs[0]["q"] - orbs[1]["q"]
     return vals, principal_variations(s), gap
+
+
+def orbit_report(rec: dict, flat: float = 0.03) -> str:
+    """Per column and first move, from the separately searched reply orbits: X's value after the best reply, the gap
+    to the second-best distinct reply orbit, and the best-to-worst range (all X's perspective; O minimises)."""
+    reps = rec["first_moves"]
+    cols = list(rec["values_replies"])
+    lines = [f"Reply orbits (PLAN6 E2): gap = X's value after the second-best distinct reply orbit minus after the best; "
+             f"range = worst reply orbit minus best. A first move is 'flat' when gap <= {flat}.", ""]
+    for c in cols:
+        v = rec["values_replies"][c]
+        off, rows = 0, []
+        for m in reps:
+            pairs = rec["replies"][str(m)]
+            k = len(pairs)
+            vals = np.asarray(v[off : off + k])
+            off += k
+            order = np.argsort(vals)
+            best, second = pairs[order[0]][1], pairs[order[1]][1] if k > 1 else None
+            gap = float(vals[order[1]] - vals[order[0]]) if k > 1 else float("nan")
+            rows.append((m, k, best, float(vals[order[0]]), second, gap, float(vals.max() - vals.min())))
+        n_flat = sum(r[5] <= flat for r in rows if not np.isnan(r[5]))
+        rng = [r[6] for r in rows]
+        lines.append(f"{c}: gap <= {flat} in {n_flat} / {len(rows)} first moves; range median {np.median(rng):.3f}, "
+                     f"min {min(rng):.3f}, max {max(rng):.3f}")
+        lines.append("  first  orbits  best reply (X value)   second   gap     range")
+        for m, k, best, vb, second, gap, r in rows:
+            lines.append(f"  [{m:2d}]   {k:2d}     {best:2d} ({vb:+.3f})          {second if second is not None else '-':>4}   "
+                         f"{gap:+.3f}  {r:.3f}")
+        lines.append("")
+    return "\n".join(lines)
 
 
 def main() -> None:
@@ -102,7 +146,11 @@ def main() -> None:
     ap.add_argument("--device", default="cuda:1")
     ap.add_argument("--no_sym", action="store_true")
     ap.add_argument("--out", default="runs/atlas.json")
+    ap.add_argument("--report", default="", help="re-read a saved atlas JSON and print the reply-orbit gaps and ranges (no search)")
     a = ap.parse_args()
+    if a.report:
+        print(orbit_report(json.load(open(a.report))))
+        return
     device = torch.device(a.device)
     nets = [p for p in a.nets.split(",") if p]
     budgets = [int(b) for b in a.budgets.split(",")]
@@ -125,7 +173,7 @@ def main() -> None:
             V2[(nm, b)] = deep_values(ev, reply_seqs, b, device)
             print(f"{nm} @{b}: done ({time.perf_counter() - t0:.0f}s)", flush=True)
     cols = list(V1)
-    print(f"\nPrincipal variations after each first move at {budgets[-1]} sims (O's reply first) and the root action-value gap (Q best - Q second):")
+    print(f"\nPrincipal variations after each first move at {budgets[-1]} sims (O's reply first) and the root reply-orbit gap (Q of the most-visited orbit - Q of the second):")
     for i, m in enumerate(reps):
         print(f"  [{m:2d}] " + "  |  ".join(f"{nm}: {pvs[nm][i]} gap {gaps[nm][i]:+.3f}" for nm in names))
     # ---- table 1: first moves ----

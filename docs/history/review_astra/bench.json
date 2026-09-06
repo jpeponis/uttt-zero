@@ -1,0 +1,287 @@
+[
+  {
+    "kind": "environment",
+    "torch": "2.13.0+cu126",
+    "cuda": "12.6",
+    "threads": 4,
+    "gpus": [
+      "NVIDIA GeForce RTX 3090",
+      "NVIDIA GeForce RTX 3060"
+    ],
+    "peer_access_0_to_1": false
+  },
+  {
+    "kind": "fused_inference",
+    "device": "cuda:0",
+    "batch": 1,
+    "graph": false,
+    "wall_ms_median": 5.598333333333964,
+    "wall_ms_min": 5.496858333306894,
+    "wall_ms_max": 5.636875000012272,
+    "gpu_ms_median": 5.595818837483724
+  },
+  {
+    "kind": "fused_inference",
+    "device": "cuda:0",
+    "batch": 1,
+    "graph": true,
+    "wall_ms_median": 0.5285250000118443,
+    "wall_ms_min": 0.5111750000044898,
+    "wall_ms_max": 0.5882500000022143,
+    "gpu_ms_median": 0.5097813208897909,
+    "allocated_mib": 33.74560546875,
+    "reserved_mib": 66.0
+  },
+  {
+    "kind": "fused_inference",
+    "device": "cuda:0",
+    "batch": 64,
+    "graph": false,
+    "wall_ms_median": 6.026983333337436,
+    "wall_ms_min": 5.996066666663562,
+    "wall_ms_max": 6.212908333319926,
+    "gpu_ms_median": 6.024447758992513
+  },
+  {
+    "kind": "fused_inference",
+    "device": "cuda:0",
+    "batch": 64,
+    "graph": true,
+    "wall_ms_median": 1.0130583333420873,
+    "wall_ms_min": 0.9342583333591392,
+    "wall_ms_max": 1.085491666647916,
+    "gpu_ms_median": 1.0106773376464844,
+    "allocated_mib": 33.7900390625,
+    "reserved_mib": 86.0
+  },
+  {
+    "kind": "fused_inference",
+    "device": "cuda:0",
+    "batch": 256,
+    "graph": false,
+    "wall_ms_median": 7.971316666688229,
+    "wall_ms_min": 7.903508333356513,
+    "wall_ms_max": 13.081249999989572,
+    "gpu_ms_median": 7.968767801920573
+  },
+  {
+    "kind": "fused_inference",
+    "device": "cuda:0",
+    "batch": 256,
+    "graph": true,
+    "wall_ms_median": 2.907316666664883,
+    "wall_ms_min": 2.7759333333203053,
+    "wall_ms_max": 2.940575000025092,
+    "gpu_ms_median": 2.8990348180135093,
+    "allocated_mib": 33.9267578125,
+    "reserved_mib": 126.0
+  },
+  {
+    "kind": "fused_inference",
+    "device": "cuda:0",
+    "batch": 1024,
+    "graph": false,
+    "wall_ms_median": 20.17033333333984,
+    "wall_ms_min": 19.889325000008284,
+    "wall_ms_max": 20.458800000028532,
+    "gpu_ms_median": 20.167338053385418
+  },
+  {
+    "kind": "fused_inference",
+    "device": "cuda:0",
+    "batch": 1024,
+    "graph": true,
+    "wall_ms_median": 11.065258333322467,
+    "wall_ms_min": 11.006600000011227,
+    "wall_ms_max": 11.235008333339161,
+    "gpu_ms_median": 11.062442779541016,
+    "allocated_mib": 34.482421875,
+    "reserved_mib": 308.0
+  },
+  {
+    "kind": "fused_inference",
+    "device": "cuda:0",
+    "batch": 4096,
+    "graph": false,
+    "wall_ms_median": 48.869775000033165,
+    "wall_ms_min": 47.79387499998696,
+    "wall_ms_max": 49.93401666668736,
+    "gpu_ms_median": 48.86375935872396
+  },
+  {
+    "kind": "fused_inference",
+    "device": "cuda:0",
+    "batch": 4096,
+    "graph": true,
+    "wall_ms_median": 42.2887999999754,
+    "wall_ms_min": 42.02960833333691,
+    "wall_ms_max": 42.42034166664629,
+    "gpu_ms_median": 42.285909016927086,
+    "allocated_mib": 37.3447265625,
+    "reserved_mib": 928.0
+  },
+  {
+    "kind": "hardware_after_load",
+    "device": "cuda:0",
+    "smi": "name, pcie.link.gen.current, pcie.link.width.current, power.draw [W], temperature.gpu\nNVIDIA GeForce RTX 3060, 4, 4, 39.10 W, 43\nNVIDIA GeForce RTX 3090, 4, 16, 348.92 W, 72\n"
+  },
+  {
+    "kind": "fused_inference",
+    "device": "cuda:1",
+    "batch": 1,
+    "graph": false,
+    "wall_ms_median": 5.337908333331143,
+    "wall_ms_min": 5.303149999993669,
+    "wall_ms_max": 5.464841666669902,
+    "gpu_ms_median": 5.335466384887695
+  },
+  {
+    "kind": "fused_inference",
+    "device": "cuda:1",
+    "batch": 1,
+    "graph": true,
+    "wall_ms_median": 0.45286666666773573,
+    "wall_ms_min": 0.4509166666745538,
+    "wall_ms_max": 0.45670833333133487,
+    "gpu_ms_median": 0.4500480095545451,
+    "allocated_mib": 33.74560546875,
+    "reserved_mib": 66.0
+  },
+  {
+    "kind": "fused_inference",
+    "device": "cuda:1",
+    "batch": 64,
+    "graph": false,
+    "wall_ms_median": 6.700466666681375,
+    "wall_ms_min": 6.683941666665305,
+    "wall_ms_max": 6.754366666655187,
+    "gpu_ms_median": 6.698154449462891
+  },
+  {
+    "kind": "fused_inference",
+    "device": "cuda:1",
+    "batch": 64,
+    "graph": true,
+    "wall_ms_median": 1.8033333333278279,
+    "wall_ms_min": 1.7452916666798046,
+    "wall_ms_max": 1.810316666668162,
+    "gpu_ms_median": 1.8011306126912434,
+    "allocated_mib": 33.7900390625,
+    "reserved_mib": 86.0
+  },
+  {
+    "kind": "fused_inference",
+    "device": "cuda:1",
+    "batch": 256,
+    "graph": false,
+    "wall_ms_median": 12.069400000010925,
+    "wall_ms_min": 12.005549999988338,
+    "wall_ms_max": 12.171649999989617,
+    "gpu_ms_median": 12.066986083984375
+  },
+  {
+    "kind": "fused_inference",
+    "device": "cuda:1",
+    "batch": 256,
+    "graph": true,
+    "wall_ms_median": 7.027124999998098,
+    "wall_ms_min": 7.001575000003868,
+    "wall_ms_max": 7.054649999986395,
+    "gpu_ms_median": 7.02463976542155,
+    "allocated_mib": 33.9267578125,
+    "reserved_mib": 126.0
+  },
+  {
+    "kind": "fused_inference",
+    "device": "cuda:1",
+    "batch": 1024,
+    "graph": false,
+    "wall_ms_median": 31.96298333333895,
+    "wall_ms_min": 31.937366666663063,
+    "wall_ms_max": 32.089266666654716,
+    "gpu_ms_median": 31.96074676513672
+  },
+  {
+    "kind": "fused_inference",
+    "device": "cuda:1",
+    "batch": 1024,
+    "graph": true,
+    "wall_ms_median": 26.62694166667734,
+    "wall_ms_min": 26.622233333341683,
+    "wall_ms_max": 26.640116666688602,
+    "gpu_ms_median": 26.625022888183594,
+    "allocated_mib": 34.482421875,
+    "reserved_mib": 308.0
+  },
+  {
+    "kind": "fused_inference",
+    "device": "cuda:1",
+    "batch": 4096,
+    "graph": false,
+    "wall_ms_median": 109.69475000001694,
+    "wall_ms_min": 109.67838333332718,
+    "wall_ms_max": 110.22468333332351,
+    "gpu_ms_median": 109.69344075520833
+  },
+  {
+    "kind": "fused_inference",
+    "device": "cuda:1",
+    "batch": 4096,
+    "graph": true,
+    "wall_ms_median": 104.863691666651,
+    "wall_ms_min": 104.85255833331546,
+    "wall_ms_max": 104.86930000001848,
+    "gpu_ms_median": 104.86204020182292,
+    "allocated_mib": 37.3447265625,
+    "reserved_mib": 928.0
+  },
+  {
+    "kind": "hardware_after_load",
+    "device": "cuda:1",
+    "smi": "name, pcie.link.gen.current, pcie.link.width.current, power.draw [W], temperature.gpu\nNVIDIA GeForce RTX 3060, 4, 4, 141.25 W, 58\nNVIDIA GeForce RTX 3090, 4, 16, 134.62 W, 64\n"
+  },
+  {
+    "kind": "dummy_optimizer_step",
+    "device": "cuda:0",
+    "batch": 1024,
+    "channels_last": false,
+    "wall_ms_median": 67.15071999997235,
+    "wall_ms_min": 66.45223999994414,
+    "wall_ms_max": 69.46940000007089,
+    "gpu_ms_median": 67.13717041015624
+  },
+  {
+    "kind": "dummy_optimizer_step",
+    "device": "cuda:0",
+    "batch": 1024,
+    "channels_last": true,
+    "wall_ms_median": 266.06069999998,
+    "wall_ms_min": 264.2269999999371,
+    "wall_ms_max": 267.72915999999896,
+    "gpu_ms_median": 266.0517333984375
+  },
+  {
+    "kind": "replay_multinomial_1024",
+    "device": "cuda:0",
+    "wall_ms_median": 1.7546833333123384,
+    "wall_ms_min": 1.6998166666629306,
+    "wall_ms_max": 1.8799166666667588,
+    "gpu_ms_median": 1.7491626739501953
+  },
+  {
+    "kind": "replay_multinomial_262144",
+    "device": "cuda:0",
+    "wall_ms_median": 1.9658500000332424,
+    "wall_ms_min": 1.7419499999959953,
+    "wall_ms_max": 2.1718499999678897,
+    "gpu_ms_median": 1.9470880031585693
+  },
+  {
+    "kind": "replay_cached_cdf_1024",
+    "device": "cuda:0",
+    "wall_ms_median": 0.18377500002012917,
+    "wall_ms_min": 0.18124166668561278,
+    "wall_ms_max": 0.2627666666512596,
+    "gpu_ms_median": 0.18082666397094727
+  }
+]

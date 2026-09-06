@@ -8,6 +8,8 @@ raw first-move policy on the empty board (entropy in bits and top-1 share — th
 McGrath et al. 2022), raw policy entropy by ply bucket on held-out positions, and D4 consistency (mean Jensen–Shannon
 divergence of the policy across the 8 orientations, mean std of the value). Writes <run>/timeline.json and
 <run>/timeline.png with the LR drops marked. Held-out positions come from another run's games (PLAN5 §8).
+When <run>/eval_full.jsonl exists (tools/eval_worker.py, PLAN6 E7), the full-suite scores and CIs of every
+evaluated checkpoint are carried as full_<anchor> / full_ci_<anchor> and drawn with error bars on the score panel.
 """
 from __future__ import annotations
 
@@ -100,6 +102,9 @@ def main() -> None:
     log = {r["iter"] + 1: r for r in map(json.loads, open(os.path.join(a.run, "log.jsonl")))}  # net_NNNN is saved after log iter NNNN-1
     cfg = json.load(open(os.path.join(a.run, "config.json")))
     anchors = sorted({k[3:] for r in log.values() for k in r if k.startswith("vs_")})
+    full_path = os.path.join(a.run, "eval_full.jsonl")
+    full = {r["iter"]: r for r in map(json.loads, open(full_path))} if os.path.exists(full_path) else {}
+    full_anchors = sorted({k for r in full.values() for k in r["anchors"]})
     files = sorted(glob.glob(os.path.join(a.corpus, "games", "games_*.npz")))[-a.last :]
     rows = sample_positions(files, 4, 0, 80, a.n, np.random.default_rng(0))
     ply = np.array([r[1] for r in rows])
@@ -116,6 +121,8 @@ def main() -> None:
         for k in anchors:
             if "vs_" + k in lr:
                 rec["vs_" + k] = lr["vs_" + k]
+        for k, v in full.get(it, {}).get("anchors", {}).items():
+            rec["full_" + k], rec["full_ci_" + k] = v["score"], v["ci"]
         rec["lr"] = lr.get("lr")
         r0 = evaluate(fe, es, device, sims=(), n_boot=100, symmetrise=False)["rows"][0]
         rec.update(eg_wdl_acc=r0["wdl_acc"], eg_draw_recognition=breakdown(es, r0, "wdl_acc")["draw"][0], eg_regret=r0["regret"], eg_optimal=r0["optimal"])
@@ -136,7 +143,8 @@ def main() -> None:
               f"| H by ply " + " ".join(f"{v:.2f}" for v in rec["entropy_by_ply"].values())
               + f" | D4 JS {rec['d4_policy_js_bits']:.3f}b vstd {rec['d4_value_std']:.3f}  ({time.perf_counter() - t0:.0f}s)", flush=True)
     meta = {"run": a.run, "corpus": a.corpus, "corpus_files": [os.path.basename(f) for f in files], "n_positions": len(rows), "n_sym": a.n_sym,
-            "endgame_set": a.set, "lr_drops": cfg.get("lr_drops", ""), "anchors": anchors, "ply_buckets": [list(b) for b in PLY_BUCKETS]}
+            "endgame_set": a.set, "lr_drops": cfg.get("lr_drops", ""), "anchors": anchors, "full_anchors": full_anchors,
+            "ply_buckets": [list(b) for b in PLY_BUCKETS]}
     path = os.path.join(a.run, "timeline.json")
     with open(path, "w") as f:
         json.dump({"meta": meta, "rows": out}, f, indent=1)
@@ -167,8 +175,14 @@ def plot(rows, meta, path) -> None:
         pts = [(r["iter"], r["vs_" + k]) for r in rows if "vs_" + k in r]
         if pts:
             ax.plot(*zip(*pts), color=c, linewidth=2, marker="o", markersize=4, label=f"vs {k}")
+    for k, c in zip(meta.get("full_anchors", []), (BLUE, ORANGE, AQUA)):
+        pts = [(r["iter"], r["full_" + k], r["full_ci_" + k]) for r in rows if "full_" + k in r]
+        if pts:
+            x, y, ci = zip(*pts)
+            ax.errorbar(x, y, yerr=[[yy - lo for yy, (lo, hi) in zip(y, ci)], [hi - yy for yy, (lo, hi) in zip(y, ci)]],
+                        color=c, linewidth=0, elinewidth=1.2, marker="s", markersize=5, capsize=2, label=f"vs {k} (full suite)")
     ax.axhline(0.5, color=GRID, linewidth=1)
-    style(ax, "In-run paired score vs anchors (64 sims, ±6)", "score")
+    style(ax, "Paired score vs anchors (64 sims): in-run ±6; squares: full suite ±2.8", "score")
     ax.set_ylim(0, 1)
     ax.legend(frameon=False, fontsize=8, loc="lower right")
 

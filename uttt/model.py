@@ -77,11 +77,15 @@ class ResNet(nn.Module):
 
 
 def load_checkpoint(path: str, device) -> ResNet:
-    """Build the ResNet a checkpoint describes (blocks, filters, n_planes, own_classes from its cfg) and load its weights."""
+    """Build the ResNet a checkpoint describes (blocks, filters, n_planes, own_classes from its cfg) and load its weights.
+
+    The construction initialises layers (and so consumes CPU RNG) before the weights are replaced; that is done under
+    fork_rng so loading an anchor or a candidate never moves the caller's random stream (PLAN6 E4)."""
     ck = torch.load(path, map_location=device, weights_only=False)
     cfg = ck.get("cfg", {})
-    net = ResNet(NetConfig(blocks=cfg.get("blocks", 6), filters=cfg.get("filters", 64), n_planes=cfg.get("n_planes", N_PLANES),
-                           own_classes=cfg.get("own_classes", 3)))
+    with torch.random.fork_rng(devices=[]):
+        net = ResNet(NetConfig(blocks=cfg.get("blocks", 6), filters=cfg.get("filters", 64), n_planes=cfg.get("n_planes", N_PLANES),
+                               own_classes=cfg.get("own_classes", 3)))
     net.load_state_dict(ck["net"], strict=False)
     return net.to(device).eval()
 

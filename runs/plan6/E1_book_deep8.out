@@ -1,6 +1,11 @@
+depth 1: 15 nodes evaluated at 16384 sims (104s)
+depth 2: 44 nodes evaluated at 16384 sims (280s)
+depth 3: 130 nodes evaluated at 16384 sims (804s)
+depth 4: 390 nodes evaluated at 16384 sims (2278s)
+audit: {'nodes': 579, 'lines': 15, 'illegal_member': [], 'transform_mismatch': [], 'duplicate_child': [], 'illegal_line': [], 'frame_mismatch': [], 'clean': True}
 # Opening book: runs/deep8_c1_300/net_0300.pt at 16384 sims, depth 4, top-3 replies per node
 
-Values are the deep-search value for X after the moves (search-relative: what this net + search prefers, not game-theoretic). Moves are `m(b<board>c<cell>)`, m = 9*board + cell. The line follows the most-visited move. A reply is one *orbit* (replies equivalent under the symmetries that fix the position), shown by its canonical (smallest-index) member with the orbit size in brackets when > 1; share is the orbit's summed visit share; every line is in the frame of its first move.
+Values are the deep-search value for X after the moves (search-relative: what this net + search prefers, not game-theoretic). Moves are `m(b<board>c<cell>)`, m = 9*board + cell. The line follows the most-visited move. A reply is one *orbit* (replies equivalent under the symmetries that fix the position), shown by its most-visited member with the orbit size in brackets when > 1; share is the orbit's summed visit share.
 
 | first move | value X | best reply orbit (O) | share | X's next | line to depth 4 | paired X score | draw share |
 |---|---|---|---|---|---|---|---|
@@ -21,3 +26,5 @@ Values are the deep-search value for X after the moves (search-relative: what th
 | 13(b1c4) | -0.017 | 40(b4c4) | 1.00 | 37(b4c1) | 40(b4c4)(-0.02) 37(b4c1)(-0.02) 12(b1c3)(-0.02) | 50 % (40) | 25 % |
 
 Nodes: 579; built 2026-09-06 14:03 in 2279 s.
+
+wrote runs/book_deep8.json and runs/book_deep8.md  [2279s]

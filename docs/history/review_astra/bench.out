@@ -1,0 +1,68 @@
+{"kind": "environment", "torch": "2.13.0+cu126", "cuda": "12.6", "threads": 4, "gpus": ["NVIDIA GeForce RTX 3090", "NVIDIA GeForce RTX 3060"], "peer_access_0_to_1": false}
+{"kind": "fused_inference", "device": "cuda:0", "batch": 1, "graph": false, "wall_ms_median": 5.577249999987544, "wall_ms_min": 5.461433333304437, "wall_ms_max": 5.604483333324121, "gpu_ms_median": 5.574746449788411}
+{"kind": "fused_inference", "device": "cuda:0", "batch": 1, "graph": true, "wall_ms_median": 0.6211499999911515, "wall_ms_min": 0.6059416666630568, "wall_ms_max": 0.6974916666801315, "gpu_ms_median": 0.6179866790771484, "allocated_mib": 41.86962890625, "reserved_mib": 86.0}
+{"kind": "fused_inference", "device": "cuda:0", "batch": 64, "graph": false, "wall_ms_median": 5.8705666666962015, "wall_ms_min": 5.674283333329792, "wall_ms_max": 5.9667583333293805, "gpu_ms_median": 5.868117650349935}
+{"kind": "fused_inference", "device": "cuda:0", "batch": 64, "graph": true, "wall_ms_median": 0.8996749999899597, "wall_ms_min": 0.8682583332983995, "wall_ms_max": 0.9615499999805858, "gpu_ms_median": 0.8961706956227621, "allocated_mib": 50.01953125, "reserved_mib": 106.0}
+{"kind": "fused_inference", "device": "cuda:0", "batch": 256, "graph": false, "wall_ms_median": 12.148183333313986, "wall_ms_min": 12.019866666681386, "wall_ms_max": 12.344550000004043, "gpu_ms_median": 12.145562489827475}
+{"kind": "fused_inference", "device": "cuda:0", "batch": 256, "graph": true, "wall_ms_median": 2.891716666681532, "wall_ms_min": 2.782558333327264, "wall_ms_max": 2.9860583333250665, "gpu_ms_median": 2.889216105143229, "allocated_mib": 58.2216796875, "reserved_mib": 146.0}
+{"kind": "fused_inference", "device": "cuda:0", "batch": 1024, "graph": false, "wall_ms_median": 15.292541666667603, "wall_ms_min": 15.245975000008608, "wall_ms_max": 15.33328333331004, "gpu_ms_median": 15.290093739827475}
+{"kind": "fused_inference", "device": "cuda:0", "batch": 1024, "graph": true, "wall_ms_median": 10.939791666676987, "wall_ms_min": 10.822966666637512, "wall_ms_max": 11.081258333319965, "gpu_ms_median": 10.937088012695312, "allocated_mib": 66.662109375, "reserved_mib": 258.0}
+{"kind": "fused_inference", "device": "cuda:0", "batch": 4096, "graph": false, "wall_ms_median": 48.12576666665791, "wall_ms_min": 48.055008333335536, "wall_ms_max": 48.49610833332463, "gpu_ms_median": 48.11955261230469}
+{"kind": "fused_inference", "device": "cuda:0", "batch": 4096, "graph": true, "wall_ms_median": 42.259199999989505, "wall_ms_min": 42.13596666666793, "wall_ms_max": 42.48902500000895, "gpu_ms_median": 42.25604248046875, "allocated_mib": 76.0556640625, "reserved_mib": 578.0}
+{"kind": "hardware_after_load", "device": "cuda:0", "smi": "name, pcie.link.gen.current, pcie.link.width.current, power.draw [W], temperature.gpu\nNVIDIA GeForce RTX 3060, 1, 4, 10.48 W, 40\nNVIDIA GeForce RTX 3090, 4, 16, 349.39 W, 73\n"}
+{"kind": "fused_inference", "device": "cuda:1", "batch": 1, "graph": false, "wall_ms_median": 5.373366666655481, "wall_ms_min": 5.240966666671436, "wall_ms_max": 5.512858333342289, "gpu_ms_median": 5.371050516764323}
+C:\Users\John Peponis\Desktop\uttt-zero\.venv\lib\site-packages\torch\cuda\graphs.py:169: UserWarning: The CUDA Graph is empty. This usually means that the graph was attempted to be captured on wrong device or stream. (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\aten\src\ATen\cuda\CUDAGraph.cpp:211.)
+  super().capture_end()
+{"kind": "fused_inference", "device": "cuda:1", "batch": 1, "graph": true, "wall_ms_median": 0.007525000000896398, "wall_ms_min": 0.007491666641120294, "wall_ms_max": 0.011108333334656587, "gpu_ms_median": 0.00554666668176651, "allocated_mib": 33.74365234375, "reserved_mib": 64.0}
+{"kind": "fused_inference", "device": "cuda:1", "batch": 64, "graph": false, "wall_ms_median": 6.6338499999953155, "wall_ms_min": 6.613275000025472, "wall_ms_max": 6.66033333334326, "gpu_ms_median": 6.631509145100911}
+{"kind": "fused_inference", "device": "cuda:1", "batch": 64, "graph": true, "wall_ms_median": 0.007675000006202026, "wall_ms_min": 0.0072666666710574646, "wall_ms_max": 0.008866666651859608, "gpu_ms_median": 0.00554666668176651, "allocated_mib": 41.8935546875, "reserved_mib": 84.0}
+{"kind": "fused_inference", "device": "cuda:1", "batch": 256, "graph": false, "wall_ms_median": 13.666433333317704, "wall_ms_min": 12.64685000001009, "wall_ms_max": 13.691116666677772, "gpu_ms_median": 13.663317362467447}
+Traceback (most recent call last):
+  File "C:\Users\John Peponis\Desktop\uttt-zero\review_astra\bench.py", line 71, in inference
+    output = fe(*args)
+  File "C:\Users\John Peponis\Desktop\uttt-zero\.venv\lib\site-packages\torch\utils\_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+  File "C:\Users\John Peponis\Desktop\uttt-zero\uttt\infer.py", line 69, in __call__
+    p_logits, v_logits, *_ = self.net(obs)
+  File "C:\Users\John Peponis\Desktop\uttt-zero\.venv\lib\site-packages\torch\nn\modules\module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\John Peponis\Desktop\uttt-zero\.venv\lib\site-packages\torch\nn\modules\module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\John Peponis\Desktop\uttt-zero\uttt\model.py", line 70, in forward
+    h = self.blocks(self.stem(x))
+  File "C:\Users\John Peponis\Desktop\uttt-zero\.venv\lib\site-packages\torch\nn\modules\module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\John Peponis\Desktop\uttt-zero\.venv\lib\site-packages\torch\nn\modules\module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\John Peponis\Desktop\uttt-zero\.venv\lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\John Peponis\Desktop\uttt-zero\.venv\lib\site-packages\torch\nn\modules\module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\John Peponis\Desktop\uttt-zero\.venv\lib\site-packages\torch\nn\modules\module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\John Peponis\Desktop\uttt-zero\uttt\model.py", line 48, in forward
+    y = F.relu(self.b1(self.c1(x)))
+  File "C:\Users\John Peponis\Desktop\uttt-zero\.venv\lib\site-packages\torch\nn\functional.py", line 1771, in relu
+    result = torch.relu(input)
+torch.AcceleratorError: CUDA error: operation not permitted when stream is capturing
+Search for `cudaErrorStreamCaptureUnsupported' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+For more detailed error information, run with CUDA_LOG_FILE=stderr
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\John Peponis\Desktop\uttt-zero\review_astra\bench.py", line 150, in <module>
+    main()
+  File "C:\Users\John Peponis\Desktop\uttt-zero\review_astra\bench.py", line 143, in main
+    inference(device, rows)
+  File "C:\Users\John Peponis\Desktop\uttt-zero\review_astra\bench.py", line 70, in inference
+    with torch.cuda.graph(graph):
+  File "C:\Users\John Peponis\Desktop\uttt-zero\.venv\lib\site-packages\torch\cuda\graphs.py", line 477, in __exit__
+    self.cuda_graph.capture_end()
+  File "C:\Users\John Peponis\Desktop\uttt-zero\.venv\lib\site-packages\torch\cuda\graphs.py", line 169, in capture_end
+    super().capture_end()
+torch.AcceleratorError: CUDA error: operation failed due to a previous error during capture
+Search for `cudaErrorStreamCaptureInvalidated' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+For more detailed error information, run with CUDA_LOG_FILE=stderr
+

@@ -70,6 +70,85 @@ def orbit_representatives() -> list[int]:
     return reps
 
 
+# ---- the transforms themselves (PLAN6 E1: a canonical key is only half the answer; the frame change that
+# produced it must travel with it, or lines assembled from several canonical nodes mix coordinate frames) ----
+def _group_tables():
+    comp = np.empty((8, 8), dtype=np.int64)
+    inv = np.empty(8, dtype=np.int64)
+    for a in range(8):
+        for b in range(8):
+            image = _SYM[a][_SYM[b]]  # apply b, then a
+            (comp[a, b],) = [s for s in range(8) if np.array_equal(_SYM[s], image)]
+        (inv[a],) = [s for s in range(8) if np.array_equal(_SYM[a][_SYM[s]], np.arange(81))]
+    return comp, inv
+
+
+_COMPOSE, _INVERSE = _group_tables()
+
+
+def compose(a: int, b: int) -> int:
+    """Index of the symmetry "b first, then a": SYM[compose(a, b)][m] == SYM[a][SYM[b][m]]."""
+    return int(_COMPOSE[a, b])
+
+
+def inverse(g: int) -> int:
+    return int(_INVERSE[g])
+
+
+def transform_move(g: int, m: int) -> int:
+    """Image of move m under symmetry g (the same table the batched engine uses)."""
+    return int(_SYM[g, m])
+
+
+def canonical_transforms(seqs: np.ndarray):
+    """canonical_keys plus, per sequence, the index g of a symmetry that maps it onto its canonical form
+    (the smallest such index, so the choice is deterministic; with a non-trivial stabiliser several g work)."""
+    seqs = np.asarray(seqs, dtype=np.int64)
+    P = seqs.shape[1]
+    weights = 81 ** np.arange(P - 1, -1, -1, dtype=np.int64)
+    enc = (_SYM[:, seqs] * weights).sum(-1)  # (8, G)
+    return enc.min(0), enc.argmin(0)
+
+
+def canonicalise(seq) -> tuple[tuple[int, ...], int]:
+    """(canonical sequence, g) with canonical[i] == transform_move(g, seq[i]) for every i."""
+    seq = list(seq)
+    if not seq:
+        return (), 0
+    keys, gs = canonical_transforms(np.array([seq]))
+    return tuple(decode_key(keys[0], len(seq))), int(gs[0])
+
+
+def reply_orbits(seq, legal: np.ndarray, share: np.ndarray, q: np.ndarray) -> list[dict]:
+    """Group the legal replies to `seq` by the D4 orbit of the sequence they produce. Per orbit: the representative,
+    every member, the summed visit share, the visit-weighted Q, the child's canonical key and the transform that
+    maps `seq + [representative]` onto that child. Sorted by share, descending. Members of one orbit are the same
+    reply up to a symmetry that fixes `seq`, so ranking replies without this grouping can list one alternative
+    several times (PLAN6 §1 item 2).
+
+    The representative is the orbit's smallest member. For a canonical `seq` that is exactly the member whose
+    sequence is the child's canonical form (the minimising symmetry must fix `seq`, whose encoding dominates, so
+    canonical(seq + [a]) = seq + [min over the stabiliser of g(a)]): the child key literally extends the parent's,
+    the stored transform is the identity, and a line read off successive nodes stays in one frame. Choosing the
+    most-visited member instead (the pre-PLAN6 book) put the displayed move and the child's frame at odds."""
+    seq = list(seq)
+    moves = np.flatnonzero(np.asarray(legal))
+    if moves.size == 0:
+        return []
+    keys, gs = canonical_transforms(np.array([seq + [int(a)] for a in moves]))
+    out = []
+    for key in np.unique(keys):
+        members = moves[keys == key]  # ascending
+        sh = np.asarray(share)[members]
+        rep = int(members[0])
+        tot = float(sh.sum())
+        qw = float((np.asarray(q)[members] * sh).sum() / tot) if tot > 0 else float(np.asarray(q)[members].mean())
+        out.append({"move": rep, "members": [int(m) for m in members], "share": tot, "q": qw,
+                    "child": " ".join(map(str, decode_key(key, len(seq) + 1))), "g": int(gs[list(moves).index(rep)])})
+    out.sort(key=lambda o: (-o["share"], o["move"]))
+    return out
+
+
 # ---- suite construction --------------------------------------------------------------------
 def natural_openings(corpus_files: list[str], k: int, plies: int, rng: np.random.Generator):
     """k distinct canonical `plies`-move prefixes drawn without replacement ∝ corpus frequency.

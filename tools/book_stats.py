@@ -1,6 +1,8 @@
 """Reply principles read off an opening book (PLAN5 §4 C2): how often the most-visited reply is the "self-send" —
 the cell whose index equals the board the mover was sent to, which sends the opponent straight back into that same
-board — and what the reply is otherwise.
+board — and what the reply is otherwise. Since PLAN6 E1 a book's replies are orbits; the top reply is the orbit's
+representative and its share the orbit's summed visit share. Every statistic here (self-send, cell class, free move,
+back-to-previous) is invariant within an orbit, so the representative stands for the orbit.
 
     .venv/Scripts/python.exe tools/book_stats.py runs/book_deep10.json runs/book_deep8.json
 """

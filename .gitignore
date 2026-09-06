@@ -28,3 +28,6 @@ runs/**
 !runs/*.vbs
 !runs/*.cmd
 .claude/scheduled_tasks.lock
+docs/history/review_astra/numba_cache/
+!runs/*/*.sh
+!runs/*/eval_full.jsonl

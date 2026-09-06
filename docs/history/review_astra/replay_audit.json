@@ -1,0 +1,64 @@
+{
+  "checkpoint_keys": [
+    "buffer",
+    "cfg",
+    "global_step",
+    "iter",
+    "net",
+    "opt"
+  ],
+  "iteration": 299,
+  "global_step": 76800,
+  "rows": 2000000,
+  "distinct_hashes": 922325,
+  "row_weight_ESS": 1177988.625,
+  "expected_weighted_replay_age_iters": 3.3712034225463867,
+  "value_classes_sample_probability": {
+    "-1": 0.41451799869537354,
+    "0": 0.159270778298378,
+    "1": 0.42621129751205444
+  },
+  "exact_sample_probability": 0.08872230350971222,
+  "ply_buckets": [
+    {
+      "plies": [
+        0,
+        7
+      ],
+      "row_fraction": 0.154231995344162,
+      "sample_fraction": 0.03279310464859009
+    },
+    {
+      "plies": [
+        8,
+        19
+      ],
+      "row_fraction": 0.23134900629520416,
+      "sample_fraction": 0.18354575335979462
+    },
+    {
+      "plies": [
+        20,
+        31
+      ],
+      "row_fraction": 0.2313539981842041,
+      "sample_fraction": 0.24506227672100067
+    },
+    {
+      "plies": [
+        32,
+        43
+      ],
+      "row_fraction": 0.2298865020275116,
+      "sample_fraction": 0.286607027053833
+    },
+    {
+      "plies": [
+        44,
+        81
+      ],
+      "row_fraction": 0.15317849814891815,
+      "sample_fraction": 0.251991868019104
+    }
+  ]
+}

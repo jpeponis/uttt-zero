@@ -1,0 +1,449 @@
+{
+  "torch": "2.13.0+cu126",
+  "cuda": "12.6",
+  "devices": [
+    "NVIDIA GeForce RTX 3090",
+    "NVIDIA GeForce RTX 3060"
+  ],
+  "group": {
+    "line_hypergraph_automorphisms": 8,
+    "fixed_board_counts": [
+      9,
+      1,
+      1,
+      1,
+      3,
+      3,
+      3,
+      3
+    ],
+    "first_move_orbits": 15,
+    "ordered_action_pair_orbits": 861
+  },
+  "rng": {
+    "cpu": {
+      "deterministic_eval_advances_rng": true
+    },
+    "cuda:1": {
+      "deterministic_eval_advances_rng": true
+    },
+    "checkpoint_load_advances_cpu_rng": true
+  },
+  "logs": {
+    "deep10_c1_300": {
+      "unique_iters": 300,
+      "duplicate_rows": 0,
+      "totals_seconds": {
+        "t_selfplay": 48387.4,
+        "t_train": 5161.0,
+        "t_eval": 14143.2,
+        "t_ckpt": 24.9,
+        "t_exact_wait": 179.5,
+        "t_iter": 67920.8,
+        "unattributed_s": 24.8
+      },
+      "positions_total": 78536996,
+      "sampled_total": 78643200,
+      "tail_mean": {
+        "positions_new": 261881.1,
+        "games": 5042.7,
+        "t_selfplay": 185.335,
+        "t_train": 17.16,
+        "cap_hit": 0.0050349999999999995,
+        "distinct_frac": 0.47955000000000003
+      }
+    },
+    "deep10_c1_300_s1": {
+      "unique_iters": 300,
+      "duplicate_rows": 14,
+      "totals_seconds": {
+        "t_selfplay": 53139.3,
+        "t_train": 5436.6,
+        "t_eval": 4115.8,
+        "t_ckpt": 26.8,
+        "t_exact_wait": 78.7,
+        "t_iter": 62822.1,
+        "unattributed_s": 24.9
+      },
+      "positions_total": 78328677,
+      "sampled_total": 78643200,
+      "tail_mean": {
+        "positions_new": 262024.8,
+        "games": 5038.25,
+        "t_selfplay": 204.85999999999999,
+        "t_train": 17.71,
+        "cap_hit": 0.0044800000000000005,
+        "distinct_frac": 0.5020499999999999
+      }
+    },
+    "deep10_c1_300_lr150": {
+      "unique_iters": 300,
+      "duplicate_rows": 0,
+      "totals_seconds": {
+        "t_selfplay": 51752.4,
+        "t_train": 5371.9,
+        "t_eval": 4048.2,
+        "t_ckpt": 28.0,
+        "t_exact_wait": 150.6,
+        "t_iter": 61374.6,
+        "unattributed_s": 23.5
+      },
+      "positions_total": 78537616,
+      "sampled_total": 78643200,
+      "tail_mean": {
+        "positions_new": 262230.65,
+        "games": 5080.85,
+        "t_selfplay": 198.995,
+        "t_train": 17.904999999999998,
+        "cap_hit": 0.0036049999999999997,
+        "distinct_frac": 0.5071499999999999
+      }
+    },
+    "deep8_c1_300": {
+      "unique_iters": 300,
+      "duplicate_rows": 9,
+      "totals_seconds": {
+        "t_selfplay": 40664.2,
+        "t_train": 4396.0,
+        "t_eval": 4499.3,
+        "t_ckpt": 24.1,
+        "t_exact_wait": 53.4,
+        "t_iter": 49661.0,
+        "unattributed_s": 24.0
+      },
+      "positions_total": 78436065,
+      "sampled_total": 78643200,
+      "tail_mean": {
+        "positions_new": 262063.2,
+        "games": 5046.15,
+        "t_selfplay": 156.625,
+        "t_train": 14.654999999999998,
+        "cap_hit": 0.004895000000000001,
+        "distinct_frac": 0.52165
+      }
+    },
+    "d3_before_treatment": [
+      {
+        "iter": 0,
+        "differences": {
+          "loss_policy": [
+            2.5373,
+            2.5374
+          ],
+          "loss_value": [
+            0.8265,
+            0.8266
+          ]
+        }
+      },
+      {
+        "iter": 1,
+        "differences": {
+          "positions_new": [
+            243072,
+            226202
+          ],
+          "games": [
+            6569,
+            5638
+          ],
+          "loss_policy": [
+            2.0785,
+            2.0192
+          ],
+          "loss_value": [
+            0.7769,
+            0.795
+          ],
+          "x_win": [
+            0.523,
+            0.526
+          ],
+          "first_move_top_share": [
+            0.087,
+            0.07
+          ]
+        }
+      },
+      {
+        "iter": 2,
+        "differences": {
+          "positions_new": [
+            245167,
+            267185
+          ],
+          "games": [
+            5360,
+            5975
+          ],
+          "loss_policy": [
+            2.0176,
+            1.9831
+          ],
+          "loss_value": [
+            0.776,
+            0.7824
+          ],
+          "x_win": [
+            0.539,
+            0.518
+          ],
+          "first_move_top_share": [
+            0.189,
+            0.094
+          ]
+        }
+      },
+      {
+        "iter": 3,
+        "differences": {
+          "positions_new": [
+            249253,
+            251187
+          ],
+          "games": [
+            4741,
+            4825
+          ],
+          "loss_policy": [
+            1.9418,
+            1.9137
+          ],
+          "loss_value": [
+            0.7716,
+            0.7784
+          ],
+          "x_win": [
+            0.552,
+            0.532
+          ],
+          "first_move_top_share": [
+            0.609,
+            0.218
+          ]
+        }
+      }
+    ]
+  },
+  "symmetry": {
+    "n": 483,
+    "corpus": "deep8_c1_300 games_0299 first 128 games, plies 16/28/40/48",
+    "mean_policy_js_bits": 0.030833307653665543,
+    "mean_value_orbit_range": 0.19880352914333344,
+    "mean_value_orbit_std": 0.0632413700222969,
+    "fraction_all_eight_argmax_agree": 0.6190476417541504,
+    "base_encoding_exact_color_relabel_invariance": true,
+    "erased_closed_board_cells": {
+      "n": 311,
+      "mean_abs_value_change": 0.061003491282463074,
+      "policy_argmax_changed": 0.03858520835638046,
+      "warning": "Out-of-training-distribution input, not a performance comparison; keep engine macro state."
+    }
+  },
+  "existing_tests": [
+    {
+      "module": "test_game",
+      "function": "test_invariants",
+      "kwargs": {},
+      "pass": true,
+      "seconds": 7.816
+    },
+    {
+      "module": "test_game",
+      "function": "test_free_move_after_closed_board",
+      "kwargs": {},
+      "pass": true,
+      "seconds": 0.001
+    },
+    {
+      "module": "test_game",
+      "function": "test_count_tiebreak",
+      "kwargs": {},
+      "pass": true,
+      "seconds": 0.0
+    },
+    {
+      "module": "test_game",
+      "function": "test_count_draw",
+      "kwargs": {},
+      "pass": true,
+      "seconds": 0.0
+    },
+    {
+      "module": "test_batch",
+      "function": "test_encode_shapes",
+      "kwargs": {},
+      "pass": true,
+      "seconds": 0.003
+    },
+    {
+      "module": "test_batch",
+      "function": "test_batch_matches_reference",
+      "kwargs": {
+        "n": 32,
+        "device": "cuda:1"
+      },
+      "pass": true,
+      "seconds": 0.919
+    },
+    {
+      "module": "test_batch",
+      "function": "test_symmetries_preserve_game",
+      "kwargs": {
+        "n": 32
+      },
+      "pass": true,
+      "seconds": 0.649
+    },
+    {
+      "module": "test_hygiene",
+      "function": "test_sym_hash",
+      "kwargs": {
+        "n": 64
+      },
+      "pass": true,
+      "seconds": 0.686
+    },
+    {
+      "module": "test_hygiene",
+      "function": "test_extra_planes",
+      "kwargs": {
+        "n": 64
+      },
+      "pass": true,
+      "seconds": 0.144
+    },
+    {
+      "module": "test_hygiene",
+      "function": "test_own_classes",
+      "kwargs": {},
+      "pass": true,
+      "seconds": 0.002
+    },
+    {
+      "module": "test_hygiene",
+      "function": "test_alpha_early",
+      "kwargs": {},
+      "pass": true,
+      "seconds": 0.041
+    },
+    {
+      "module": "test_mcts",
+      "function": "test_schedule",
+      "kwargs": {},
+      "pass": true,
+      "seconds": 0.002
+    },
+    {
+      "module": "test_mcts",
+      "function": "test_tactics",
+      "kwargs": {},
+      "pass": true,
+      "seconds": 27.325
+    },
+    {
+      "module": "test_search_v2",
+      "function": "compare",
+      "kwargs": {
+        "mode": "gumbel",
+        "sims": 16,
+        "n": 32
+      },
+      "pass": true,
+      "seconds": 0.733
+    },
+    {
+      "module": "test_search_v2",
+      "function": "compare",
+      "kwargs": {
+        "mode": "puct",
+        "sims": 16,
+        "n": 32
+      },
+      "pass": true,
+      "seconds": 0.627
+    },
+    {
+      "module": "test_search_graph",
+      "function": "compare",
+      "kwargs": {
+        "mode": "gumbel",
+        "sims": 16,
+        "n": 32,
+        "depth_cap": 8
+      },
+      "pass": true,
+      "seconds": 1.407
+    },
+    {
+      "module": "test_search_graph",
+      "function": "compare",
+      "kwargs": {
+        "mode": "gumbel",
+        "sims": 16,
+        "n": 32,
+        "depth_cap": 8,
+        "net": true
+      },
+      "pass": true,
+      "seconds": 1.331
+    },
+    {
+      "module": "test_search_graph",
+      "function": "test_refresh_in_place",
+      "kwargs": {
+        "n": 32
+      },
+      "pass": true,
+      "seconds": 2.424
+    },
+    {
+      "module": "test_selfplay_cont",
+      "function": "test_consistency",
+      "kwargs": {
+        "n": 32,
+        "steps": 80,
+        "sims": 4
+      },
+      "pass": true,
+      "seconds": 9.709
+    },
+    {
+      "module": "test_solver",
+      "function": "test_against_reference",
+      "kwargs": {
+        "n": 20,
+        "max_empty": 7
+      },
+      "pass": true,
+      "seconds": 1.486
+    },
+    {
+      "module": "test_symmetry_eval",
+      "function": "main",
+      "kwargs": {
+        "n": 64
+      },
+      "pass": true,
+      "seconds": 0.714
+    },
+    {
+      "module": "test_concepts",
+      "function": "test_labels",
+      "kwargs": {
+        "n": 100
+      },
+      "pass": true,
+      "seconds": 0.223
+    },
+    {
+      "module": "test_tablebase",
+      "function": "test_table",
+      "kwargs": {
+        "n": 30
+      },
+      "pass": true,
+      "seconds": 0.261
+    }
+  ]
+}

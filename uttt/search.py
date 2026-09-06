@@ -10,7 +10,15 @@
   schedule column, the Gumbel noise and the root logits are static tensors;
 * two self-play changes motivated by run dev1 (RESULTS-dev1.md): an optional
   uniform floor mixed into the root prior, and sampling the self-play move from
-  the improved policy for the first `sample_moves` plies.
+  the improved policy for the first `sample_moves` plies;
+* RNG hygiene (PLAN6 E4): the Gumbel noise and the self-play move sampling draw from
+  the search's own torch.Generator when one is given, and a deterministic search
+  (selfplay=False, or gumbel_scale 0) draws nothing at all — so an evaluation
+  inserted between two training iterations leaves the trainer's random streams
+  where they were (tests/test_rng_hygiene.py). This makes evaluation observationally
+  neutral; it does not make training trajectories reproducible (the pipeline is not
+  bitwise deterministic under cudnn.benchmark + fp16, and a 4096-game self-play loop
+  amplifies a last-bit difference within one iteration: PLAN6 §1 item 13).
 
 search() returns the same SearchResult as uttt.mcts and, with the new options at
 their defaults, produces identical trees (tests/test_search_v2.py).
@@ -36,11 +44,12 @@ class SearchConfig(MCTSConfig):
 
 
 class BatchedSearch:
-    def __init__(self, evaluator, n: int, cfg: SearchConfig, device) -> None:
+    def __init__(self, evaluator, n: int, cfg: SearchConfig, device, generator: torch.Generator | None = None) -> None:
         self.eval = evaluator
         self.n = n
         self.cfg = cfg
         self.device = torch.device(device)
+        self.gen = generator  # None: torch's global generator (the pre-PLAN6 behaviour)
         d = self.device
         M = cfg.n_sims + 1
         self.M = M
@@ -239,6 +248,7 @@ class BatchedSearch:
 
         # ---- root -------------------------------------------------------
         probs, value = self.eval(cells, macro, next_board, player, done)
+        raw_probs = probs
         root_legal = legal_mask(cells, macro, next_board, done)
         self.root_legal.copy_(root_legal)
         if not gumbel and selfplay and cfg.noise_frac > 0:
@@ -255,8 +265,11 @@ class BatchedSearch:
         self._put_slot(ones, cells, macro, next_board, player, done, winner, probs, self.root_logits, root_value0)
         self.node_N[:, 0] = 1
         if gumbel:
-            u = torch.rand(n, 81, device=d).clamp(min=1e-20)
-            self.g.copy_((-torch.log(-torch.log(u))) * (cfg.gumbel_scale if selfplay else 0.0))
+            if selfplay and cfg.gumbel_scale > 0:
+                u = torch.rand(n, 81, device=d, generator=self.gen).clamp(min=1e-20)
+                self.g.copy_((-torch.log(-torch.log(u))) * cfg.gumbel_scale)
+            else:
+                self.g.zero_()  # deterministic search: no draw, so it cannot advance anyone's RNG (PLAN6 E4)
             n_legal = root_legal.sum(1).clamp(max=cfg.m_considered)
             schedule = self.table[n_legal]  # (n, n_sims)
         else:
@@ -304,8 +317,14 @@ class BatchedSearch:
                 uni = root_legal.float() / root_legal.sum(1, keepdim=True).clamp(min=1)
                 w = (1 - cfg.sample_uniform) * w + cfg.sample_uniform * uni
             w = w.clamp(min=1e-12) * root_legal + (~root_legal.any(1, keepdim=True)).float()  # finished games: any row (discarded)
-            sampled = torch.multinomial(w, 1).squeeze(1)
+            sampled = torch.multinomial(w, 1, generator=self.gen).squeeze(1)
             action = torch.where(sample, sampled, action)
+        # diagnostics for the budget log (PLAN6 E8): how far the search moved the net's policy, and the Q spread it saw
+        raw_kl = (policy * (torch.log(policy.clamp(min=1e-12)) - torch.log(raw_probs.clamp(min=1e-12)))).sum(1)
+        visited = (Nc > 0) & root_legal
+        big = torch.finfo(torch.float32).max
+        q_range = torch.where(visited, Qc, torch.full_like(Qc, -big)).max(1).values - torch.where(visited, Qc, torch.full_like(Qc, big)).min(1).values
+        q_range = torch.where(visited.any(1), q_range, torch.zeros_like(q_range))
         # clones: the result must not alias tree buffers that the next search() overwrites
         return SearchResult(policy=policy, action=action, visits=Nc.clone(), root_value=root_value, raw_value=self.s_value[:, 0].clone(),
-                            cap_hits=self.cap_hits.clone())
+                            cap_hits=self.cap_hits.clone(), raw_kl=raw_kl, q_range=q_range)
