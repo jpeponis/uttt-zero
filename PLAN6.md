@@ -33,7 +33,9 @@ runs/deep8_c1_300_e4.out; do sleep 300; done` (the Monitor tool delivers nothing
 **The owner's decision (2026-09-07): H1b approved, and a conditional pre-approval of the chain H1b → H4 → H3.** The
 next run starts without asking *as long as the instance is under 50 % of its context window when it would start it*;
 above 50 % it updates everything (this Handover first, then the log, KNOWLEDGE, RETROSPECTIVE, README) and hands over
-to the next instance instead of launching. Each result is read by its pre-registered rule and written up before the
+to the next instance instead of launching. *Amended by the owner at 13:55: H4 is to be launched after H1b regardless
+of the instance's estimate (it judged itself at ≈ 55–60 % after the preflight; the owner judged that fine); the line
+applies again to H3.* Each result is read by its pre-registered rule and written up before the
 next launch. Delegate the write-ups and any file-heavy reading to `directed` subagents (opus) to stay under the line.
 
 The Handover's optional hour is done (13:16–13:36 on the 3060, `runs/plan6/H1_reverify.out`; the log's 13:36
