@@ -48,11 +48,14 @@ Read in this order:
    claude in the PLAN3 era, adjudicated in PLAN4). References such as "PLAN4 §3c" in the
    live files mean these.
 
-## Current state (2026-09-06)
+## Current state (2026-09-07)
 
-- **Best network:** `runs/deep10_c1_300/net_0300.pt` — 10 residual blocks of 128
-  filters, trained for 300 iterations. It is +242 Elo over the `v2b` reference net at 64
-  search simulations per move (about an 80 % expected score).
+- **Best network:** `runs/deep8_c1_300_e2/net_0300.pt` — 8 residual blocks of 128
+  filters, 300 iterations, **512 optimizer steps per iteration** (PLAN6 H1, 2026-09-07):
+  +291 Elo over the `v2b` reference at 64 search simulations per move (84 % expected
+  score), **+100 over its parent deep8_c1_300 and +86 over the previous best,
+  deep10_c1_300**, for 1.3 extra hours of training. The learner had been update-limited
+  all along (KNOWLEDGE 46, 47).
 - **Play configuration:** a flat `--sims 256` or more. The phased search schedule
   (`"0:128,24:384"`, fewer simulations early and more late) helped earlier nets but was
   **not** confirmed on this one (+10 [−7, +26], below the project's ±3-point rule;
@@ -83,12 +86,15 @@ Read in this order:
   KNOWLEDGE claims 4, 5, 7, 7a, 9, 20, 28, 41, 42 restated — no number moves except the
   book's), then Phase F takes an hour of cheap play-time measurements, Phase G answers the
   architecture question on frozen data, and Phase H proposes runs in order: `--epochs 2` on
-  8 blocks first (H1), 600 iterations after (H3). **Done the same day:** Phase E (E1–E10; E11, the
-  off-machine backup, awaits a destination — the repository has no remote) and Phase F: exact
-  equivariance at play is a null (canonical vs plain, 49.5 % [46.7, 52.3]); at ±2.8 the first LR
-  drop is a resolved +5 … +9 on every run and the second does nothing resolvable; the ownership
-  head does learn late-game ownership (68 % on open boards after ply 44, against 50 % for local
-  features or a random trunk). See PLAN6's log.
+  8 blocks first (H1), 600 iterations after (H3). **Done 2026-09-06/07:** Phase E (E1–E10; E11,
+  the backup, is deferred by the owner until the write-up — the repository has no remote yet),
+  Phase F (exact equivariance at play is a null, 49.5 % [46.7, 52.3]; at ±2.8 the first LR drop is
+  a resolved +5 … +9 on every run and the second does nothing resolvable; the ownership head does
+  learn late-game ownership), **Phase G** on the frozen teacher (`runs/gdata_v1.npz`, 500 k
+  positions labelled by deep10 8-way @256: the fit depends on optimizer steps, not on distinct
+  positions; a D4 group-convolutional net at the same cost fits the teacher far better than the
+  ResNet, tied heads alone a third as much, depth not at all — `uttt/equivariant.py`) and **H1**,
+  above. See PLAN6's log; proposals for the next runs in its Handover.
 - **Analysis programme (PLAN5 Phases A–C): complete, 2026-09-03.** Every ordering and sign
   from the earlier nets held on the +242 net; two magnitudes moved (the free-move value,
   +0.16 → +0.20, and a small residual value per owned board once macro lines are
@@ -118,9 +124,10 @@ perfect). Details in RETROSPECTIVE §2.
 | wide128_c1 | + filters 128 | +77 | 76.3 / 0.067 |
 | deep8_c1 | + blocks 8 | +100 | 77.6 / 0.064 |
 | deep8_c1_300 | + 300 iters (drops 200/280) | +211 | 84.0 / 0.045 |
-| **deep10_c1_300** | **+ blocks 10** | **+242** | **84.6 / 0.037** |
+| deep10_c1_300 | + blocks 10 | +242 | 84.6 / 0.037 |
 | deep10_c1_300_s1 | same recipe, seed 1 (replicate) | +213 | 83.9 / 0.047 |
 | deep10_c1_300_lr150 | LR drops at 150/250 (hurt) | +193 | 83.3 / 0.051 |
+| **deep8_c1_300_e2** | **deep8_c1_300 + 512 steps / iteration (`--epochs 2`)** | **+291** | **87.6 / 0.036** |
 
 ## Where things live
 
@@ -146,6 +153,7 @@ uttt/train2.py  v2 training loop (game persistence, margin head, LR schedule, pa
 uttt/concepts.py hand-written concept labels from the board state (free move, threats, dead boards, ...) for probing
 uttt/surrogate.py per-move and per-position features in torch + a linear surrogate evaluator (PLAN5 B6)
 uttt/tablebase.py exact one-open-board tablebase (1 MB) and an evaluator wrapper that splices it into the search (C5)
+uttt/equivariant.py D4-tied heads and a group-convolutional ResNet, exactly equivariant, exporting to plain modules (PLAN6 G)
 tools/          openings.py (build the suite, paired matches with CIs; players: checkpoint | uct | rollout | random;
                 sims may be a ply schedule "0:32,24:96"; --a_sym/--b_sym for symmetry-averaged play),
                 endgame.py (build / eval the exact endgame set; --split dev,test splits by source game),
@@ -154,6 +162,9 @@ tools/          openings.py (build the suite, paired matches with CIs; players: 
                 concepts per checkpoint), book.py (C1: opening book to depth d at deep search), book_stats.py,
                 principles.py (C2: folk claims), annotate.py (C3: solver-annotated puzzles), distill.py (B6: fit and
                 play the legible surrogate), tablebase_grade.py (C5: grade a net on one-open-board positions),
+                eval_worker.py (PLAN6 E7: out-of-process full-suite evaluator of a run's checkpoints -> eval_full.jsonl),
+                gdata.py (G-data: the frozen-teacher dataset), gstudy.py (G0 / the G arms: supervised students and
+                their metrics), gtiming.py (inference cost per arm), ownership_grade.py (E9), suite_overlap.py (E10),
                 atlas.py (opening atlas: first-move and reply orbits, rank stability across nets/budgets),
                 decision.py (when games become predictable, held-out games), freemove.py (free-move effect,
                 prespecified regression with cluster-robust SE), puzzles.py (surprise -> solver-validated puzzles),
@@ -201,7 +212,7 @@ the fifth prints statistics over a run's last 20 iterations of self-play games; 
 plays a paired-suite match between two checkpoints and reports the score, Elo and
 confidence interval; the seventh plays against a net in the terminal; the last serves the
 local web UI for play and analysis. To play the current best net, substitute
-`runs/deep10_c1_300/net_0300.pt` for the checkpoint path.
+`runs/deep8_c1_300_e2/net_0300.pt` for the checkpoint path.
 
 Move index convention everywhere: `m = 9*board + cell`, board and cell both
 row-major in their 3×3 grids (so 40 = centre of the centre board).

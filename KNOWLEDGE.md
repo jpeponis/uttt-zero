@@ -24,7 +24,9 @@ Every line carries:
   `deep10_c1_300/net_0300.pt` (+242 Elo vs v2b @64) and `deep8_c1_300/net_0300.pt` (+211);
   "all three strong nets" or "both seeds" adds the seed replicate
   `deep10_c1_300_s1/net_0300.pt` (+213, PLAN5 §5 D1); "all nets" adds dev1, v2a, v2b (250–340 Elo weaker). A claim that held from dev1 to deep10
-  survived a 340-Elo span; a magnitude is quoted from the strongest net;
+  survived a 340-Elo span; a magnitude is quoted from the strongest net. Since 2026-09-07 the
+  strongest net is `deep8_c1_300_e2/net_0300.pt` (+291 vs v2b; 46); the game claims of §1–§8
+  have not been re-run on it, and "strongest net" in those sections still means deep10;
 - **the tool and the output file** so the number can be regenerated.
 
 Rules used throughout (PLAN5 §1c): orderings and signs are trusted when they hold across
@@ -417,19 +419,75 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     vs deep8_300 and +4 [−13, +22] against the other seed: the seed band at 10×128 is ≈ 3
     points / ≈ 30 Elo, and "+ blocks 10" (+35 on one seed, +9 on the other) is inside it —
     not an established rung. Duration (+211) is the last confirmed rung; deep10_c1_300 is
-    still the strongest single net measured. An earlier first LR drop (`deep10_c1_300_lr150`)
+    the strongest 10-block net measured. An earlier first LR drop (`deep10_c1_300_lr150`)
     scores +193 — below both seeds: −32 [−50, −14] against the reference, −10 [−29, +9]
-    against the replicate (42). *Behavioural.* `runs/*/analysis.out`.
+    against the replicate (42). **Doubling the optimizer steps per iteration on 8 blocks
+    (`deep8_c1_300_e2`, 2026-09-07) is +100 over deep8_c1_300 and +291 over v2b — the
+    strongest net, and the largest single step of the ladder (46).** *Behavioural.*
+    `runs/*/analysis.out`.
 44. **At equal compute the deep, long-trained net wins for the first time:** deep10@64
     beats v2b@427 (6.7× the sims) by +42 [+23, +61]; but deep10@64 vs deep8_300@80 is −11
     [−30, +7] — the last rung is a wash at a fixed inference budget; duration, not depth,
     is where deployment strength came from. The seed replicate agrees from the other side:
-    at equal sims the 8 → 10 step is inside the seed band (43). *Behavioural.*
+    at equal sims the 8 → 10 step is inside the seed band (43). And the 8-block net trained
+    with twice the updates beats the 10-block net by +86 [+67, +105] at equal sims while
+    costing 0.81× per evaluation (46): *updates*, not depth. *Behavioural.*
     `runs/plan5_A8.out`, `runs/deep10_c1_300_s1/analysis.out`.
-45. **The phased search schedule ("0:128,24:384") is not confirmed on the best net:** +10
+45. **The phased search schedule ("0:128,24:384") is not confirmed on deep10:** +10
     [−7, +26] vs a flat 256 (was +50 on v2b, +26 on deep8_300) — the stronger the raw
-    policy, the less late search adds. Play config: flat `--sims 256` or more.
-    *Behavioural.* Same.
+    policy, the less late search adds. Play config: flat `--sims 256` or more (not
+    re-verified on `deep8_c1_300_e2`). *Behavioural.* Same.
+46. **Doubling the optimizer steps per iteration is worth +100 Elo, with nothing else
+    changed** (PLAN6 H1, 2026-09-07). `deep8_c1_300_e2` is deep8_c1_300's recipe with
+    `--epochs 2`: 512 steps of batch 1024 per iteration instead of 256, over the same
+    4096 × 64 new positions per iteration, the same 2 M-row buffer (mean sampled replay age
+    3.35 iterations), the same LR drops at 200 / 280 — +1.3 h of training on a 14.6 h run.
+    On the full paired suite at 64 sims it scores **64.0 % [61.4, 66.5], +100 Elo [+81,
+    +119] against deep8_c1_300**, **62.1 % [59.6, 64.6], +86 [+67, +105] against
+    deep10_c1_300**, 63.6 % [60.9, 66.3], +97 against the 10-block seed replicate, and
+    **84.2 % [82.2, 86.2], +291 Elo [+266, +318] against v2b**. The learner was
+    update-limited, not data-limited: the +127 of "duration" (150 → 300 iterations: twice
+    the data *and* twice the updates) was mostly the updates. Raw heads: endgame_v1 WDL
+    **87.6 % [86.4, 88.9]** (deep10 84.6), draw recognition 74.8 % (67–69), regret 0.036;
+    endgame_v2_dev 87.5 [86.3, 88.6], regret 0.034 (deep8_300 83.5 / 0.050, deep10 84.7 /
+    0.048); the 256-sim search 99.9 % optimal on both. The first full-suite timeline
+    (`eval_full.jsonl`, every 10th checkpoint at ±2.8): ahead of the reference from
+    iteration 10 (20.1 vs 11.9 % vs v2b), 75.9 vs 67.7 at 200 — even with deep8_c1_300's
+    *final* net (48.0 %) before its own LR drop — the drop adds the usual ≈ +7 (82.2 at
+    210), then flat within ±3 to 300 (83.0–84.9), the second drop nothing. Self-play games
+    lengthen (52.5 vs 51.9 plies) and draw more (15.5 vs 13.0 %); the policy loss is lower
+    throughout; 70 of 153 600 steps were skipped by the GradScaler. *Behavioural; one run
+    read against three references, seed band ≈ 3 points.*
+    `runs/deep8_c1_300_e2/{analysis.out,eval_full.jsonl,timeline.png}`, PLAN6 log.
+47. **For a fixed teacher, the fit is a function of optimizer steps, not of distinct
+    positions** (PLAN6 G0). ResNet 8×128 students trained on `runs/gdata_v1.npz`
+    (deep10 8-way @256 sims as the teacher; held-out policy KL on the dev slice): at 384
+    steps, 50 000 positions × 8 passes 1.188, 100 000 × 4 1.187, 200 000 × 2 1.182,
+    400 000 × 1 1.183; at 780 steps 1.082 / 1.076 / 1.075; at 1560 steps 0.976 / 0.973;
+    at 3120 steps (400 000 × 8) 0.884, still falling. Top-1 agreement, value Brier, exact
+    3-way accuracy and endgame regret line up the same way, as does the subset of dev
+    positions with no canonical twin in the training slice (1.014 at 3120 steps). Eight
+    passes over 50 000 positions fit as well as one pass over 400 000. The supervised twin
+    of 46. *Supervised, dev slice, one seed per cell (two-seed spread at 400k × 8: 0.0014).*
+    `tools/gstudy.py` → `runs/plan6/G0_resnet8.json`.
+48. **Exact D4 equivariance buys sample efficiency for a fixed teacher; the closed-board
+    mask a little; depth nothing** (PLAN6 G arms, 400 000 × 8 = 3120 steps, two seeds, dev
+    slice; policy KL vs the teacher). ResNet 8×128: 0.8839 / 0.8853 (top-1 0.552, exact
+    3-way 0.756–0.760, endgame regret 0.164). ResNet 10×128: 0.8820 / 0.8803 — inside the
+    seed spread. 8×128 with the closed-board input mask: 0.8769 / 0.8739 (−0.008, 6× the
+    spread; 3-way +1.6 points; regret 0.152). **8×128 with D4-tied heads (861-orbit policy
+    map, orbit-pooled value / margin, board-orbit ownership; `uttt/equivariant.py`):
+    0.8480 / 0.8462 (−0.038; top-1 0.565; 3-way 0.782; regret 0.145; D4 residual 0.045
+    bits vs 0.056).** **The D4 group-convolutional net at the same activation width (16
+    base filters × 8 orientations): 0.8057 / 0.8066 (−0.078; top-1 0.600; 3-way 0.799;
+    regret 0.147; D4 residual 0 by construction; 312 k parameters against 2.46 M; the same
+    inference cost, 33.6 vs 33.2 ms per 4096 evaluations on the 3090, because it exports to
+    ordinary convolutions of the expanded width).** Its value Brier is 0.002–0.006 worse
+    (a narrower tied value read-out). The ordering holds on the positions with no canonical
+    twin in train (1.014 / 1.012 / 1.006 / 0.969 / 1.006). Both equivariant arms pass §4's
+    gate (i) on the dev slice at equal cost; the sealed test read and the sample-efficiency
+    points are in PLAN6's log. *Supervised, dev slice.* `runs/plan6/G_arm_*.json`,
+    `runs/plan6/G_timing_*.json`, `tests/test_equivariant.py`.
 
 ## 10. Open, and not claimed
 

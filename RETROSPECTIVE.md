@@ -51,6 +51,7 @@ playing its preferred move instead of the best one (0 = perfect).
 | **deep10_c1_300** | **+ blocks 10** | **+242** | **84.6 / 0.037** |
 | deep10_c1_300_s1 | same recipe, seed 1 (the replicate, PLAN5 §5 D1) | +213 | 83.9 / 0.047 |
 | deep10_c1_300_lr150 | LR drops at 150/250 instead of 200/280 (PLAN5 §5 D3) | +193 | 83.3 / 0.051 |
+| **deep8_c1_300_e2** | **deep8_c1_300 + `--epochs 2` (512 optimizer steps per iteration; PLAN6 H1)** | **+291** | **87.6 / 0.036** |
 
 Absolute anchor: v2b@64 is ≈ +169 over a rollout UCT with 100 k playouts per move (the
 recipe of the strong CodinGame bots, which run plain tree search with random playouts),
@@ -64,6 +65,10 @@ deep10@64 vs deep8_c1_300@80 is −11 [−30, +7] — the last rung is a wash at
 seed band at 10×128 is ≈ 3 points / ≈ 30 Elo on the v2b yardstick, and "+ blocks 10" is +35
 on one seed and +9 on the other — inside the band, not an established rung. The last
 confirmed rung is duration, +211; deep10_c1_300 remains the strongest single net measured.)*
+*(Addendum 2026-09-07, PLAN6 H1: doubling the optimizer steps per iteration on 8 blocks, nothing
+else changed, is +100 [+81, +119] over deep8_c1_300, +86 over deep10_c1_300 and +291 [+266,
++318] over v2b — the strongest net and the largest single step of the ladder, for +1.3 h of
+training. The play agent is now `deep8_c1_300_e2/net_0300.pt`.)*
 
 ## 3. What makes an AlphaZero recipe stronger here — the validated ledger
 
@@ -112,6 +117,15 @@ confirmed rung is duration, +211; deep10_c1_300 remains the strongest single net
   in-run; "both drops delivered steps" is not supported by the curves.)*
 - **Phased play-time search: +50 Elo (v2b), +26 (deep8_300)** at equal mean cost —
   spend fewer simulations early and more late, where games are decided.
+- **Optimizer steps 256 → 512 per iteration: +100 Elo, for +1.3 h** (2026-09-07, PLAN6 H1;
+  KNOWLEDGE 46). The one lever nobody had pulled: every run had trained ≈ one sampled
+  example per generated position. With the same games, buffer and schedule, twice the
+  updates beat the 8-block parent by +100, the 10-block nets by +86 / +97, and the
+  reference by +291. The learner was update-limited; the +127 of duration was mostly its
+  updates; and every recipe comparison in this ledger was made under under-training.
+  The supervised twin (KNOWLEDGE 47): on a fixed teacher the fit depends on optimizer
+  steps, not on distinct positions — eight passes over 50 000 positions equal one pass over
+  400 000. Corollary for the next runs: dose–response (`--epochs 4`) before more games.
 
 **Did nothing (each a clean, CI-bounded null):** exact endgame labels (replacing the
 self-play outcome z with solver values as the value target — z was already exact in
@@ -220,9 +234,10 @@ where noted:
 
 ## 7. Where things stand, and the open list for whenever work resumes
 
-- **Best net** `runs/deep10_c1_300/net_0300.pt`; best play config: flat `--sims 256`
-  or more (phased re-verified 2026-09-02, not confirmed — §2 addendum). Web UI:
-  `python web/server.py runs/deep10_c1_300/net_0300.pt --sims 800 --device cuda:1`.
+- **Best net** `runs/deep8_c1_300_e2/net_0300.pt` (2026-09-07; +291 vs v2b, +100 vs
+  deep8_c1_300, +86 vs deep10_c1_300); play config: flat `--sims 256` or more (the phased
+  schedule was re-verified on deep10, +10, not confirmed; not re-run on this net). Web UI:
+  `python web/server.py runs/deep8_c1_300_e2/net_0300.pt --sims 800 --device cuda:1`.
 - **Neither depth nor duration is exhausted** — 12-block and 600-iteration runs are the
   obvious continuations, each a committed GPU-day, both on hold per the pause. *(2026-09-06:
   depth 8 → 10 is inside the seed band and an earlier LR drop hurts, so the continuation the

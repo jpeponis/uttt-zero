@@ -213,3 +213,7 @@ G queue 2 DONE (21:30)
 === arm resnet8_mask, rerun with the WDL fix (10:56)
 runs/gdata_v1.npz: train 400560, dev 49726 (33616 with no canonical twin in train); arm resnet8_mask
   resnet8_mask positions 400000 passes 8 seed 0
+    pass 1/8: loss_p 1.488 loss_v 0.1561 (45s)
+    pass 2/8: loss_p 1.408 loss_v 0.1360 (89s)
+    pass 3/8: loss_p 1.319 loss_v 0.1292 (133s)
+    pass 4/8: loss_p 1.267 loss_v 0.1308 (177s)
