@@ -236,7 +236,8 @@ where noted:
 
 - **Best net** `runs/deep8_c1_300_e2/net_0300.pt` (2026-09-07; +291 vs v2b, +100 vs
   deep8_c1_300, +86 vs deep10_c1_300); play config: flat `--sims 256` or more (the phased
-  schedule was re-verified on deep10, +10, not confirmed; not re-run on this net). Web UI:
+  schedule is +10 on deep10 and +11 [−6, +26] on this net — not confirmed on either; the
+  8-way average is +32 here as it was +35 on deep10, the canonical evaluator a null on both). Web UI:
   `python web/server.py runs/deep8_c1_300_e2/net_0300.pt --sims 800 --device cuda:1`.
 - **Neither depth nor duration is exhausted** — 12-block and 600-iteration runs are the
   obvious continuations, each a committed GPU-day, both on hold per the pause. *(2026-09-06:

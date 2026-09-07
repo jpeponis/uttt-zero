@@ -36,12 +36,10 @@ above 50 % it updates everything (this Handover first, then the log, KNOWLEDGE, 
 to the next instance instead of launching. Each result is read by its pre-registered rule and written up before the
 next launch. Delegate the write-ups and any file-heavy reading to `directed` subagents (opus) to stay under the line.
 
-Also running on the 3060, launched 13:16 (`runs/plan6/H1_reverify_3060.sh` via `runs/launch_reverify_hidden.vbs`,
-≈ 1–1.5 h sharing the card with the worker; no approval needed — play-time measurements on an existing net):
-the phased schedule "0:128,24:384" vs flat 256, the 8-way average vs plain @64, and the canonical evaluator vs plain
-@64, all on `deep8_c1_300_e2` (PLAN5 A8c / B5 and PLAN6 F1 repeated on the new play agent) →
-`runs/plan6/H1_reverify.out`, `runs/deep8_c1_300_e2/paired_{phased_vs_256,sym_vs_plain_64,canon_vs_plain_64}.json`.
-Readings by the ±3 rule; KNOWLEDGE 45 / 41 / 41b each get a sentence.
+The Handover's optional hour is done (13:16–13:36 on the 3060, `runs/plan6/H1_reverify.out`; the log's 13:36
+entry): on `deep8_c1_300_e2` the phased schedule is a null again (+11), the 8-way average the same +32 it was on
+deep10, the canonical evaluator a null again (+3). KNOWLEDGE 45 / 41 / 41b, README and RETROSPECTIVE §7 carry them.
+The play configuration stays flat `--sims 256` or more.
 
 The play agent is `runs/deep8_c1_300_e2/net_0300.pt` (+291 vs v2b; the log's H1 entry). Phase G is complete,
 including the one sealed test read. The G-CNN was smoke-tested through the self-play pipeline on 2026-09-07
@@ -232,6 +230,13 @@ consumer yet); a 10-block anything (46, 48); self-play on the 3060 (§6).
   matches vs `deep8_c1_300_e2` and `_e4`. H1b (`runs/queue10.sh`) launched 13:15 through the hidden launcher, the
   worker with it (iteration 0: 1024 steps, 0 skipped, self-play 81.5 s, training 61.9 s; ETA 07:17 on 2026-09-08);
   the three re-verifications on `deep8_c1_300_e2` (`runs/plan6/H1_reverify_3060.sh`) at 13:16 on the 3060.
+- **13:36 — the re-verifications on `deep8_c1_300_e2`** (full paired suite, 516 pairs, the 3060 shared with the
+  worker, 20 min in all; `runs/plan6/H1_reverify.out`): phased "0:128,24:384" vs flat 256 **51.6 % [49.2, 53.8],
+  +11 Elo [−6, +26]** — null (deep10: +10, deep8_300: +26, v2b: +50; the stronger the net the less the late
+  search adds); the 8-way symmetry average @64 vs plain @64 **54.7 % [52.1, 57.2], +32 [+14, +50]** — the same
+  ensembling gain as deep10's +35, at 8× the inference; the canonical evaluator @64 vs plain @64 **50.4 % [47.7,
+  53.1], +3 [−16, +22]** — null (deep10: −3). KNOWLEDGE 45, 41, 41b restated with the new net; README and
+  RETROSPECTIVE §7 updated. Play config unchanged.
 
 ## 0. The decision in front of the project
 

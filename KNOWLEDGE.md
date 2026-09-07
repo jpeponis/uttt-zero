@@ -352,7 +352,10 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     per sim) and adds +0.4 WDL points on the endgame set — but at equal inference the
     same averaging *loses* to plain search with 8× the sims, **23.9 % [21.8, 26.2], −201
     Elo**: the residual asymmetry is real and is cheaper to search through than to average
-    away. *Behavioural; deep10.* `runs/deep10_c1_300/timeline.json`,
+    away. On `deep8_c1_300_e2` the averaging gain is the same, **54.7 % [52.1, 57.2], +32
+    [+14, +50]** (2026-09-07; its D4 JS at 300 is 0.026 bits). *Behavioural; deep10 and
+    deep8_c1_300_e2.* `runs/deep10_c1_300/timeline.json`,
+    `runs/deep8_c1_300_e2/paired_sym_vs_plain_64.json`,
     `runs/plan5_B5_sym_vs_plain.out`, `runs/plan5_B5b_sym_equal_compute.out`.
 41b. **Exact equivariance alone buys nothing at play; the +35 above is an ensembling gain.**
     The one-call canonical evaluator (`uttt/symmetry.py CanonicalEvaluator`, PLAN6 F1: the net
@@ -364,8 +367,10 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     orientation's errors consistently does not remove them. So the residual asymmetry of 41
     costs nothing at play, averaging it away is worth +35 only because it averages eight
     evaluations, and an exactly equivariant *architecture* has no play-time gain to promise on
-    that account — its case is sample efficiency (PLAN6 Phase G). *Behavioural; deep10.*
-    `runs/deep10_c1_300/paired_canon_vs_plain_64.json`, `docs/history/review_astra/canonical_demo.json`.
+    that account — its case is sample efficiency (PLAN6 Phase G). On `deep8_c1_300_e2` the
+    same null: 50.4 % [47.7, 53.1], +3 [−16, +22] (2026-09-07). *Behavioural; deep10 and
+    deep8_c1_300_e2.* `runs/deep10_c1_300/paired_canon_vs_plain_64.json`,
+    `runs/deep8_c1_300_e2/paired_canon_vs_plain_64.json`, `docs/history/review_astra/canonical_demo.json`.
 41a. **The named concepts do not carry the strength.** A legible surrogate — a linear
     score over 20 hand-written per-move features (wins the board, wins the game, gives a
     free move, lets the opponent win next, threats after, count after, the self-send, cell
@@ -435,8 +440,10 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     `runs/plan5_A8.out`, `runs/deep10_c1_300_s1/analysis.out`.
 45. **The phased search schedule ("0:128,24:384") is not confirmed on deep10:** +10
     [−7, +26] vs a flat 256 (was +50 on v2b, +26 on deep8_300) — the stronger the raw
-    policy, the less late search adds. Play config: flat `--sims 256` or more (not
-    re-verified on `deep8_c1_300_e2`). *Behavioural.* Same.
+    policy, the less late search adds. Re-verified on `deep8_c1_300_e2` (2026-09-07):
+    51.6 % [49.2, 53.8], +11 [−6, +26] — null again. Play config: flat `--sims 256` or
+    more. *Behavioural; deep10 and deep8_c1_300_e2.* Same;
+    `runs/deep8_c1_300_e2/paired_phased_vs_256.json`.
 46. **Doubling the optimizer steps per iteration is worth +100 Elo, with nothing else
     changed** (PLAN6 H1, 2026-09-07). `deep8_c1_300_e2` is deep8_c1_300's recipe with
     `--epochs 2`: 512 steps of batch 1024 per iteration instead of 256, over the same

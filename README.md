@@ -57,9 +57,9 @@ Read in this order:
   deep10_c1_300**, for 1.3 extra hours of training. The learner had been update-limited
   all along (KNOWLEDGE 46, 47).
 - **Play configuration:** a flat `--sims 256` or more. The phased search schedule
-  (`"0:128,24:384"`, fewer simulations early and more late) helped earlier nets but was
-  **not** confirmed on this one (+10 [−7, +26], below the project's ±3-point rule;
-  PLAN5 §2 A8c).
+  (`"0:128,24:384"`, fewer simulations early and more late) helped earlier nets but is
+  **not** confirmed on the strong ones: +10 [−7, +26] on deep10 (PLAN5 §2 A8c) and +11
+  [−6, +26] on this net (2026-09-07), both below the project's ±3-point rule.
 - **The ladder is paused by owner directive** (PLAN4 §3c, PLAN5 §5): no new rung without the
   owner's approval. **The one owner-approved run, D1 — the seed replicate
   `runs/deep10_c1_300_s1` (same recipe as the best net, `--seed 1`) — finished 2026-09-05**
