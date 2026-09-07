@@ -17,92 +17,71 @@ a named parent; judged on the frozen paired suite by the ±3-point rule, final c
 training run starts without the owner's approval; every claim about the game carries its level, CI,
 the nets it held on, and the file that produced it.
 
-## Handover (2026-09-06)
+## Handover (2026-09-07)
 
-**State (2026-09-07 12:05, hand-off).** Nothing is running on either card. The play agent is now
-**`runs/deep8_c1_300_e2/net_0300.pt`** (+291 vs v2b; the log's H1 entry). Phase G is complete, including the
-one sealed test read (the log's last entries). What ran during 2026-09-06/07, both owner-approved:
+**State (2026-09-07 13:20).** **H1b is running on the 3090:** `runs/deep8_c1_300_e4` (`runs/queue10.sh`, launched
+13:15 through `runs/launch_queue10_hidden.vbs`; retry wrapper, 6 attempts) — deep8_c1_300_e2's recipe with
+`--epochs 4` (1024 optimizer steps per iteration), `--eval_every 0 --ckpt_every 10 --anchors ""`. Iteration 0: 1024
+steps, 0 skipped, self-play 81.5 s + training 61.9 s; `run_status` ETA 07:17 on 2026-09-08 (+17.9 h). The E7 worker
+runs beside it on the 3060 (`runs/deep8_c1_300_e4_worker.out`; anchors v2b, deep8_c1_300_e2 (the parent),
+deep8_c1_300 at 64 sims on the full suite, endgame_v2_dev → `eval_full.jsonl`). At the end queue10 runs
+`eval_run.sh` (which now includes the parent matches `paired_vs_deep8c1_300e2_64.json` and, once it exists, `_e4`)
+and the endgame_v2_dev read into `analysis.out`. Status: `python tools/run_status.py runs/deep8_c1_300_e4 --ref
+runs/deep8_c1_300_e2`. Watch: a single-shot background `until [ -f runs/deep8_c1_300_e4/DONE ] || grep -q FAILED
+runs/deep8_c1_300_e4.out; do sleep 300; done` (the Monitor tool delivers nothing from these files on this machine).
 
-- **H1, `runs/deep8_c1_300_e2`** (`runs/queue9.sh`, started 18:51 through the hidden-console launcher
-  `runs/launch_queue9_hidden.vbs`; retry wrapper, 6 attempts): deep8_c1_300's recipe with `--epochs 2`,
-  `--eval_every 0 --ckpt_every 10 --anchors ""`. Iteration 0: 512 steps, 0 skipped, ≈ 115 s (self-play
-  82 s + training 32 s, so the extra updates cost ≈ 30 s per iteration — ≈ 12 h in all, done ≈ 07:00 on
-  2026-09-07). The E7 worker runs beside it on the 3060 (`runs/deep8_c1_300_e2_worker.out`; anchors v2b,
-  deep8_c1_300, deep10_c1_300 at 64 sims on the full suite, endgame_v2_dev; `eval_full.jsonl`). At the
-  end queue9 runs `eval_run.sh` and the endgame_v2_dev read into `analysis.out`. Status:
-  `python tools/run_status.py runs/deep8_c1_300_e2 --ref runs/deep8_c1_300`. **Read it by §5 H1's
-  pre-registered rule** — primary `paired_vs_deep8c1_300_64.json` (≥ 53 helped / ≤ 47 hurt / else null),
-  secondary vs deep10_c1_300 and `_s1`, the E7 curve at the constant LR against deep8_c1_300's
-  `eval_full.jsonl` (200: 67.7, 220: 76.2, 260: 74.5, 280: 76.4, 300: 77.1 vs v2b), tertiary
-  endgame_v2_dev raw WDL / regret vs 84.0 / 0.045 — and decide H3's shape (§5).
-- **Phase G, `runs/plan6/G_queue.sh`** (started 18:56, `runs/plan6/G_queue.out`): G0 (resnet8 at 50k /
-  100k / 200k / 400k positions × 1 / 2 / 4 / 8 passes, seed 0 → `G0_resnet8.json`), then arms (b)
-  resnet8, (a) resnet10, (c) resnet8_mask at 400k × 8, seeds 0 and 1 (`G_arm_<arm>.json`), all on the
-  dev slice with `tools/gstudy.py`. ≈ 2 h on the 3060 (shared with the worker). Arms (d) tied heads and
-  (e) the D4 G-CNN are **not implemented** — `tools/gstudy.py ARMS` is where they plug in; (e) needs the
-  weight-expanded convolution of §4 so `FusedEvaluator` stays untouched. G's gate (§4) is read on the
-  sealed test slice *once*, after every arm is in; until then `--split dev` only.
+**The owner's decision (2026-09-07): H1b approved, and a conditional pre-approval of the chain H1b → H4 → H3.** The
+next run starts without asking *as long as the instance is under 50 % of its context window when it would start it*;
+above 50 % it updates everything (this Handover first, then the log, KNOWLEDGE, RETROSPECTIVE, README) and hands over
+to the next instance instead of launching. Each result is read by its pre-registered rule and written up before the
+next launch. Delegate the write-ups and any file-heavy reading to `directed` subagents (opus) to stay under the line.
 
-E11 is deferred by the owner (2026-09-06): no backup until the research is over; the repository goes to
-GitHub with the write-up. `runs/gdata_v1.npz` exists (`tools/gdata.py`,
-`runs/plan6/G_data.out`): 500 000 positions from `deep10_c1_300_s1` games 280–299 by the replay mixture,
-split by game 400 560 / 49 726 / 49 714, teacher deep10 8-way @256 sims (3.2 h on the 3090), exact labels
-where ≤ 14 empties; the splits share canonical positions through the opening plies (train ∩ dev 9410,
-train ∩ test 9499 of ≈ 43 000 distinct per slice — see the meta), which G's read-outs must report on the
-disjoint subset as well. The test slice is sealed. The play agent is unchanged:
-`runs/deep10_c1_300/net_0300.pt`, flat `--sims 256` or more. Four 300-iteration runs exist (deep8_c1_300;
-deep10_c1_300 and its seed replicate `_s1`; the earlier-LR-drop run `_lr150`), all with checkpoints every
-10–20 iterations, their games corpora on disk, and (since F2) `eval_full.jsonl` full-suite reads for the
-checkpoints around both LR drops; their `timeline.{json,png}` carry those points. `KNOWLEDGE.md` holds 51
-claims (41b and the E10 line are new); the restatements of §2 E3 are in.
-The scheduled tasks `uttt-queue7` / `uttt-queue8` no longer exist (checked 2026-09-06). The review and
-its scripts are committed under `docs/history/` (review artefacts, not pipeline code; the scripts' repo-root
-path was adjusted so they still run from the root); PLAN5 is in `docs/history/` with a line in its README,
-and the README's "Start here" points here. PLAN5's glossary stays the glossary (referenced, not copied).
+Also running on the 3060, launched 13:16 (`runs/plan6/H1_reverify_3060.sh` via `runs/launch_reverify_hidden.vbs`,
+≈ 1–1.5 h sharing the card with the worker; no approval needed — play-time measurements on an existing net):
+the phased schedule "0:128,24:384" vs flat 256, the 8-way average vs plain @64, and the canonical evaluator vs plain
+@64, all on `deep8_c1_300_e2` (PLAN5 A8c / B5 and PLAN6 F1 repeated on the new play agent) →
+`runs/plan6/H1_reverify.out`, `runs/deep8_c1_300_e2/paired_{phased_vs_256,sym_vs_plain_64,canon_vs_plain_64}.json`.
+Readings by the ±3 rule; KNOWLEDGE 45 / 41 / 41b each get a sentence.
 
-**What the next instance does, in order.** Phase E (§2) — no GPU-days, about two days of desk work,
-E1–E4 first because they change what KNOWLEDGE says. Then Phase F (§3), an hour of GPU on existing
-nets. Phase G (§4) runs on the 3060 over several days and does not block anything. Phase H (§5) is
-training; H1 is the run to propose to the owner first, and it can start on the otherwise idle 3090 as
-soon as E5/E7 (the operational changes it depends on) are in.
+The play agent is `runs/deep8_c1_300_e2/net_0300.pt` (+291 vs v2b; the log's H1 entry). Phase G is complete,
+including the one sealed test read. The G-CNN was smoke-tested through the self-play pipeline on 2026-09-07
+(`runs/probe_gcnn_smoke`, untracked, an untrained net: 4 iterations of 256 games on the 3060 — fused graph self-play,
+50 training steps per iteration with falling losses and no skipped steps, atomic checkpoints, a resume that restored
+the scaler and generators, and the E7 worker scoring its checkpoints against a ResNet anchor with the endgame set), so
+H4 is launchable as written. E11 (backup) stays deferred by the owner to the write-up; the repository has no remote.
 
-**Progress (2026-09-06, same day; details in the log below).** Phase E is done except E11 (the
-off-machine backup needs a destination from the owner — and the repository itself has no git remote, so
-the backup must include it: ≈ 2.7 GB in all — 645 MB of games corpora for the four 300-iteration runs,
-2.0 GB of `net_*.pt` across every run, 3 MB of logs and configs, 0.6 MB of suites — or, for a first
-copy, a private remote for the repo, which already tracks the code, the documents and every run's final
-checkpoints). Phase F is done: F1 null, F2 read at ±2.8 (see the log), F3 recorded.
+**The chain, with the recipes fixed by the rules already written.** Operational settings for every run: copy
+`runs/queue10.sh` (retry wrapper, `--eval_every 0 --ckpt_every 10`, the E7 worker on the 3060 with the parent among
+its anchors, `eval_run.sh` + the endgame_v2_dev read at the end), a `launch_queue<N>_run.cmd` and
+`launch_queue<N>_hidden.vbs` (sed the names), launched with `wscript runs/launch_queue<N>_hidden.vbs` from the repo
+root; the trainer must never share the 3090 with anything. Every reading: the *final* checkpoint on the full paired
+suite @64 against the named parent — ≥ 53 % helped, ≤ 47 % hurt, otherwise null — with the seed band (≈ 3 points)
+stated beside it. E below is the epochs the chain carries forward.
 
-**What the next instance does, in order.** (1) Put the three proposals below to the owner; launch the approved one through a hidden-console
-`runs/launch_queue<N>_hidden.vbs` (copy queue9's: retry wrapper, `--eval_every 0 --ckpt_every 10`, the E7
-worker on the 3060, `eval_run.sh` + the endgame_v2_dev read at the end) and watch it with single-shot
-`until grep -q ...` background waits — the Monitor tool delivered no events from these log files on this
-machine (2026-09-06/07), so do not rely on it. (2) Optional, an
-hour of the 3090: the phased schedule and the 8-way / canonical evaluators re-verified on the new play agent
-(PLAN5 A8c / PLAN6 F1 on `deep8_c1_300_e2`); the game claims of KNOWLEDGE §1–§8 on it are a bigger job
-(Phase A's tools, ≈ a day of the 3060) and only worth it if a magnitude is suspected to have moved.
+1. **H1b `deep8_c1_300_e4` — running.** Primary `paired_vs_deep8c1_300e2_64.json`: **≥ 53 → still update-limited,
+   E = 4** (and an `--epochs 8` run is worth proposing after the chain); **47–53 → epochs 2 is the plateau, E = 2**;
+   **≤ 47 → over-fitting the 7.6-iteration buffer window, E = 2**, and the buffer size (not the update count) is the
+   knob to propose after the chain. Secondary: vs deep8_c1_300, deep10_c1_300, `_s1`, v2b (all in `analysis.out`);
+   the E7 curve against H1's (`runs/deep8_c1_300_e2/eval_full.jsonl`; H1 vs v2b: 10: 20.1, 50: 52.1, 100: 68.8,
+   150: 75.5, 200: 75.9, 210: 82.2, 220: 83.4, 260: 84.2, 280: 84.9, 300: 84.2); the budget axes (E8: steps skipped,
+   replay age, the sampled distinct-position fraction — H1: 3.35 iterations, 0.81 → 0.75, 70 of 153 600 skipped).
+   Tertiary: endgame_v2_dev raw WDL / regret vs 87.5 / 0.034 (endgame_v1 87.6 / 0.036). Write-up: a new KNOWLEDGE
+   claim 49 (and 46's last sentence), RETROSPECTIVE §2 ladder / §3 ledger / §7, README state and ladder, this log;
+   the play agent changes only if H1b helped.
+2. **H4 `gcnn8_c1_300_e<E>`** — `--gcnn 16 --filters 128 --blocks 8 --epochs <E>`, everything else as H1; parent
+   the chain's best 8-block net at epochs E (`deep8_c1_300_e4` if E = 4, else `_e2`). ≈ 15–17 h. Worker anchors:
+   v2b, the parent, deep8_c1_300. Primary vs the parent at 64 sims (equal inference cost by construction, so one
+   comparison serves both of §5 H4's requirements); secondary the D4 residual (0 by construction — `timeline.py`'s
+   D4 JS column should read 0.000) and the endgame reads. `--head_tying 1` on the plain trunk is the fallback if the
+   G-CNN misbehaves in RL (diverging losses, many skipped steps). The first play agent with exact symmetry if it wins.
+3. **H3 `deep8_c1_600_e<E>`** — `--iters 600 --lr_drops 500 --epochs <E>`, everything else as H1; parent the same
+   net as H4's. ≈ 30–35 h (late iterations run ≈ 15 % slower than the mean). Reading: the E7 full-suite curve from
+   300 to 500 — flat means duration is exhausted at this data rate, climbing means it is not — and the final net by
+   the rule against the parent. `eval_run.sh` discovers the last `net_*.pt`; the queue's endgame_v2_dev line must say
+   `net_0600.pt`.
 
-**Proposals for the owner (each one change against a named parent; ±3 rule; final checkpoint on the full
-suite; the E7 worker gives the curve at ±2.8).**
-- **H1b — dose–response: `deep8_c1_300_e4`, `--epochs 4` (1024 steps per iteration), everything else as
-  H1.** ≈ 17 h (training 5 h of it). Parent: `deep8_c1_300_e2`. Pre-registered: ≥ 53 % → still
-  update-limited, and the next run doubles again (or H3 runs at epochs 4); 47–53 → epochs 2 is the plateau,
-  H3 at epochs 2; ≤ 47 → over-fitting the 7.6-iteration buffer window, and the buffer (not the update count)
-  is the next knob. The cheapest test of the largest effect the project has found; **first**.
-- **H4 — the gated architecture in self-play: `gcnn8_c1_300_e2`, `--gcnn 16 --filters 128 --blocks 8
-  --epochs 2`, everything else as H1.** ≈ 15 h (the group convolution's expansion is a gather per forward;
-  the self-play path uses the exported plain net at identical cost). Parent: H1. Primary vs H1 at 64 sims
-  (equal cost by construction, so one comparison serves both of §5 H4's requirements); secondary the D4
-  residual (0 by construction — the first play agent with exact symmetry) and the endgame reads. Reading by
-  the rule. **Second**, or first if the owner prefers the architecture question. `resnet8_tied` (arm d,
-  `--head_tying 1`) is the cheaper half of the same question and a fallback if the G-CNN misbehaves in RL.
-- **H3 — duration at the right update count: `deep8_c1_600_e2`, 600 iterations, `--lr_drops 500`,
-  `--epochs 2` (or H1b's epochs if it helped).** ≈ 29 h. Parent: H1. Reading: the full-suite curve from
-  300 to 500 — flat means duration is exhausted at this data rate, climbing means it is not.
-- Not proposed: H2 (the closed-board mask; its supervised gain is real but small — 0.008 in KL — and the
-  licence it buys, a smaller state key for caches, has no consumer yet); a 10-block anything (46, 48).
-
-**Nothing starts without the owner's word.** E11 (backup / GitHub) is deferred by the owner to the write-up.
+Not proposed: H2 (the mask; its supervised gain is real but small — 0.008 in KL — and the licence it buys has no
+consumer yet); a 10-block anything (46, 48); self-play on the 3060 (§6).
 
 ## Log
 
@@ -242,6 +221,17 @@ suite; the E7 worker gives the curve at ±2.8).**
   arm: the ordering, the gate readings and the sizes of the gaps stand as read on dev. `endgame_v3_test`
   was **not** opened (the students were graded on `endgame_v2_dev`; `_v3_test` stays sealed for a net that
   is not a supervised student). Phase G is complete; the 3060 is idle.
+
+- **2026-09-07, 13:15 — H1b launched; the G-CNN smoke-tested; the re-verifications started.** Preflight: both cards
+  idle, git clean, `tests/test_equivariant.py` passes on the 3060. `runs/probe_gcnn_smoke` (untracked; an untrained
+  net): `train2 --gcnn 16 --filters 128 --blocks 8 --epochs 2` for 4 iterations of 256 games × 64 steps on the 3060
+  — fused graph self-play (13–29 games/s at that batch), 50 steps per iteration with the losses falling
+  (policy 4.18 → 1.98) and none skipped, `net_NNNN.pt` written atomically, a resume that restored the scaler and the
+  generators, and `tools/eval_worker.py --once` scoring the four checkpoints against v2b with the endgame set. H4 is
+  launchable. The owner approved H1b and the conditional chain (Handover). `runs/eval_run.sh` gained the parent
+  matches vs `deep8_c1_300_e2` and `_e4`. H1b (`runs/queue10.sh`) launched 13:15 through the hidden launcher, the
+  worker with it (iteration 0: 1024 steps, 0 skipped, self-play 81.5 s, training 61.9 s; ETA 07:17 on 2026-09-08);
+  the three re-verifications on `deep8_c1_300_e2` (`runs/plan6/H1_reverify_3060.sh`) at 13:16 on the 3060.
 
 ## 0. The decision in front of the project
 

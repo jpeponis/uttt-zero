@@ -22,6 +22,8 @@ $P tools/openings.py match --a $N --b runs/v2b/net_0150.pt --sims 64 --device $D
 [ "$R" != "deep8_c1_300" ] && [ -f runs/deep8_c1_300/net_0300.pt ] && $P tools/openings.py match --a $N --b runs/deep8_c1_300/net_0300.pt --sims 64 --device $D --out runs/$R/paired_vs_deep8c1_300_64.json
 [ "$R" != "deep10_c1_300" ] && [ -f runs/deep10_c1_300/net_0300.pt ] && $P tools/openings.py match --a $N --b runs/deep10_c1_300/net_0300.pt --sims 64 --device $D --out runs/$R/paired_vs_deep10c1_300_64.json
 [ "$R" != "deep10_c1_300_s1" ] && [ -f runs/deep10_c1_300_s1/net_0300.pt ] && $P tools/openings.py match --a $N --b runs/deep10_c1_300_s1/net_0300.pt --sims 64 --device $D --out runs/$R/paired_vs_deep10c1_300s1_64.json
+[ "$R" != "deep8_c1_300_e2" ] && [ -f runs/deep8_c1_300_e2/net_0300.pt ] && $P tools/openings.py match --a $N --b runs/deep8_c1_300_e2/net_0300.pt --sims 64 --device $D --out runs/$R/paired_vs_deep8c1_300e2_64.json
+[ "$R" != "deep8_c1_300_e4" ] && [ -f runs/deep8_c1_300_e4/net_0300.pt ] && $P tools/openings.py match --a $N --b runs/deep8_c1_300_e4/net_0300.pt --sims 64 --device $D --out runs/$R/paired_vs_deep8c1_300e4_64.json
 $P tools/openings.py match --a $N --b runs/dev1/net_0200.pt --sims 64 --device $D --out runs/$R/paired_vs_dev1_64.json
 echo "=== endgame set"
 $P tools/endgame.py eval $N --device $D
