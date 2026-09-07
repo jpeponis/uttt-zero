@@ -19,11 +19,9 @@ the nets it held on, and the file that produced it.
 
 ## Handover (2026-09-06)
 
-**State (2026-09-07, hand-off).** Nothing is training. The play agent is now
-**`runs/deep8_c1_300_e2/net_0300.pt`** (+291 vs v2b; the log's H1 entry). The 3060 may still be finishing
-the G follow-up queues (`runs/plan6/G_queue.out` — queue 3: the mask rerun and the sample-efficiency points;
-queue 4: the one sealed test read); their results are pasted into the log entries marked Q3 / Q4 when they
-land. What was running during 2026-09-06/07, both owner-approved:
+**State (2026-09-07 12:05, hand-off).** Nothing is running on either card. The play agent is now
+**`runs/deep8_c1_300_e2/net_0300.pt`** (+291 vs v2b; the log's H1 entry). Phase G is complete, including the
+one sealed test read (the log's last entries). What ran during 2026-09-06/07, both owner-approved:
 
 - **H1, `runs/deep8_c1_300_e2`** (`runs/queue9.sh`, started 18:51 through the hidden-console launcher
   `runs/launch_queue9_hidden.vbs`; retry wrapper, 6 attempts): deep8_c1_300's recipe with `--epochs 2`,
@@ -75,13 +73,11 @@ the backup must include it: ≈ 2.7 GB in all — 645 MB of games corpora for th
 copy, a private remote for the repo, which already tracks the code, the documents and every run's final
 checkpoints). Phase F is done: F1 null, F2 read at ±2.8 (see the log), F3 recorded.
 
-**What the next instance does, in order.** (1) If the Q3 / Q4 lines in the log still say pending, read
-`runs/plan6/G_queue.out` and the JSONs (`G_arm_resnet8_mask.json`, `G0_gcnn8x16.json`, `G0b_gcnn8x16.json`,
-`G0_resnet8_tied.json`, `G0b_resnet8_tied.json`, `G_test_*.json`) and fill them in; the gate-(ii) reading is
-"reaches the ResNet's 3120-step KL (0.884 dev) with ≤ 1560 steps", since G0 showed steps are the currency.
-(2) Put the three proposals below to the owner; launch the approved one through a hidden-console
+**What the next instance does, in order.** (1) Put the three proposals below to the owner; launch the approved one through a hidden-console
 `runs/launch_queue<N>_hidden.vbs` (copy queue9's: retry wrapper, `--eval_every 0 --ckpt_every 10`, the E7
-worker on the 3060, `eval_run.sh` + the endgame_v2_dev read at the end) and monitor it. (3) Optional, an
+worker on the 3060, `eval_run.sh` + the endgame_v2_dev read at the end) and watch it with single-shot
+`until grep -q ...` background waits — the Monitor tool delivered no events from these log files on this
+machine (2026-09-06/07), so do not rely on it. (2) Optional, an
 hour of the 3090: the phased schedule and the 8-way / canonical evaluators re-verified on the new play agent
 (PLAN5 A8c / PLAN6 F1 on `deep8_c1_300_e2`); the game claims of KNOWLEDGE §1–§8 on it are a bigger job
 (Phase A's tools, ≈ a day of the 3060) and only worth it if a magnitude is suspected to have moved.
@@ -239,7 +235,13 @@ suite; the E7 worker gives the curve at ±2.8).**
   vs 1× the distinct positions), where the ResNet's was (0.973 vs 0.976) — the equivariant net extracts more per
   update and is the first student here that is partly data-limited.
 - **G queue 4 — the sealed test read, once:** every arm at 400k × 8 seed 0 on `--split test`. Result:
-  (pending — queue 4 waits for queue 3; fill from `runs/plan6/G_test_*.json`)
+(12:00, 400k × 8, seed 0; test KL with the same student's dev KL in brackets): resnet8 **0.8851** [0.8839],
+  resnet10 0.8818 [0.8820], resnet8_mask 0.8763 [0.8769], resnet8_tied **0.8483** [0.8480], gcnn8x16 **0.8063**
+  [0.8057]; top-1 0.551 / 0.550 / 0.555 / 0.563 / 0.602; exact 3-way 0.755 / 0.756 / 0.770 / 0.778 / 0.800;
+  endgame_v2_dev regret 0.164 / 0.161 / 0.152 / 0.148 / 0.152. Test agrees with dev to within 0.0012 on every
+  arm: the ordering, the gate readings and the sizes of the gaps stand as read on dev. `endgame_v3_test`
+  was **not** opened (the students were graded on `endgame_v2_dev`; `_v3_test` stays sealed for a net that
+  is not a supervised student). Phase G is complete; the 3060 is idle.
 
 ## 0. The decision in front of the project
 

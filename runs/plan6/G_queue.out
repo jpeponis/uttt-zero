@@ -341,3 +341,20 @@ runs/gdata_v1.npz: train 400560, test 49714 (33662 with no canonical twin in tra
     pass 4/8: loss_p 1.240 loss_v 0.1332 (180s)
     pass 5/8: loss_p 1.176 loss_v 0.0996 (224s)
     pass 6/8: loss_p 1.152 loss_v 0.1034 (269s)
+    pass 7/8: loss_p 1.140 loss_v 0.1046 (315s)
+    pass 8/8: loss_p 1.138 loss_v 0.1167 (360s)
+    -> KL 0.8483 top1 0.563 brier 0.1064 acc3 0.778 | disjoint KL 0.9688 | endgame WDL 66.9 regret 0.148 | D4 JS 0.0445b | 84.81 ms @4096, 0.30 ms @1 (366s)
+wrote runs/plan6/G_test_resnet8_tied.json  [366s]
+runs/gdata_v1.npz: train 400560, test 49714 (33662 with no canonical twin in train); arm gcnn8x16
+  gcnn8x16 positions 400000 passes 8 seed 0
+    pass 1/8: loss_p 1.307 loss_v 0.1530 (55s)
+    pass 2/8: loss_p 1.272 loss_v 0.1218 (109s)
+    pass 3/8: loss_p 1.180 loss_v 0.1232 (163s)
+    pass 4/8: loss_p 1.160 loss_v 0.1242 (217s)
+    pass 5/8: loss_p 1.089 loss_v 0.0911 (271s)
+    pass 6/8: loss_p 1.036 loss_v 0.0937 (325s)
+    pass 7/8: loss_p 1.022 loss_v 0.0984 (379s)
+    pass 8/8: loss_p 1.011 loss_v 0.1020 (433s)
+    -> KL 0.8063 top1 0.602 brier 0.1102 acc3 0.800 | disjoint KL 1.0047 | endgame WDL 66.1 regret 0.152 | D4 JS 0.0000b | 85.67 ms @4096, 0.31 ms @1 (440s)
+wrote runs/plan6/G_test_gcnn8x16.json  [440s]
+G queue 4 DONE (11:58)

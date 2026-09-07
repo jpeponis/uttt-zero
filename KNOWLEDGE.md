@@ -492,7 +492,9 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     1560 steps, 400 000 vs 200 000 positions) where the ResNet's did not (47) — the
     equivariant net is the first student that is partly data-limited. The mask arm's
     endgame WDL is 67.2 / 67.3 % (ResNet 64.4 / 65.3; an earlier 48 % was an evaluation
-    artefact, fixed). *Supervised, dev slice; the sealed test read is in PLAN6's log.*
+    artefact, fixed). **The sealed test slice, read once (2026-09-07), agrees with dev to
+    within 0.0012 on every arm** (KL 0.885 / 0.882 / 0.876 / 0.848 / 0.806 for ResNet 8 /
+    ResNet 10 / mask / tied / G-CNN). *Supervised; dev slice, confirmed on the test slice.*
     `runs/plan6/G_arm_*.json`, `runs/plan6/G0_gcnn8x16.json`, `runs/plan6/G0b_*.json`,
     `runs/plan6/G_timing_*.json`, `tests/test_equivariant.py`.
 
