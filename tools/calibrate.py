@@ -44,12 +44,12 @@ def raw_logits(fe, es, idx, device):
     from uttt.batch import encode
 
     t = lambda a: torch.from_numpy(a[idx]).to(device)  # noqa: E731
-    obs = encode(t(es.cells), t(es.macro), t(es.next_board), t(es.player), None, extra=fe.extra)
+    obs = encode(t(es.cells), t(es.macro), t(es.next_board), t(es.player), None, extra=fe.extra, mask_closed=getattr(fe, "mask_closed", False))
     if fe.half:
         obs = obs.half()
     if fe.channels_last:
         obs = obs.contiguous(memory_format=torch.channels_last)
-    _, v, *_ = fe.net(obs)
+    _, v, *_ = fe.net(obs)  # obs must be encoded with the same flags as the evaluator's (extra planes, mask_closed)
     return v.float()
 
 

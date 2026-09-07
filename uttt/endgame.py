@@ -199,7 +199,7 @@ def wdl_probs(fe, cells, macro, nb, player, symmetrise: bool = False) -> torch.T
     acc = torch.zeros(n, 3, device=cells.device)
     for s in syms:
         c, m, b = apply_symmetry(s, cells, macro, nb)
-        obs = encode(c, m, b, player, done, extra=getattr(fe, "extra", False))
+        obs = encode(c, m, b, player, done, extra=getattr(fe, "extra", False), mask_closed=getattr(fe, "mask_closed", False))
         if fe.half:
             obs = obs.half()
         if fe.channels_last:

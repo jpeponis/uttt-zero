@@ -261,7 +261,7 @@ def ownership_head_accuracy(net, cells, macro, nb, player, labels, split, device
     for i in range(0, len(te), 2048):
         idx = torch.from_numpy(te[i : i + 2048]).to(device)
         done = torch.zeros(len(idx), dtype=torch.bool, device=device)
-        _, _, o, _ = net(encode(cells[idx], macro[idx], nb[idx], player[idx], done, extra=net.cfg.extra_planes))
+        _, _, o, _ = net(encode(cells[idx], macro[idx], nb[idx], player[idx], done, extra=net.cfg.extra_planes, mask_closed=bool(getattr(net.cfg, "mask_closed", 0))))
         pred = o.argmax(2).cpu().numpy()  # (n, 9) in the head's classes: 0 self / 1 neither / 2 opponent
         truth = np.stack([labels[f"final_own_{b}"][te[i : i + 2048]] for b in range(9)], 1)
         if net.cfg.own_classes == 4:  # 4-class heads: self 0 / opponent 1 / full 2 / open 3 -> 3-class

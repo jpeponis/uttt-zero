@@ -94,7 +94,7 @@ def head_predictions(net, cells, macro, nb, player, device, bs=2048):
     for i in range(0, cells.shape[0], bs):
         sl = slice(i, i + bs)
         done = torch.zeros(cells[sl].shape[0], dtype=torch.bool, device=device)
-        _, _, o, _ = net(encode(cells[sl], macro[sl], nb[sl], player[sl], done, extra=net.cfg.extra_planes))
+        _, _, o, _ = net(encode(cells[sl], macro[sl], nb[sl], player[sl], done, extra=net.cfg.extra_planes, mask_closed=bool(getattr(net.cfg, "mask_closed", 0))))
         pred = o.argmax(2)
         if net.cfg.own_classes == 4:  # self 0 / opponent 1 / full 2 / open 3 -> self 0 / neither 1 / opponent 2
             pred = torch.where(pred == 0, 0, torch.where(pred == 1, 2, 1))

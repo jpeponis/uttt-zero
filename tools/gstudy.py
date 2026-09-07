@@ -169,7 +169,10 @@ def main() -> None:
     ap.add_argument("--lr", type=float, default=0.02)
     ap.add_argument("--device", default="cuda:1")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--save", default="", help="directory to save every student's weights as <arm>_p<positions>_x<passes>_s<seed>.pt")
     a = ap.parse_args()
+    if a.save:
+        os.makedirs(a.save, exist_ok=True)
     device = torch.device(a.device)
     t0 = time.perf_counter()
     d = load_data(a.data, device)
@@ -207,6 +210,10 @@ def main() -> None:
                       + f" | D4 JS {rec['d4_policy_js_bits']:.4f}b | {rec['ms_batch4096']:.2f} ms @4096, {rec['ms_batch1']:.2f} ms @1 ({time.perf_counter() - t0:.0f}s)", flush=True)
                 with open(a.out, "w") as f:
                     json.dump({"data": a.data, "meta": d["meta"], "split": a.split, "set": a.set, "results": results}, f, indent=1)
+                if a.save:
+                    from dataclasses import asdict
+                    torch.save({"net": net.state_dict(), "cfg": asdict(cfg), "student": rec},
+                               os.path.join(a.save, f"{a.arm}_p{n_pos}_x{passes}_s{seed}.pt"))
                 del net, fe
                 torch.cuda.empty_cache()
     print(f"wrote {a.out}  [{time.perf_counter() - t0:.0f}s]")
