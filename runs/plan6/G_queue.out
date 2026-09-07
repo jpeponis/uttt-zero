@@ -219,3 +219,125 @@ runs/gdata_v1.npz: train 400560, dev 49726 (33616 with no canonical twin in trai
     pass 4/8: loss_p 1.267 loss_v 0.1308 (177s)
     pass 5/8: loss_p 1.236 loss_v 0.0950 (222s)
     pass 6/8: loss_p 1.195 loss_v 0.1093 (266s)
+    pass 7/8: loss_p 1.147 loss_v 0.1083 (310s)
+    pass 8/8: loss_p 1.178 loss_v 0.1174 (354s)
+    -> KL 0.8769 top1 0.558 brier 0.1056 acc3 0.772 | disjoint KL 1.0080 | endgame WDL 67.2 regret 0.152 | D4 JS 0.0586b | 85.07 ms @4096, 0.31 ms @1 (360s)
+  resnet8_mask positions 400000 passes 8 seed 1
+    pass 1/8: loss_p 1.514 loss_v 0.1493 (44s)
+    pass 2/8: loss_p 1.428 loss_v 0.1526 (88s)
+    pass 3/8: loss_p 1.313 loss_v 0.1301 (132s)
+    pass 4/8: loss_p 1.344 loss_v 0.1243 (177s)
+    pass 5/8: loss_p 1.251 loss_v 0.1132 (221s)
+    pass 6/8: loss_p 1.170 loss_v 0.0940 (265s)
+    pass 7/8: loss_p 1.128 loss_v 0.0988 (309s)
+    pass 8/8: loss_p 1.161 loss_v 0.1034 (353s)
+    -> KL 0.8739 top1 0.556 brier 0.1064 acc3 0.776 | disjoint KL 1.0045 | endgame WDL 67.3 regret 0.152 | D4 JS 0.0579b | 85.04 ms @4096, 0.31 ms @1 (718s)
+wrote runs/plan6/G_arm_resnet8_mask.json  [718s]
+=== gcnn8x16 sample-efficiency points (11:08)
+runs/gdata_v1.npz: train 400560, dev 49726 (33616 with no canonical twin in train); arm gcnn8x16
+  gcnn8x16 positions 100000 passes 8 seed 0
+    pass 1/8: loss_p 1.973 loss_v 0.1804 (14s)
+    pass 2/8: loss_p 1.505 loss_v 0.2029 (27s)
+    pass 3/8: loss_p 1.399 loss_v 0.1581 (40s)
+    pass 4/8: loss_p 1.304 loss_v 0.1520 (54s)
+    pass 5/8: loss_p 1.287 loss_v 0.1831 (67s)
+    pass 6/8: loss_p 1.220 loss_v 0.1119 (80s)
+    pass 7/8: loss_p 1.117 loss_v 0.1173 (93s)
+    pass 8/8: loss_p 1.112 loss_v 0.1059 (106s)
+    -> KL 0.9694 top1 0.525 brier 0.1435 acc3 0.702 | disjoint KL 1.1358 | endgame WDL 57.0 regret 0.228 | D4 JS 0.0000b | 85.87 ms @4096, 0.31 ms @1 (112s)
+  gcnn8x16 positions 200000 passes 8 seed 0
+    pass 1/8: loss_p 1.514 loss_v 0.1848 (27s)
+    pass 2/8: loss_p 1.358 loss_v 0.1526 (53s)
+    pass 3/8: loss_p 1.259 loss_v 0.1431 (80s)
+    pass 4/8: loss_p 1.238 loss_v 0.1142 (106s)
+    pass 5/8: loss_p 1.230 loss_v 0.1215 (133s)
+    pass 6/8: loss_p 1.083 loss_v 0.1107 (160s)
+    pass 7/8: loss_p 1.090 loss_v 0.1075 (186s)
+    pass 8/8: loss_p 1.052 loss_v 0.1091 (213s)
+    -> KL 0.8800 top1 0.565 brier 0.1309 acc3 0.750 | disjoint KL 1.0659 | endgame WDL 61.2 regret 0.187 | D4 JS 0.0000b | 85.85 ms @4096, 0.31 ms @1 (329s)
+wrote runs/plan6/G0_gcnn8x16.json  [329s]
+runs/gdata_v1.npz: train 400560, dev 49726 (33616 with no canonical twin in train); arm gcnn8x16
+  gcnn8x16 positions 400000 passes 4 seed 0
+    pass 1/4: loss_p 1.307 loss_v 0.1530 (55s)
+    pass 2/4: loss_p 1.272 loss_v 0.1218 (109s)
+    pass 3/4: loss_p 1.140 loss_v 0.1238 (163s)
+    pass 4/4: loss_p 1.123 loss_v 0.1091 (217s)
+    -> KL 0.8559 top1 0.573 brier 0.1136 acc3 0.764 | disjoint KL 1.0231 | endgame WDL 64.1 regret 0.156 | D4 JS 0.0000b | 85.83 ms @4096, 0.34 ms @1 (224s)
+wrote runs/plan6/G0b_gcnn8x16.json  [224s]
+=== resnet8_tied sample-efficiency points (11:17)
+runs/gdata_v1.npz: train 400560, dev 49726 (33616 with no canonical twin in train); arm resnet8_tied
+  resnet8_tied positions 100000 passes 8 seed 0
+    pass 1/8: loss_p 1.843 loss_v 0.1762 (12s)
+    pass 2/8: loss_p 1.554 loss_v 0.1771 (23s)
+    pass 3/8: loss_p 1.497 loss_v 0.1596 (35s)
+    pass 4/8: loss_p 1.428 loss_v 0.1614 (46s)
+    pass 5/8: loss_p 1.410 loss_v 0.1616 (57s)
+    pass 6/8: loss_p 1.368 loss_v 0.1293 (69s)
+    pass 7/8: loss_p 1.291 loss_v 0.1385 (80s)
+    pass 8/8: loss_p 1.319 loss_v 0.1367 (91s)
+    -> KL 1.0224 top1 0.486 brier 0.1378 acc3 0.657 | disjoint KL 1.1293 | endgame WDL 54.5 regret 0.229 | D4 JS 0.0426b | 84.86 ms @4096, 0.30 ms @1 (97s)
+  resnet8_tied positions 200000 passes 8 seed 0
+    pass 1/8: loss_p 1.580 loss_v 0.1949 (23s)
+    pass 2/8: loss_p 1.475 loss_v 0.1615 (46s)
+    pass 3/8: loss_p 1.341 loss_v 0.1560 (68s)
+    pass 4/8: loss_p 1.328 loss_v 0.1205 (91s)
+    pass 5/8: loss_p 1.324 loss_v 0.1234 (114s)
+    pass 6/8: loss_p 1.217 loss_v 0.1301 (137s)
+    pass 7/8: loss_p 1.222 loss_v 0.1211 (159s)
+    pass 8/8: loss_p 1.204 loss_v 0.1177 (182s)
+    -> KL 0.9313 top1 0.526 brier 0.1216 acc3 0.718 | disjoint KL 1.0467 | endgame WDL 62.0 regret 0.185 | D4 JS 0.0449b | 84.83 ms @4096, 0.31 ms @1 (283s)
+wrote runs/plan6/G0_resnet8_tied.json  [283s]
+runs/gdata_v1.npz: train 400560, dev 49726 (33616 with no canonical twin in train); arm resnet8_tied
+  resnet8_tied positions 400000 passes 4 seed 0
+    pass 1/4: loss_p 1.391 loss_v 0.1521 (45s)
+    pass 2/4: loss_p 1.338 loss_v 0.1324 (90s)
+    pass 3/4: loss_p 1.236 loss_v 0.1316 (135s)
+    pass 4/4: loss_p 1.226 loss_v 0.1193 (180s)
+    -> KL 0.9212 top1 0.531 brier 0.1198 acc3 0.714 | disjoint KL 1.0358 | endgame WDL 60.4 regret 0.171 | D4 JS 0.0421b | 84.81 ms @4096, 0.30 ms @1 (186s)
+wrote runs/plan6/G0b_resnet8_tied.json  [186s]
+G queue 3 DONE (11:25)
+=== SEALED TEST READ (11:25) -- once
+runs/gdata_v1.npz: train 400560, test 49714 (33662 with no canonical twin in train); arm resnet8
+  resnet8 positions 400000 passes 8 seed 0
+    pass 1/8: loss_p 1.491 loss_v 0.1605 (45s)
+    pass 2/8: loss_p 1.428 loss_v 0.1307 (89s)
+    pass 3/8: loss_p 1.335 loss_v 0.1401 (132s)
+    pass 4/8: loss_p 1.291 loss_v 0.1272 (176s)
+    pass 5/8: loss_p 1.239 loss_v 0.0995 (221s)
+    pass 6/8: loss_p 1.195 loss_v 0.1116 (265s)
+    pass 7/8: loss_p 1.165 loss_v 0.1059 (308s)
+    pass 8/8: loss_p 1.189 loss_v 0.1265 (352s)
+    -> KL 0.8851 top1 0.551 brier 0.1093 acc3 0.755 | disjoint KL 1.0130 | endgame WDL 64.4 regret 0.164 | D4 JS 0.0562b | 84.87 ms @4096, 0.31 ms @1 (358s)
+wrote runs/plan6/G_test_resnet8.json  [358s]
+runs/gdata_v1.npz: train 400560, test 49714 (33662 with no canonical twin in train); arm resnet10
+  resnet10 positions 400000 passes 8 seed 0
+    pass 1/8: loss_p 1.504 loss_v 0.1608 (54s)
+    pass 2/8: loss_p 1.424 loss_v 0.1381 (108s)
+    pass 3/8: loss_p 1.329 loss_v 0.1431 (161s)
+    pass 4/8: loss_p 1.293 loss_v 0.1258 (215s)
+    pass 5/8: loss_p 1.237 loss_v 0.0998 (269s)
+    pass 6/8: loss_p 1.203 loss_v 0.1079 (322s)
+    pass 7/8: loss_p 1.171 loss_v 0.1112 (376s)
+    pass 8/8: loss_p 1.184 loss_v 0.1314 (429s)
+    -> KL 0.8818 top1 0.550 brier 0.1090 acc3 0.756 | disjoint KL 1.0108 | endgame WDL 65.2 regret 0.161 | D4 JS 0.0557b | 105.57 ms @4096, 0.35 ms @1 (436s)
+wrote runs/plan6/G_test_resnet10.json  [436s]
+runs/gdata_v1.npz: train 400560, test 49714 (33662 with no canonical twin in train); arm resnet8_mask
+  resnet8_mask positions 400000 passes 8 seed 0
+    pass 1/8: loss_p 1.488 loss_v 0.1561 (44s)
+    pass 2/8: loss_p 1.408 loss_v 0.1360 (89s)
+    pass 3/8: loss_p 1.319 loss_v 0.1292 (132s)
+    pass 4/8: loss_p 1.267 loss_v 0.1308 (176s)
+    pass 5/8: loss_p 1.236 loss_v 0.0950 (220s)
+    pass 6/8: loss_p 1.195 loss_v 0.1093 (264s)
+    pass 7/8: loss_p 1.147 loss_v 0.1083 (308s)
+    pass 8/8: loss_p 1.178 loss_v 0.1174 (352s)
+    -> KL 0.8763 top1 0.555 brier 0.1059 acc3 0.770 | disjoint KL 1.0054 | endgame WDL 67.2 regret 0.152 | D4 JS 0.0592b | 85.03 ms @4096, 0.31 ms @1 (358s)
+wrote runs/plan6/G_test_resnet8_mask.json  [358s]
+runs/gdata_v1.npz: train 400560, test 49714 (33662 with no canonical twin in train); arm resnet8_tied
+  resnet8_tied positions 400000 passes 8 seed 0
+    pass 1/8: loss_p 1.391 loss_v 0.1521 (45s)
+    pass 2/8: loss_p 1.338 loss_v 0.1324 (90s)
+    pass 3/8: loss_p 1.266 loss_v 0.1341 (135s)
+    pass 4/8: loss_p 1.240 loss_v 0.1332 (180s)
+    pass 5/8: loss_p 1.176 loss_v 0.0996 (224s)
+    pass 6/8: loss_p 1.152 loss_v 0.1034 (269s)

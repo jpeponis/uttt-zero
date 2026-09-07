@@ -485,8 +485,15 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     ordinary convolutions of the expanded width).** Its value Brier is 0.002–0.006 worse
     (a narrower tied value read-out). The ordering holds on the positions with no canonical
     twin in train (1.014 / 1.012 / 1.006 / 0.969 / 1.006). Both equivariant arms pass §4's
-    gate (i) on the dev slice at equal cost; the sealed test read and the sample-efficiency
-    points are in PLAN6's log. *Supervised, dev slice.* `runs/plan6/G_arm_*.json`,
+    gate (i) on the dev slice at equal cost. **Sample efficiency (gate ii):** the G-CNN reaches
+    the ResNet's 3120-step KL (0.884) with half the data (200 000 × 8: 0.880) or half the
+    steps (400 000 × 4: 0.856); the tied heads do not (0.931 / 0.921). And for the G-CNN
+    the fit at equal steps depends on the number of distinct positions (0.856 vs 0.880 at
+    1560 steps, 400 000 vs 200 000 positions) where the ResNet's did not (47) — the
+    equivariant net is the first student that is partly data-limited. The mask arm's
+    endgame WDL is 67.2 / 67.3 % (ResNet 64.4 / 65.3; an earlier 48 % was an evaluation
+    artefact, fixed). *Supervised, dev slice; the sealed test read is in PLAN6's log.*
+    `runs/plan6/G_arm_*.json`, `runs/plan6/G0_gcnn8x16.json`, `runs/plan6/G0b_*.json`,
     `runs/plan6/G_timing_*.json`, `tests/test_equivariant.py`.
 
 ## 10. Open, and not claimed

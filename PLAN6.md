@@ -229,7 +229,15 @@ suite; the E7 worker gives the curve at ±2.8).**
   `probe.py`, `ownership_grade.py`); its regret (0.152, through the evaluator) was right. Rerun in queue 3.
 - **G queue 3 (11:00, 3060):** the mask arm again with the fix, and the sample-efficiency points of gate (ii)
   for the two winning arms (100k × 8, 200k × 8, 400k × 4; students saved under `runs/plan6/students/`).
-  Result: (pending — queue 3 running on the 3060 at hand-off; fill from `runs/plan6/G_queue.out`)
+  (11:25) the mask arm with the fix: endgame WDL **67.2 / 67.3 %** (ResNet 64.4 / 65.3) — its value head is
+  in fact slightly better, KL and regret unchanged (0.8769 / 0.8739; 0.152). Sample-efficiency points (dev KL;
+  the ResNet's own G0 points in brackets): gcnn8x16 100k × 8 = 776 steps **0.969** [ResNet at 780 steps 1.08],
+  200k × 8 = 1560 steps **0.880** [0.976], 400k × 4 = 1560 steps **0.856** [0.973]; resnet8_tied 1.022 / 0.931 /
+  0.921. **Gate (ii) — the ResNet's 400k × 8 KL (0.884) reached with half the data (200k × 8: 0.880) or half the
+  steps (400k × 4: 0.856) — passes for gcnn8x16 and fails for resnet8_tied.** A second thing the points show:
+  for the G-CNN the fit at equal steps is *not* a function of steps alone (0.856 vs 0.880 at 1560 steps with 2×
+  vs 1× the distinct positions), where the ResNet's was (0.973 vs 0.976) — the equivariant net extracts more per
+  update and is the first student here that is partly data-limited.
 - **G queue 4 — the sealed test read, once:** every arm at 400k × 8 seed 0 on `--split test`. Result:
   (pending — queue 4 waits for queue 3; fill from `runs/plan6/G_test_*.json`)
 
