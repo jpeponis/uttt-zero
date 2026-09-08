@@ -17,18 +17,22 @@ a named parent; judged on the frozen paired suite by the ±3-point rule, final c
 training run starts without the owner's approval; every claim about the game carries its level, CI,
 the nets it held on, and the file that produced it.
 
-## Handover (2026-09-07)
+## Handover (2026-09-08)
 
-**State (2026-09-07 13:20).** **H1b is running on the 3090:** `runs/deep8_c1_300_e4` (`runs/queue10.sh`, launched
-13:15 through `runs/launch_queue10_hidden.vbs`; retry wrapper, 6 attempts) — deep8_c1_300_e2's recipe with
-`--epochs 4` (1024 optimizer steps per iteration), `--eval_every 0 --ckpt_every 10 --anchors ""`. Iteration 0: 1024
-steps, 0 skipped, self-play 81.5 s + training 61.9 s; `run_status` ETA 07:17 on 2026-09-08 (+17.9 h). The E7 worker
-runs beside it on the 3060 (`runs/deep8_c1_300_e4_worker.out`; anchors v2b, deep8_c1_300_e2 (the parent),
-deep8_c1_300 at 64 sims on the full suite, endgame_v2_dev → `eval_full.jsonl`). At the end queue10 runs
-`eval_run.sh` (which now includes the parent matches `paired_vs_deep8c1_300e2_64.json` and, once it exists, `_e4`)
-and the endgame_v2_dev read into `analysis.out`. Status: `python tools/run_status.py runs/deep8_c1_300_e4 --ref
-runs/deep8_c1_300_e2`. Watch: a single-shot background `until [ -f runs/deep8_c1_300_e4/DONE ] || grep -q FAILED
-runs/deep8_c1_300_e4.out; do sleep 300; done` (the Monitor tool delivers nothing from these files on this machine).
+**State (2026-09-08 06:30).** H1b is done (the log's entry: +64 vs its parent, +363 vs v2b — helped, so the
+chain carries **E = 4**). **H4 is running on the 3090:** `runs/gcnn8_c1_300_e4` (`runs/queue11.sh` with `E=4` and
+`PARENT=deep8_c1_300_e4` set from that reading, launched 06:23 through `wscript runs/launch_queue11_hidden.vbs`;
+retry wrapper, 6 attempts) — the D4 group-convolutional net, `--gcnn 16 --filters 128 --blocks 8 --epochs 4`,
+everything else H1's recipe, `--eval_every 0 --ckpt_every 10 --anchors ""`. Iteration 0: 1024 steps, 0 skipped,
+self-play 85.5 s (the exported plain net costs what the ResNet's did — H1b's was 81.5 s) + training 93.2 s (H1b:
+61.9 s; the group convolution's weight expansion per forward makes a training step ≈ 1.5× the ResNet's); 0 crashes.
+`run_status` ETA 03:29 on 2026-09-09 (**+21 h — the proposal's "≈ 15–17 h" was low; read it as ≈ 21 h**). The E7
+worker runs beside it on the 3060 (`runs/gcnn8_c1_300_e4_worker.out`; anchors v2b, deep8_c1_300_e4 (the parent),
+deep8_c1_300 at 64 sims on the full suite, endgame_v2_dev → `eval_full.jsonl`). At the end queue11 runs
+`eval_run.sh` and the endgame_v2_dev read into `analysis.out`. Status: `python tools/run_status.py
+runs/gcnn8_c1_300_e4 --ref runs/deep8_c1_300_e4`. Watch: a single-shot background `until [ -f
+runs/gcnn8_c1_300_e4/DONE ] || grep -q "FAILED after" runs/gcnn8_c1_300_e4.out; do sleep 300; done` (the Monitor
+tool delivers nothing from these files on this machine).
 
 **The owner's decision (2026-09-07): H1b approved, and a conditional pre-approval of the chain H1b → H4 → H3.** The
 next run starts without asking *as long as the instance is under 50 % of its context window when it would start it*;
@@ -43,42 +47,39 @@ entry): on `deep8_c1_300_e2` the phased schedule is a null again (+11), the 8-wa
 deep10, the canonical evaluator a null again (+3). KNOWLEDGE 45 / 41 / 41b, README and RETROSPECTIVE §7 carry them.
 The play configuration stays flat `--sims 256` or more.
 
-The play agent is `runs/deep8_c1_300_e2/net_0300.pt` (+291 vs v2b; the log's H1 entry). Phase G is complete,
+The play agent is `runs/deep8_c1_300_e4/net_0300.pt` (+363 vs v2b; the log's H1b entry). Phase G is complete,
 including the one sealed test read. The G-CNN was smoke-tested through the self-play pipeline on 2026-09-07
 (`runs/probe_gcnn_smoke`, untracked, an untrained net: 4 iterations of 256 games on the 3060 — fused graph self-play,
 50 training steps per iteration with falling losses and no skipped steps, atomic checkpoints, a resume that restored
 the scaler and generators, and the E7 worker scoring its checkpoints against a ResNet anchor with the endgame set), so
-H4 is launchable as written. E11 (backup) stays deferred by the owner to the write-up; the repository has no remote.
+H4 was launchable as written. E11 (backup) stays deferred by the owner to the write-up; the repository has no remote.
 
 **The chain, with the recipes fixed by the rules already written.** Operational settings for every run: copy
-`runs/queue10.sh` (retry wrapper, `--eval_every 0 --ckpt_every 10`, the E7 worker on the 3060 with the parent among
+`runs/queue11.sh` (retry wrapper, `--eval_every 0 --ckpt_every 10`, the E7 worker on the 3060 with the parent among
 its anchors, `eval_run.sh` + the endgame_v2_dev read at the end), a `launch_queue<N>_run.cmd` and
 `launch_queue<N>_hidden.vbs` (sed the names), launched with `wscript runs/launch_queue<N>_hidden.vbs` from the repo
 root; the trainer must never share the 3090 with anything. Every reading: the *final* checkpoint on the full paired
 suite @64 against the named parent — ≥ 53 % helped, ≤ 47 % hurt, otherwise null — with the seed band (≈ 3 points)
 stated beside it. E below is the epochs the chain carries forward.
 
-1. **H1b `deep8_c1_300_e4` — running.** Primary `paired_vs_deep8c1_300e2_64.json`: **≥ 53 → still update-limited,
-   E = 4** (and an `--epochs 8` run is worth proposing after the chain); **47–53 → epochs 2 is the plateau, E = 2**;
-   **≤ 47 → over-fitting the 7.6-iteration buffer window, E = 2**, and the buffer size (not the update count) is the
-   knob to propose after the chain. Secondary: vs deep8_c1_300, deep10_c1_300, `_s1`, v2b (all in `analysis.out`);
-   the E7 curve against H1's (`runs/deep8_c1_300_e2/eval_full.jsonl`; H1 vs v2b: 10: 20.1, 50: 52.1, 100: 68.8,
-   150: 75.5, 200: 75.9, 210: 82.2, 220: 83.4, 260: 84.2, 280: 84.9, 300: 84.2); the budget axes (E8: steps skipped,
-   replay age, the sampled distinct-position fraction — H1: 3.35 iterations, 0.81 → 0.75, 70 of 153 600 skipped).
-   Tertiary: endgame_v2_dev raw WDL / regret vs 87.5 / 0.034 (endgame_v1 87.6 / 0.036). Write-up: a new KNOWLEDGE
-   claim 49 (and 46's last sentence), RETROSPECTIVE §2 ladder / §3 ledger / §7, README state and ladder, this log;
-   the play agent changes only if H1b helped.
-2. **H4 `gcnn8_c1_300_e<E>`** — `--gcnn 16 --filters 128 --blocks 8 --epochs <E>`, everything else as H1; parent
-   the chain's best 8-block net at epochs E (`deep8_c1_300_e4` if E = 4, else `_e2`). ≈ 15–17 h. Worker anchors:
-   v2b, the parent, deep8_c1_300. Primary vs the parent at 64 sims (equal inference cost by construction, so one
-   comparison serves both of §5 H4's requirements); secondary the D4 residual (0 by construction — `timeline.py`'s
-   D4 JS column should read 0.000) and the endgame reads. `--head_tying 1` on the plain trunk is the fallback if the
-   G-CNN misbehaves in RL (diverging losses, many skipped steps). The first play agent with exact symmetry if it wins.
-3. **H3 `deep8_c1_600_e<E>`** — `--iters 600 --lr_drops 500 --epochs <E>`, everything else as H1; parent the same
-   net as H4's. ≈ 30–35 h (late iterations run ≈ 15 % slower than the mean). Reading: the E7 full-suite curve from
-   300 to 500 — flat means duration is exhausted at this data rate, climbing means it is not — and the final net by
-   the rule against the parent. `eval_run.sh` discovers the last `net_*.pt`; the queue's endgame_v2_dev line must say
-   `net_0600.pt`.
+1. **H1b `deep8_c1_300_e4` — done 2026-09-08** (the log's entry). Primary `paired_vs_deep8c1_300e2_64.json`:
+   **59.1 % [56.3, 61.8], +64 Elo [+44, +83] — helped**, 6 points clear of the rule and twice the ≈ 3-point seed
+   band. **So the chain carries E = 4**: the learner is still update-limited at four passes, and an `--epochs 8`
+   run is worth proposing after the chain. Secondary and tertiary readings, the curve and the budget axes are in
+   the log entry; KNOWLEDGE 49 (43, 44, 46 extended), RETROSPECTIVE §2 / §3 / §7 and README carry them. The play
+   agent is now `runs/deep8_c1_300_e4/net_0300.pt`.
+2. **H4 `gcnn8_c1_300_e4` — running** (State, above). `--gcnn 16 --filters 128 --blocks 8 --epochs 4`, everything
+   else as H1; parent `deep8_c1_300_e4`. ≈ 21 h, not the 15–17 h proposed. Worker anchors: v2b, the parent,
+   deep8_c1_300. Primary vs the parent at 64 sims (equal inference cost by construction, so one comparison serves
+   both of §5 H4's requirements); secondary the D4 residual (0 by construction — `timeline.py`'s D4 JS column
+   should read 0.000, against 0.026 bits for the ResNet) and the endgame reads. `--head_tying 1` on the plain
+   trunk is the fallback if the G-CNN misbehaves in RL (diverging losses, many skipped steps). The first play
+   agent with exact symmetry if it wins.
+3. **H3 `deep8_c1_600_e4`** — `--iters 600 --lr_drops 500 --epochs 4`, everything else as H1; parent
+   `deep8_c1_300_e4`, the same net as H4's. ≈ 34–36 h (twice H1b's 16.9 h; its late iterations ran 224 s against
+   a 203 s mean). Reading: the E7 full-suite curve from 300 to 500 — flat means duration is exhausted at this data
+   rate, climbing means it is not — and the final net by the rule against the parent. `eval_run.sh` discovers the
+   last `net_*.pt`; the queue's endgame_v2_dev line must say `net_0600.pt`.
 
 Not proposed: H2 (the mask; its supervised gain is real but small — 0.008 in KL — and the licence it buys has no
 consumer yet); a 10-block anything (46, 48); self-play on the 3060 (§6).
@@ -239,6 +240,45 @@ consumer yet); a 10-block anything (46, 48); self-play on the 3060 (§6).
   ensembling gain as deep10's +35, at 8× the inference; the canonical evaluator @64 vs plain @64 **50.4 % [47.7,
   53.1], +3 [−16, +22]** — null (deep10: −3). KNOWLEDGE 45, 41, 41b restated with the new net; README and
   RETROSPECTIVE §7 updated. Play config unchanged.
+
+- **2026-09-08, H1b — `deep8_c1_300_e4` (owner-approved 2026-09-07, launched 2026-09-07 13:15, DONE 06:11 the
+  next morning after 16.9 h, 0 crashes).** `deep8_c1_300_e2`'s recipe with `--epochs 4` (1024 steps of batch 1024 per iteration instead of
+  512) and nothing else changed: the same 4096 × 64 new positions per iteration, the same 2 M-row buffer, the same
+  LR drops at 200 / 280, seed 0; `--eval_every 0 --ckpt_every 10 --anchors ""`, the E7 worker scoring every 10th
+  checkpoint on the full suite against v2b, the parent and deep8_c1_300. **Primary: 59.1 % [56.3, 61.8], +64 Elo
+  [+44, +83] vs `deep8_c1_300_e2` — helped**, 6 points clear of the rule and twice the ≈ 3-point seed band.
+  Secondary: 74.4 % [72.0, 76.7], +185 [+164, +207] vs deep8_c1_300; 69.2 % [66.7, 71.6], +141 [+121, +160] vs
+  deep10_c1_300 and 71.3 % [68.9, 73.6], +158 [+138, +178] vs its replicate; **89.0 % [87.4, 90.6], +363 Elo
+  [+337, +395] vs v2b**; +310 vs wide128_c1, +291 vs deep8_c1, 92.5 % [91.0, 94.0], +437 vs dev1. The worker's
+  independent final read agrees (`eval_full.jsonl` iteration 300: 0.890 vs v2b, 0.5906 vs the parent). The
+  full-suite curve (`eval_full.jsonl`, ±2.8, every 10 iterations, H1's beside it):
+
+  | iteration | 10 | 50 | 100 | 150 | 200 | 210 | 220 | 260 | 280 | 300 |
+  |---|---|---|---|---|---|---|---|---|---|---|
+  | H1b vs v2b | 24.7 | 67.0 | 75.0 | 79.1 | 80.5 | 86.1 | 87.3 | 86.6 | 87.2 | 89.0 |
+  | H1 vs v2b | 20.1 | 52.1 | 68.8 | 75.5 | 75.9 | 82.2 | 83.4 | 84.2 | 84.9 | 84.2 |
+  | H1b vs H1's final net | 8.1 | 20.6 | 30.2 | 38.9 | 47.3 | 52.7 | 56.2 | 57.7 | 55.3 | 59.1 |
+
+  The gain is built in the constant-LR phase and then carried: H1b leads H1 by 3.6–14.9 points at every
+  checkpoint to 200 (most of it early — +14.9 at iteration 50), and at 200, before its own drop, it is already
+  level with H1's *final* net (47.3 %). The first drop then does for it what it did for H1 — +5.6 (80.5 → 86.1)
+  against H1's +6.3, both inside F2's +4.8 … +8.5 band — and **220–300 is flat within ±3** (86.6–89.0 vs v2b; the
+  head-to-head wobbles 55.3–59.1 over the same window, a 3.8-point spread at the ≈ ±3 checkpoint noise floor), the
+  second drop nothing. Tertiary: endgame_v1 raw WDL **90.1 % [89.0, 91.2]**, draw recognition 79.0 %, regret 0.022
+  [0.016, 0.028], optimal 98.1 % (H1 87.6 / 74.8 / 0.036; deep10 84.6 / 0.037); endgame_v2_dev 90.5 [89.5, 91.6],
+  regret 0.029 [0.023, 0.036] (H1 87.5 / 0.034); the 256-sim search 99.9 % optimal and 0.001 regret on both.
+  Timeline (`runs/plan6/H1b_timeline.out`, 20 000 held-out positions from deep10_c1_300): endgame WDL 62.3 → 90.1
+  and draw recognition 25.7 → 79.0 % over the run, stepping at the first drop as every run's does; final **D4 JS
+  0.026 bits, value std 0.052** — H1's 0.026 / 0.050, so four passes bought no more symmetry consistency than two.
+  Budget axes (E8): 133 of 307 200 steps skipped by the GradScaler (H1 70 of 153 600 — the same rate); mean sampled
+  replay age 3.35 iterations of a 7.6-iteration buffer window (H1 3.35); sampled distinct-position fraction
+  0.67 → 0.62 (H1 0.81 → 0.75 — each row is now drawn twice as often); policy-target entropy 0.15 bits; raw/search
+  KL 1.13 → 0.84 (1.22 → 0.84); root Q range 0.41 → 0.50 (0.39 → 0.46); self-play games 52.8 plies (52.5), draws
+  16.6 % (15.5 %). Cost: t_train 4.98 h vs 2.55 h, t_selfplay 11.93 h vs 12.06 h; wall 16.9 h vs 14.6 h; the net is
+  the same 8×128 ResNet, so it costs exactly what H1's costs to evaluate. **Reading: still update-limited at four
+  passes — E = 4 for the chain**, and an `--epochs 8` run is worth proposing after it. H4 was launched at 06:23 on
+  2026-09-08 at `--epochs 4` with `deep8_c1_300_e4` as its parent (Handover). KNOWLEDGE 49 (43, 44, 46 extended);
+  RETROSPECTIVE §2, §3, §7; README. The play agent changes to `deep8_c1_300_e4/net_0300.pt`.
 
 ## 0. The decision in front of the project
 

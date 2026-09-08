@@ -48,18 +48,21 @@ Read in this order:
    claude in the PLAN3 era, adjudicated in PLAN4). References such as "PLAN4 §3c" in the
    live files mean these.
 
-## Current state (2026-09-07)
+## Current state (2026-09-08)
 
-- **Best network:** `runs/deep8_c1_300_e2/net_0300.pt` — 8 residual blocks of 128
-  filters, 300 iterations, **512 optimizer steps per iteration** (PLAN6 H1, 2026-09-07):
-  +291 Elo over the `v2b` reference at 64 search simulations per move (84 % expected
-  score), **+100 over its parent deep8_c1_300 and +86 over the previous best,
-  deep10_c1_300**, for 1.3 extra hours of training. The learner had been update-limited
-  all along (KNOWLEDGE 46, 47).
+- **Best network:** `runs/deep8_c1_300_e4/net_0300.pt` — 8 residual blocks of 128
+  filters, 300 iterations, **1024 optimizer steps per iteration** (PLAN6 H1b, 2026-09-08):
+  +363 Elo over the `v2b` reference at 64 search simulations per move (89 % expected
+  score), **+64 over its parent deep8_c1_300_e2, +185 over deep8_c1_300 and +141 over
+  deep10_c1_300**, for 2.4 extra hours of training. Two doublings of the update count, one
+  after the other, are worth +164 between them: the learner had been update-limited all
+  along, and four sampled examples per generated position is still not the plateau
+  (KNOWLEDGE 46, 47, 49).
 - **Play configuration:** a flat `--sims 256` or more. The phased search schedule
   (`"0:128,24:384"`, fewer simulations early and more late) helped earlier nets but is
   **not** confirmed on the strong ones: +10 [−7, +26] on deep10 (PLAN5 §2 A8c) and +11
-  [−6, +26] on this net (2026-09-07), both below the project's ±3-point rule.
+  [−6, +26] on `deep8_c1_300_e2` (2026-09-07), both below the project's ±3-point rule; not
+  re-run on the new net.
 - **The ladder is paused by owner directive** (PLAN4 §3c, PLAN5 §5): no new rung without the
   owner's approval. **The one owner-approved run, D1 — the seed replicate
   `runs/deep10_c1_300_s1` (same recipe as the best net, `--seed 1`) — finished 2026-09-05**
@@ -75,8 +78,9 @@ Read in this order:
   the reference (one perturbed run read against the seed band — "same seed" only fixes the
   start here, PLAN6 §1 item 13), −10 against the replicate, +193 vs v2b. The drop is a fixed
   ≈ +9 step on whatever the constant-LR phase has built; no strength gain resolves after it
-  (the raw head's endgame reads creep a few points; PLAN5 §5 D3, KNOWLEDGE 42). Nothing is
-  running; the ladder stays paused.
+  (the raw head's endgame reads creep a few points; PLAN5 §5 D3, KNOWLEDGE 42). Nothing was
+  running when PLAN6 opened; the ladder still moves only by owner approval — the approved
+  chain is below.
 - **PLAN6 (2026-09-06), after an outside review of the project's method and its use of the
   game's symmetry:** the review found two bugs in the opening-book instrument (one orbit
   listed three times as the "top three" replies; principal lines that mixed coordinate
@@ -94,7 +98,11 @@ Read in this order:
   positions labelled by deep10 8-way @256: the fit depends on optimizer steps, not on distinct
   positions; a D4 group-convolutional net at the same cost fits the teacher far better than the
   ResNet, tied heads alone a third as much, depth not at all — `uttt/equivariant.py`) and **H1**,
-  above. See PLAN6's log; proposals for the next runs in its Handover.
+  above. **On 2026-09-07 the owner approved a chain of three runs, H1b → H4 → H3.** H1b
+  (`deep8_c1_300_e4`, `--epochs 4`) ran 2026-09-07/08 and helped, above; **H4
+  (`runs/gcnn8_c1_300_e4`, the D4 group-convolutional net in self-play at the same inference
+  cost) has been training on the 3090 since 06:23 on 2026-09-08** (≈ 21 h), and H3
+  (`deep8_c1_600_e4`, 600 iterations) follows it. See PLAN6's log and Handover.
 - **Analysis programme (PLAN5 Phases A–C): complete, 2026-09-03.** Every ordering and sign
   from the earlier nets held on the +242 net; two magnitudes moved (the free-move value,
   +0.16 → +0.20, and a small residual value per owned board once macro lines are
@@ -106,7 +114,7 @@ Read in this order:
   book to depth 4 has the two strong nets agreeing on 75 % of nodes and a reply rule (the
   self-send); a legible linear surrogate captures 41 % of the search's moves and none of
   the strength (−661 Elo vs v2b); the one-open-board tablebase adds nothing because every
-  net already plays that phase perfectly. **`KNOWLEDGE.md` holds the claims** (49, each with
+  net already plays that phase perfectly. **`KNOWLEDGE.md` holds the claims** (53, each with
   level, effect size, CI, nets, tool and file); PLAN5 §2–§4 hold the working notes.
 
 The strength ladder. Each run changed one thing from the run above it. Elo is measured on
@@ -127,7 +135,8 @@ perfect). Details in RETROSPECTIVE §2.
 | deep10_c1_300 | + blocks 10 | +242 | 84.6 / 0.037 |
 | deep10_c1_300_s1 | same recipe, seed 1 (replicate) | +213 | 83.9 / 0.047 |
 | deep10_c1_300_lr150 | LR drops at 150/250 (hurt) | +193 | 83.3 / 0.051 |
-| **deep8_c1_300_e2** | **deep8_c1_300 + 512 steps / iteration (`--epochs 2`)** | **+291** | **87.6 / 0.036** |
+| deep8_c1_300_e2 | + 512 steps / iteration (`--epochs 2`) | +291 | 87.6 / 0.036 |
+| **deep8_c1_300_e4** | **+ 1024 steps / iteration (`--epochs 4`)** | **+363** | **90.1 / 0.022** |
 
 ## Where things live
 
@@ -212,7 +221,7 @@ the fifth prints statistics over a run's last 20 iterations of self-play games; 
 plays a paired-suite match between two checkpoints and reports the score, Elo and
 confidence interval; the seventh plays against a net in the terminal; the last serves the
 local web UI for play and analysis. To play the current best net, substitute
-`runs/deep8_c1_300_e2/net_0300.pt` for the checkpoint path.
+`runs/deep8_c1_300_e4/net_0300.pt` for the checkpoint path.
 
 Move index convention everywhere: `m = 9*board + cell`, board and cell both
 row-major in their 3×3 grids (so 40 = centre of the centre board).

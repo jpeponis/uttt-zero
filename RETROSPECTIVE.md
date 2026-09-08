@@ -52,6 +52,7 @@ playing its preferred move instead of the best one (0 = perfect).
 | deep10_c1_300_s1 | same recipe, seed 1 (the replicate, PLAN5 §5 D1) | +213 | 83.9 / 0.047 |
 | deep10_c1_300_lr150 | LR drops at 150/250 instead of 200/280 (PLAN5 §5 D3) | +193 | 83.3 / 0.051 |
 | **deep8_c1_300_e2** | **deep8_c1_300 + `--epochs 2` (512 optimizer steps per iteration; PLAN6 H1)** | **+291** | **87.6 / 0.036** |
+| **deep8_c1_300_e4** | **deep8_c1_300_e2 + `--epochs 4` (1024 optimizer steps per iteration; PLAN6 H1b)** | **+363** | **90.1 / 0.022** |
 
 Absolute anchor: v2b@64 is ≈ +169 over a rollout UCT with 100 k playouts per move (the
 recipe of the strong CodinGame bots, which run plain tree search with random playouts),
@@ -69,6 +70,13 @@ confirmed rung is duration, +211; deep10_c1_300 remains the strongest single net
 else changed, is +100 [+81, +119] over deep8_c1_300, +86 over deep10_c1_300 and +291 [+266,
 +318] over v2b — the strongest net and the largest single step of the ladder, for +1.3 h of
 training. The play agent is now `deep8_c1_300_e2/net_0300.pt`.)*
+*(Addendum 2026-09-08, PLAN6 H1b: doubling them a second time — 1024 optimizer steps per
+iteration, nothing else changed — is +64 [+44, +83] over `deep8_c1_300_e2`, +185 over
+deep8_c1_300, +141 over deep10_c1_300 and +363 [+337, +395] over v2b, for +2.4 h of training
+on a 16.9 h run. Two passes over each generated position was not the plateau either. The raw
+value head now names 90.1 % of solved endgames correctly, recognises 79 % of the exact draws
+and loses 0.022 of value to its preferred move. The play agent is now
+`deep8_c1_300_e4/net_0300.pt`.)*
 
 ## 3. What makes an AlphaZero recipe stronger here — the validated ledger
 
@@ -126,6 +134,17 @@ training. The play agent is now `deep8_c1_300_e2/net_0300.pt`.)*
   The supervised twin (KNOWLEDGE 47): on a fixed teacher the fit depends on optimizer
   steps, not on distinct positions — eight passes over 50 000 positions equal one pass over
   400 000. Corollary for the next runs: dose–response (`--epochs 4`) before more games.
+  *(2026-09-08, PLAN6 H1b, KNOWLEDGE 49: the dose–response answered — **512 → 1024 steps is
+  another +64** [+44, +83] over `deep8_c1_300_e2` and +363 over v2b, for ≈ +2.5 h of training
+  (t_train 4.98 h against 2.55 h) on a 16.9 h run. Four sampled examples per generated position
+  is still not the plateau: the learner is update-limited at two passes exactly as it was at
+  one, and nothing complains — the sampled replay age is unchanged at 3.35 iterations of a
+  7.6-iteration buffer window, and 133 of 307 200 steps were skipped by the GradScaler, H1's
+  rate. What this says about where the ladder's rungs came from: the largest confirmed rung,
+  duration (+127), was mostly its updates; pulling the update lever on its own has now added
+  +164 more on top of it; and the two depth rungs it was weighed against (+23 for 6 → 8 blocks,
+  +35 for 8 → 10, the latter inside the seed band) were measured on nets trained at a quarter
+  of the updates the same data supports.)*
 
 **Did nothing (each a clean, CI-bounded null):** exact endgame labels (replacing the
 self-play outcome z with solver values as the value target — z was already exact in
@@ -234,11 +253,17 @@ where noted:
 
 ## 7. Where things stand, and the open list for whenever work resumes
 
-- **Best net** `runs/deep8_c1_300_e2/net_0300.pt` (2026-09-07; +291 vs v2b, +100 vs
-  deep8_c1_300, +86 vs deep10_c1_300); play config: flat `--sims 256` or more (the phased
-  schedule is +10 on deep10 and +11 [−6, +26] on this net — not confirmed on either; the
-  8-way average is +32 here as it was +35 on deep10, the canonical evaluator a null on both). Web UI:
-  `python web/server.py runs/deep8_c1_300_e2/net_0300.pt --sims 800 --device cuda:1`.
+- **Best net** `runs/deep8_c1_300_e4/net_0300.pt` (2026-09-08; +363 vs v2b, +64 vs
+  `deep8_c1_300_e2`, +185 vs deep8_c1_300, +141 vs deep10_c1_300); play config unchanged: flat
+  `--sims 256` or more (the phased schedule is +10 on deep10 and +11 [−6, +26] on `_e2` — not
+  confirmed on either; the 8-way average is +32 there as it was +35 on deep10, the canonical
+  evaluator a null on both; none of the three re-run on `_e4`). Web UI:
+  `python web/server.py runs/deep8_c1_300_e4/net_0300.pt --sims 800 --device cuda:1`.
+- **A chain of three runs is in progress** (PLAN6 Handover, owner-approved 2026-09-07, one
+  change per run): H1b `deep8_c1_300_e4` done 2026-09-08 (+64, above); **H4
+  `gcnn8_c1_300_e4`** — the D4 group-convolutional net in self-play, exactly equivariant at
+  the same inference cost — training on the 3090 since 06:23 on 2026-09-08, ≈ 21 h; **H3
+  `deep8_c1_600_e4`** (600 iterations, one LR drop at 500, ≈ 35 h) after it.
 - **Neither depth nor duration is exhausted** — 12-block and 600-iteration runs are the
   obvious continuations, each a committed GPU-day, both on hold per the pause. *(2026-09-06:
   depth 8 → 10 is inside the seed band and an earlier LR drop hurts, so the continuation the
