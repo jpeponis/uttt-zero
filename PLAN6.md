@@ -75,7 +75,7 @@ stated beside it. E below is the epochs the chain carries forward.
    should read 0.000, against 0.026 bits for the ResNet) and the endgame reads. `--head_tying 1` on the plain
    trunk is the fallback if the G-CNN misbehaves in RL (diverging losses, many skipped steps). The first play
    agent with exact symmetry if it wins.
-3. **H3 `deep8_c1_600_e4`** — `--iters 600 --lr_drops 500 --epochs 4`, everything else as H1; parent
+3. **H3 `deep8_c1_600_e4`** (staged: `runs/queue12.sh` + `runs/launch_queue12_hidden.vbs`, ready to launch once H4 is DONE and written up) — `--iters 600 --lr_drops 500 --epochs 4`, everything else as H1; parent
    `deep8_c1_300_e4`, the same net as H4's. ≈ 34–36 h (twice H1b's 16.9 h; its late iterations ran 224 s against
    a 203 s mean). Reading: the E7 full-suite curve from 300 to 500 — flat means duration is exhausted at this data
    rate, climbing means it is not — and the final net by the rule against the parent. `eval_run.sh` discovers the
