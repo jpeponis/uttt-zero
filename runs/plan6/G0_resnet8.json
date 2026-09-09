@@ -1,0 +1,608 @@
+{
+ "data": "runs/gdata_v1.npz",
+ "meta": {
+  "corpus": "runs/deep10_c1_300_s1",
+  "files": [
+   "games_0280.npz",
+   "games_0281.npz",
+   "games_0282.npz",
+   "games_0283.npz",
+   "games_0284.npz",
+   "games_0285.npz",
+   "games_0286.npz",
+   "games_0287.npz",
+   "games_0288.npz",
+   "games_0289.npz",
+   "games_0290.npz",
+   "games_0291.npz",
+   "games_0292.npz",
+   "games_0293.npz",
+   "games_0294.npz",
+   "games_0295.npz",
+   "games_0296.npz",
+   "games_0297.npz",
+   "games_0298.npz",
+   "games_0299.npz"
+  ],
+  "n": 500000,
+  "mixture": [
+   0.03,
+   0.18,
+   0.25,
+   0.29,
+   0.25
+  ],
+  "ply_buckets": [
+   [
+    0,
+    7
+   ],
+   [
+    8,
+    19
+   ],
+   [
+    20,
+    31
+   ],
+   [
+    32,
+    43
+   ],
+   [
+    44,
+    81
+   ]
+  ],
+  "teacher": "runs/deep10_c1_300/net_0300.pt",
+  "sims": 256,
+  "symmetry_averaged": true,
+  "max_exact": 14,
+  "seed": 0,
+  "split": "0 train / 1 dev / 2 test (by source game; test sealed until the end of PLAN6 Phase G)",
+  "overlap": {
+   "train_dev": 9410,
+   "train_test": 9499,
+   "dev_test": 3658,
+   "distinct": [
+    297199,
+    42796,
+    42927
+   ]
+  },
+  "built": "2026-09-06 17:36",
+  "seconds": 11582
+ },
+ "split": "dev",
+ "set": "suites/endgame_v2_dev.npz",
+ "results": [
+  {
+   "arm": "resnet8",
+   "positions": 50000,
+   "passes": 1,
+   "seed": 0,
+   "steps": 48,
+   "t_train": 6,
+   "params": 2456014,
+   "dev": {
+    "n": 49726,
+    "policy_kl": 1.4466753005981445,
+    "policy_top1": 0.26062825322151184,
+    "value_brier": 0.23663175106048584,
+    "exact_acc3": 0.23095270991325378,
+    "n_solved": 7547,
+    "disjoint": {
+     "n": 33616,
+     "policy_kl": 1.4623163938522339,
+     "policy_top1": 0.23295454680919647,
+     "value_brier": 0.27294859290122986
+    }
+   },
+   "endgame": {
+    "set": "endgame_v2_dev",
+    "wdl_acc": 0.36566666666666664,
+    "regret_raw": 0.48833333333333334,
+    "optimal_raw": 0.6583333333333333
+   },
+   "d4_policy_js_bits": 0.0822201818227768,
+   "d4_value_std": 0.04742142930626869,
+   "ms_batch4096": 84.70839000001433,
+   "ms_batch1": 0.30218499996408354
+  },
+  {
+   "arm": "resnet8",
+   "positions": 50000,
+   "passes": 2,
+   "seed": 0,
+   "steps": 96,
+   "t_train": 11,
+   "params": 2456014,
+   "dev": {
+    "n": 49726,
+    "policy_kl": 1.4030940532684326,
+    "policy_top1": 0.2926839292049408,
+    "value_brier": 0.18931333720684052,
+    "exact_acc3": 0.4645554721355438,
+    "n_solved": 7547,
+    "disjoint": {
+     "n": 33616,
+     "policy_kl": 1.4467915296554565,
+     "policy_top1": 0.25493812561035156,
+     "value_brier": 0.22563573718070984
+    }
+   },
+   "endgame": {
+    "set": "endgame_v2_dev",
+    "wdl_acc": 0.42033333333333334,
+    "regret_raw": 0.4723333333333333,
+    "optimal_raw": 0.665
+   },
+   "d4_policy_js_bits": 0.023429132997989655,
+   "d4_value_std": 0.07244668155908585,
+   "ms_batch4096": 84.91334000009374,
+   "ms_batch1": 0.3030699999726494
+  },
+  {
+   "arm": "resnet8",
+   "positions": 50000,
+   "passes": 4,
+   "seed": 0,
+   "steps": 192,
+   "t_train": 22,
+   "params": 2456014,
+   "dev": {
+    "n": 49726,
+    "policy_kl": 1.2932225465774536,
+    "policy_top1": 0.3590677082538605,
+    "value_brier": 0.17342662811279297,
+    "exact_acc3": 0.5289519429206848,
+    "n_solved": 7547,
+    "disjoint": {
+     "n": 33616,
+     "policy_kl": 1.373997688293457,
+     "policy_top1": 0.3153557777404785,
+     "value_brier": 0.2092614769935608
+    }
+   },
+   "endgame": {
+    "set": "endgame_v2_dev",
+    "wdl_acc": 0.44433333333333336,
+    "regret_raw": 0.4026666666666667,
+    "optimal_raw": 0.711
+   },
+   "d4_policy_js_bits": 0.040764983743429184,
+   "d4_value_std": 0.061531342566013336,
+   "ms_batch4096": 84.85110500005248,
+   "ms_batch1": 0.309689999994589
+  },
+  {
+   "arm": "resnet8",
+   "positions": 50000,
+   "passes": 8,
+   "seed": 0,
+   "steps": 384,
+   "t_train": 44,
+   "params": 2456014,
+   "dev": {
+    "n": 49726,
+    "policy_kl": 1.18793785572052,
+    "policy_top1": 0.4150344133377075,
+    "value_brier": 0.1581229269504547,
+    "exact_acc3": 0.5881807804107666,
+    "n_solved": 7547,
+    "disjoint": {
+     "n": 33616,
+     "policy_kl": 1.2873202562332153,
+     "policy_top1": 0.365510493516922,
+     "value_brier": 0.19230365753173828
+    }
+   },
+   "endgame": {
+    "set": "endgame_v2_dev",
+    "wdl_acc": 0.49866666666666665,
+    "regret_raw": 0.3363333333333333,
+    "optimal_raw": 0.7516666666666667
+   },
+   "d4_policy_js_bits": 0.04832267761230469,
+   "d4_value_std": 0.051507286727428436,
+   "ms_batch4096": 85.22902000004251,
+   "ms_batch1": 0.314645000071323
+  },
+  {
+   "arm": "resnet8",
+   "positions": 100000,
+   "passes": 1,
+   "seed": 0,
+   "steps": 97,
+   "t_train": 11,
+   "params": 2456014,
+   "dev": {
+    "n": 49726,
+    "policy_kl": 1.403082251548767,
+    "policy_top1": 0.29113543033599854,
+    "value_brier": 0.18982604146003723,
+    "exact_acc3": 0.4689280688762665,
+    "n_solved": 7547,
+    "disjoint": {
+     "n": 33616,
+     "policy_kl": 1.4472508430480957,
+     "policy_top1": 0.2513684034347534,
+     "value_brier": 0.22649002075195312
+    }
+   },
+   "endgame": {
+    "set": "endgame_v2_dev",
+    "wdl_acc": 0.41933333333333334,
+    "regret_raw": 0.46366666666666667,
+    "optimal_raw": 0.67
+   },
+   "d4_policy_js_bits": 0.02482169307768345,
+   "d4_value_std": 0.07515271008014679,
+   "ms_batch4096": 85.31592500003171,
+   "ms_batch1": 0.3096649999861256
+  },
+  {
+   "arm": "resnet8",
+   "positions": 100000,
+   "passes": 2,
+   "seed": 0,
+   "steps": 194,
+   "t_train": 22,
+   "params": 2456014,
+   "dev": {
+    "n": 49726,
+    "policy_kl": 1.2932170629501343,
+    "policy_top1": 0.3588666021823883,
+    "value_brier": 0.17015044391155243,
+    "exact_acc3": 0.5198092460632324,
+    "n_solved": 7547,
+    "disjoint": {
+     "n": 33616,
+     "policy_kl": 1.3764278888702393,
+     "policy_top1": 0.31407663226127625,
+     "value_brier": 0.20463383197784424
+    }
+   },
+   "endgame": {
+    "set": "endgame_v2_dev",
+    "wdl_acc": 0.44433333333333336,
+    "regret_raw": 0.42433333333333334,
+    "optimal_raw": 0.6963333333333334
+   },
+   "d4_policy_js_bits": 0.03948340564966202,
+   "d4_value_std": 0.05908358097076416,
+   "ms_batch4096": 85.32816000006278,
+   "ms_batch1": 0.3083199999309727
+  },
+  {
+   "arm": "resnet8",
+   "positions": 100000,
+   "passes": 4,
+   "seed": 0,
+   "steps": 388,
+   "t_train": 44,
+   "params": 2456014,
+   "dev": {
+    "n": 49726,
+    "policy_kl": 1.1866248846054077,
+    "policy_top1": 0.4138478934764862,
+    "value_brier": 0.15674245357513428,
+    "exact_acc3": 0.590168297290802,
+    "n_solved": 7547,
+    "disjoint": {
+     "n": 33616,
+     "policy_kl": 1.284521222114563,
+     "policy_top1": 0.3634876310825348,
+     "value_brier": 0.19064344465732574
+    }
+   },
+   "endgame": {
+    "set": "endgame_v2_dev",
+    "wdl_acc": 0.49033333333333334,
+    "regret_raw": 0.3293333333333333,
+    "optimal_raw": 0.7613333333333333
+   },
+   "d4_policy_js_bits": 0.04726845398545265,
+   "d4_value_std": 0.051007725298404694,
+   "ms_batch4096": 85.33913499995833,
+   "ms_batch1": 0.30919500004529255
+  },
+  {
+   "arm": "resnet8",
+   "positions": 100000,
+   "passes": 8,
+   "seed": 0,
+   "steps": 776,
+   "t_train": 87,
+   "params": 2456014,
+   "dev": {
+    "n": 49726,
+    "policy_kl": 1.0820045471191406,
+    "policy_top1": 0.46173030138015747,
+    "value_brier": 0.14016221463680267,
+    "exact_acc3": 0.6435670256614685,
+    "n_solved": 7547,
+    "disjoint": {
+     "n": 33616,
+     "policy_kl": 1.1955841779708862,
+     "policy_top1": 0.4071275591850281,
+     "value_brier": 0.1721237748861313
+    }
+   },
+   "endgame": {
+    "set": "endgame_v2_dev",
+    "wdl_acc": 0.527,
+    "regret_raw": 0.28833333333333333,
+    "optimal_raw": 0.7873333333333333
+   },
+   "d4_policy_js_bits": 0.05402311682701111,
+   "d4_value_std": 0.053187884390354156,
+   "ms_batch4096": 85.28157000000647,
+   "ms_batch1": 0.3349700000399025
+  },
+  {
+   "arm": "resnet8",
+   "positions": 200000,
+   "passes": 1,
+   "seed": 0,
+   "steps": 195,
+   "t_train": 22,
+   "params": 2456014,
+   "dev": {
+    "n": 49726,
+    "policy_kl": 1.2880655527114868,
+    "policy_top1": 0.3653219938278198,
+    "value_brier": 0.1716894954442978,
+    "exact_acc3": 0.5252418518066406,
+    "n_solved": 7547,
+    "disjoint": {
+     "n": 33616,
+     "policy_kl": 1.373009204864502,
+     "policy_top1": 0.31946098804473877,
+     "value_brier": 0.20661266148090363
+    }
+   },
+   "endgame": {
+    "set": "endgame_v2_dev",
+    "wdl_acc": 0.44566666666666666,
+    "regret_raw": 0.403,
+    "optimal_raw": 0.7126666666666667
+   },
+   "d4_policy_js_bits": 0.041224800050258636,
+   "d4_value_std": 0.05653983727097511,
+   "ms_batch4096": 85.32578499998635,
+   "ms_batch1": 0.30919500004529255
+  },
+  {
+   "arm": "resnet8",
+   "positions": 200000,
+   "passes": 2,
+   "seed": 0,
+   "steps": 390,
+   "t_train": 44,
+   "params": 2456014,
+   "dev": {
+    "n": 49726,
+    "policy_kl": 1.182217001914978,
+    "policy_top1": 0.4176487326622009,
+    "value_brier": 0.15947774052619934,
+    "exact_acc3": 0.585530698299408,
+    "n_solved": 7547,
+    "disjoint": {
+     "n": 33616,
+     "policy_kl": 1.279121994972229,
+     "policy_top1": 0.3664921522140503,
+     "value_brier": 0.19307570159435272
+    }
+   },
+   "endgame": {
+    "set": "endgame_v2_dev",
+    "wdl_acc": 0.49433333333333335,
+    "regret_raw": 0.35133333333333333,
+    "optimal_raw": 0.7443333333333333
+   },
+   "d4_policy_js_bits": 0.042827628552913666,
+   "d4_value_std": 0.05118469148874283,
+   "ms_batch4096": 85.31505499995546,
+   "ms_batch1": 0.3112200000032317
+  },
+  {
+   "arm": "resnet8",
+   "positions": 200000,
+   "passes": 4,
+   "seed": 0,
+   "steps": 780,
+   "t_train": 88,
+   "params": 2456014,
+   "dev": {
+    "n": 49726,
+    "policy_kl": 1.0759316682815552,
+    "policy_top1": 0.45994049310684204,
+    "value_brier": 0.13976599276065826,
+    "exact_acc3": 0.6403869390487671,
+    "n_solved": 7547,
+    "disjoint": {
+     "n": 33616,
+     "policy_kl": 1.1865090131759644,
+     "policy_top1": 0.4082282483577728,
+     "value_brier": 0.1711576282978058
+    }
+   },
+   "endgame": {
+    "set": "endgame_v2_dev",
+    "wdl_acc": 0.537,
+    "regret_raw": 0.28,
+    "optimal_raw": 0.79
+   },
+   "d4_policy_js_bits": 0.04844372719526291,
+   "d4_value_std": 0.053506672382354736,
+   "ms_batch4096": 85.31249000006937,
+   "ms_batch1": 0.3083850000621169
+  },
+  {
+   "arm": "resnet8",
+   "positions": 200000,
+   "passes": 8,
+   "seed": 0,
+   "steps": 1560,
+   "t_train": 176,
+   "params": 2456014,
+   "dev": {
+    "n": 49726,
+    "policy_kl": 0.9758250713348389,
+    "policy_top1": 0.5107589960098267,
+    "value_brier": 0.12412499636411667,
+    "exact_acc3": 0.7051808834075928,
+    "n_solved": 7547,
+    "disjoint": {
+     "n": 33616,
+     "policy_kl": 1.0992366075515747,
+     "policy_top1": 0.45279034972190857,
+     "value_brier": 0.15313084423542023
+    }
+   },
+   "endgame": {
+    "set": "endgame_v2_dev",
+    "wdl_acc": 0.586,
+    "regret_raw": 0.22933333333333333,
+    "optimal_raw": 0.8246666666666667
+   },
+   "d4_policy_js_bits": 0.054902173578739166,
+   "d4_value_std": 0.05492446944117546,
+   "ms_batch4096": 85.29065500006254,
+   "ms_batch1": 0.3129849999822909
+  },
+  {
+   "arm": "resnet8",
+   "positions": 400000,
+   "passes": 1,
+   "seed": 0,
+   "steps": 390,
+   "t_train": 44,
+   "params": 2456014,
+   "dev": {
+    "n": 49726,
+    "policy_kl": 1.182560682296753,
+    "policy_top1": 0.41225919127464294,
+    "value_brier": 0.157366082072258,
+    "exact_acc3": 0.5826156139373779,
+    "n_solved": 7547,
+    "disjoint": {
+     "n": 33616,
+     "policy_kl": 1.278009295463562,
+     "policy_top1": 0.3638148605823517,
+     "value_brier": 0.19100362062454224
+    }
+   },
+   "endgame": {
+    "set": "endgame_v2_dev",
+    "wdl_acc": 0.49266666666666664,
+    "regret_raw": 0.32566666666666666,
+    "optimal_raw": 0.762
+   },
+   "d4_policy_js_bits": 0.04197709262371063,
+   "d4_value_std": 0.04976040497422218,
+   "ms_batch4096": 85.32379499993112,
+   "ms_batch1": 0.31220000000757864
+  },
+  {
+   "arm": "resnet8",
+   "positions": 400000,
+   "passes": 2,
+   "seed": 0,
+   "steps": 780,
+   "t_train": 88,
+   "params": 2456014,
+   "dev": {
+    "n": 49726,
+    "policy_kl": 1.07481050491333,
+    "policy_top1": 0.4674617052078247,
+    "value_brier": 0.14122407138347626,
+    "exact_acc3": 0.6394594311714172,
+    "n_solved": 7547,
+    "disjoint": {
+     "n": 33616,
+     "policy_kl": 1.1827763319015503,
+     "policy_top1": 0.411500483751297,
+     "value_brier": 0.17265957593917847
+    }
+   },
+   "endgame": {
+    "set": "endgame_v2_dev",
+    "wdl_acc": 0.5313333333333333,
+    "regret_raw": 0.2806666666666667,
+    "optimal_raw": 0.7896666666666666
+   },
+   "d4_policy_js_bits": 0.046797025948762894,
+   "d4_value_std": 0.05046685039997101,
+   "ms_batch4096": 85.35080000001471,
+   "ms_batch1": 0.3108799999608891
+  },
+  {
+   "arm": "resnet8",
+   "positions": 400000,
+   "passes": 4,
+   "seed": 0,
+   "steps": 1560,
+   "t_train": 199,
+   "params": 2456014,
+   "dev": {
+    "n": 49726,
+    "policy_kl": 0.9730685353279114,
+    "policy_top1": 0.5097735524177551,
+    "value_brier": 0.12335599958896637,
+    "exact_acc3": 0.7039883732795715,
+    "n_solved": 7547,
+    "disjoint": {
+     "n": 33616,
+     "policy_kl": 1.0907130241394043,
+     "policy_top1": 0.4556461274623871,
+     "value_brier": 0.1520007848739624
+    }
+   },
+   "endgame": {
+    "set": "endgame_v2_dev",
+    "wdl_acc": 0.5893333333333334,
+    "regret_raw": 0.211,
+    "optimal_raw": 0.837
+   },
+   "d4_policy_js_bits": 0.051926225423812866,
+   "d4_value_std": 0.051253847777843475,
+   "ms_batch4096": 225.96647499995015,
+   "ms_batch1": 0.808839999990596
+  },
+  {
+   "arm": "resnet8",
+   "positions": 400000,
+   "passes": 8,
+   "seed": 0,
+   "steps": 3120,
+   "t_train": 957,
+   "params": 2456014,
+   "dev": {
+    "n": 49726,
+    "policy_kl": 0.8839223980903625,
+    "policy_top1": 0.5519446730613708,
+    "value_brier": 0.10976018011569977,
+    "exact_acc3": 0.7555320262908936,
+    "n_solved": 7547,
+    "disjoint": {
+     "n": 33616,
+     "policy_kl": 1.0136890411376953,
+     "policy_top1": 0.4917301535606384,
+     "value_brier": 0.13596487045288086
+    }
+   },
+   "endgame": {
+    "set": "endgame_v2_dev",
+    "wdl_acc": 0.644,
+    "regret_raw": 0.16433333333333333,
+    "optimal_raw": 0.8683333333333333
+   },
+   "d4_policy_js_bits": 0.05611060559749603,
+   "d4_value_std": 0.0522453710436821,
+   "ms_batch4096": 85.3366700001061,
+   "ms_batch1": 0.30728500005352544
+  }
+ ]
+}

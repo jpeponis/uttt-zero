@@ -19,20 +19,34 @@ the nets it held on, and the file that produced it.
 
 ## Handover (2026-09-08)
 
-**State (2026-09-08 06:30).** H1b is done (the log's entry: +64 vs its parent, +363 vs v2b — helped, so the
-chain carries **E = 4**). **H4 is running on the 3090:** `runs/gcnn8_c1_300_e4` (`runs/queue11.sh` with `E=4` and
-`PARENT=deep8_c1_300_e4` set from that reading, launched 06:23 through `wscript runs/launch_queue11_hidden.vbs`;
-retry wrapper, 6 attempts) — the D4 group-convolutional net, `--gcnn 16 --filters 128 --blocks 8 --epochs 4`,
-everything else H1's recipe, `--eval_every 0 --ckpt_every 10 --anchors ""`. Iteration 0: 1024 steps, 0 skipped,
-self-play 85.5 s (the exported plain net costs what the ResNet's did — H1b's was 81.5 s) + training 93.2 s (H1b:
-61.9 s; the group convolution's weight expansion per forward makes a training step ≈ 1.5× the ResNet's); 0 crashes.
-`run_status` ETA 03:29 on 2026-09-09 (**+21 h — the proposal's "≈ 15–17 h" was low; read it as ≈ 21 h**). The E7
-worker runs beside it on the 3060 (`runs/gcnn8_c1_300_e4_worker.out`; anchors v2b, deep8_c1_300_e4 (the parent),
-deep8_c1_300 at 64 sims on the full suite, endgame_v2_dev → `eval_full.jsonl`). At the end queue11 runs
-`eval_run.sh` and the endgame_v2_dev read into `analysis.out`. Status: `python tools/run_status.py
-runs/gcnn8_c1_300_e4 --ref runs/deep8_c1_300_e4`. Watch: a single-shot background `until [ -f
-runs/gcnn8_c1_300_e4/DONE ] || grep -q "FAILED after" runs/gcnn8_c1_300_e4.out; do sleep 300; done` (the Monitor
-tool delivers nothing from these files on this machine).
+**State (2026-09-09 12:45).** H1b is done (E = 4). **H4 is done and read: hurt.** `gcnn8_c1_300_e4/net_0300.pt`
+scores **22.0 % [19.9, 24.2], −220 Elo against its parent `deep8_c1_300_e4`** on the full suite @64 (the log's 12:35
+entry) — the run was interrupted at iteration 268 by a Windows Update restart at 23:55 on 2026-09-08 and resumed at
+09:24 as attempt 1 from iteration 260 (files verified bit-clean; the log's 08:25 entry; iterations 260–268 carry
+`attempt: 1` in `log.jsonl`, de-duplicate by iteration when reading it). Exact symmetry held throughout (D4 JS 0.000
+at all 30 checkpoints), nothing was unstable, and the cause reads as capacity, not the LR (the sweeps in the 08:25
+entry: at 12 480 supervised steps the plain ResNet overtakes the G-CNN, dev KL 0.763 vs 0.830, the G-CNN over-fits the
+frozen set, and a lower LR at equal steps makes it worse, 0.845; Phase G's gate was read at 3 120 steps, 1 % of the
+run's, and the ordering it certified does not survive 12 480 — a supervised gate has to be read at a step count of
+the order of the run's). Written up: KNOWLEDGE 50 and 48, RETROSPECTIVE §2 / §3 / §4 / §5 / §7, README. **Sweep 3
+read (13:01): the tied-heads hedge survives the same test** — resnet8_tied 0.7408 against resnet8's 0.7630 at 12 480
+steps, ahead on every metric, the margin shrinking slowly (0.036 / 0.027 / 0.022 over three doublings) rather than
+reversing (the 08:25 entry's last paragraph). So `--head_tying 1` on the `deep8_c1_300_e4` recipe is *proposable*
+as H5 after H3, at zero inference cost, with the honest prediction "null-to-small"; a 64-pass point (≈ 50 min on the
+3060) first would say whether the margin stabilises. Not to propose: a G-CNN at a lower LR, or a wider G-CNN (§5
+H4's equal-cost requirement). Both cards are idle (13:05). Windows Update is paused until 2026-10-14; the play agent
+is `runs/deep8_c1_300_e4/net_0300.pt`.
+
+**Next: H3** (`wscript runs/launch_queue12_hidden.vbs` from the repo root; `runs/queue12.sh` staged as written,
+parent `deep8_c1_300_e4`, ≈ 34–36 h — inside the update pause if launched before 2026-10-12). Preflight: both cards
+idle (`nvidia-smi`; sweep 3 must have ended — the trainer never shares the 3090, and the E7 worker takes the 3060),
+git clean of tracked changes. The 50 % line: the instance that wrote this is above it after the H4 write-up, so H3
+is the owner's launch or the next instance's. Status: `python tools/run_status.py runs/deep8_c1_600_e4 --ref
+runs/deep8_c1_300_e4`; watch: a single-shot background `until [ -f runs/deep8_c1_600_e4/DONE ] || grep -q "FAILED
+after" runs/deep8_c1_600_e4.out; do sleep 300; done` (the Monitor tool delivers nothing from these files on this
+machine). A reboot is the one failure the retry wrapper cannot cover: if the machine restarts mid-run, relaunch the
+same `.vbs` — `train2` resumes from `latest_full.pt` and the worker skips what `eval_full.jsonl` holds (the H4
+precedent, the log's 08:25 entry).
 
 **The owner's decision (2026-09-07): H1b approved, and a conditional pre-approval of the chain H1b → H4 → H3.** The
 next run starts without asking *as long as the instance is under 50 % of its context window when it would start it*;
@@ -68,13 +82,15 @@ stated beside it. E below is the epochs the chain carries forward.
    run is worth proposing after the chain. Secondary and tertiary readings, the curve and the budget axes are in
    the log entry; KNOWLEDGE 49 (43, 44, 46 extended), RETROSPECTIVE §2 / §3 / §7 and README carry them. The play
    agent is now `runs/deep8_c1_300_e4/net_0300.pt`.
-2. **H4 `gcnn8_c1_300_e4` — running** (State, above). `--gcnn 16 --filters 128 --blocks 8 --epochs 4`, everything
-   else as H1; parent `deep8_c1_300_e4`. ≈ 21 h, not the 15–17 h proposed. Worker anchors: v2b, the parent,
-   deep8_c1_300. Primary vs the parent at 64 sims (equal inference cost by construction, so one comparison serves
-   both of §5 H4's requirements); secondary the D4 residual (0 by construction — `timeline.py`'s D4 JS column
-   should read 0.000, against 0.026 bits for the ResNet) and the endgame reads. `--head_tying 1` on the plain
-   trunk is the fallback if the G-CNN misbehaves in RL (diverging losses, many skipped steps). The first play
-   agent with exact symmetry if it wins.
+2. **H4 `gcnn8_c1_300_e4` — done 2026-09-09, hurt** (the log's 12:35 entry; interrupted at 268 by a restart and
+   resumed as attempt 1, the log's 08:25 entry). `--gcnn 16 --filters 128 --blocks 8 --epochs 4`, everything else
+   as H1; parent `deep8_c1_300_e4`. Primary `paired_vs_deep8c1_300e4_64.json`: **22.0 % [19.9, 24.2], −220 Elo
+   [−242, −199] vs the parent — hurt**, by 25 points; −50 vs deep8_c1_300, +162 vs v2b. Secondary: D4 JS 0.000 at
+   all 30 checkpoints — exact symmetry held and is not what was missing; endgame_v1 80.8 / 0.058 (parent 90.1 /
+   0.022). 19.8 h (self-play 1.02× the parent, training 1.52×). `--head_tying 1` was the fallback if the G-CNN
+   misbehaved in RL (diverging losses, many skipped steps) — it did not misbehave; it converged, stably, to a much
+   weaker net, and the sweeps read the cause as capacity, not the LR. Not proposed again at this width; the play
+   agent stays the parent.
 3. **H3 `deep8_c1_600_e4`** (staged: `runs/queue12.sh` + `runs/launch_queue12_hidden.vbs`, ready to launch once H4 is DONE and written up) — `--iters 600 --lr_drops 500 --epochs 4`, everything else as H1; parent
    `deep8_c1_300_e4`, the same net as H4's. ≈ 34–36 h (twice H1b's 16.9 h; its late iterations ran 224 s against
    a 203 s mean). Reading: the E7 full-suite curve from 300 to 500 — flat means duration is exhausted at this data
@@ -279,6 +295,175 @@ consumer yet); a 10-block anything (46, 48); self-play on the 3060 (§6).
   passes — E = 4 for the chain**, and an `--epochs 8` run is worth proposing after it. H4 was launched at 06:23 on
   2026-09-08 at `--epochs 4` with `deep8_c1_300_e4` as its parent (Handover). KNOWLEDGE 49 (43, 44, 46 extended);
   RETROSPECTIVE §2, §3, §7; README. The play agent changes to `deep8_c1_300_e4/net_0300.pt`.
+
+- **2026-09-09, 08:25–09:30 — H4 interrupted at iteration 268 by a Windows Update restart; every file verified
+  intact; resumed 09:24 as a perturbed continuation; the reading at 260 is already "hurt"; the mechanism traced to
+  the constant LR.** The restart: Windows Update installed the 2026-09 cumulative (KB5124008) and `MoUsoCoreWorker`
+  restarted the machine at 23:55:03 on 2026-09-08 (a second, TrustedInstaller restart at 23:57:23), outside the
+  01:00–15:00 active hours, nothing pending beforehand. Iteration 268's shard (23:52:24), `latest.pt` and its log line
+  (23:53:52) were complete; the kill landed ≈ 70 s into iteration 269's self-play. The bash wrapper died with the
+  session (`runs/queue11.out`: `dofork … 0xC000026B`, `STATUS_DLL_INIT_FAILED_LOGOFF`), so the 6-attempt retry loop
+  never reached attempt 1 — a reboot is the one failure the wrapper cannot cover; updates are now paused until
+  2026-10-14. **Integrity** (an opus `directed` agent, read-only, CPU; `runs/plan6/H4_diag/ck_check.py`): no `.tmp`
+  under `runs/` or anywhere in the repo, no zero-byte or truncated file; `latest.pt` (iteration 268: net, opt, scaler,
+  rng), `latest_full.pt` (iteration 259, 578 MB: the same plus the full 2 000 000-row buffer, all 14 fields at 2 M
+  rows, no non-finite value; its net byte-identical to `net_0260.pt`), `net_0250/0260.pt` and the play agent
+  `deep8_c1_300_e4/net_0300.pt` all load with a strict `state_dict` match; `log.jsonl` 269/269 lines, iterations
+  0…268 with no gap or duplicate, the `global_step` arithmetic tying out (274 432 + 1024 = 275 456); `eval_full.jsonl`
+  26/26; all 269 game shards open with one key set and consistent shapes (1 340 385 games); all 26 numbered
+  checkpoints re-hash to the sha256 the worker recorded before the crash; the three suites open; `git fsck --full`
+  clean, no tracked file modified; both cards enumerate after the update. **Resume:** `queue11.sh` relaunched as
+  written (`wscript runs/launch_queue11_hidden.vbs`, 09:24): `train2` prefers `latest_full.pt`, so it restarted at
+  iteration 260 as attempt 1 (`config_resume_20260909_092443.json`; `resumed from iteration 259 (latest_full.pt,
+  buffer 2000000, scaler restored, generators restored)`), overwriting `games_0260–0268.npz` and appending
+  `attempt: 1` rows for 260–268 to `log.jsonl` (`net_0260.pt` stays; the D1 precedent, PLAN5 Handover); the worker
+  restarted beside it and skips what `eval_full.jsonl` holds. 40 iterations ≈ 2.9 h + `eval_run.sh`.
+
+  **The interim reading — the worker's full-suite reads at ±2.8, H4 and its parent at the same iteration:**
+
+  | iteration | 10 | 50 | 100 | 150 | 190 | 200 | 210 | 220 | 250 | 260 |
+  |---|---|---|---|---|---|---|---|---|---|---|
+  | H4 vs v2b | 8.0 | 22.0 | 32.9 | 39.9 | 40.0 | 29.4 | 60.1 | 65.4 | 65.1 | 65.2 |
+  | parent (H1b) vs v2b | 24.7 | 67.0 | 75.0 | 79.1 | 80.5 | 80.5 | 86.1 | 87.3 | 88.9 | 86.6 |
+  | H4 vs deep8_c1_300's final net | 2.3 | 5.1 | 12.1 | 15.0 | 16.4 | 10.5 | 29.8 | 32.6 | 31.9 | 35.7 |
+  | parent vs the same | 10.8 | 32.9 | 48.5 | 56.1 | 54.6 | 60.7 | 69.2 | 68.8 | 70.4 | 70.1 |
+  | **H4 vs the parent's final net** | 0.7 | 1.8 | 4.8 | 5.9 | 7.8 | 5.1 | 15.7 | 17.6 | 17.7 | **19.3 [17.2, 21.5]** |
+
+  H4 trails at all 26 common checkpoints with non-overlapping intervals; at 260 the gap through the shared anchors
+  is −21.4 points vs v2b (+109 against +324 Elo) and −34.4 vs deep8_c1_300, and head-to-head with the parent's final
+  net it is **19.3 % [17.2, 21.5], −248 Elo** — the rule's "hurt" line is 47 %, and neither 40 more iterations nor
+  the second drop (nothing resolvable on four runs, F2) can move 19 to 47. Its post-drop plateau (65 % vs v2b) is
+  where the parent was at iteration ≈ 20. endgame_v2_dev at 260: raw WDL 80.4 %, regret 0.050 (parent 89.5 / 0.029).
+  **The fallback clause does not fire:** no divergence (policy loss 1.71 at 0 → 1.36 at 200 → 1.13 at 250 → 1.18 at
+  268, the same late wobble as the parent's), **122 steps skipped of 275 456 against the parent's 118**, at most 2 in
+  any iteration of either run, no NaN or Inf in any logged field, target entropy 0.163 vs 0.161 bits over 239–268,
+  self-play *more* diverse than the parent's (distinct fraction 0.69 vs 0.58), `attempt: 0` on every line. Cost:
+  17.5 h to 268 against the parent's 15.0 (self-play 1.02× — the exported net costs what the ResNet costs, as
+  claimed; training 1.52×, the per-step weight expansion and the per-iteration re-export). An equivariance
+  signature in the run itself: when the top first move leaves cell 40 (13 of the last 119 iterations) the mass is
+  split exactly across a 4-cell orbit (share × orbit size 0.71–0.86); the parent never leaves cell 40 after 150.
+
+  **Mechanism** (an opus `directed` agent, read-only, CPU; `runs/plan6/H4_diag/{gradscale,gradscale2,sharpness,
+  rootpolicy}.py`): a stable convergence to a far weaker fixed point at the top LR — a different failure from the
+  one the fallback anticipated. (i) The policy loss is *flat over iterations 100–190* (1.362 → 1.374 → 1.377) and
+  falls 15 % in ten iterations at the first drop (the parent: 8 %); `raw_kl` sits 32 % above the parent's through
+  the plateau; `surprise` is 1.5× the parent's at the constant LR and collapses to parity at the drop (−0.073
+  against −0.004). The drop was worth **+223 Elo to H4 (−152 → +71 vs v2b) against +70 to the parent**; its endgame
+  WDL jumped 70.8 → 81.2 in one step. (ii) The raw opening prior at the empty board flips between orbits across
+  adjacent checkpoints — p([40]) 0.24 / 0.69 / 0.15 / 0.67 at 180 / 190 / 200 / 260, the four corners of the centre
+  board taking the rest, exactly tied — where the parent sits at 0.97–0.99 throughout; `first_move_top_share` has
+  sd 0.227 over 100–190 against the parent's 0.039 and settles after the drop (0.058). The root value swings with it
+  (+0.34 / +0.12 / +0.20 at 180 / 190 / 200; parent +0.43 / +0.34). (iii) The obvious story — a bank's gradient is
+  the sum over its 8 (64 for group-to-group layers) expanded copies, so the effective LR is 8× — is **refuted by
+  measurement**: the summing is real (amplification 2.8–6.5 per trunk layer, the copies positively correlated) but
+  the BatchNorm weight-norm equilibrium absorbs it (the G-CNN's trunk norm settles 1.9× above init against the
+  ResNet's 1.45×, because decay acts on one copy while the data gradient acts on eight), leaving the relative step
+  ‖g‖/‖w‖ **1.19× the ResNet's in the trunk and 1.41× in the heads** at iteration 190. What *is* different is
+  curvature: the top Hessian eigenvalue of the same loss is **2.26× the ResNet's at 190** (1373 vs 607; 1.97× at
+  260), so lr·λ_max sits ≈ 2.3× further past the stability edge. (iv) `gstudy.py` used the identical SGD (0.02,
+  momentum 0.9, wd 1e-4, nesterov, warmup 200, fp16) — but 2 080 top-LR steps against the run's 204 800; the
+  supervised win was measured 98× short of the RL exposure. Also real, ranked lower: 312 k parameters against a
+  moving target; D4 augmentation is an exact no-op for an equivariant net (up to 8× less per-step diversity from
+  the same rows — KNOWLEDGE 48 already called it the first partly data-limited student); weight decay effectively
+  3–6× weaker on the shared banks; the tied invariant value read-out (value loss *rose* after the drop, 0.654 →
+  0.718, the parent's fell). Refuted, not to chase: the GradScaler / fp16 path (BN runs fp32 under autocast; skips
+  at the parent's rate), a broken export (`tests/test_equivariant.py` passes; the fused path is exact). **The
+  sweep** launched 09:25 on the 3060 (`runs/plan6/H4_lr_sweep_3060.sh`): gcnn8x16 and resnet8 on `gdata_v1`,
+  400k × 16 passes (6 250 steps, twice the G points) at lr 0.02 and at 0.005, one seed, ≈ 14 min per arm.
+  Pre-registered reading against the 8-pass points on file (0.806 / 0.884): the G-CNN's dev-KL advantage *shrinks or
+  inverts at 0.02 as steps grow but holds at 0.005* → the LR; shrinks at both → capacity; holds at both → neither,
+  and the RL-specific hypotheses (the augmentation no-op, the moving target) are next.
+  **Sweep read (10:27; dev policy KL vs the teacher, one seed; `runs/plan6/H4_lr_*.json`, the 8-pass lr-0.02 points
+  in brackets):** at lr 0.02, 16 passes (6 240 steps) — gcnn8x16 **0.7875** [0.8057 / 0.8066], resnet8 **0.8145**
+  [0.8839 / 0.8853]: the G-CNN's advantage shrinks from 0.078 to 0.027 — the ResNet gains 0.070 from the doubling,
+  the G-CNN 0.018. At lr 0.005, 16 passes: gcnn8x16 0.846, resnet8 0.894 — both worse than at 0.02 (6 240 steps at
+  a quarter of the LR is under-trained; the drops sit at the same fractions), the advantage 0.048. Beyond the KL: at
+  16 passes @0.02 the ResNet's value head is now the better one (Brier 0.1006 vs 0.1182; endgame_v2_dev raw WDL
+  69.7 vs 67.5 %, regret 0.132 vs 0.148 — at 8 passes the G-CNN led on both), while the G-CNN keeps the policy edge
+  (top-1 0.620 vs 0.582, exact 3-way 0.818 vs 0.807). D4 JS: G-CNN 3 × 10⁻⁶ bits (exact), ResNet 0.060. Reading:
+  **the supervised advantage is a few-step advantage that erodes with steps** — the rule's first branch ("shrinks at
+  0.02") fires, but one step count at 0.005 cannot say whether it "holds" there, and the erosion is equally what
+  capacity saturation (312 k parameters) looks like, so LR and capacity are not yet separated. At the ResNet's
+  per-doubling gain the crossover is ≈ 1–2 more doublings (12–25 k steps), a thirtieth of the run's 307 200 —
+  consistent with the RL result either way. Second sweep (`runs/plan6/H4_lr_sweep2_3060.sh`, launched 10:31,
+  ≈ 1.4 h → `H4_lr_sweep2.out`, `H4_lr2_*_x32.json`): both arms at lr 0.02 × 32 passes (does the ResNet overtake?)
+  and gcnn8x16 at lr 0.005 × 32 (does the G-CNN beat its own lr-0.02 number at equal steps — an LR floor, propose the
+  G-CNN at a lower LR — or not — capacity, the wider G-CNN or `--head_tying 1`?).
+  **Sweep 2 read (12:10; 400k × 32 = 12 480 steps, `runs/plan6/H4_lr2_*_x32.json`):** at lr 0.02 the ResNet
+  **overtakes** — resnet8 **0.7630** (top-1 0.611, Brier 0.096, exact 3-way 0.840, endgame_v2_dev raw WDL 72.6 %,
+  regret 0.124), gcnn8x16 **0.8298** (0.629 / 0.116 / 0.822 / 66.0 % / 0.151) — and the G-CNN's dev KL is now *worse*
+  than at 16 passes (0.7875) and at 8 (0.806) while its training loss keeps falling (0.899 → 0.782 at the last
+  pass): it is over-fitting the frozen 400 k set (KL on the positions with no canonical twin in train 1.026 →
+  1.135; the ResNet's 0.960 → 0.931, still improving) — what a net for which D4 augmentation is an exact no-op does
+  on its 32nd identical pass, while the ResNet is on its fourth pass over eight views. At lr 0.005 × 32 the G-CNN is
+  worse again, **0.8447** (disjoint 1.119, endgame WDL 60.9 %): a lower LR at equal steps recovers nothing.
+  **Reading: capacity, not the LR.** The G-CNN's supervised advantage (0.078 at 3 120 steps) is a small-step
+  advantage; the ordering flips between 6 240 and 12 480 steps — 4 % of the run's 307 200 — and the RL result is
+  that ordering read at full exposure. The interpretation that fits the run's "flat, then a cliff at the drop" is
+  then the noise floor of a sharper basin (λ_max 2.3×) that a smaller LR lowers but that no LR puts under the
+  ResNet's — and the *second* drop, worth nothing to any ResNet (F2), gives the G-CNN +7.3 vs v2b (net_0280 66.3 →
+  net_0290 73.6), which says the same. Consequence for the method: Phase G's gate was read at 3 120 steps, 1 % of
+  the RL exposure, and the ordering it certified does not survive 12 480; a supervised gate has to be read at a
+  step count of the order of the run's, or until the curves have crossed or clearly will not — KNOWLEDGE 48 is to
+  be restated with this. Consequence for the chain: no G-CNN at a lower LR; a wider G-CNN breaks §5 H4's equal-cost
+  requirement; `--head_tying 1` (KL 0.848 at 3 120 steps, the pre-registered hedge) is not proposed either until the
+  same test has been run on it — sweep 3 (`runs/plan6/H4_lr_sweep3_3060.sh`, 12:15, ≈ 36 min): resnet8_tied at
+  lr 0.02 × 16 and × 32 against the resnet8 points above (0.8145 / 0.7630).
+  **Sweep 3 read (13:01; `runs/plan6/H4_lr3_resnet8_tied_lr0.02.json`): the tied heads survive.** resnet8_tied at
+  6 240 steps **0.7877** (resnet8 0.8145) and at 12 480 **0.7408** (0.7630) — ahead at every step count and on every
+  metric at 12 480 (top-1 0.620 vs 0.611, Brier 0.094 vs 0.096, exact 3-way 0.849 vs 0.840, disjoint-position KL
+  0.897 vs 0.931, endgame_v2_dev raw WDL 73.1 vs 72.6 %, regret 0.104 vs 0.124), with no over-fitting signature (its
+  disjoint KL falls 0.922 → 0.897 as the ResNet's does). The margin shrinks slowly — 0.036 / 0.027 / 0.022 across the
+  three doublings — rather than reversing; a straight line in log-steps reaches zero near the run's 307 200, so the
+  honest self-play prediction is null-to-small, not a rung. What it has that the G-CNN lacks: a full 2.39 M-parameter
+  ResNet trunk on which D4 augmentation is still informative; the tying is confined to the read-out (861 policy
+  orbits, orbit-pooled value / margin, board-orbit ownership), which is exactly symmetric only when the trunk is
+  (D4 JS 0.058, the ResNet's 0.071). **Status: `--head_tying 1` on the `deep8_c1_300_e4` recipe is proposable to the
+  owner as H5, after H3** — zero inference cost (33.3 vs 33.2 ms per 4096, G timing), a pre-registered rule against
+  the parent, and, given the shrinking margin, a 64-pass point (25 k steps, ≈ 50 min on the 3060) first would say
+  whether the margin stabilises or keeps closing; not proposed by this instance.
+
+- **2026-09-09, 12:35 — H4 `gcnn8_c1_300_e4` DONE (12:21, after 19.8 h of distinct iterations, 20.45 h of GPU
+  time with the nine re-run ones; attempt 1 from 260) — hurt.** The D4 group-convolutional net (`--gcnn 16`: 16 base
+  filters × 8 orientations = activation width 128, 312 k parameters against the ResNet's 2.46 M, exported to plain
+  convolutions so it costs what the 8×128 ResNet costs to evaluate) on `deep8_c1_300_e4`'s recipe, nothing else
+  changed. **Primary `paired_vs_deep8c1_300e4_64.json`: 22.0 % [19.9, 24.2], −220 Elo [−242, −199] against the
+  parent — hurt**, 25 points below the rule's line and eight seed bands; the worker's independent read of the same
+  checkpoint agrees (22.0 [19.9, 24.3]). Secondary: 31.6 % [29.2, 34.2], −134 vs `deep8_c1_300_e2`; **42.8 % [40.2,
+  45.4], −50 [−69, −32] vs deep8_c1_300** — below the 1×-update ResNet of the same shape and duration; 37.1 %, −92 vs
+  deep10_c1_300 and 41.5 %, −59 vs its replicate; +79 vs deep8_c1 (150 iterations), +114 vs wide128_c1, **71.7 %
+  [69.2, 74.1], +162 [+141, +182] vs v2b**, +260 vs dev1. On the ladder it lands between deep8_c1 (+100) and
+  deep8_c1_300 (+211), with four times the updates of either. **The pre-registered secondary, exact symmetry, holds:
+  D4 JS 0.000 bits and value std 0.000 at all 30 checkpoints** (`runs/plan6/H4_timeline.out`, `timeline.{json,png}`;
+  the ResNet's 0.026 / 0.052) — the equivariant export survived the fused fp16 graph path for the whole run, and
+  exact symmetry is not what was missing. Tertiary: endgame_v1 raw WDL **80.8 % [79.4, 82.2]**, draw recognition
+  60.5 %, regret 0.058 [0.048, 0.068], optimal 95.1 % (parent 90.1 / 79.0 / 0.022 / 98.1; deep8_c1_300 84.0 / 0.045;
+  the 150-iteration deep8_c1 77.6 / 0.064); endgame_v2_dev 82.5 [81.1, 83.8], draws 68.1 %, regret 0.056 (parent
+  90.5 / 0.029); the 256-sim search 99.8 / 99.7 % optimal, regret 0.002 / 0.003 — search repairs the raw head here
+  as everywhere. The full-suite curve (`eval_full.jsonl`, ±2.8; the parent's beside it):
+
+  | iteration | 10 | 50 | 100 | 150 | 200 | 210 | 220 | 260 | 280 | 290 | 300 |
+  |---|---|---|---|---|---|---|---|---|---|---|---|
+  | H4 vs v2b | 8.0 | 22.0 | 32.9 | 39.9 | 29.4 | 60.1 | 65.4 | 65.2 | 66.3 | 73.6 | 71.7 |
+  | parent vs v2b | 24.7 | 67.0 | 75.0 | 79.1 | 80.5 | 86.1 | 87.3 | 86.6 | 87.2 | 88.1 | 89.0 |
+  | H4 vs the parent's final net | 0.7 | 1.8 | 4.8 | 5.9 | 5.1 | 15.7 | 17.6 | 19.3 | 18.9 | 21.7 | 22.0 |
+
+  Two things no ResNet showed. (i) The first drop is worth **+30.7 points** to it (29.4 → 60.1; +223 Elo) against
+  the ResNets' +4.8 … +8.5, after a constant-LR phase in which it *lost* ground from 150 to 200 (39.9 → 29.4) while
+  the parent gained; (ii) **the second drop is a resolved step, +6.5** (65.2 at 260 → 71.7 at 300; the worker's
+  280 / 290 reads 66.3 / 73.6), where F2 found it nothing on four ResNets (+2.6 / +4.1 / −0.4 / −0.3): each LR
+  reduction lowers this net's floor by more than the ResNet's — the sharper basin (λ_max 2.3×, the mechanism
+  paragraph) read at play strength. Budget axes (E8; the logs de-duplicated by iteration, attempt 1 for 260–268):
+  132 of 307 200 steps skipped (parent 133); replay age 3.31 (3.31); sampled distinct-position fraction 0.63 → 0.67
+  (0.63 → 0.63); target entropy 0.162 bits (0.165); raw/search KL 1.83 → 1.02 (1.49 → 0.85); root Q range 0.48 → 0.46
+  (0.36 → 0.49); policy loss 1.12 against 1.00 and value loss 0.73 against 0.67 over the last 20 iterations;
+  self-play 51.9 plies (52.8), draws 14.1 % (16.6), count endings 13.7 % (16.5). Cost: t_selfplay 12.21 h (11.93 —
+  the exported net costs what the ResNet costs at play, as claimed), t_train 7.58 h (4.98 — the per-step weight
+  expansion and the per-iteration re-export), wall 19.8 h (16.9). **Reading: hurt, decisively, with no instability
+  and exact symmetry intact — the supervised gate (48) certified an ordering at 3 120 steps that reverses by 12 480
+  (the sweeps, above), and self-play at 307 200 steps read the reversed ordering.** The G-CNN is not proposed again
+  at this width; the equal-cost requirement rules out a wider one; the tied-heads hedge waits for sweep 3. The play
+  agent stays `deep8_c1_300_e4/net_0300.pt`. KNOWLEDGE 50 (48 restated); RETROSPECTIVE §2, §3, §5, §7; README.
 
 ## 0. The decision in front of the project
 

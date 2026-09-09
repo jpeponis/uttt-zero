@@ -1,0 +1,113 @@
+{
+ "data": "runs/gdata_v1.npz",
+ "meta": {
+  "corpus": "runs/deep10_c1_300_s1",
+  "files": [
+   "games_0280.npz",
+   "games_0281.npz",
+   "games_0282.npz",
+   "games_0283.npz",
+   "games_0284.npz",
+   "games_0285.npz",
+   "games_0286.npz",
+   "games_0287.npz",
+   "games_0288.npz",
+   "games_0289.npz",
+   "games_0290.npz",
+   "games_0291.npz",
+   "games_0292.npz",
+   "games_0293.npz",
+   "games_0294.npz",
+   "games_0295.npz",
+   "games_0296.npz",
+   "games_0297.npz",
+   "games_0298.npz",
+   "games_0299.npz"
+  ],
+  "n": 500000,
+  "mixture": [
+   0.03,
+   0.18,
+   0.25,
+   0.29,
+   0.25
+  ],
+  "ply_buckets": [
+   [
+    0,
+    7
+   ],
+   [
+    8,
+    19
+   ],
+   [
+    20,
+    31
+   ],
+   [
+    32,
+    43
+   ],
+   [
+    44,
+    81
+   ]
+  ],
+  "teacher": "runs/deep10_c1_300/net_0300.pt",
+  "sims": 256,
+  "symmetry_averaged": true,
+  "max_exact": 14,
+  "seed": 0,
+  "split": "0 train / 1 dev / 2 test (by source game; test sealed until the end of PLAN6 Phase G)",
+  "overlap": {
+   "train_dev": 9410,
+   "train_test": 9499,
+   "dev_test": 3658,
+   "distinct": [
+    297199,
+    42796,
+    42927
+   ]
+  },
+  "built": "2026-09-06 17:36",
+  "seconds": 11582
+ },
+ "split": "dev",
+ "set": "suites/endgame_v2_dev.npz",
+ "results": [
+  {
+   "arm": "resnet8_tied",
+   "positions": 400000,
+   "passes": 4,
+   "seed": 0,
+   "steps": 1560,
+   "t_train": 180,
+   "params": 2386834,
+   "dev": {
+    "n": 49726,
+    "policy_kl": 0.9211553931236267,
+    "policy_top1": 0.5309295058250427,
+    "value_brier": 0.11975227296352386,
+    "exact_acc3": 0.7137935757637024,
+    "n_solved": 7547,
+    "disjoint": {
+     "n": 33616,
+     "policy_kl": 1.0358213186264038,
+     "policy_top1": 0.4772132337093353,
+     "value_brier": 0.14739170670509338
+    }
+   },
+   "endgame": {
+    "set": "endgame_v2_dev",
+    "wdl_acc": 0.6036666666666667,
+    "regret_raw": 0.17133333333333334,
+    "optimal_raw": 0.8636666666666667
+   },
+   "d4_policy_js_bits": 0.04214116930961609,
+   "d4_value_std": 0.046532899141311646,
+   "ms_batch4096": 84.81389500011574,
+   "ms_batch1": 0.3024500001629349
+  }
+ ]
+}

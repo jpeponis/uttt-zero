@@ -1,0 +1,40 @@
+{
+ "device": "NVIDIA GeForce RTX 3060",
+ "rows": [
+  {
+   "arm": "resnet10",
+   "params": 3046862,
+   "params_exported": 3044166,
+   "ms_batch4096": 105.59863499947824,
+   "ms_batch1": 0.4406449996167794
+  },
+  {
+   "arm": "resnet8",
+   "params": 2456014,
+   "params_exported": 2453830,
+   "ms_batch4096": 84.63054499952705,
+   "ms_batch1": 0.37622500021825545
+  },
+  {
+   "arm": "resnet8_mask",
+   "params": 2456014,
+   "params_exported": 2453830,
+   "ms_batch4096": 84.63999500017962,
+   "ms_batch1": 0.3811100003076717
+  },
+  {
+   "arm": "resnet8_tied",
+   "params": 2386834,
+   "params_exported": 2453830,
+   "ms_batch4096": 84.64134000023478,
+   "ms_batch1": 0.37804499952471815
+  },
+  {
+   "arm": "gcnn8x16",
+   "params": 311586,
+   "params_exported": 2461310,
+   "ms_batch4096": 85.43663000018569,
+   "ms_batch1": 0.37842999954591505
+  }
+ ]
+}

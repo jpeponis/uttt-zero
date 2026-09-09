@@ -31,3 +31,6 @@ runs/**
 docs/history/review_astra/numba_cache/
 !runs/*/*.sh
 !runs/*/eval_full.jsonl
+!runs/plan6/H4_diag/
+!runs/plan6/H4_diag/*.py
+!runs/plan6/*.json

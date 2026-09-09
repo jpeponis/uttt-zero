@@ -367,7 +367,9 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     orientation's errors consistently does not remove them. So the residual asymmetry of 41
     costs nothing at play, averaging it away is worth +35 only because it averages eight
     evaluations, and an exactly equivariant *architecture* has no play-time gain to promise on
-    that account — its case is sample efficiency (PLAN6 Phase G). On `deep8_c1_300_e2` the
+    that account — its case is sample efficiency (PLAN6 Phase G; tested in self-play
+    2026-09-09 and lost — the D4 group-convolutional net trained on the strongest recipe is
+    −220 Elo against its parent, 50). On `deep8_c1_300_e2` the
     same null: 50.4 % [47.7, 53.1], +3 [−16, +22] (2026-09-07). *Behavioural; deep10 and
     deep8_c1_300_e2.* `runs/deep10_c1_300/paired_canon_vs_plain_64.json`,
     `runs/deep8_c1_300_e2/paired_canon_vs_plain_64.json`, `docs/history/review_astra/canonical_demo.json`.
@@ -430,7 +432,11 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     (`deep8_c1_300_e2`, 2026-09-07) is +100 over deep8_c1_300 and +291 over v2b — the
     largest single step of the ladder (46); **doubling them again (`deep8_c1_300_e4`,
     2026-09-08) adds +64 more, +185 over deep8_c1_300 and +363 over v2b — the strongest
-    net measured (49).** *Behavioural.* `runs/*/analysis.out`.
+    net measured (49).** The one architectural arm of that chain does not make a rung:
+    `gcnn8_c1_300_e4` (the same recipe with a D4 group-convolutional trunk at the same
+    inference cost, 2026-09-09) scores **+162 vs v2b** — between deep8_c1 and deep8_c1_300 —
+    −220 against its parent `deep8_c1_300_e4` and −50 against deep8_c1_300: hurt (50).
+    *Behavioural.* `runs/*/analysis.out`.
 44. **At equal compute the deep, long-trained net wins for the first time:** deep10@64
     beats v2b@427 (6.7× the sims) by +42 [+23, +61]; but deep10@64 vs deep8_300@80 is −11
     [−30, +7] — the last rung is a wash at a fixed inference budget; duration, not depth,
@@ -508,6 +514,36 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     ResNet 10 / mask / tied / G-CNN). *Supervised; dev slice, confirmed on the test slice.*
     `runs/plan6/G_arm_*.json`, `runs/plan6/G0_gcnn8x16.json`, `runs/plan6/G0b_*.json`,
     `runs/plan6/G_timing_*.json`, `tests/test_equivariant.py`.
+    **Restated 2026-09-09 (PLAN6 H4's sweeps, the same two arms on `gdata_v1` carried past
+    3 120 steps): the G-CNN's advantage is a *small-step* advantage, and it reverses.** At
+    lr 0.02 and 400 000 × 16 = 6 240 steps the G-CNN is **0.7875** and the ResNet **0.8145** —
+    the gap has shrunk from 0.078 to 0.027, the doubling worth 0.070 to the ResNet and 0.018 to
+    the G-CNN. At 400 000 × 32 = 12 480 steps **the ResNet overtakes: 0.7630 against 0.8298**,
+    and the G-CNN's dev KL is now worse than at 6 240 and worse than at 3 120 while its training
+    loss keeps falling (0.899 → 0.782 over the last pass) — it is over-fitting the frozen 400 k
+    set, its KL on the dev positions with no canonical twin in train rising 1.026 → 1.135 where
+    the ResNet's falls 0.960 → 0.931. That is what a net for which D4 augmentation is an exact
+    no-op does on its 32nd identical pass, while the ResNet is on its fourth pass over eight
+    views. A lower LR is not the missing ingredient: at lr 0.005 × 12 480 steps the G-CNN is
+    **0.8447**, worse than its own lr-0.02 number at the same steps. (The value head crosses
+    earlier: at 6 240 steps the ResNet's Brier is 0.1006 against 0.1182 and its endgame_v2_dev
+    WDL 69.7 against 67.5 %, both of which the G-CNN led at 3 120.) So the gate readings above —
+    both equivariant arms passing gate (i), and the G-CNN passing gate (ii) — hold *at 3 120
+    steps*, 1 % of the RL exposure they were gating, and do not survive 12 480: **a supervised
+    gate has to be read at a step count of the
+    order of the run's**, or until the curves have crossed or clearly will not. The self-play
+    reading is 50 — the G-CNN loses 220 Elo to its parent, capacity and not the LR. **The
+    tied-heads arm survives the same test** (sweep 3, the same day): resnet8_tied is **0.7877**
+    at 6 240 steps and **0.7408** at 12 480 against the ResNet's 0.8145 / 0.7630 — ahead on every
+    metric at 12 480 (top-1 0.620 vs 0.611, Brier 0.094 vs 0.096, exact 3-way 0.849 vs 0.840,
+    disjoint-position KL 0.897 vs 0.931, endgame_v2_dev WDL 73.1 vs 72.6 %, regret 0.104 vs
+    0.124) with no over-fitting signature; its margin shrinks slowly, 0.036 / 0.027 / 0.022 over
+    the three doublings, rather than reversing, and a straight line in log-steps reaches zero
+    near a run's 307 200 — so the self-play prediction for `--head_tying 1` is null-to-small,
+    and it is proposable, not proposed (PLAN6 Handover). What separates it from the G-CNN is a
+    full 2.39 M-parameter trunk on which augmentation is still informative; the tying is only
+    in the read-out. `runs/plan6/H4_lr_*.json`, `runs/plan6/H4_lr2_*_x32.json`,
+    `runs/plan6/H4_lr3_resnet8_tied_lr0.02.json`.
 49. **Doubling the optimizer steps again is worth another +64 Elo** (PLAN6 H1b, 2026-09-08).
     `deep8_c1_300_e4` is `deep8_c1_300_e2`'s recipe with `--epochs 4`: 1024 steps of batch
     1024 per iteration instead of 512, over the same 4096 × 64 new positions per iteration,
@@ -536,6 +572,57 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     parent, seed band ≈ 3 points.*
     `runs/deep8_c1_300_e4/{analysis.out,eval_full.jsonl,timeline.png}`,
     `runs/plan6/H1b_timeline.out`, PLAN6 log.
+50. **An exactly equivariant trunk at the same inference cost loses 220 Elo in self-play**
+    (PLAN6 H4, 2026-09-09). `gcnn8_c1_300_e4` is `deep8_c1_300_e4`'s recipe with the ResNet
+    trunk replaced by a D4 group convolution (`--gcnn 16`: 16 base filters × 8 orientations =
+    an activation width of 128, 312 k parameters against the ResNet's 2.46 M, exported to
+    ordinary convolutions so it costs what the 8×128 ResNet costs to evaluate), nothing else
+    changed. On the full paired suite at 64 sims it scores **22.0 % [19.9, 24.2], −220 Elo
+    [−242, −199] against its parent** — hurt by the pre-registered rule (≥ 53 % helped,
+    ≤ 47 % hurt), 25 points below the line and eight seed bands — and **42.8 % [40.2, 45.4],
+    −50 [−69, −32] against deep8_c1_300**, the 1×-update ResNet of the same shape and
+    duration; 31.6 % [29.2, 34.2], −134 against `deep8_c1_300_e2`, 37.1 %, −92 against
+    deep10_c1_300, 41.5 %, −59 against the 10-block seed replicate, +79 against deep8_c1,
+    +114 against wide128_c1, **71.7 % [69.2, 74.1], +162 [+141, +182] against v2b** and +260
+    against dev1 — a ladder rung between deep8_c1 (+100) and deep8_c1_300 (+211), with four
+    times the updates of either. **The pre-registered secondary, exact symmetry, holds and is
+    not what was missing:** the D4 Jensen–Shannon residual is 0.000 bits and the value std
+    0.000 at all 30 checkpoints (the parent's 0.026 / 0.052) — the equivariant export survived
+    the fused fp16 graph path for the whole run. Raw heads: endgame_v1 WDL **80.8 % [79.4,
+    82.2]**, draw recognition 60.5 %, regret 0.058 [0.048, 0.068], optimal 95.1 % (parent
+    90.1 / 79.0 / 0.022 / 98.1; deep8_c1_300 84.0 / 0.045); endgame_v2_dev 82.5 [81.1, 83.8],
+    draws 68.1 %, regret 0.056 (parent 90.5 / 0.029); the 256-sim search 99.8 / 99.7 % optimal
+    on the two sets — search repairs the raw head here as everywhere. Nothing was unstable:
+    132 of 307 200 steps skipped by the GradScaler (parent 133), no NaN or Inf in any logged
+    field, the losses falling to 1.12 policy / 0.73 value over the last 20 iterations against
+    the parent's 1.00 / 0.67 — it converged, stably, to a much weaker net. Two things no
+    ResNet showed. The **first LR drop is worth +30.7 points** to it (29.4 → 60.1 % vs v2b,
+    +223 Elo) against the ResNets' +4.8 … +8.5, after a constant-LR phase in which it *lost*
+    ground from 150 to 200 (39.9 → 29.4) while the parent gained; and **the second drop is a
+    resolved +6.5** (65.2 at 260 → 71.7 at 300) where F2 found nothing resolvable on four
+    ResNets (+2.6 / +4.1 / −0.4 / −0.3): each LR reduction lowers this net's floor by more
+    than a ResNet's. Cost: t_selfplay 12.21 h against 11.93 (**1.02× — the equal-cost claim of
+    48 holds at play**), t_train 7.58 h against 4.98 (1.52×, the per-step weight expansion and
+    the per-iteration re-export), wall 19.8 h against 16.9. **The mechanism is capacity, not
+    the effective learning rate.** The obvious story — a bank's gradient is the sum over its 8
+    expanded copies, so the effective LR is 8× — is refuted by measurement: the summing is
+    real (2.8–6.5× per trunk layer) but the BatchNorm weight-norm equilibrium absorbs it,
+    leaving the relative step ‖g‖/‖w‖ 1.19× the ResNet's in the trunk and 1.41× in the heads.
+    What is different is curvature — the top Hessian eigenvalue of the same loss is 2.3× the
+    ResNet's — and, decisively, the supervised advantage that licensed the run is a small-step
+    advantage: on `gdata_v1` at lr 0.02 the dev policy KL is 0.806 (G-CNN) against 0.884
+    (ResNet) at 3 120 steps, 0.7875 against 0.8145 at 6 240, and 0.830 against **0.763** at
+    12 480, where the ResNet overtakes and the G-CNN is over-fitting the frozen set; a quarter
+    of the LR at those 12 480 steps recovers nothing (0.845). Phase G's gate was read at 1 % of
+    this run's 307 200 steps, and self-play read the reversed ordering (48). The G-CNN is not
+    proposed again at this width; the equal-cost requirement rules out a wider one; the play
+    agent stays `deep8_c1_300_e4/net_0300.pt`. (The run was interrupted at iteration 268 by a
+    Windows Update restart and resumed as attempt 1 from iteration 260, every file verified
+    intact; iterations 260–268 are a perturbed re-run, so `log.jsonl` is read de-duplicated by
+    iteration.) *Behavioural; one run read against its parent, seed band ≈ 3 points.*
+    `runs/gcnn8_c1_300_e4/{analysis.out,eval_full.jsonl,timeline.json}`,
+    `runs/plan6/H4_timeline.out`, `runs/plan6/H4_lr_*.json`, `runs/plan6/H4_lr2_*_x32.json`,
+    `runs/plan6/H4_diag/`, PLAN6 log 2026-09-09.
 
 ## 10. Open, and not claimed
 
@@ -552,6 +639,12 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
   game before solving, 0 canonical positions shared between the halves and none duplicated within them
   (`tools/suite_overlap.py`). Held out for deep10, deep8_300 and any Phase G student — not for the seed
   replicate, whose games it comes from. To be read once, at the end of Phase G, and logged in PLAN6.
+- An exactly equivariant net at a full run's step budget is untested at any width other than
+  the one measured, 16 base filters × 8 orientations (50): a wider one breaks the equal-cost
+  requirement that made that comparison a fair one, so nothing is claimed about whether the
+  architecture's supervised edge would survive at ResNet-sized capacity. The cheaper
+  D4-tied-heads hedge survives the step-count test of 48 to 12 480 steps with a slowly closing
+  margin; whether that margin survives a full run is untested (proposable as PLAN6 H5, after H3).
 - The five hard puzzles are annotated in `docs/positions.md` (C3); a larger annotated set
   (the top surprises of B4) is not.
 - A two-open-board tablebase (the useful frontier after 31a) — not built; it needs

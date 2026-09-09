@@ -48,7 +48,7 @@ Read in this order:
    claude in the PLAN3 era, adjudicated in PLAN4). References such as "PLAN4 §3c" in the
    live files mean these.
 
-## Current state (2026-09-08)
+## Current state (2026-09-09)
 
 - **Best network:** `runs/deep8_c1_300_e4/net_0300.pt` — 8 residual blocks of 128
   filters, 300 iterations, **1024 optimizer steps per iteration** (PLAN6 H1b, 2026-09-08):
@@ -101,8 +101,17 @@ Read in this order:
   above. **On 2026-09-07 the owner approved a chain of three runs, H1b → H4 → H3.** H1b
   (`deep8_c1_300_e4`, `--epochs 4`) ran 2026-09-07/08 and helped, above; **H4
   (`runs/gcnn8_c1_300_e4`, the D4 group-convolutional net in self-play at the same inference
-  cost) has been training on the 3090 since 06:23 on 2026-09-08** (≈ 21 h), and H3
-  (`deep8_c1_600_e4`, 600 iterations) follows it. See PLAN6's log and Handover.
+  cost) finished 2026-09-09 and hurt: 22.0 % [19.9, 24.2], −220 Elo [−242, −199] against its
+  parent**, +162 vs v2b, and −50 below deep8_c1_300, the 1×-update ResNet of the same shape and
+  duration. Exact symmetry held throughout — the D4 Jensen–Shannon residual is 0.000 bits at all
+  30 checkpoints, against the parent's 0.026 — and nothing was unstable; it converged, stably,
+  to a much weaker net whose raw head reads 80.8 % WDL and 0.058 regret on the endgame set
+  against the parent's 90.1 / 0.022. The cause reads as capacity, not the learning rate: the
+  supervised advantage that licensed the run reverses by 12 480 training steps, where the plain
+  ResNet overtakes the equivariant net (KNOWLEDGE 50, 48 restated). (The run was interrupted at
+  iteration 268 of 300 by a Windows Update restart at 23:55 on 2026-09-08 and resumed at 09:24
+  the next morning with every file verified intact; iterations 260–268 are a perturbed re-run.)
+  H3 (`deep8_c1_600_e4`, 600 iterations, ≈ 35 h) is next; see PLAN6's Handover.
 - **Analysis programme (PLAN5 Phases A–C): complete, 2026-09-03.** Every ordering and sign
   from the earlier nets held on the +242 net; two magnitudes moved (the free-move value,
   +0.16 → +0.20, and a small residual value per owned board once macro lines are
@@ -114,7 +123,7 @@ Read in this order:
   book to depth 4 has the two strong nets agreeing on 75 % of nodes and a reply rule (the
   self-send); a legible linear surrogate captures 41 % of the search's moves and none of
   the strength (−661 Elo vs v2b); the one-open-board tablebase adds nothing because every
-  net already plays that phase perfectly. **`KNOWLEDGE.md` holds the claims** (53, each with
+  net already plays that phase perfectly. **`KNOWLEDGE.md` holds the claims** (54, each with
   level, effect size, CI, nets, tool and file); PLAN5 §2–§4 hold the working notes.
 
 The strength ladder. Each run changed one thing from the run above it. Elo is measured on
@@ -137,6 +146,7 @@ perfect). Details in RETROSPECTIVE §2.
 | deep10_c1_300_lr150 | LR drops at 150/250 (hurt) | +193 | 83.3 / 0.051 |
 | deep8_c1_300_e2 | + 512 steps / iteration (`--epochs 2`) | +291 | 87.6 / 0.036 |
 | **deep8_c1_300_e4** | **+ 1024 steps / iteration (`--epochs 4`)** | **+363** | **90.1 / 0.022** |
+| gcnn8_c1_300_e4 | deep8_c1_300_e4's recipe with the D4 group-convolutional trunk (`--gcnn 16`, exactly equivariant, same inference cost; PLAN6 H4) — hurt | +162 | 80.8 / 0.058 |
 
 ## Where things live
 

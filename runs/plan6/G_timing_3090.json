@@ -1,0 +1,40 @@
+{
+ "device": "NVIDIA GeForce RTX 3090",
+ "rows": [
+  {
+   "arm": "resnet10",
+   "params": 3046862,
+   "params_exported": 3044166,
+   "ms_batch4096": 41.078160000324715,
+   "ms_batch1": 0.49136999950860627
+  },
+  {
+   "arm": "resnet8",
+   "params": 2456014,
+   "params_exported": 2453830,
+   "ms_batch4096": 33.16430499980925,
+   "ms_batch1": 0.4107999993721023
+  },
+  {
+   "arm": "resnet8_mask",
+   "params": 2456014,
+   "params_exported": 2453830,
+   "ms_batch4096": 33.16995999994106,
+   "ms_batch1": 0.4158850002568215
+  },
+  {
+   "arm": "resnet8_tied",
+   "params": 2386834,
+   "params_exported": 2453830,
+   "ms_batch4096": 33.29484999994747,
+   "ms_batch1": 0.4347499998402782
+  },
+  {
+   "arm": "gcnn8x16",
+   "params": 311586,
+   "params_exported": 2461310,
+   "ms_batch4096": 33.5882949999359,
+   "ms_batch1": 0.4214600005070679
+  }
+ ]
+}

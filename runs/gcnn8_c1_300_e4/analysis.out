@@ -1,0 +1,181 @@
+=== gcnn8_c1_300_e4 final in-run evals (checkpoint: runs/gcnn8_c1_300_e4/net_0300.pt)
+wall-clock (h): 20.45
+=== paired matches
+paired suite openings_v1 (516 openings, 1032 games): A=runs/gcnn8_c1_300_e4/net_0300.pt@64 vs B=runs/v2b/net_0150.pt@64  [63s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1  100.0%       n/a        n/a                 100.0% 100.0%    50.0%    0.0%      1 /   0 /   0
+  orbits      15   75.0%  [ 60.0,  88.3]   +191 [ +70, +352]   83.3%  66.7%    58.3%   16.7%     11 /   3 /   1
+  natural    250   71.3%  [ 67.7,  75.0]   +158 [+129, +191]   81.6%  61.0%    60.3%   10.2%    141 /  86 /  23
+  random     250   71.8%  [ 68.4,  75.1]   +162 [+134, +192]   80.8%  62.8%    59.0%   11.2%    142 /  92 /  16
+  all        516   71.7%  [ 69.2,  74.1]   +162 [+141, +182]   81.3%  62.1%    59.6%   10.9%    295 / 181 /  40
+  end reasons: line 78.2%  count 10.9%  equal 10.9%  |  mean length 49.5
+wrote runs/gcnn8_c1_300_e4/paired_vs_v2b_64.json
+paired suite openings_v1 (516 openings, 1032 games): A=runs/gcnn8_c1_300_e4/net_0300.pt@64 vs B=runs/wide128_c1/net_0150.pt@64  [73s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1   50.0%       n/a        n/a                   0.0% 100.0%     0.0%    0.0%      0 /   1 /   0
+  orbits      15   63.3%  [ 55.0,  73.3]    +95 [ +35, +176]   73.3%  53.3%    60.0%   13.3%      6 /   9 /   0
+  natural    250   64.9%  [ 61.4,  68.5]   +107 [ +81, +135]   76.6%  53.2%    61.7%   13.4%    121 /  98 /  31
+  random     250   67.1%  [ 63.6,  70.6]   +124 [ +97, +152]   78.6%  55.6%    61.5%   15.8%    130 /  94 /  26
+  all        516   65.9%  [ 63.5,  68.4]   +114 [ +96, +134]   77.3%  54.5%    61.4%   14.5%    257 / 202 /  57
+  end reasons: line 73.5%  count 11.9%  equal 14.5%  |  mean length 49.9
+wrote runs/gcnn8_c1_300_e4/paired_vs_wide128c1_64.json
+paired suite openings_v1 (516 openings, 1032 games): A=runs/gcnn8_c1_300_e4/net_0300.pt@64 vs B=runs/deep8_c1/net_0150.pt@64  [77s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1   50.0%       n/a        n/a                   0.0% 100.0%     0.0%    0.0%      0 /   1 /   0
+  orbits      15   60.0%  [ 43.3,  76.7]    +70 [ -47, +207]   66.7%  53.3%    56.7%    6.7%      6 /   6 /   3
+  natural    250   60.4%  [ 56.5,  64.5]    +73 [ +45, +104]   70.6%  50.2%    60.2%   16.4%    114 /  80 /  56
+  random     250   62.1%  [ 58.6,  65.8]    +86 [ +60, +114]   71.4%  52.8%    59.3%   17.0%    104 / 105 /  41
+  all        516   61.2%  [ 58.6,  63.9]    +79 [ +61,  +99]   70.7%  51.6%    59.5%   16.4%    224 / 192 / 100
+  end reasons: line 72.4%  count 11.2%  equal 16.4%  |  mean length 49.9
+wrote runs/gcnn8_c1_300_e4/paired_vs_deep8c1_64.json
+paired suite openings_v1 (516 openings, 1032 games): A=runs/gcnn8_c1_300_e4/net_0300.pt@64 vs B=runs/deep8_c1_300/net_0300.pt@64  [78s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1   50.0%       n/a        n/a                 100.0%   0.0%   100.0%    0.0%      0 /   1 /   0
+  orbits      15   31.7%  [ 16.7,  46.7]   -134 [-280,  -23]   46.7%  16.7%    65.0%   16.7%      2 /   4 /   9
+  natural    250   41.7%  [ 38.0,  45.6]    -58 [ -85,  -31]   57.4%  26.0%    65.7%   17.0%     53 /  92 / 105
+  random     250   44.6%  [ 40.7,  48.3]    -38 [ -65,  -12]   54.8%  34.4%    60.2%   19.6%     68 /  88 /  94
+  all        516   42.8%  [ 40.2,  45.4]    -50 [ -69,  -32]   55.9%  29.7%    63.1%   18.2%    123 / 185 / 208
+  end reasons: line 70.6%  count 11.1%  equal 18.2%  |  mean length 50.6
+wrote runs/gcnn8_c1_300_e4/paired_vs_deep8c1_300_64.json
+paired suite openings_v1 (516 openings, 1032 games): A=runs/gcnn8_c1_300_e4/net_0300.pt@64 vs B=runs/deep10_c1_300/net_0300.pt@64  [85s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1   25.0%       n/a        n/a                  50.0%   0.0%    75.0%   50.0%      0 /   0 /   1
+  orbits      15   35.0%  [ 21.7,  48.3]   -108 [-223,  -12]   43.3%  26.7%    58.3%   23.3%      2 /   4 /   9
+  natural    250   32.8%  [ 29.4,  36.4]   -125 [-152,  -97]   41.4%  24.2%    58.6%   15.2%     27 /  91 / 132
+  random     250   41.6%  [ 37.7,  45.5]    -59 [ -87,  -31]   50.4%  32.8%    58.8%   18.8%     57 /  89 / 104
+  all        516   37.1%  [ 34.4,  39.6]    -92 [-112,  -73]   45.8%  28.4%    58.7%   17.2%     86 / 184 / 246
+  end reasons: line 66.7%  count 16.1%  equal 17.2%  |  mean length 50.5
+wrote runs/gcnn8_c1_300_e4/paired_vs_deep10c1_300_64.json
+paired suite openings_v1 (516 openings, 1032 games): A=runs/gcnn8_c1_300_e4/net_0300.pt@64 vs B=runs/deep10_c1_300_s1/net_0300.pt@64  [84s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1  100.0%       n/a        n/a                 100.0% 100.0%    50.0%    0.0%      1 /   0 /   0
+  orbits      15   33.3%  [ 15.0,  51.7]   -120 [-301,  +12]   36.7%  30.0%    53.3%   13.3%      4 /   2 /   9
+  natural    250   41.2%  [ 37.5,  44.9]    -62 [ -89,  -36]   52.2%  30.2%    61.0%   16.0%     49 / 101 / 100
+  random     250   42.1%  [ 38.3,  45.8]    -55 [ -83,  -29]   50.2%  34.0%    58.1%   19.4%     57 /  92 / 101
+  all        516   41.5%  [ 38.9,  44.2]    -59 [ -78,  -41]   50.9%  32.2%    59.4%   17.5%    111 / 195 / 210
+  end reasons: line 69.7%  count 12.8%  equal 17.5%  |  mean length 50.9
+wrote runs/gcnn8_c1_300_e4/paired_vs_deep10c1_300s1_64.json
+paired suite openings_v1 (516 openings, 1032 games): A=runs/gcnn8_c1_300_e4/net_0300.pt@64 vs B=runs/deep8_c1_300_e2/net_0300.pt@64  [78s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1   25.0%       n/a        n/a                  50.0%   0.0%    75.0%   50.0%      0 /   0 /   1
+  orbits      15   16.7%  [  6.7,  26.7]   -280 [-458, -176]   26.7%   6.7%    60.0%   13.3%      0 /   3 /  12
+  natural    250   32.4%  [ 28.8,  36.3]   -128 [-157,  -98]   42.4%  22.4%    60.0%   12.8%     30 /  88 / 132
+  random     250   31.8%  [ 28.5,  35.1]   -133 [-160, -107]   43.4%  20.2%    61.6%   19.6%     28 /  83 / 139
+  all        516   31.6%  [ 29.2,  34.2]   -134 [-154, -114]   42.4%  20.8%    60.8%   16.2%     58 / 174 / 284
+  end reasons: line 71.8%  count 12.0%  equal 16.2%  |  mean length 50.5
+wrote runs/gcnn8_c1_300_e4/paired_vs_deep8c1_300e2_64.json
+paired suite openings_v1 (516 openings, 1032 games): A=runs/gcnn8_c1_300_e4/net_0300.pt@64 vs B=runs/deep8_c1_300_e4/net_0300.pt@64  [79s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1   25.0%       n/a        n/a                  50.0%   0.0%    75.0%   50.0%      0 /   0 /   1
+  orbits      15   11.7%  [  3.3,  21.7]   -352 [-585, -223]   10.0%  13.3%    48.3%   10.0%      0 /   2 /  13
+  natural    250   21.9%  [ 18.8,  25.1]   -221 [-254, -190]   33.0%  10.8%    61.1%   12.2%     12 /  67 / 171
+  random     250   22.7%  [ 19.6,  25.8]   -213 [-245, -184]   29.8%  15.6%    57.1%   16.6%     15 /  61 / 174
+  all        516   22.0%  [ 19.9,  24.2]   -220 [-242, -199]   30.8%  13.2%    58.8%   14.3%     27 / 130 / 359
+  end reasons: line 75.1%  count 10.6%  equal 14.3%  |  mean length 50.8
+wrote runs/gcnn8_c1_300_e4/paired_vs_deep8c1_300e4_64.json
+paired suite openings_v1 (516 openings, 1032 games): A=runs/gcnn8_c1_300_e4/net_0300.pt@64 vs B=runs/dev1/net_0200.pt@64  [64s]
+  suite    pairs  score   95% CI (pairs)    Elo  95% CI          as X   as O   | X share  draws |  pairs won/split/lost
+  empty        1  100.0%       n/a        n/a                 100.0% 100.0%    50.0%    0.0%      1 /   0 /   0
+  orbits      15   90.0%  [ 80.0,  98.3]   +382 [+241, +708]   83.3%  96.7%    43.3%    6.7%     13 /   2 /   0
+  natural    250   78.0%  [ 74.6,  81.2]   +220 [+187, +254]   85.8%  70.2%    57.8%   11.2%    174 /  61 /  15
+  random     250   84.8%  [ 82.0,  87.5]   +299 [+263, +338]   89.2%  80.4%    54.4%    8.4%    192 /  52 /   6
+  all        516   81.7%  [ 79.5,  83.8]   +260 [+236, +285]   87.4%  76.0%    55.7%    9.7%    380 / 115 /  21
+  end reasons: line 77.8%  count 12.5%  equal 9.7%  |  mean length 49.0
+wrote runs/gcnn8_c1_300_e4/paired_vs_dev1_64.json
+=== endgame set
+suites/endgame_v1.npz: 3000 positions, 2870 source games, W/D/L 0.333/0.333/0.333; free-move positions 0.441
+
+runs/gcnn8_c1_300_e4/net_0300.pt on endgame_v1  [26s]
+evaluator                                       WDL acc %    Brier  logloss            3-way %  |err|             regret          optimal %
+raw net (value head + policy argmax)     80.8 [79.4,82.2]    0.254    0.419   79.2 [77.7,80.7]  0.236 0.058 [0.048,0.068]   95.1 [94.4,95.9]
+raw net, symmetry-averaged WDL           80.8 [79.4,82.2]    0.254    0.419   79.2 [77.7,80.7]  0.236                                      
+search 32 sims                                                                66.9 [65.2,68.6]  0.353 0.008 [0.005,0.012]   99.3 [99.0,99.6]
+search 64 sims                                                                70.3 [68.7,72.0]  0.323 0.004 [0.002,0.006]   99.6 [99.4,99.8]
+search 256 sims                                                               69.9 [68.3,71.5]  0.333 0.002 [0.001,0.004]   99.8 [99.6,99.9]
+
+WDL accuracy % by stratum: raw net (value head + policy argmax) | raw net, symmetry-averaged WDL
+  empties 6-9      (n= 750):  90.9   90.9
+  empties 10-12    (n= 750):  83.1   83.1
+  empties 13-14    (n= 750):  77.7   77.7
+  empties 15-16    (n= 750):  71.6   71.6
+  mover wins       (n=1000):  89.5   89.5
+  draw             (n=1000):  60.5   60.5
+  mover loses      (n=1000):  92.5   92.5
+  X to move        (n=1500):  80.9   80.9
+  O to move        (n=1500):  80.7   80.7
+  free move        (n=1324):  83.2   83.2
+  sent to a board  (n=1676):  79.0   79.0
+
+action regret by stratum: raw net (value head + policy argmax) | search 256 sims
+  empties 6-9      (n= 750): 0.029  0.000
+  empties 10-12    (n= 750): 0.047  0.003
+  empties 13-14    (n= 750): 0.080  0.001
+  empties 15-16    (n= 750): 0.077  0.005
+  mover wins       (n=1000): 0.073  0.000
+  draw             (n=1000): 0.102  0.007
+  mover loses      (n=1000): 0.000  0.000
+  X to move        (n=1500): 0.057  0.004
+  O to move        (n=1500): 0.060  0.001
+  free move        (n=1324): 0.080  0.002
+  sent to a board  (n=1676): 0.041  0.003
+
+optimal-move % by stratum: raw net (value head + policy argmax) | search 256 sims
+  empties 6-9      (n= 750):  97.9  100.0
+  empties 10-12    (n= 750):  95.6   99.7
+  empties 13-14    (n= 750):  93.6   99.9
+  empties 15-16    (n= 750):  93.5   99.5
+  mover wins       (n=1000):  95.6  100.0
+  draw             (n=1000):  89.8   99.3
+  mover loses      (n=1000): 100.0  100.0
+  X to move        (n=1500):  95.2   99.6
+  O to move        (n=1500):  95.1   99.9
+  free move        (n=1324):  93.3   99.8
+  sent to a board  (n=1676):  96.6   99.7
+suites/endgame_v2_dev.npz: 3000 positions, 2932 source games, W/D/L 0.333/0.333/0.333; free-move positions 0.415
+
+runs/gcnn8_c1_300_e4/net_0300.pt on endgame_v2_dev  [26s]
+evaluator                                       WDL acc %    Brier  logloss            3-way %  |err|             regret          optimal %
+raw net (value head + policy argmax)     82.5 [81.1,83.8]    0.245    0.414   79.4 [77.9,80.9]  0.246 0.056 [0.046,0.066]   95.2 [94.5,96.0]
+raw net, symmetry-averaged WDL           82.5 [81.1,83.8]    0.245    0.414   79.4 [77.9,80.9]  0.246                                      
+search 32 sims                                                                70.5 [68.9,72.2]  0.324 0.007 [0.004,0.010]   99.3 [99.0,99.6]
+search 64 sims                                                                74.4 [72.8,76.0]  0.290 0.005 [0.002,0.007]   99.5 [99.3,99.8]
+search 256 sims                                                               73.7 [72.1,75.3]  0.295 0.003 [0.001,0.005]   99.7 [99.5,99.9]
+
+WDL accuracy % by stratum: raw net (value head + policy argmax) | raw net, symmetry-averaged WDL
+  empties 6-9      (n= 750):  92.1   92.1
+  empties 10-12    (n= 750):  83.3   83.3
+  empties 13-14    (n= 750):  79.5   79.5
+  empties 15-16    (n= 750):  74.9   74.9
+  mover wins       (n=1000):  89.7   89.7
+  draw             (n=1000):  68.1   68.1
+  mover loses      (n=1000):  89.6   89.6
+  X to move        (n=1500):  81.9   81.9
+  O to move        (n=1500):  83.1   83.1
+  free move        (n=1244):  85.9   85.9
+  sent to a board  (n=1756):  80.1   80.1
+
+action regret by stratum: raw net (value head + policy argmax) | search 256 sims
+  empties 6-9      (n= 750): 0.016  0.000
+  empties 10-12    (n= 750): 0.045  0.001
+  empties 13-14    (n= 750): 0.089  0.004
+  empties 15-16    (n= 750): 0.072  0.007
+  mover wins       (n=1000): 0.063  0.001
+  draw             (n=1000): 0.104  0.008
+  mover loses      (n=1000): 0.000  0.000
+  X to move        (n=1500): 0.052  0.003
+  O to move        (n=1500): 0.059  0.003
+  free move        (n=1244): 0.077  0.006
+  sent to a board  (n=1756): 0.040  0.001
+
+optimal-move % by stratum: raw net (value head + policy argmax) | search 256 sims
+  empties 6-9      (n= 750):  98.7  100.0
+  empties 10-12    (n= 750):  96.0   99.9
+  empties 13-14    (n= 750):  92.5   99.6
+  empties 15-16    (n= 750):  93.7   99.3
+  mover wins       (n=1000):  96.1   99.9
+  draw             (n=1000):  89.6   99.2
+  mover loses      (n=1000): 100.0  100.0
+  X to move        (n=1500):  95.3   99.7
+  O to move        (n=1500):  95.1   99.7
+  free move        (n=1244):  93.2   99.4
+  sent to a board  (n=1756):  96.6   99.9

@@ -53,6 +53,7 @@ playing its preferred move instead of the best one (0 = perfect).
 | deep10_c1_300_lr150 | LR drops at 150/250 instead of 200/280 (PLAN5 §5 D3) | +193 | 83.3 / 0.051 |
 | **deep8_c1_300_e2** | **deep8_c1_300 + `--epochs 2` (512 optimizer steps per iteration; PLAN6 H1)** | **+291** | **87.6 / 0.036** |
 | **deep8_c1_300_e4** | **deep8_c1_300_e2 + `--epochs 4` (1024 optimizer steps per iteration; PLAN6 H1b)** | **+363** | **90.1 / 0.022** |
+| gcnn8_c1_300_e4 | deep8_c1_300_e4's recipe with the D4 group-convolutional trunk (`--gcnn 16`, exactly equivariant, same inference cost; PLAN6 H4) — hurt | +162 | 80.8 / 0.058 |
 
 Absolute anchor: v2b@64 is ≈ +169 over a rollout UCT with 100 k playouts per move (the
 recipe of the strong CodinGame bots, which run plain tree search with random playouts),
@@ -77,6 +78,21 @@ on a 16.9 h run. Two passes over each generated position was not the plateau eit
 value head now names 90.1 % of solved endgames correctly, recognises 79 % of the exact draws
 and loses 0.022 of value to its preferred move. The play agent is now
 `deep8_c1_300_e4/net_0300.pt`.)*
+*(Addendum 2026-09-09, PLAN6 H4: the chain's one architectural arm — the same recipe with the
+ResNet trunk replaced by a D4 group convolution, exactly equivariant, 312 k parameters against
+2.46 M and exported to ordinary convolutions so it costs the same to evaluate — **hurt: 22.0 %
+[19.9, 24.2], −220 Elo [−242, −199] against its parent**, +162 over v2b, and −50 [−69, −32]
+below deep8_c1_300, the 1×-update ResNet of the same shape and duration. Exact symmetry held
+throughout (D4 Jensen–Shannon 0.000 bits and value std 0.000 at all 30 checkpoints, against the
+parent's 0.026 / 0.052) and nothing was unstable — it converged, stably, to a much weaker net.
+The cause reads as capacity, not the learning rate: the supervised advantage that licensed the
+run (0.078 of dev policy KL at 3 120 optimizer steps) has shrunk to 0.027 by 6 240 and reversed
+by 12 480, where the plain ResNet overtakes, and a quarter of the learning rate at the same
+steps recovers nothing. Its LR drops are the largest any run here has shown — +30.7 points at
+the first and a resolved +6.5 at the second, where four ResNets showed nothing — which is the
+same sharper basin read at play strength. Self-play cost 1.02× the parent's, training 1.52×,
+the run 19.8 h against 16.9. The play agent stays `deep8_c1_300_e4/net_0300.pt`; KNOWLEDGE 50,
+48 restated.)*
 
 ## 3. What makes an AlphaZero recipe stronger here — the validated ledger
 
@@ -146,6 +162,20 @@ and loses 0.022 of value to its preferred move. The play agent is now
   +35 for 8 → 10, the latter inside the seed band) were measured on nets trained at a quarter
   of the updates the same data supports.)*
 
+**Hurt:** **an exactly equivariant trunk, at equal inference cost** (2026-09-09, PLAN6 H4;
+KNOWLEDGE 50). The one architectural change of the chain: the 8×128 ResNet trunk replaced by a
+D4 group convolution — the board's symmetry built into the weights instead of augmented into
+the data, 312 k parameters against 2.46 M, exported to ordinary convolutions so a game costs
+the same to play — on the best recipe in the ladder with nothing else changed. It scored
+**22.0 %, −220 Elo against its parent**, and −50 below even the 1×-update ResNet of the same
+shape and duration. It did not misbehave: exact symmetry held at all 30 checkpoints (D4 JS
+0.000 bits), 132 of 307 200 steps were skipped against the parent's 133, no loss diverged. It
+converged, stably, to a much weaker net. What licensed the run was a supervised gate on a
+frozen teacher read at 3 120 optimizer steps, where the group-convolutional net fit far better;
+carried to 12 480 steps the plain ResNet overtakes it and the equivariant net begins over-fitting
+the frozen set, and a quarter of the learning rate at the same steps makes it worse still —
+capacity, not the learning rate, and a gate read at 1 % of the exposure it was gating (§5).
+
 **Did nothing (each a clean, CI-bounded null):** exact endgame labels (replacing the
 self-play outcome z with solver values as the value target — z was already exact in
 98.7 % of ≤14-empty positions at 64 sims); symmetric dedup, early-α, extra input planes,
@@ -185,6 +215,20 @@ Lesson: never diagnose capacity from runs that were never trained to convergence
   `latest_full.pt`, with the replay buffer, every 10th; atomic writes) + retry wrappers
   made every run finish unattended. The old single-file scheme silently destroyed the
   buffer nine iterations out of ten. It bit exactly once, and cost a 79-iteration run.
+- **A reboot is the one failure a retry wrapper cannot cover.** A Windows Update restart
+  killed H4 at iteration 268 of 300 (23:55, outside the configured active hours, nothing
+  pending beforehand): the retry loop's own bash process died with the session
+  (`STATUS_DLL_INIT_FAILED_LOGOFF`, `0xC000026B`), so the six-attempt retry loop never reached
+  attempt 1 and nothing resumed unattended: the machine sat idle from 23:55 until it was
+  relaunched by hand at 09:24. What did work is the two-file checkpointing above — relaunching
+  the same launcher was the entire recovery, because `train2` prefers `latest_full.pt` (it
+  resumed from the iteration-259 full checkpoint, buffer and generators restored, and re-ran
+  260 onward) and the evaluation worker beside it skips whatever `eval_full.jsonl` already holds. Verify before resuming — every
+  checkpoint loaded with a strict `state_dict` match and re-hashed to what the worker had
+  recorded, `log.jsonl` had no gap or duplicate, `git fsck` was clean — and remember that the
+  iterations after the resume point are a *perturbed re-run*, stamped `attempt: 1`, so that
+  file must be read de-duplicated by iteration. The cheap prevention is the one now in place:
+  pause Windows Update across the run window (paused here until 2026-10-14).
 - **Provenance costs nothing if you start early.** git + `_provenance` in config.json
   (the exact command line, torch version and commit that started the run) + no-clobber
   configs took 30 minutes to add on day 3 and should have existed on day 1.
@@ -207,6 +251,14 @@ Lesson: never diagnose capacity from runs that were never trained to convergence
   which is a different, cheaper property).
 - **In-run curves are for shape, not conclusions.** The evaluation run inside training
   is small (432 games, ±6; checkpoints ±4), enough to see a trend, not to call a result.
+- **A screening gate on frozen data has to be read at a step count of the order of the run it
+  is gating.** Phase G ranked five architectures at 3 120 optimizer steps — 1 % of the 307 200
+  steps of the run it licensed — and the ordering it certified reverses by 12 480 steps, where
+  the plain ResNet overtakes the group-convolutional net; self-play at full exposure then read
+  the reversed ordering, at a cost of 20 GPU-hours (PLAN6 H4; KNOWLEDGE 48, 50). The cheap
+  supervised screen was still worth its hour — it is the reading that was over-extended. Read
+  such a gate out to the horizon it will be applied at, or until the curves have crossed or
+  clearly will not.
 - **"Strongest" is budget-relative.** At equal inference FLOPs, a small net with 4× the
   search beat the wide net (+101 Elo, v2b@256 vs wide128_c1@64). The ladder is an
   equal-sims instrument; deployment claims need the budget attached. (Sol's best catch.)
@@ -262,8 +314,10 @@ where noted:
 - **A chain of three runs is in progress** (PLAN6 Handover, owner-approved 2026-09-07, one
   change per run): H1b `deep8_c1_300_e4` done 2026-09-08 (+64, above); **H4
   `gcnn8_c1_300_e4`** — the D4 group-convolutional net in self-play, exactly equivariant at
-  the same inference cost — training on the 3090 since 06:23 on 2026-09-08, ≈ 21 h; **H3
-  `deep8_c1_600_e4`** (600 iterations, one LR drop at 500, ≈ 35 h) after it.
+  the same inference cost — done 2026-09-09 and **hurt**: 22.0 % [19.9, 24.2], −220 Elo against
+  its parent, +162 vs v2b, with exact symmetry held at all 30 checkpoints and nothing unstable;
+  the cause reads as capacity, not the learning rate (PLAN6 log, 2026-09-09; KNOWLEDGE 50, and
+  48 restated). **H3 `deep8_c1_600_e4`** (600 iterations, one LR drop at 500, ≈ 35 h) is next.
 - **Neither depth nor duration is exhausted** — 12-block and 600-iteration runs are the
   obvious continuations, each a committed GPU-day, both on hold per the pause. *(2026-09-06:
   depth 8 → 10 is inside the seed band and an earlier LR drop hurts, so the continuation the
