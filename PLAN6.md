@@ -40,7 +40,7 @@ a G-CNN at a lower LR (the sweeps), and no wider G-CNN in *self-play* except thr
 inference cost declared. Both cards are idle (13:05). Windows Update is paused until 2026-10-14; the play agent
 is `runs/deep8_c1_300_e4/net_0300.pt`.
 
-**State at 08:15 on 2026-09-10:** H1c is running (launched 21:24 on 2026-09-09, iteration ≈ 160, DONE ≈ 20:30 then `eval_run.sh`); G arm (g) and I1 are done and read (the log's 07:30 and 08:10 entries; §9b, §9c); E11 follows H1c's write-up. **Next: the closing programme of §9, in this order — H1c on the 3090, then G arm (g) and I1 on the 3060, then E11.**
+**State at 19:50 on 2026-09-10: §9's programme is complete.** H1c done and read — helped, **55.8 % [53.3, 58.2], +40 [+23, +57] over `deep8_c1_300_e4`**; the play agent is now `runs/deep8_c1_300_e8/net_0300.pt` (+363 vs v2b, the yardstick saturated; endgame 91.3 / 0.022); G arm (g) and I1 done and read (the log's 07:30, 08:10 and 19:45 entries; §9a–c). Both cards idle. **Nothing further is proposed. Next: E11** — the owner creates the empty GitHub repository, then `git remote add origin <url> && git push -u origin main`, and the off-machine copy of `runs/*/games` (≈ 160 MB per 300-iteration run), the `net_*.pt` not tracked by git, and `suites/`. The game claims of KNOWLEDGE §1–§8 were re-read on `_e4` (I1), not on `_e8`; a third pass on `_e8` is not proposed (+40 is inside what I1 showed to be the drift of magnitudes, and the orderings held). **Next: the closing programme of §9, in this order — H1c on the 3090, then G arm (g) and I1 on the 3060, then E11.**
 
 *1. H1c `deep8_c1_300_e8`* (§9a; ≈ 22–23 h, inside the update pause if launched before 2026-10-13). `runs/queue13.sh`
 is **not yet written**: copy `runs/queue11.sh` and change four things — `R=deep8_c1_300_e8` and
@@ -122,7 +122,7 @@ stated beside it. E below is the epochs the chain carries forward.
    the data and teacher axes never have. `runs/queue12.sh`, `runs/launch_queue12_run.cmd` and
    `runs/launch_queue12_hidden.vbs` **stay in the repo as staged but withdrawn** — a correct recipe for a run that
    is not being bought, kept so the shape is on record. Not to be launched.
-4. **H1c `deep8_c1_300_e8` — approved 2026-09-09; the chain's replacement third link** (§9a). `deep8_c1_300_e4`'s
+4. **H1c `deep8_c1_300_e8` — done 2026-09-10, helped: 55.8 % [53.3, 58.2], +40 [+23, +57] over the parent** (§9a; the log's 19:45 entry; the play agent is now `deep8_c1_300_e8/net_0300.pt`). `deep8_c1_300_e4`'s
    recipe with `--epochs 8` (2048 optimizer steps of batch 1024 per iteration) and nothing else changed; parent
    `deep8_c1_300_e4`. ≈ 22–23 h on the 3090 (t_train ≈ 10 h against H1b's 4.98; self-play ≈ 12 h unchanged — the
    same 8×128 ResNet). It is the third point of the dose–response curve +100 → +64 → ? and the first direct test of
@@ -592,6 +592,43 @@ the G-CNN again at width 128 (50).
   restated; RETROSPECTIVE §6 and §7. Two of §9's three items are read; H1c remains (DONE ≈ 20:30, then its write-up
   by §9a's rule), then E11.
 
+- **2026-09-10, 19:45 — H1c `deep8_c1_300_e8` DONE (19:22, 21.96 h, 0 crashes) and read (§9a): helped, +40 — the third
+  doubling of the optimizer steps is worth about two-thirds of the second.** `deep8_c1_300_e4`'s recipe with
+  `--epochs 8` (2048 steps of batch 1024 per iteration, 614 400 in the run), nothing else changed. **Primary
+  `paired_vs_deep8c1_300e4_64.json`: 55.8 % [53.3, 58.2], +40 Elo [+23, +57] against the parent — helped by the rule**,
+  2.8 points over the line and within one ≈ 3-point seed band of it (the worker's independent read of the same
+  checkpoint: 55.8 [53.4, 58.2]). Secondary: 65.3 % [62.8, 67.8], +110 vs `deep8_c1_300_e2`; 77.1 %, +211 vs
+  deep8_c1_300; 74.5 %, +186 vs deep10_c1_300; 76.1 %, +201 vs its replicate; +311 vs deep8_c1, +334 vs wide128_c1;
+  **89.0 % [87.2, 90.7], +363 vs v2b — the same 89.0 as H1b's: the v2b yardstick has saturated at this strength**
+  (differences compress near 90 %; the head-to-head is the instrument); 95.3 %, +523 vs dev1. **The dose–response:
+  +100 (256 → 512 steps per iteration), +64 (→ 1024), +40 [+23, +57] (→ 2048)** — each doubling about two-thirds of the
+  last, +204 in all, still not the plateau at eight sampled examples per generated position. The E7 curve (±2.8):
+
+  | iteration | 10 | 50 | 100 | 150 | 200 | 210 | 220 | 260 | 280 | 290 | 300 |
+  |---|---|---|---|---|---|---|---|---|---|---|---|
+  | H1c vs v2b | 32.1 | 74.1 | 78.6 | 81.2 | 82.4 | 86.4 | 88.3 | 89.9 | 90.4 | 90.5 | 89.0 |
+  | H1b vs v2b | 24.7 | 67.0 | 75.0 | 79.1 | 80.5 | 86.1 | 87.3 | 86.6 | 87.2 | 88.1 | 89.0 |
+  | H1c vs H1b's final net | 7.0 | 22.5 | 31.4 | 33.6 | 33.7 | 49.9 | 50.9 | 52.3 | 51.0 | 53.6 | 55.8 |
+
+  Ahead of H1b at every checkpoint before the drop (most of it early, +7.1 at 50), level with H1b's *final* net by
+  210, the first drop worth +4.0 (82.4 → 86.4), then 1–3 points ahead through the low-LR phase; the second drop
+  nothing, as on every ResNet. Tertiary: endgame_v1 raw WDL **91.3 % [90.3, 92.4]**, draws 81.0 %, regret 0.022,
+  optimal 98.1 % (H1b 90.1 / 79.0 / 0.022 / 98.1); endgame_v2_dev 91.7 [90.7, 92.7], draws 83.6 %, regret 0.020
+  (H1b 90.5 / 0.029); the 256-sim search 100.0 % optimal, regret 0.000 on both sets. Timeline
+  (`runs/plan6/H1c_timeline.out`): endgame WDL 87.0 → 89.9 across the drop, 91.3 at 300; **D4 JS 0.025 bits, value
+  std 0.047** (H1b 0.026 / 0.052) — eight passes bought no more symmetry consistency than four or two. Budget axes
+  (E8): 244 of 614 400 steps skipped (H1b 133 of 307 200, the same rate); replay age 3.31 (3.31); **sampled
+  distinct-position fraction 0.48 → 0.45** (H1b 0.68 → 0.63, H1 0.81 → 0.75 — each generated row now drawn about eight
+  times, and nothing complains: policy loss 0.992 against 1.001, value 0.653 against 0.667 over the last 20
+  iterations); target entropy 0.18 bits (0.165); raw/search KL 1.49 → 0.85 (the same); root Q range 0.36 → 0.51
+  (0.49); self-play 53.2 plies (52.8), draws 16.6 % (16.6), count endings 15.7 % (16.5). Cost: t_train 9.97 h vs
+  4.98, t_selfplay 11.98 vs 11.93, wall 21.96 h vs 16.92 (t_iter 282 s against 225 late); the same 8×128 ResNet, so
+  the +40 is free at play time. **Reading: helped — still update-limited at eight passes; the curve is stated. The
+  play agent changes to `runs/deep8_c1_300_e8/net_0300.pt`.** Not proposed: `--epochs 16` (the obvious next point,
+  ≈ +5 h of training for a predicted +25; §9's programme is complete as the owner set it). KNOWLEDGE 51 (46, 49,
+  43, 44, header restated); RETROSPECTIVE §2, §3, §7; README. §9 is done: E11 follows (the owner creates the empty
+  GitHub repository; then push, and the off-machine copy of `runs/*/games`, the remaining `net_*.pt` and `suites/`).
+
 ## 0. The decision in front of the project
 
 **Three things "more strength" could be for, and they call for different work.**
@@ -914,7 +951,7 @@ off-machine backup (E11) and the write-up.
 
 **Approved, in this order of launch: H1c on the 3090, then arm (g) and I1 on the 3060.**
 
-### 9a. H1c `deep8_c1_300_e8` — the third doubling of the optimizer steps (3090, ≈ 22–23 h)
+### 9a. H1c `deep8_c1_300_e8` — the third doubling of the optimizer steps (3090, ≈ 22–23 h) — **done 2026-09-10 19:22, read in the log (19:45): helped, +40 [+23, +57]**
 
 **Recipe.** `deep8_c1_300_e4`'s recipe with `--epochs 8` and nothing else changed: **2048 optimizer
 steps of batch 1024 per iteration** (`n_steps = epochs × games × steps / batch` = 8 × 4096 × 64 /

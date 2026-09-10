@@ -48,16 +48,19 @@ Read in this order:
    claude in the PLAN3 era, adjudicated in PLAN4). References such as "PLAN4 §3c" in the
    live files mean these.
 
-## Current state (2026-09-09)
+## Current state (2026-09-10)
 
-- **Best network:** `runs/deep8_c1_300_e4/net_0300.pt` — 8 residual blocks of 128
-  filters, 300 iterations, **1024 optimizer steps per iteration** (PLAN6 H1b, 2026-09-08):
-  +363 Elo over the `v2b` reference at 64 search simulations per move (89 % expected
-  score), **+64 over its parent deep8_c1_300_e2, +185 over deep8_c1_300 and +141 over
-  deep10_c1_300**, for 2.4 extra hours of training. Two doublings of the update count, one
-  after the other, are worth +164 between them: the learner had been update-limited all
-  along, and four sampled examples per generated position is still not the plateau
-  (KNOWLEDGE 46, 47, 49).
+- **Best network:** `runs/deep8_c1_300_e8/net_0300.pt` — 8 residual blocks of 128
+  filters, 300 iterations, **2048 optimizer steps per iteration** (PLAN6 §9a H1c, 2026-09-10):
+  **+40 Elo over its parent deep8_c1_300_e4** [+23, +57], +110 over deep8_c1_300_e2, +211 over
+  deep8_c1_300, and +363 over the `v2b` reference at 64 search simulations per move (89 %
+  expected score) — **the same +363 `_e4` scored**, because the reference has saturated at this
+  strength and differences compress near 90 %; the head-to-head against the parent is the
+  instrument now. Three doublings of the update count, one after the other, are worth +204
+  between them (+100, +64, +40 — each about two-thirds of the last): the learner had been
+  update-limited all along, and eight sampled examples per generated position is still not the
+  plateau. Its raw value head names 91.3 % of solved endgames correctly and loses 0.022 of
+  value to its preferred move (KNOWLEDGE 46, 47, 49, 51).
 - **Play configuration:** a flat `--sims 256` or more. The phased search schedule
   (`"0:128,24:384"`, fewer simulations early and more late) helped earlier nets but is
   **not** confirmed on the strong ones: +10 [−7, +26] on deep10 (PLAN5 §2 A8c) and +11
@@ -118,15 +121,25 @@ Read in this order:
   `gcnn8x46`** — the D4 group-convolutional net at the *ResNet's parameter count* (46 base filters × 8
   orientations = 2.46 M parameters, ≈ 8× its inference cost, to be measured), supervised on the frozen
   teacher on the 3060, to separate capacity from equivariance in H4's negative result; and **I1** — the
-  analysis second pass, re-running PLAN5 Phase A's tools on the +363 net so every game claim quoted from
+  analysis second pass, re-running PLAN5 Phase A's tools on `deep8_c1_300_e4` so every game claim quoted from
   the +242 net is re-read 120 Elo higher, each marked held / moved / reversed. **Dropped: H3**
   (`deep8_c1_600_e4`, 600 iterations — it re-buys the data / updates / teacher confound PLAN6 §0 exists
   to remove; its queue scripts stay in the repo, staged but withdrawn) and **H5** (`--head_tying 1` — a
   predicted null whose exact policy symmetry has no consumer). **E11**, the off-machine backup and the
   first push to a remote, is scheduled after the three. Nothing else is proposed.
-- **I1, the analysis second pass, done 2026-09-10 (PLAN6 §9c):** PLAN5 Phase A's tools re-run on the
-  +363 net at the deep10 pass's settings — of 34 game claims re-read, **15 held, 18 moved and 1
-  reversed** (after [40] the strongest net prefers the corner reply orbit where both earlier strong
+  **All three are now done.** Arm (g) came back on 2026-09-09 and closed the equivariant line; I1 ran
+  on 2026-09-10 (below); and **H1c came in on 2026-09-10** — `runs/deep8_c1_300_e8`, 21.96 h on the
+  3090 with no crash, **+40 Elo [+23, +57] over its parent**, helped by the pre-registered rule but
+  2.8 points over the line and inside one ≈ 3-point seed band of it. So the dose–response curve is
+  **+100 → +64 → +40**, each doubling about two-thirds of the last, and eight sampled examples per
+  generated position is still not the plateau — what ran out first is the yardstick, not the lever:
+  the new net scores the same +363 against v2b that `_e4` did, because differences compress near
+  90 %. It is the play agent from now on (KNOWLEDGE 51, RETROSPECTIVE §2). **Nothing further is
+  proposed** — the obvious continuation, `--epochs 16`, would cost ≈ 32 h for a step predicted inside
+  the seed band. **E11 is next and is all that remains.**
+- **I1, the analysis second pass, done 2026-09-10 (PLAN6 §9c):** PLAN5 Phase A's tools re-run on
+  `deep8_c1_300_e4` at the deep10 pass's settings — of 34 game claims re-read, **15 held, 18 moved and 1
+  reversed** (after [40] that net prefers the corner reply orbit where both earlier strong
   nets preferred the edge), so the project's central methodological claim survives 120 Elo higher with
   exactly one strength-relative ordering; `KNOWLEDGE.md` carries every new number (`runs/plan6/I1_*.out`).
   The matched-parameter G-CNN study (§9b) closed the equivariant line the same night (KNOWLEDGE 48).
@@ -141,7 +154,7 @@ Read in this order:
   book to depth 4 has the two strong nets agreeing on 75 % of nodes and a reply rule (the
   self-send); a legible linear surrogate captures 41 % of the search's moves and none of
   the strength (−661 Elo vs v2b); the one-open-board tablebase adds nothing because every
-  net already plays that phase perfectly. **`KNOWLEDGE.md` holds the claims** (54, each with
+  net already plays that phase perfectly. **`KNOWLEDGE.md` holds the claims** (55, each with
   level, effect size, CI, nets, tool and file); PLAN5 §2–§4 hold the working notes.
 
 The strength ladder. Each run changed one thing from the run above it. Elo is measured on
@@ -163,8 +176,9 @@ perfect). Details in RETROSPECTIVE §2.
 | deep10_c1_300_s1 | same recipe, seed 1 (replicate) | +213 | 83.9 / 0.047 |
 | deep10_c1_300_lr150 | LR drops at 150/250 (hurt) | +193 | 83.3 / 0.051 |
 | deep8_c1_300_e2 | + 512 steps / iteration (`--epochs 2`) | +291 | 87.6 / 0.036 |
-| **deep8_c1_300_e4** | **+ 1024 steps / iteration (`--epochs 4`)** | **+363** | **90.1 / 0.022** |
+| deep8_c1_300_e4 | + 1024 steps / iteration (`--epochs 4`) | +363 | 90.1 / 0.022 |
 | gcnn8_c1_300_e4 | deep8_c1_300_e4's recipe with the D4 group-convolutional trunk (`--gcnn 16`, exactly equivariant, same inference cost; PLAN6 H4) — hurt | +162 | 80.8 / 0.058 |
+| **deep8_c1_300_e8** | **deep8_c1_300_e4 + `--epochs 8` (2048 optimizer steps per iteration; PLAN6 §9a H1c)** | **+363 (+40 vs e4)** | **91.3 / 0.022** |
 
 ## Where things live
 
@@ -249,7 +263,7 @@ the fifth prints statistics over a run's last 20 iterations of self-play games; 
 plays a paired-suite match between two checkpoints and reports the score, Elo and
 confidence interval; the seventh plays against a net in the terminal; the last serves the
 local web UI for play and analysis. To play the current best net, substitute
-`runs/deep8_c1_300_e4/net_0300.pt` for the checkpoint path.
+`runs/deep8_c1_300_e8/net_0300.pt` for the checkpoint path.
 
 Move index convention everywhere: `m = 9*board + cell`, board and cell both
 row-major in their 3×3 grids (so 40 = centre of the centre board).

@@ -54,6 +54,7 @@ playing its preferred move instead of the best one (0 = perfect).
 | **deep8_c1_300_e2** | **deep8_c1_300 + `--epochs 2` (512 optimizer steps per iteration; PLAN6 H1)** | **+291** | **87.6 / 0.036** |
 | **deep8_c1_300_e4** | **deep8_c1_300_e2 + `--epochs 4` (1024 optimizer steps per iteration; PLAN6 H1b)** | **+363** | **90.1 / 0.022** |
 | gcnn8_c1_300_e4 | deep8_c1_300_e4's recipe with the D4 group-convolutional trunk (`--gcnn 16`, exactly equivariant, same inference cost; PLAN6 H4) — hurt | +162 | 80.8 / 0.058 |
+| **deep8_c1_300_e8** | **deep8_c1_300_e4 + `--epochs 8` (2048 optimizer steps per iteration; PLAN6 §9a H1c)** | **+363 (+40 vs e4)** | **91.3 / 0.022** |
 
 Absolute anchor: v2b@64 is ≈ +169 over a rollout UCT with 100 k playouts per move (the
 recipe of the strong CodinGame bots, which run plain tree search with random playouts),
@@ -93,6 +94,21 @@ the first and a resolved +6.5 at the second, where four ResNets showed nothing �
 same sharper basin read at play strength. Self-play cost 1.02× the parent's, training 1.52×,
 the run 19.8 h against 16.9. The play agent stays `deep8_c1_300_e4/net_0300.pt`; KNOWLEDGE 50,
 48 restated.)*
+*(Addendum 2026-09-10, PLAN6 §9a H1c: doubling them a third time — 2048 optimizer steps per
+iteration, nothing else changed — is **+40 [+23, +57] over `deep8_c1_300_e4`**, +110 over
+`deep8_c1_300_e2`, +211 over deep8_c1_300 and +186 over deep10_c1_300, for +5.0 h of training
+on a 21.96 h run. It is helped by the pre-registered rule, but only 2.8 points over the line and
+inside one ≈ 3-point seed band of it — the narrowest adoption in the chain — so **the
+dose–response of the update lever now reads +100 → +64 → +40**, each doubling worth about
+two-thirds of the one before it and none of them the plateau. **The v2b column stops working
+here:** the new net scores 89.0 % against the reference, the same +363 its parent scored, because
+differences compress near 90 % — the head-to-head against the parent, not the ladder's yardstick,
+is what resolved this rung, and would have to resolve any further one. The raw value head now
+names 91.3 % of solved endgames correctly, recognises 81 % of the exact draws and loses 0.022 of
+value to its preferred move; exact symmetry is not what the extra passes bought (D4
+Jensen–Shannon 0.025 bits and value std 0.047, against `_e4`'s 0.026 / 0.052). The same 8×128
+ResNet, so the +40 costs nothing per evaluation. The play agent is now
+`deep8_c1_300_e8/net_0300.pt`; KNOWLEDGE 51.)*
 
 ## 3. What makes an AlphaZero recipe stronger here — the validated ledger
 
@@ -161,6 +177,18 @@ the run 19.8 h against 16.9. The play agent stays `deep8_c1_300_e4/net_0300.pt`;
   +164 more on top of it; and the two depth rungs it was weighed against (+23 for 6 → 8 blocks,
   +35 for 8 → 10, the latter inside the seed band) were measured on nets trained at a quarter
   of the updates the same data supports.)*
+  *(2026-09-10, PLAN6 §9a H1c, KNOWLEDGE 51: the third doubling, **1024 → 2048 steps, is +40**
+  [+23, +57] over `deep8_c1_300_e4` for +5.0 h of training on a 21.96 h run — so the curve is
+  **+100 → +64 → +40**, each doubling about two-thirds of the last, all three positive, and
+  eight sampled examples per generated position is still not the plateau. What the run finally
+  makes visible is the price: the sampled distinct-position fraction is down to **0.48 → 0.45**
+  across the run, against `_e4`'s 0.63 and H1's 0.81 — each generated row is now drawn about
+  eight times — and still nothing complains: the replay age is unchanged at 3.31 iterations, 244
+  of 614 400 steps were skipped by the GradScaler at H1b's rate, the losses are lower, and the
+  self-play statistics are H1b's to within half a ply and a point (53.2 plies, 16.6 % drawn). The over-fitting branch of H1's reading has
+  now been tested three doublings deep and has not appeared; what has run out is the *yardstick*,
+  not the lever — +363 vs v2b for the second run in a row. The lever's own cost is the training
+  half of the run doubling again, 4.98 h → 9.97 h, while self-play stays at 11.9 h.)*
 
 **Hurt:** **an exactly equivariant trunk, at equal inference cost** (2026-09-09, PLAN6 H4;
 KNOWLEDGE 50). The one architectural change of the chain: the 8×128 ResNet trunk replaced by a
@@ -321,12 +349,13 @@ where noted:
 
 ## 7. Where things stand, and the open list for whenever work resumes
 
-- **Best net** `runs/deep8_c1_300_e4/net_0300.pt` (2026-09-08; +363 vs v2b, +64 vs
-  `deep8_c1_300_e2`, +185 vs deep8_c1_300, +141 vs deep10_c1_300); play config unchanged: flat
+- **Best net** `runs/deep8_c1_300_e8/net_0300.pt` (2026-09-10; +40 vs `deep8_c1_300_e4`, +110
+  vs `deep8_c1_300_e2`, +211 vs deep8_c1_300, +186 vs deep10_c1_300, and +363 vs v2b — the same
+  +363 `_e4` scored, the yardstick having saturated near 90 %); play config unchanged: flat
   `--sims 256` or more (the phased schedule is +10 on deep10 and +11 [−6, +26] on `_e2` — not
   confirmed on either; the 8-way average is +32 there as it was +35 on deep10, the canonical
-  evaluator a null on both; none of the three re-run on `_e4`). Web UI:
-  `python web/server.py runs/deep8_c1_300_e4/net_0300.pt --sims 800 --device cuda:1`.
+  evaluator a null on both; none of the three re-run on `_e4` or `_e8`). Web UI:
+  `python web/server.py runs/deep8_c1_300_e8/net_0300.pt --sims 800 --device cuda:1`.
 - **The chain of three runs is closed** (PLAN6 Handover, owner-approved 2026-09-07, one change
   per run): H1b `deep8_c1_300_e4` done 2026-09-08 (+64, above); **H4 `gcnn8_c1_300_e4`** — the
   D4 group-convolutional net in self-play, exactly equivariant at the same inference cost —
@@ -349,15 +378,23 @@ where noted:
   H4's negative result, read at 12 480 steps as KNOWLEDGE 48's restatement requires; **I1** — the
   analysis second pass, PLAN5 Phase A's tools re-run on the +363 net at the same settings, every
   claim marked held / moved / reversed, which is the first test of the project's own central
-  methodological claim on the strongest net it has. **Two of the three are now done. Arm (g)
+  methodological claim on the strongest net it has. **All three are now done. Arm (g)
   came back on 2026-09-09 and closed the equivariant line**: at the ResNet's parameter count the
   G-CNN trails resnet8 at 12 480 steps (1.034 against 0.763) and the margin reverses by 6 240,
   so the width was not what cost H4 its 220 Elo and nothing is proposed (KNOWLEDGE 48, 50).
   **I1 ran 02:27–07:23 on 2026-09-10** and is written up in KNOWLEDGE (the note at the head of
-  §1): of 34 claims re-read, 15 held, 18 moved and **1 reversed** — after [40] the +363 net
+  §1): of 34 claims re-read, 15 held, 18 moved and **1 reversed** — after [40] `_e4`
   prefers the corner reply orbit where both earlier strong nets preferred the edge, the first
-  ordering in the file to flip with strength. H1c is under way on the 3090. **E11**, the
-  off-machine backup and the first push to a remote, is scheduled after it.
+  ordering in the file to flip with strength. **H1c came in on 2026-09-10 and closes the list**:
+  `deep8_c1_300_e8` ran 21.96 h on the 3090 without a crash and is **+40 Elo [+23, +57] over its
+  parent** — helped, but 2.8 points over the adoption line and inside one seed band of it — so
+  the dose–response of the update lever reads **+100 → +64 → +40** and eight passes are still
+  not the plateau, while the v2b yardstick has stopped resolving (+363 for the second run
+  running; KNOWLEDGE 51). **The play agent is now `deep8_c1_300_e8/net_0300.pt`.** The closing
+  programme is complete, and **nothing further is proposed** — the obvious
+  continuation, `--epochs 16`, would cost ≈ 32 h for a step predicted inside the seed band.
+  **E11**, the off-machine backup and the first push to a remote, is next and is all that
+  remains.
 - **Neither depth nor duration is exhausted** — 12-block and 600-iteration runs are the
   obvious continuations, each a committed GPU-day, both on hold per the pause. *(2026-09-06:
   depth 8 → 10 is inside the seed band and an earlier LR drop hurts, so the continuation the

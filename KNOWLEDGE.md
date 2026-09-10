@@ -24,14 +24,16 @@ Every line carries:
   `deep10_c1_300/net_0300.pt` (+242 Elo vs v2b @64) and `deep8_c1_300/net_0300.pt` (+211);
   "all three strong nets" or "both seeds" adds the seed replicate
   `deep10_c1_300_s1/net_0300.pt` (+213, PLAN5 §5 D1); **"all four strong nets" adds
-  `deep8_c1_300_e4/net_0300.pt` (+363, 49), the strongest net measured**; "all nets" adds
-  dev1, v2a, v2b (250–340 Elo weaker). A claim that held from dev1 to deep10
-  survived a 340-Elo span; a magnitude is quoted from the strongest net. Since 2026-09-08 the
-  strongest net is `deep8_c1_300_e4/net_0300.pt` (+363 vs v2b; 49), and **since 2026-09-10 the
-  game claims of §1–§8 have been re-run on it** (PLAN6 §9c, I1 — the second analysis pass, 120 Elo
-  above the net they were first quoted from): each re-read claim below carries its `_e4` number
-  beside the earlier one, and "strongest net" in those sections now means `deep8_c1_300_e4`
-  wherever a number was re-read. The five that were not re-read say so where they occur: 6
+  `deep8_c1_300_e4/net_0300.pt` (+363, 49), the net the game claims were re-read on**;
+  "all nets" adds dev1, v2a, v2b (250–340 Elo weaker). A claim that held from dev1 to deep10
+  survived a 340-Elo span; a magnitude is quoted from the strongest net. **Since 2026-09-10 the
+  strongest net is `deep8_c1_300_e8/net_0300.pt`** — `_e4`'s recipe with a third doubling of the
+  optimizer steps, +40 Elo [+23, +57] over it and +363 vs v2b (51). **The game claims of §1–§8
+  were re-read on `_e4`, not on `_e8`** (PLAN6 §9c, I1 — the second analysis pass, 2026-09-10,
+  120 Elo above the net they were first quoted from): each re-read claim below carries its `_e4`
+  number beside the earlier one, and "strongest net" in those sections means the net they were
+  read on, `deep8_c1_300_e4`, wherever a number was re-read. The five that were not re-read
+  say so where they occur: 6
   (already read on this net), 12, 15, 18 and 38a (their tools are not in I1);
 - **the tool and the output file** so the number can be regenerated.
 
@@ -602,11 +604,15 @@ sign or ordering changed.*
     against the replicate (42). **Doubling the optimizer steps per iteration on 8 blocks
     (`deep8_c1_300_e2`, 2026-09-07) is +100 over deep8_c1_300 and +291 over v2b — the
     largest single step of the ladder (46); **doubling them again (`deep8_c1_300_e4`,
-    2026-09-08) adds +64 more, +185 over deep8_c1_300 and +363 over v2b — the strongest
-    net measured (49).** The one architectural arm of that chain does not make a rung:
+    2026-09-08) adds +64 more, +185 over deep8_c1_300 and +363 over v2b — then the
+    strongest net measured (49).** The one architectural arm of that chain does not make a rung:
     `gcnn8_c1_300_e4` (the same recipe with a D4 group-convolutional trunk at the same
     inference cost, 2026-09-09) scores **+162 vs v2b** — between deep8_c1 and deep8_c1_300 —
     −220 against its parent `deep8_c1_300_e4` and −50 against deep8_c1_300: hurt (50).
+    **A third doubling (`deep8_c1_300_e8`, `--epochs 8`, 2026-09-10) adds +40 [+23, +57] over
+    `_e4` and is the strongest net measured — but it still reads +363 vs v2b, the same number as
+    its parent: the reference has saturated at this strength, and the head-to-head against the
+    parent, not the v2b score, is what resolves a rung from here on (51).**
     *Behavioural.* `runs/*/analysis.out`.
 44. **At equal compute the deep, long-trained net wins for the first time:** deep10@64
     beats v2b@427 (6.7× the sims) by +42 [+23, +61]; but deep10@64 vs deep8_300@80 is −11
@@ -616,7 +622,10 @@ sign or ordering changed.*
     with twice the updates beats the 10-block net by +86 [+67, +105] at equal sims while
     costing 0.81× per evaluation (46): *updates*, not depth. With four times the updates the
     same 8-block net beats it by +141 [+121, +160] at the same 0.81× (49) — and it costs
-    exactly what the twice-updated net costs, so that +64 is free at play time. *Behavioural.*
+    exactly what the twice-updated net costs, so that +64 is free at play time. With eight times
+    the updates it beats it by +186 [+165, +208] (51), at that same 0.81× again: the eight-pass
+    net is exactly as expensive to evaluate as the one-, two- and four-pass nets of the same
+    shape, so its +40 over `_e4` is free at play time too. *Behavioural.*
     `runs/plan5_A8.out`, `runs/deep10_c1_300_s1/analysis.out`.
 45. **The phased search schedule ("0:128,24:384") is not confirmed on deep10:** +10
     [−7, +26] vs a flat 256 (was +50 on v2b, +26 on deep8_300) — the stronger the raw
@@ -644,7 +653,9 @@ sign or ordering changed.*
     210), then flat within ±3 to 300 (83.0–84.9), the second drop nothing. Self-play games
     lengthen (52.5 vs 51.9 plies) and draw more (15.5 vs 13.0 %); the policy loss is lower
     throughout; 70 of 153 600 steps were skipped by the GradScaler. **Two passes is not the
-    plateau either: the dose–response follow-up doubled them again for another +64 (49).**
+    plateau either: the dose–response follow-up doubled them again for another +64 (49), and a
+    third doubling adds +40 more (51)** — +100, +64, +40 across three doublings, each worth
+    about two-thirds of the one before it, and none of them the plateau.
     *Behavioural; one run read against three references, seed band ≈ 3 points.*
     `runs/deep8_c1_300_e2/{analysis.out,eval_full.jsonl,timeline.png}`, PLAN6 log.
 47. **For a fixed teacher, the fit is a function of optimizer steps, not of distinct
@@ -762,7 +773,9 @@ sign or ordering changed.*
     (86.6–89.0), the second drop nothing. Exact symmetry is not what it bought: the final D4
     Jensen–Shannon residual is 0.026 bits and the value std 0.052, against H1's 0.026 / 0.050.
     Cost: t_train 4.98 h vs 2.55 h, wall 16.9 h vs 14.6 h; the same 8×128 ResNet, so the same
-    cost per evaluation as H1's and 0.81× deep10's. *Behavioural; one run read against its
+    cost per evaluation as H1's and 0.81× deep10's. **Four passes is not the plateau either:
+    the third doubling is another +40 [+23, +57], and the dose–response reads +100 → +64 → +40
+    (51).** *Behavioural; one run read against its
     parent, seed band ≈ 3 points.*
     `runs/deep8_c1_300_e4/{analysis.out,eval_full.jsonl,timeline.png}`,
     `runs/plan6/H1b_timeline.out`, PLAN6 log.
@@ -822,8 +835,66 @@ sign or ordering changed.*
     `runs/plan6/H4_timeline.out`, `runs/plan6/H4_lr_*.json`, `runs/plan6/H4_lr2_*_x32.json`,
     `runs/plan6/H4_diag/`, PLAN6 log 2026-09-09.
 
+51. **Doubling the optimizer steps a third time is worth another +40 Elo, and the v2b
+    yardstick runs out** (PLAN6 §9a, H1c, 2026-09-10). `deep8_c1_300_e8` is
+    `deep8_c1_300_e4`'s recipe with `--epochs 8`: 2048 steps of batch 1024 per iteration
+    instead of 1024 — 614 400 in the run — over the same 4096 × 64 new positions per
+    iteration, the same 2 M-row buffer (mean sampled replay age 3.31 iterations), the same
+    LR drops at 200 / 280, seed 0, nothing else changed; launched 21:24 on 2026-09-09,
+    done 19:22 on 2026-09-10 after 21.96 h, 0 crashes. On the full paired suite at 64 sims
+    it scores **55.8 % [53.3, 58.2], +40 Elo [+23, +57] against its parent** — helped by the
+    pre-registered rule (≥ 53 %), but 2.8 points over the line and within one ≈ 3-point seed
+    band of it, the narrowest adoption in the chain (the E7 worker's independent read of the
+    same checkpoint agrees: 55.8 [53.4, 58.2]) — **65.3 % [62.8, 67.8], +110 [+91, +130]
+    against `deep8_c1_300_e2`**, 77.1 % [74.8, 79.2], +211 [+189, +232] against
+    deep8_c1_300, 74.5 % [72.1, 76.8], +186 [+165, +208] against deep10_c1_300, 76.1 %
+    [73.9, 78.2], +201 against the 10-block seed replicate, +311 against deep8_c1, +334
+    against wide128_c1, and **89.0 % [87.2, 90.7], +363 Elo [+333, +397] against v2b — the
+    same 89.0 % H1b read**: the reference has saturated at this strength (differences
+    compress near 90 %), so the head-to-head against the parent, not the v2b score, is the
+    instrument from here on. Against dev1, 95.3 % [94.2, 96.4], +523. **The dose–response of
+    the update lever, in full: +100 (256 → 512 steps per iteration, 46), +64 (→ 1024, 49),
+    +40 [+23, +57] (→ 2048)** — each doubling worth about two-thirds of the one before it,
+    all three positive, and eight sampled examples per generated position is still not the
+    plateau. The full-suite timeline (`eval_full.jsonl`, every 10th checkpoint at ±2.8),
+    vs v2b at iterations 10 / 50 / 100 / 150 / 200 / 210 / 220 / 260 / 280 / 290 / 300 with
+    H1b's beside it: 32.1 / 74.1 / 78.6 / 81.2 / 82.4 / 86.4 / 88.3 / 89.9 / 90.4 / 90.5 /
+    89.0 against 24.7 / 67.0 / 75.0 / 79.1 / 80.5 / 86.1 / 87.3 / 86.6 / 87.2 / 88.1 / 89.0
+    — ahead at every checkpoint before the drop, most of it early (+7.1 at iteration 50).
+    Against H1b's *final* net over the same checkpoints: 7.0 / 22.5 / 31.4 / 33.6 / 33.7 /
+    49.9 / 50.9 / 52.3 / 51.0 / 53.6 / 55.8 — level with it by 210, the first drop worth
+    +4.0 (82.4 → 86.4 vs v2b), then 1–3 points ahead through the low-LR phase. Raw heads:
+    endgame_v1 WDL **91.3 % [90.3, 92.4]**, draw recognition 81.0 %, regret 0.022 [0.016,
+    0.028], optimal 98.1 % (H1b 90.1 / 79.0 / 0.022 / 98.1); endgame_v2_dev 91.7 [90.7,
+    92.7], draws 83.6 %, regret 0.020 [0.015, 0.026] (H1b 90.5 / 0.029); the 256-sim search
+    100.0 % optimal at regret 0.000 on both sets. On the timeline's 20 000 held-out
+    positions from deep10_c1_300 the endgame WDL steps 87.0 → 89.9 across the first drop
+    (200 → 210) and reaches 91.3 at 300, while the final D4 Jensen–Shannon residual is 0.025
+    bits and the value std 0.047 (H1b 0.026 / 0.052): **eight passes bought no more symmetry
+    consistency than four or two.** Budget axes: 244 of 614 400 steps were skipped by the
+    GradScaler (H1b 133 of 307 200 — the same rate), the mean sampled replay age is unchanged
+    at 3.31, and **the sampled distinct-position fraction is 0.48 → 0.45 against H1b's
+    0.63 → 0.63 and H1's 0.81 → 0.75 — each generated row is now drawn about eight times** —
+    and nothing else in the run complains: policy-target entropy 0.18 bits (0.165), raw/search
+    KL 1.49 → 0.85 (the same), root Q range 0.36 → 0.51 (0.36 → 0.49), and over the last 20
+    iterations policy loss 0.992 (1.001) and value loss 0.653 (0.667), self-play 53.2 plies
+    (52.8), draws 16.6 % (16.6), count endings 15.7 % (16.5). Cost: t_train 9.97 h against
+    4.98, t_selfplay 11.98 against 11.93, wall 21.96 h against 16.92 — the training half has
+    doubled again and the self-play half has not — but it is the same 8×128 ResNet, so exactly
+    the same cost per evaluation as `_e4`, `_e2` and deep8_c1_300: the +40 is free at play
+    time (44). The reading: helped, still update-limited at eight passes, and the play agent
+    becomes `runs/deep8_c1_300_e8/net_0300.pt`. Nothing further is proposed — PLAN6 §9's
+    closing programme is complete and E11 follows. *Behavioural; one run read against its
+    parent, seed band ≈ 3 points.*
+    `runs/deep8_c1_300_e8/{analysis.out,eval_full.jsonl,timeline.json}`,
+    `runs/plan6/H1c_timeline.out`, PLAN6 log 2026-09-10.
+
 ## 10. Open, and not claimed
 
+- The dose–response of the optimizer-step lever is +100 → +64 → +40 and still positive (51),
+  so `--epochs 16` — a fourth doubling, ≈ 32 h — is the obvious continuation; it is **not**
+  proposed: the last step is 2.8 points over the adoption line, its successor is predicted
+  inside the seed band, and PLAN6 §9's programme is closed.
 - The opening book stops at depth 4 with three replies per node; nothing is claimed about
   lines beyond it.
 - The per-owned-board residual (14) survived the seed replicate to the third decimal and is
