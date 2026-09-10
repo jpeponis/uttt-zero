@@ -124,6 +124,12 @@ Read in this order:
   to remove; its queue scripts stay in the repo, staged but withdrawn) and **H5** (`--head_tying 1` — a
   predicted null whose exact policy symmetry has no consumer). **E11**, the off-machine backup and the
   first push to a remote, is scheduled after the three. Nothing else is proposed.
+- **I1, the analysis second pass, done 2026-09-10 (PLAN6 §9c):** PLAN5 Phase A's tools re-run on the
+  +363 net at the deep10 pass's settings — of 34 game claims re-read, **15 held, 18 moved and 1
+  reversed** (after [40] the strongest net prefers the corner reply orbit where both earlier strong
+  nets preferred the edge), so the project's central methodological claim survives 120 Elo higher with
+  exactly one strength-relative ordering; `KNOWLEDGE.md` carries every new number (`runs/plan6/I1_*.out`).
+  The matched-parameter G-CNN study (§9b) closed the equivariant line the same night (KNOWLEDGE 48).
 - **Analysis programme (PLAN5 Phases A–C): complete, 2026-09-03.** Every ordering and sign
   from the earlier nets held on the +242 net; two magnitudes moved (the free-move value,
   +0.16 → +0.20, and a small residual value per owned board once macro lines are

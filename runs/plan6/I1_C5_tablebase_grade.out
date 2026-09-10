@@ -1,0 +1,5 @@
+runs/probe_data_deep10late_e4.npz: 60000 positions, 689 with exactly one open board (1.1 %); exact W/D/L for the mover 0.31/0.40/0.29
+runs/deep8_c1_300_e4/net_0300.pt on the 689 one-open-board positions:
+  raw value head: 3-way accuracy 100.0 %, draw recognition 100.0 %
+  raw policy: optimal move 100.0 %, regret 0.000
+  search 64 sims: optimal move 100.0 %, regret 0.000

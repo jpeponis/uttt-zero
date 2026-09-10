@@ -1,0 +1,179 @@
+{
+ "data": "runs/gdata_v1.npz",
+ "meta": {
+  "corpus": "runs/deep10_c1_300_s1",
+  "files": [
+   "games_0280.npz",
+   "games_0281.npz",
+   "games_0282.npz",
+   "games_0283.npz",
+   "games_0284.npz",
+   "games_0285.npz",
+   "games_0286.npz",
+   "games_0287.npz",
+   "games_0288.npz",
+   "games_0289.npz",
+   "games_0290.npz",
+   "games_0291.npz",
+   "games_0292.npz",
+   "games_0293.npz",
+   "games_0294.npz",
+   "games_0295.npz",
+   "games_0296.npz",
+   "games_0297.npz",
+   "games_0298.npz",
+   "games_0299.npz"
+  ],
+  "n": 500000,
+  "mixture": [
+   0.03,
+   0.18,
+   0.25,
+   0.29,
+   0.25
+  ],
+  "ply_buckets": [
+   [
+    0,
+    7
+   ],
+   [
+    8,
+    19
+   ],
+   [
+    20,
+    31
+   ],
+   [
+    32,
+    43
+   ],
+   [
+    44,
+    81
+   ]
+  ],
+  "teacher": "runs/deep10_c1_300/net_0300.pt",
+  "sims": 256,
+  "symmetry_averaged": true,
+  "max_exact": 14,
+  "seed": 0,
+  "split": "0 train / 1 dev / 2 test (by source game; test sealed until the end of PLAN6 Phase G)",
+  "overlap": {
+   "train_dev": 9410,
+   "train_test": 9499,
+   "dev_test": 3658,
+   "distinct": [
+    297199,
+    42796,
+    42927
+   ]
+  },
+  "built": "2026-09-06 17:36",
+  "seconds": 11582
+ },
+ "split": "dev",
+ "set": "suites/endgame_v2_dev.npz",
+ "results": [
+  {
+   "arm": "gcnn8x46",
+   "positions": 400000,
+   "passes": 32,
+   "seed": 0,
+   "steps": 12480,
+   "t_train": 10046,
+   "params": 2459392,
+   "dev": {
+    "n": 49726,
+    "policy_kl": 1.0336381196975708,
+    "policy_top1": 0.6559144258499146,
+    "value_brier": 0.10202553868293762,
+    "exact_acc3": 0.8349013328552246,
+    "n_solved": 7547,
+    "disjoint": {
+     "n": 33616,
+     "policy_kl": 1.5159975290298462,
+     "policy_top1": 0.49794742465019226,
+     "value_brier": 0.1399635523557663
+    }
+   },
+   "endgame": {
+    "set": "endgame_v2_dev",
+    "wdl_acc": 0.6703333333333333,
+    "regret_raw": 0.15866666666666668,
+    "optimal_raw": 0.8726666666666667
+   },
+   "d4_policy_js_bits": 2.958796358143445e-06,
+   "d4_value_std": 0.00011019801604561508,
+   "ms_batch4096": 609.6821549996093,
+   "ms_batch1": 0.6747750005160924
+  },
+  {
+   "arm": "gcnn8x46",
+   "positions": 400000,
+   "passes": 8,
+   "seed": 0,
+   "steps": 3120,
+   "t_train": 2929,
+   "params": 2459392,
+   "dev": {
+    "n": 49726,
+    "policy_kl": 0.7636129260063171,
+    "policy_top1": 0.6387604475021362,
+    "value_brier": 0.10729976743459702,
+    "exact_acc3": 0.8293362259864807,
+    "n_solved": 7547,
+    "disjoint": {
+     "n": 33616,
+     "policy_kl": 1.032704472541809,
+     "policy_top1": 0.5131484866142273,
+     "value_brier": 0.141765758395195
+    }
+   },
+   "endgame": {
+    "set": "endgame_v2_dev",
+    "wdl_acc": 0.6936666666666667,
+    "regret_raw": 0.14033333333333334,
+    "optimal_raw": 0.8856666666666667
+   },
+   "d4_policy_js_bits": 1.875033035503293e-06,
+   "d4_value_std": 0.00010693688818719238,
+   "ms_batch4096": 1693.8684000000649,
+   "ms_batch1": 1.7949599998246413
+  },
+  {
+   "arm": "gcnn8x46",
+   "positions": 400000,
+   "passes": 16,
+   "seed": 0,
+   "steps": 6240,
+   "t_train": 4986,
+   "params": 2459392,
+   "dev": {
+    "n": 49726,
+    "policy_kl": 0.9194502830505371,
+    "policy_top1": 0.6482524275779724,
+    "value_brier": 0.10269278287887573,
+    "exact_acc3": 0.8360938429832458,
+    "n_solved": 7547,
+    "disjoint": {
+     "n": 33616,
+     "policy_kl": 1.321921467781067,
+     "policy_top1": 0.4983638823032379,
+     "value_brier": 0.13793383538722992
+    }
+   },
+   "endgame": {
+    "set": "endgame_v2_dev",
+    "wdl_acc": 0.6836666666666666,
+    "regret_raw": 0.16433333333333333,
+    "optimal_raw": 0.8713333333333333
+   },
+   "d4_policy_js_bits": 2.4107539502438158e-06,
+   "d4_value_std": 0.00010479036427568644,
+   "ms_batch4096": 1693.763449999824,
+   "ms_batch1": 1.8111400000634603
+  }
+ ]
+}

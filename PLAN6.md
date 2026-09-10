@@ -40,7 +40,7 @@ a G-CNN at a lower LR (the sweeps), and no wider G-CNN in *self-play* except thr
 inference cost declared. Both cards are idle (13:05). Windows Update is paused until 2026-10-14; the play agent
 is `runs/deep8_c1_300_e4/net_0300.pt`.
 
-**Next: the closing programme of §9, in this order — H1c on the 3090, then G arm (g) and I1 on the 3060, then E11.**
+**State at 08:15 on 2026-09-10:** H1c is running (launched 21:24 on 2026-09-09, iteration ≈ 160, DONE ≈ 20:30 then `eval_run.sh`); G arm (g) and I1 are done and read (the log's 07:30 and 08:10 entries; §9b, §9c); E11 follows H1c's write-up. **Next: the closing programme of §9, in this order — H1c on the 3090, then G arm (g) and I1 on the 3060, then E11.**
 
 *1. H1c `deep8_c1_300_e8`* (§9a; ≈ 22–23 h, inside the update pause if launched before 2026-10-13). `runs/queue13.sh`
 is **not yet written**: copy `runs/queue11.sh` and change four things — `R=deep8_c1_300_e8` and
@@ -546,6 +546,52 @@ the G-CNN again at width 128 (50).
   is above the 50 % line: the readings and write-ups (§9's pre-registered rules) fall to the next instance, from this
   Handover. E11 after all three: the owner creates the empty GitHub repository, then push and the off-machine copy.
 
+- **2026-09-10, 07:30 — G arm (g) read (§9b): the matched-parameter G-CNN over-fits the frozen set; the pre-registered
+  reading closes the equivariant line under this protocol, with a caveat.** `gcnn8x46` (2 459 392 parameters; 7.0×
+  resnet8's cost at batch 4096, measured) on `gdata_v1` at lr 0.02, seed 0, dev policy KL against the teacher (resnet8 /
+  gcnn8x16 at the same steps in brackets; `runs/plan6/G_arm_gcnn8x46.json`, 21:24–02:27 on the 3060 shared with the E7
+  worker): 3 120 steps **0.7636** [0.884 / 0.806] — the best fit of any student at the gate's step count, top-1 0.639;
+  6 240 steps **0.9195** [0.8145 / 0.7875]; 12 480 steps **1.0336** [0.7630 / 0.8298]; its KL on the dev positions with
+  no canonical twin in train 1.033 → 1.322 → 1.516 (the ResNet's 0.960 → 0.931 over the last doubling); endgame_v2_dev
+  raw WDL 69.4 / 68.4 / 67.0 %, regret 0.140 / 0.164 / 0.159; D4 residual 0 at every point. **Reading by the rule: it
+  trails resnet8 at 12 480 steps and the margin does not close but reverses by 6 240 — the equivariant line closes;
+  nothing is proposed.** The caveat, stated because the rule was written before the 8-pass point was seen: at 3 120
+  steps the wide G-CNN extracts more per step than any net measured, and what follows is memorisation of 400 000
+  positions for which D4 augmentation is an exact no-op (the ResNet sees eight views of each) — so the protocol shows
+  the wide net data-limited by ≈ 8× at equal capacity where the ResNet is not, and cannot say whether its self-play
+  prospect (fresh data every iteration) differs from the narrow net's. A data-matched supervised test would need ≈ 8×
+  `gdata_v1` (≈ 40 h of teacher labelling on the 3090) and is not proposed: the 7.0× inference cost disqualifies the net
+  as a rung, and the project's purpose does not need the answer. KNOWLEDGE 48 / 50 / §10 restated. I1 finished 07:23
+  (its reading follows in the next entry); H1c at iteration 147 at 07:26, ETA 20:23, the worker's curve 81.1 % vs v2b at
+  140 (H1b: 79.1 at 150) and 35.1 % against H1b's final net.
+
+- **2026-09-10, 08:10 — I1 read (§9c): the second analysis pass on the +363 net. Of 34 claims re-read, 15 held, 18
+  moved, 1 reversed.** Every net-dependent PLAN5 Phase A tool re-run on `runs/deep8_c1_300_e4/net_0300.pt` at the
+  deep10 pass's settings, 02:27–07:23 on the 3060 beside H1c's worker; `runs/plan6/I1_second_pass_3060.sh`, outputs
+  `runs/plan6/I1_*.out`, every exit code 0. **The reversal is claim 7.** After [40] this net's book puts **0.71 of
+  its visits on the corner reply orbit 36** and 0.29 on the edge orbit 37 — the mirror of deep10's 0.75 / 0.25 and
+  deep8_300's 0.54 / 0.46 — and rates the *edge* subtree +0.022 better for X where both earlier nets rated the corner
+  +0.016 better; its atlas says 36 at 1k, 4k and 16k where all nine earlier columns said 37. One ordering in
+  KNOWLEDGE is therefore strength-relative, and it flipped between +242 and +363. **Held (15):** 1, 8 (+0.1953 ±
+  0.0278 against deep10's +0.196 ± 0.028), 11, 13, 17, 19, 21, 26, 31a (100 / 100 / 100 on 689 one-open-board
+  positions), 33, 34, 35, 36, 38, 40 (70.8 % late ownership against 51.1 / 53.6 / 65.9). **Moved (18):** the opening
+  sharpens — 2 (τ vs v2b@16k 0.96 → 0.85), 3 (+0.495), 4 (flat after 9 of 15, range median 0.150), 5 ([13] 0.142,
+  plus a new non-[40] exception after [2], 0.073), 7a (self-send 55 / 58 → 48 %); games settle earlier — 20 (Q 34 on
+  strong play against 36, raw 39 against 41), 22, 23 (policy disagreement 33.6 → 30.8 %, the value gap unchanged at
+  0.19); the corpus moves — 24 (X 62.7 / O 20.7 / draws 16.6), 25 (the count rule decides a third, not a quarter),
+  27 (52.8 plies, 5.08 free moves); the regressions shrink — 9 (+0.117, so "halves" is 0.60 here), 10 (+0.30 late,
+  and the middlegame now runs with the count, −0.16 to +0.24), 14 (+0.02 … +0.05), 16 (+0.022); the net reads better
+  and earlier — 32 (raw failures 2.1 → 1.0 %, search 0.12 → 0.03 %), 37 (the same gains 20–50 iterations earlier),
+  39. **Not re-read:** 6, 12, 15, 18, 38a (their tools are not in §9c's table); 28–31 were already read on this net.
+  Two caveats: the new book's paired X-score column uses the parent match, not a self-match, so it is not comparable
+  with the earlier books'; and `principles.py`'s solved-position column is a property of the held-out set, not of the
+  net (it reproduces deep8_300's digits exactly). **On the method (PLAN5 §1c):** signs and orderings survive 120 Elo
+  with one exception, and that exception sits where two lines are within 0.02 of each other; PLAN5 §2's "the
+  magnitudes saturated between deep8_300 and deep10" is wrong for the count rule, the draw share and the settling
+  ply, which all resumed moving. KNOWLEDGE header, §1 note, 1–5, 7, 7a, 8–11, 13, 14, 16, 17, 19–27, 31a–40, §10
+  restated; RETROSPECTIVE §6 and §7. Two of §9's three items are read; H1c remains (DONE ≈ 20:30, then its write-up
+  by §9a's rule), then E11.
+
 ## 0. The decision in front of the project
 
 **Three things "more strength" could be for, and they call for different work.**
@@ -923,7 +969,7 @@ the machine restarts mid-run, **relaunch the same `.vbs`** — `train2` prefers 
 restarts from the last buffer save as a perturbed continuation (`attempt: N`; de-duplicate
 `log.jsonl` by iteration when reading it), and the worker skips what `eval_full.jsonl` already holds.
 
-### 9b. G arm (g) `gcnn8x46` — the G-CNN at the ResNet's parameter count, on frozen data (3060)
+### 9b. G arm (g) `gcnn8x46` — the G-CNN at the ResNet's parameter count, on frozen data (3060) — **done 2026-09-10 02:27, read in the log (07:30): the equivariant line closes**
 
 **Purpose.** Separate *capacity* from *equivariance* in H4's negative result. The sweeps read H4 as
 capacity rather than the learning rate (50, 48 restated), but the only equivariant net this project
@@ -976,7 +1022,7 @@ or clearly will not.
   equivariant line closes**.
 - Two seeds at the 32-pass point (`--seeds 0,1`) if the margin there is inside 0.005.
 
-### 9c. I1 — the analysis second pass on the strongest net (3060, hours)
+### 9c. I1 — the analysis second pass on the strongest net (3060, hours) — **done 2026-09-10 07:23, read in the log (08:10): 15 held, 18 moved, 1 reversed**
 
 **Purpose.** The project's central methodological claim is PLAN5 §1c's: orderings and signs are
 stable across strength, magnitudes drift and saturate. It has been tested once, in Phase A at +242,

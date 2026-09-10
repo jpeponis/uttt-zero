@@ -283,22 +283,38 @@ where noted:
 - Centre-of-centre (m=40, the centre cell of the centre board) is the best first move in
   every net × budget × seed tested; openings are otherwise flat (root Q-gaps ≤ 0.02 —
   the search's values for the best and next-best replies differ by at most 0.02).
-  Ordering is stable, values are not.
+  Ordering is stable, values are not. *(Addendum 2026-09-10, PLAN6 I1 on the +363 net: [40]
+  is still rank 1 and [13] rank 15, and X's edge after [40] has risen again to +0.495; but
+  "otherwise flat" is the weaker nets' reading — measured by reply **orbit** the gap after
+  [13] is 0.142 and after [4] 0.090, only 9 of 15 first moves are flat at ≤ 0.03, and the
+  best-to-worst range runs 0.09–0.26. KNOWLEDGE 3, 4, 5.)*
 - Games are decided late: median settled at ply 38 of ~51 (64-sim best-child Q, the
   point from which the search's favourite move's value stops changing side); nothing is
-  settled at ply 30.
+  settled at ply 30. *(2026-09-10: 36 on the reference v2a games and **34** on strong play
+  for the +363 net, with a first quartile of 25 — "nothing is settled at ply 30" was never
+  right and the settling keeps moving earlier with strength. KNOWLEDGE 20.)*
 - A free move is worth +0.16 ± 0.03 in expected score (matched natural positions,
   cluster-robust standard errors that allow for positions from the same game being
   related) — half the naive tensor-probe estimate, and largest late in the game when
-  ahead.
+  ahead. *(2026-09-10: **+0.195 ± 0.028 of utility** on the +363 net, the deep10 number to
+  the third decimal, and **+0.30** at plies 44–50 when the count is level or better; on that
+  net the middlegame value of a free move runs with the count, −0.16 two boards down to
+  +0.24 two up, where deep10's was a flat +0.03. Values here are utilities, not expected
+  score — KNOWLEDGE's header. KNOWLEDGE 8, 10.)*
 - The board "value hierarchy" (centre worth more than corners, corners more than edges)
   is macro-line counting in disguise (±0.17 per line). *(Addendum 2026-09-03, PLAN5 §2 A5:
   on the two strong nets the lines are still ±0.15 each, but with them controlled an own
   board now carries a small residual of its own, +0.03 … +0.07 — a fifth to a third of a
-  line; which class of board is worth most is not resolved between the nets.)*
+  line; which class of board is worth most is not resolved between the nets.)* *(2026-09-10:
+  the lines are ±0.15 on the +363 net too, and the residual is smaller there, +0.02 … +0.05 —
+  it grew once, from v2b's zero, and has not grown since. The class order is still unresolved:
+  that net's two fits disagree with each other. KNOWLEDGE 13, 14.)*
 - The count tiebreak decides ~30 % of strong games and rises with strength; draws rise
   with strength too (12 % at 64-sim eval, 19–22 % between the newest nets — the
-  strongest agents increasingly *prove* draws).
+  strongest agents increasingly *prove* draws). *(2026-09-10: the share held flat at ~27 %
+  from v2a to deep10 and then moved — **33 % on the +363 net** (16.5 % by a board count,
+  16.6 % by an equal count), whose own self-play is **16.6 % drawn** against deep10's 13.1.
+  KNOWLEDGE 24, 25.)*
 - **Revised:** endgame value error is not a wall. Trained long enough, the raw head
   reaches 84.6 % WDL / 96.7 % optimal moves, and search at 256 sims is 99.9 % optimal
   with regret 0.001 — the endgame is, in practice, solved by the agent.
@@ -323,18 +339,25 @@ where noted:
   staged but withdrawn. **H5 (`--head_tying 1`) was not proposed**: the supervised margin closes
   across three doublings of the step count, so the prediction is null-to-small — inside the seed
   band — and exact policy symmetry has no consumer (41b).
-- **The open list is now three items and no more** (the owner's closing programme, PLAN6 §9,
+- **The open list was three items and no more** (the owner's closing programme, PLAN6 §9,
   2026-09-09), in launch order: **H1c `deep8_c1_300_e8`** — the third doubling of the optimizer
   steps (2048 per iteration, parent `deep8_c1_300_e4`, ≈ 22–23 h on the 3090), reading the
   dose–response curve +100 → +64 → ? to its asymptote or its plateau, with the over-fitting
   branch of H1's reading finally testable; **G arm (g) `gcnn8x46`** — the D4 G-CNN at the
-  ResNet's *parameter* count (46 base filters × 8 orientations, 2.46 M parameters, ≈ 8× the
-  inference cost) on the frozen teacher, to separate capacity from equivariance in H4's negative
-  result, read at 12 480 steps as KNOWLEDGE 48's restatement requires; **I1** — the analysis
-  second pass, PLAN5 Phase A's tools re-run on the +363 net at the same settings, every claim
-  marked held / moved / reversed, which is the first test of the project's own central
-  methodological claim on the strongest net it has. **E11**, the off-machine backup and the
-  first push to a remote, is scheduled after all three.
+  ResNet's *parameter* count (46 base filters × 8 orientations, 2.46 M parameters, 7.0× the
+  inference cost as measured) on the frozen teacher, to separate capacity from equivariance in
+  H4's negative result, read at 12 480 steps as KNOWLEDGE 48's restatement requires; **I1** — the
+  analysis second pass, PLAN5 Phase A's tools re-run on the +363 net at the same settings, every
+  claim marked held / moved / reversed, which is the first test of the project's own central
+  methodological claim on the strongest net it has. **Two of the three are now done. Arm (g)
+  came back on 2026-09-09 and closed the equivariant line**: at the ResNet's parameter count the
+  G-CNN trails resnet8 at 12 480 steps (1.034 against 0.763) and the margin reverses by 6 240,
+  so the width was not what cost H4 its 220 Elo and nothing is proposed (KNOWLEDGE 48, 50).
+  **I1 ran 02:27–07:23 on 2026-09-10** and is written up in KNOWLEDGE (the note at the head of
+  §1): of 34 claims re-read, 15 held, 18 moved and **1 reversed** — after [40] the +363 net
+  prefers the corner reply orbit where both earlier strong nets preferred the edge, the first
+  ordering in the file to flip with strength. H1c is under way on the 3090. **E11**, the
+  off-machine backup and the first push to a remote, is scheduled after it.
 - **Neither depth nor duration is exhausted** — 12-block and 600-iteration runs are the
   obvious continuations, each a committed GPU-day, both on hold per the pause. *(2026-09-06:
   depth 8 → 10 is inside the seed band and an earlier LR drop hurts, so the continuation the
@@ -347,7 +370,8 @@ where noted:
 - Also open, cheaper: a seed replicate of the final recipe (rigor — *done 2026-09-05*,
   PLAN5 §5 D1); an analysis second
   pass with the new net (atlas / decision / freemove / puzzles → `puzzles_v2_dev`, suites
-  refresh with a dev/test split — *approved 2026-09-09 as I1, above*); the 6×64
+  refresh with a dev/test split — *approved 2026-09-09 as I1, run 2026-09-10, done; it wrote
+  `suites/puzzles_v3_dev.npz` and `runs/book_deep8_e4.json`*); the 6×64
   endgame-overfit diagnostic (now largely
   mooted by §3's revision); the CodinGame port (needs the batch-1 latency budget — one
   position at a time under a per-move time limit — not the ladder).

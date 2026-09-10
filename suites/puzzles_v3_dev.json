@@ -1,0 +1,48 @@
+[
+ {
+  "id": 1385,
+  "game_id": 757,
+  "ply": 53,
+  "exact": 0,
+  "best": 18,
+  "pv": [
+   18,
+   42,
+   31,
+   45
+  ],
+  "raw_move": 23,
+  "search_move": 23,
+  "motifs": [
+   "local_win",
+   "gives_free_move",
+   "tiebreak_conversion",
+   "draw_hold"
+  ],
+  "board": "to move: O   next board: 2   moves: 53\n. . X  O X .  . O .\n. . X  O . .  O . .\n. . X  O . .  O X X\n\nO X O  O . X  . X X\nX . O  X X O  X . O\nX O X  . . X  X O O\n\n. . X  . . .  O O O\nX O X  O . O  O X X\nO O O  X X X  X . O\nmacro:\nXO.\n...\nOXO"
+ },
+ {
+  "id": 4596,
+  "game_id": 2598,
+  "ply": 42,
+  "exact": 1,
+  "best": 25,
+  "pv": [
+   25,
+   63,
+   21,
+   24,
+   44,
+   36,
+   67,
+   42
+  ],
+  "raw_move": 44,
+  "search_move": 44,
+  "motifs": [
+   "denies_free_move",
+   "tiebreak_conversion"
+  ],
+  "board": "to move: X   next board: any   moves: 42\nX . .  O . .  X O X\nX . O  O . .  . O X\nX . O  O . .  . . O\n\nX O .  . X O  . X .\nX O .  X X O  . . O\n. O .  . O .  X X X\n\nO . O  . X .  . . X\n. . O  X . O  O X .\nX . O  . . .  X . .\nmacro:\nXO.\nO.X\nO.X"
+ }
+]

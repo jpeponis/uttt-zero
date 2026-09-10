@@ -1,0 +1,32 @@
+depth 1: 15 nodes evaluated at 16384 sims (103s)
+depth 2: 43 nodes evaluated at 16384 sims (279s)
+depth 3: 126 nodes evaluated at 16384 sims (748s)
+depth 4: 378 nodes evaluated at 16384 sims (2790s)
+audit: {'nodes': 562, 'lines': 15, 'illegal_member': [], 'transform_mismatch': [], 'duplicate_child': [], 'illegal_line': [], 'frame_mismatch': [], 'clean': True}
+# Opening book: runs/deep8_c1_300_e4/net_0300.pt at 16384 sims, depth 4, top-3 replies per node
+
+Values are the deep-search value for X after the moves (search-relative: what this net + search prefers, not game-theoretic). Moves are `m(b<board>c<cell>)`, m = 9*board + cell. The line follows the most-visited move. A reply is one *orbit* (replies equivalent under the symmetries that fix the position), shown by its canonical (smallest-index) member with the orbit size in brackets when > 1; share is the orbit's summed visit share; every line is in the frame of its first move.
+
+| first move | value X | best reply orbit (O) | share | X's next | line to depth 4 | paired X score | draw share | deep8_c1_300 value / best reply |
+|---|---|---|---|---|---|---|---|---|
+| 40(b4c4) | +0.495 | 36(b4c0) [4] | 0.71 | 0(b0c0) | 36(b4c0)(+0.50) 0(b0c0)(+0.50) 8(b0c8)(+0.50) | 73 % (44) | 23 % | +0.455 / 37(b4c1) != |
+| 36(b4c0) | +0.395 | 0(b0c0) | 0.44 | 4(b0c4) | 0(b0c0)(+0.39) 4(b0c4)(+0.40) 38(b4c2)(+0.40) | 74 % (80) | 24 % | +0.320 / 4(b0c4) != |
+| 0(b0c0) | +0.309 | 1(b0c1) [2] | 0.63 | 14(b1c5) | 1(b0c1)(+0.33) 14(b1c5)(+0.33) 50(b5c5)(+0.33) | 66 % (78) | 17 % | +0.291 / 1(b0c1) = |
+| 37(b4c1) | +0.305 | 10(b1c1) | 0.89 | 12(b1c3) | 10(b1c1)(+0.30) 12(b1c3)(+0.32) 30(b3c3)(+0.32) | 68 % (54) | 24 % | +0.290 / 10(b1c1) = |
+| 5(b0c5) | +0.254 | 50(b5c5) | 0.46 | 45(b5c0) | 50(b5c5)(+0.26) 45(b5c0)(+0.28) 7(b0c7)(+0.28) | 65 % (110) | 20 % | +0.212 / 50(b5c5) = |
+| 8(b0c8) | +0.232 | 80(b8c8) | 0.87 | 72(b8c0) | 80(b8c8)(+0.23) 72(b8c0)(+0.23) 5(b0c5)(+0.24) | 50 % (42) | 38 % | +0.199 / 73(b8c1) != |
+| 4(b0c4) | +0.192 | 40(b4c4) | 1.00 | 36(b4c0) | 40(b4c4)(+0.19) 36(b4c0)(+0.19) 5(b0c5)(+0.18) | 72 % (36) | 17 % | +0.179 / 40(b4c4) = |
+| 1(b0c1) | +0.171 | 10(b1c1) | 0.61 | 16(b1c7) | 10(b1c1)(+0.17) 16(b1c7)(+0.16) 66(b7c3)(+0.17) | 62 % (96) | 15 % | +0.134 / 10(b1c1) = |
+| 10(b1c1) | +0.170 | 16(b1c7) | 0.94 | 66(b7c3) | 16(b1c7)(+0.17) 66(b7c3)(+0.17) 30(b3c3)(+0.16) | 66 % (80) | 18 % | +0.197 / 16(b1c7) = |
+| 12(b1c3) | +0.166 | 30(b3c3) | 0.77 | 28(b3c1) | 30(b3c3)(+0.16) 28(b3c1)(+0.17) 10(b1c1)(+0.18) | 50 % (84) | 17 % | +0.119 / 30(b3c3) = |
+| 2(b0c2) | +0.157 | 20(b2c2) | 0.97 | 18(b2c0) | 20(b2c2)(+0.16) 18(b2c0)(+0.17) 7(b0c7)(+0.16) | 61 % (102) | 18 % | +0.165 / 20(b2c2) = |
+| 15(b1c6) | +0.094 | 60(b6c6) | 0.97 | 55(b6c1) | 60(b6c6)(+0.09) 55(b6c1)(+0.10) 12(b1c3)(+0.10) | 57 % (66) | 20 % | +0.118 / 60(b6c6) = |
+| 16(b1c7) | +0.090 | 70(b7c7) | 0.74 | 66(b7c3) | 70(b7c7)(+0.08) 66(b7c3)(+0.10) 30(b3c3)(+0.11) | 59 % (48) | 31 % | +0.103 / 70(b7c7) = |
+| 9(b1c0) | +0.039 | 0(b0c0) | 0.74 | 1(b0c1) | 0(b0c0)(+0.04) 1(b0c1)(+0.05) 12(b1c3)(+0.04) | 58 % (70) | 19 % | +0.064 / 5(b0c5) != |
+| 13(b1c4) | -0.079 | 40(b4c4) | 1.00 | 39(b4c3) | 40(b4c4)(-0.08) 39(b4c3)(-0.09) 30(b3c3)(-0.07) | 56 % (40) | 28 % | -0.017 / 40(b4c4) = |
+
+Agreement with runs/deep8_c1_300/net_0300.pt on the most-visited reply orbit: 0.70 over 415 shared nodes (by depth: 1: 0.73, 2: 0.67, 3: 0.69, 4: 0.71); mean |value difference| 0.042.
+
+Nodes: 562; built 2026-09-10 05:45 in 2790 s.
+
+wrote runs/book_deep8_e4.json and runs/book_deep8_e4.md  [2791s]

@@ -23,10 +23,16 @@ Every line carries:
 - **held across** — the nets on which the claim was tested. "Both strong nets" means
   `deep10_c1_300/net_0300.pt` (+242 Elo vs v2b @64) and `deep8_c1_300/net_0300.pt` (+211);
   "all three strong nets" or "both seeds" adds the seed replicate
-  `deep10_c1_300_s1/net_0300.pt` (+213, PLAN5 §5 D1); "all nets" adds dev1, v2a, v2b (250–340 Elo weaker). A claim that held from dev1 to deep10
+  `deep10_c1_300_s1/net_0300.pt` (+213, PLAN5 §5 D1); **"all four strong nets" adds
+  `deep8_c1_300_e4/net_0300.pt` (+363, 49), the strongest net measured**; "all nets" adds
+  dev1, v2a, v2b (250–340 Elo weaker). A claim that held from dev1 to deep10
   survived a 340-Elo span; a magnitude is quoted from the strongest net. Since 2026-09-08 the
-  strongest net is `deep8_c1_300_e4/net_0300.pt` (+363 vs v2b; 49); the game claims of §1–§8
-  have not been re-run on it, and "strongest net" in those sections still means deep10;
+  strongest net is `deep8_c1_300_e4/net_0300.pt` (+363 vs v2b; 49), and **since 2026-09-10 the
+  game claims of §1–§8 have been re-run on it** (PLAN6 §9c, I1 — the second analysis pass, 120 Elo
+  above the net they were first quoted from): each re-read claim below carries its `_e4` number
+  beside the earlier one, and "strongest net" in those sections now means `deep8_c1_300_e4`
+  wherever a number was re-read. The five that were not re-read say so where they occur: 6
+  (already read on this net), 12, 15, 18 and 38a (their tools are not in I1);
 - **the tool and the output file** so the number can be regenerated.
 
 Rules used throughout (PLAN5 §1c): orderings and signs are trusted when they hold across
@@ -45,35 +51,65 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
 
 ## 1. The opening
 
+*Second pass, 2026-09-10 (PLAN6 §9c, I1). Every net-dependent tool of PLAN5 Phase A re-run on
+`deep8_c1_300_e4/net_0300.pt` (+363) at the deep10 pass's settings, 02:27–07:23 on the 3060;
+outputs `runs/plan6/I1_*.out`, script `runs/plan6/I1_second_pass_3060.sh`. Of the **34 claims
+re-read: 15 held, 18 moved, 1 reversed**; 5 more (6, 12, 15, 18, 38a) were not re-run, and 28–31
+were already read on this net (`runs/deep8_c1_300_e4/analysis.out`, 49). **The reversal is in 7:**
+after [40] this net prefers the corner reply orbit where both earlier strong nets preferred the
+edge — the first ordering in this file to flip with strength. The moves are mostly magnitudes
+drifting the way strength has always pushed them (a sharper opening, 2–5; earlier settling, 20–22;
+a raw policy that fails half as often, 32), with two that are not: the count rule now decides a
+third of games rather than a quarter (25), and 16.6 % of this net's games are drawn (24). No other
+sign or ordering changed.*
+
 1. **[40] — centre of the centre board — is the best first move** on every net and every
    budget tested, and **[13] the worst**: rank 1 and rank 15 in all 9 columns of the atlas
    (v2b, deep8_300, deep10 × 1k / 4k / 16k sims, symmetry-averaged), as they were for dev1
-   and v2a. *Search-relative; all nets.* `tools/atlas.py` → `runs/plan5_A1_atlas.out`,
-   `runs/step7a.out`.
+   and v2a — and in all 3 of `deep8_c1_300_e4`'s columns (2026-09-10), 12 columns in all.
+   *Search-relative; all nets, `deep8_c1_300_e4` included.* `tools/atlas.py` →
+   `runs/plan5_A1_atlas.out`, `runs/step7a.out`, `runs/plan6/I1_A1_atlas.out`.
 2. **The first-move ordering is stable across 340 Elo**: Kendall τ between deep10@16k and
    v2b@16k is 0.96, deep8_300 vs v2b 0.92; the top four are [40] > [36] > [0] > [37] on
    every strong column (centre-centre, then the centre board's corner and the corner
-   board's corner and edge). *Search-relative; all nets.* Same files.
+   board's corner and edge). **`deep8_c1_300_e4` has the same top four in the same order at
+   16k** ([0] and [37] swap at 1k and 4k, as they already did on deep8_300), but its ordering
+   sits further from the weak net's: **τ 0.85 against v2b@16k**, 0.89 against deep10@16k, 0.92
+   against deep8_300@16k (2026-09-10) — the top and the bottom fixed, the middle looser than any
+   earlier pair. *Search-relative; all nets.* Same files; `runs/plan6/I1_A1_atlas.json`.
 3. **X's edge after [40] is rated +0.447 by deep10 at 16k sims** (v2b: +0.354; dev1: +0.28).
    The *magnitude* rises with strength and is not trusted; the *sign* and the gap to the
-   next move (+0.11 to [36]) are. *Search-relative.* Same files.
+   next move (+0.11 to [36]) are. `deep8_c1_300_e4`: **+0.495**, gap to [36] **+0.100**
+   (2026-09-10) — a fourth point on a rise that has not stopped (0.28 → 0.354 → 0.455 /
+   0.447 → 0.495) while the gap stays ≈ 0.10. *Search-relative.* Same files;
+   `runs/plan6/I1_A1_atlas.out`.
 4. **After most first moves there are two or more comparably good replies — and the worst
    reply is clearly worse.** Between the two best *distinct reply orbits* (a reply and its
    images under the symmetries that fix the position count once) the 16k-sim value gap is
    ≤ 0.03 after 12 of the 15 first moves on deep10 (deep8_300 10, v2b 14), but the
    best-to-worst reply-orbit range is 0.07–0.19 after every first move except [40]
-   (0.02), median 0.11 (deep8_300 0.12, v2b 0.08). *Restated 2026-09-06:* the earlier
+   (0.02), median 0.11 (deep8_300 0.12, v2b 0.08). **On `deep8_c1_300_e4` both numbers move
+   the way strength has been moving them** (2026-09-10, at all three budgets): flat after **9 of
+   15** first moves, and a best-to-worst range of **0.09–0.26 except [40] (0.022), median
+   0.150** — fewer comparable replies and a wider spread between the best and the worst.
+   *Restated 2026-09-06:* the earlier
    form ("the choice of reply hardly matters", gap ≤ 0.03 in 13 of 15) compared the two
    most-visited *individual* replies, which after [0], [8] and [40] were symmetry copies of
-   one reply (REVIEW-astra §4.3). *Search-relative; v2b and both strong nets.*
-   `tools/atlas.py --report runs/plan5_A1_atlas.json` → `runs/plan6_E2_atlas_orbits.out`.
+   one reply (REVIEW-astra §4.3). *Search-relative; v2b, both strong nets and
+   `deep8_c1_300_e4`.* `tools/atlas.py --report runs/plan5_A1_atlas.json` →
+   `runs/plan6_E2_atlas_orbits.out`, `runs/plan6/I1_A1_atlas_orbits.out`.
 5. **The clear exceptions are the first moves whose best reply is to take [40]:** after
    [13] the gap between the best reply orbit ([40]) and the next is 0.102 (deep8_300 0.075,
    v2b 0.071); after [4] it is 0.053 (deep8_300 0.048) — on v2b the best reply to [4] is
    [36], not [40], and the gap 0.008. A third first move, [37], sits at the edge (0.037,
-   deep8_300 0.035, v2b 0.026). The only opening edges a stronger net has *found* are
-   "answer by taking the centre of the centre board". *Search-relative; grew with
-   strength.* Same file.
+   deep8_300 0.035, v2b 0.026). The only opening edges the three earlier nets *found* are
+   "answer by taking the centre of the centre board". **`deep8_c1_300_e4` widens all three
+   again and adds a fourth of a different kind** (2026-09-10): [13] **0.142**, [4] **0.090**,
+   [37] **0.051**, and after [2] a gap of **0.073** (deep10 0.003, deep8_300 0.006, v2b 0.004)
+   whose best reply is the self-send [20], not [40]. The "answer by taking [40]" restriction is
+   the earlier nets' reading; on the strongest net there is a sharp reply that is not a [40]
+   reply. *Search-relative; grew with strength on every net.* Same file;
+   `runs/plan6/I1_A1_atlas_orbits.out`.
 6. **The opening is learned first.** Both 300-iteration nets put ≥ 0.95 of the raw
    first-move probability on [40] from iteration 20–30 on (deep8_300: 0.09 at iteration 10,
    0.79 at 20, 0.98 at 30) and never broaden again. *Descriptive of training.*
@@ -92,25 +128,51 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
    visits on the four edges and 0.25 on the corners, deep8_300 0.54 / 0.46), and the corner
    subtree — absent from the earlier book — is worth +0.02 more to X on both nets; the
    earlier "deep10 plays 37, deep8 plays 41 after [40]" was one reply under two names.
-   *Search-relative; both strong nets.*
+   **Reversed on the strongest net (2026-09-10, PLAN6 I1).** `deep8_c1_300_e4`'s book
+   (`runs/book_deep8_e4.json`, 562 nodes, the same settings) puts **0.71 of its visits after
+   [40] on the corner orbit 36 [4] and 0.29 on the edge orbit 37** — the mirror of deep10's
+   0.75 / 0.25 and deep8_300's 0.54 / 0.46 — and rates the *edge* subtree +0.022 better for X
+   where both earlier nets rated the *corner* subtree +0.016 better. Its atlas agrees at all
+   three budgets (36 is the best reply orbit at 1k, 4k and 16k, where all nine earlier columns
+   said 37). So "after [40] the strong nets prefer the edge reply" is **strength-relative: it
+   flipped between +242 and +363**, and it is the one ordering in this file that has. The rest
+   of the claim holds: the first-move values reproduce the atlas ordering ([40] +0.495 …
+   [13] −0.079); agreement with deep8_300 on the most-visited reply orbit is **70 % of the 415
+   shared nodes** (by depth 73 / 67 / 69 / 71 %, mean value difference 0.042) and with deep10
+   67 % of 404; and the flatness pattern survives with every level lower — **88 %** agreement
+   where the top orbit carries ≥ 0.9 of the root's visits (was 98), 66 % at 0.7–0.9 (79),
+   39–52 % below 0.7 (35–46). The new book's paired X-score column is **not** comparable with
+   the earlier ones: its `--paired` file is this net's match against its parent, not a
+   self-match (`runs/plan6/I1_second_pass_3060.sh` header).
+   *Search-relative; both strong nets and `deep8_c1_300_e4`, the [40] reply strength-relative.*
+   `runs/plan6/I1_C1_book.out`, `runs/book_deep8_e4.json`.
 7a. **The reply rule the book contains: the self-send.** The most-visited reply orbit is
    the cell whose index equals the board the mover was sent to — sending the opponent
    straight back into the board you just played in — in **55 % (deep10, 250 of 458) /
    58 % (deep8_300, 263 of 455)** of the nodes where that cell is free, at every depth to 4,
    with a higher visit share when chosen (0.84 vs 0.74 for other replies). "Take the centre
    of the board you were sent to" is *not* the rule (the top reply is the centre cell in
-   4 % of nodes). *Rebuilt book (was 52 / 57 % on the pre-E1 book). Behavioural; both
-   strong nets.* `tools/book_stats.py` → `runs/plan6/E1_book_stats.out`.
+   4 % of nodes). **On `deep8_c1_300_e4` the rule weakens for the first time: 48 % (213 of
+   the 447 nodes where that cell is free)**, by depth 12 / 12, 15 / 31, 50 / 101, 136 / 303,
+   with the same signature when it is chosen (visit share 0.85 against 0.78 for other replies)
+   and the same 4 % centre-cell rate (25 of 562) (2026-09-10). The self-send is still the single
+   most common reply and is still played with more conviction than anything else; it is no
+   longer played in a majority of nodes. *Rebuilt book (was 52 / 57 % on the pre-E1 book).
+   Behavioural; both strong nets and `deep8_c1_300_e4`.* `tools/book_stats.py` →
+   `runs/plan6/E1_book_stats.out`, `runs/plan6/I1_C1_book_stats.out`.
 
 ## 2. Tempo: the free move
 
 8. **A free move is worth about +0.2 of utility (≈ +10 points of expected score)** to the side that gets it, with
    ply, count, open boards, empties, side and macro threats controlled: **+0.196 ± 0.028**
    (deep10, 256-sim values, 30 000 natural positions, cluster-robust by game); deep8_300
-   +0.192 ± 0.027; v2b +0.163 ± 0.027. Same sign on every net; the magnitude grew a third
-   and then stopped (the two strong nets agree to 0.004). *Search-relative; all nets.*
-   `tools/freemove.py` → `runs/plan5_A4_freemove_deep10_on_deep8late.out`,
-   `runs/plan5_A4b_freemove_deep8_on_deep10late.out`, `runs/step7b_freemove.out`.
+   +0.192 ± 0.027; v2b +0.163 ± 0.027; **`deep8_c1_300_e4` +0.1953 ± 0.0278** (2026-09-10, on
+   deep10's late games) — the deep10 number to the third decimal, 120 Elo later. Same sign on
+   every net; the magnitude grew a third and then stopped (the three strong readings agree to
+   0.004). *Search-relative; all nets.* `tools/freemove.py` →
+   `runs/plan5_A4_freemove_deep10_on_deep8late.out`,
+   `runs/plan5_A4b_freemove_deep8_on_deep10late.out`, `runs/step7b_freemove.out`,
+   `runs/plan6/I1_A4_freemove.out`.
 9. **Conditioning on the immediate macro win halves the coefficient.** With "the mover can
    complete a macro line this move" in the model (+0.675 ± 0.059 on its own; deep8_300
    +0.625 ± 0.056), the free-move coefficient falls to **+0.084 ± 0.026** (deep8_300 +0.102
@@ -118,16 +180,36 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
    mediation split: it says that with the immediate win in the model a free move is worth
    ≈ +0.08 … +0.10, and ≈ +0.2 without it — not that half of a free move's value *is* the
    option to win at once (REVIEW-astra §8.3; the earlier line said "half of that is the
-   option to end the game"). *Search-relative; both strong nets.* `tools/value_decomp.py`
-   → `runs/plan5_B3_value_deep10.out`, `runs/plan5_B3_value_deep8.out`.
+   option to end the game"). **On `deep8_c1_300_e4` the conditional coefficient is +0.117 ±
+   0.027**, with the immediate macro win at +0.608 ± 0.058 (2026-09-10): still far below its own
+   unconditional +0.195, but 0.60 of it against deep10's 0.43 — so "halves" is deep10's number,
+   not a constant. Across the strong nets, with the immediate win in the model a free move is
+   worth ≈ +0.08 … +0.12. *Search-relative; both strong nets and `deep8_c1_300_e4`.*
+   `tools/value_decomp.py` → `runs/plan5_B3_value_deep10.out`, `runs/plan5_B3_value_deep8.out`,
+   `runs/plan6/I1_B3_value_decomp.out`.
 10. **It is largest late, when level or ahead:** +0.25 at plies 44–50 with the count level
-    or better, +0.03 at plies 32–43 (stratified check). *Search-relative; deep10, v2b.*
-    `plan5_A4_*.out`.
+    or better, +0.03 at plies 32–43 (stratified check). **`deep8_c1_300_e4` is larger still
+    late, and its middlegame is no longer flat** (2026-09-10): **+0.30** at plies 44–50 with the
+    count level or better (+0.24 / +0.39 / +0.33 at a count of 0 / +1 / +2, against deep10's
+    +0.25 / +0.27 / +0.27), and at plies 32–43 the free-minus-confined difference runs with the
+    count — **−0.16 two boards down, +0.01 one down, +0.11 level, +0.14 one up, +0.24 two up**
+    — against deep10's +0.03 in every stratum. The ordering (largest late, largest when ahead)
+    is the same on both; on the stronger net a free move is worth what the count can spend it
+    on. *Search-relative; deep10, v2b, `deep8_c1_300_e4`.* `plan5_A4_*.out`,
+    `runs/plan6/I1_A4_freemove.out`.
 11. **The value head over-credits it:** raw-head coefficient +0.290 ± 0.030 vs +0.196 for
-    the search — a 0.094 gap that was 0.094 on v2b too. Over training the raw coefficient
+    the search — a 0.094 gap that was 0.094 on v2b too, and **+0.2835 ± 0.0310 against +0.1953,
+    a 0.088 gap, on `deep8_c1_300_e4`** (2026-09-10): three nets, the same ≈ 0.09. Over training
+    the raw coefficient
     falls (+0.19 → +0.14 in the fuller model) while the search's rises (+0.04 → +0.09):
-    intuition converges toward search. *Predictive vs search-relative; all nets.*
-    `plan5_A4_*.out`, `plan5_B3_value_deep10.out`.
+    intuition converges toward search. **That second sentence is deep10's path alone.** On
+    `deep8_c1_300_e4` the raw coefficient *rises* over training (+0.04 at iteration 10, +0.16 at
+    20, +0.19 at 300 in the fuller model) while the search's rises too (+0.04 → +0.12), so the
+    raw − search gap widens from ≈ 0 to +0.070; deep8_300 does the same (§10). What holds across
+    nets is the over-crediting at the end of training, not the direction it arrives from.
+    *Predictive vs search-relative; all nets.*
+    `plan5_A4_*.out`, `plan5_B3_value_deep10.out`, `runs/plan6/I1_A4_freemove.out`,
+    `runs/plan6/I1_B3_value_decomp.out`.
 12. **Editing the tensor overstates it 2×.** Granting a free move by editing the position
     moves the raw value by +0.41 (median +0.32; v2a-era +0.27), against +0.20 from natural
     positions. The overstatement itself is stable, so tensor-edit numbers are read as
@@ -138,8 +220,9 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
 
 13. **A macro-line threat (two own boards in a line, the third open) is worth ≈ +0.15, an
     opponent's ≈ −0.14**, controlling for everything else in the model: +0.154 / −0.140
-    (deep10), +0.145 / −0.139 (deep8_300), +0.16 / −0.17 (v2b). *Search-relative; all
-    nets.* `plan5_A4_*.out`.
+    (deep10), +0.145 / −0.139 (deep8_300), +0.16 / −0.17 (v2b), **+0.148 ± 0.021 / −0.132 ±
+    0.018 (`deep8_c1_300_e4`, 2026-09-10)** — four strengths, the same pair of numbers.
+    *Search-relative; all nets.* `plan5_A4_*.out`, `runs/plan6/I1_A4_freemove.out`.
 14. **Owning a board is worth a little of its own — +0.03 … +0.08 — beyond the lines it
     sits on, and the number is not sharp.** With threats controlled, an own board adds:
     deep10 centre +0.070 ± 0.040, corner +0.065 ± 0.030, edge +0.056 ± 0.027 (A4's model),
@@ -148,9 +231,15 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     +0.078 ± 0.032 / +0.065 ± 0.028 (B3's model) — the reference's numbers to the third
     decimal. Positive in all five fits, significant in most, centre not significant on
     deep8_300. On v2b this was
-    indistinguishable from zero (+0.008 / +0.011 / +0.033). *Search-relative; moved with
-    strength — all three strong nets, smaller on deep8_300.* `plan5_A4_*.out`,
-    `plan5_B3_value_deep10.out`, `plan5_B3_value_deep8.out`, `plan5_B3_value_s1.out`.
+    indistinguishable from zero (+0.008 / +0.011 / +0.033). **`deep8_c1_300_e4` is smaller
+    again** (2026-09-10): +0.049 ± 0.039 / +0.026 ± 0.030 / +0.038 ± 0.027 (A4's model) and
+    +0.021 ± 0.045 / +0.034 ± 0.034 / +0.032 ± 0.031 (B3's) — positive in all six, significant
+    in three, every one of them below deep10's interval. Over four strong nets the residual is
+    **+0.02 … +0.08 and does not grow with strength**; "moved with strength" was the step up
+    from v2b, and it has not moved again since deep8_300. *Search-relative; positive on all four
+    strong nets, zero on v2b.* `plan5_A4_*.out`,
+    `plan5_B3_value_deep10.out`, `plan5_B3_value_deep8.out`, `plan5_B3_value_s1.out`,
+    `runs/plan6/I1_A4_freemove.out`, `runs/plan6/I1_B3_value_decomp.out`.
 15. **Which class of board is worth most is not resolved.** deep10 orders centre > corner >
     edge, deep8_300 has edge highest, the seed replicate corner > centre ≈ edge; the
     differences are inside the CIs on all three. The raw head's
@@ -162,18 +251,25 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     coefficient on the raw value falls from +0.106 (iteration 20) to +0.037 ± 0.010
     (iteration 300); the search's from +0.076 to +0.036. Early nets count boards; trained
     nets count lines and tempo. The seed replicate: +0.137 (iteration 10) → +0.033 ± 0.010,
-    the search's +0.097 → +0.036; deep8_300 +0.078 → +0.021. *Predictive / search-relative;
-    all three runs' checkpoints.* `plan5_B3_value_deep10.out`, `plan5_B3_value_s1.out`.
+    the search's +0.097 → +0.036; deep8_300 +0.078 → +0.021; **`deep8_c1_300_e4` +0.082
+    (iteration 10) → +0.022 ± 0.012, the search's +0.047 → +0.014** (2026-09-10) — below
+    deep10's interval and on deep8_300's endpoint, so the discount deepens rather than
+    saturating. *Predictive / search-relative; all four strong nets' checkpoints.*
+    `plan5_B3_value_deep10.out`, `plan5_B3_value_s1.out`, `runs/plan6/I1_B3_value_decomp.out`.
 17. **Line counting is learned first and never moves:** the threat coefficients are at
-    their final values by iteration 10–20 of 300 on both seeds and on deep8_300.
-    *Descriptive of training; all three strong nets.* Same; `plan5_B3_value_s1.out`.
+    their final values by iteration 10–20 of 300 on both seeds and on deep8_300 — and on
+    `deep8_c1_300_e4`, whose search-value threats read +0.123 / −0.166 at iteration 10 against
+    +0.131 / −0.136 at 300 (2026-09-10). *Descriptive of training; all four strong nets.*
+    Same; `plan5_B3_value_s1.out`, `runs/plan6/I1_B3_value_decomp.out`.
 18. **An open board that becomes nobody's is worth nothing to the mover:** removing an open
     board for both sides moves the raw value by +0.017 (v2a: +0.06). *Predictive.*
     `plan5_B4_probe_value_deep10.out`.
 19. **An opponent's immediate local threat costs ≈ −0.10** (−0.099 ± 0.014); an own
     immediate local win, once the macro win is separated, is worth nothing by itself
     (−0.026 ± 0.017). Seed replicate: −0.098 ± 0.014 and −0.028 ± 0.017; deep8_300 −0.082
-    ± 0.014. *Search-relative; all three strong nets.* `plan5_B3_value_*.out`.
+    ± 0.014; **`deep8_c1_300_e4` −0.086 ± 0.015 and −0.037 ± 0.018** (2026-09-10).
+    *Search-relative; all four strong nets.* `plan5_B3_value_*.out`,
+    `runs/plan6/I1_B3_value_decomp.out`.
 
 ## 4. When games are decided
 
@@ -186,38 +282,70 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     36 % at 32, 52 % at 36, 72 % at 40, 87 % at 44, 95 % at 48. "Settled" is retrospective
     prediction stability — the ply from which the verdict never changes again — not the
     ply at which the result became forced (the earlier line said "nothing is settled by
-    ply 30", which its own first quartile contradicted). *Predictive; all nets; the 2-ply
-    shift from v2b saturated between the two strong nets.* `tools/decision.py` →
-    `runs/plan5_A3*_decision_*.out`, `runs/step7c_decision.out`.
-21. **X wins settle earlier (ply 32) than O wins (39–40) and draws (39–41).** *Predictive;
-    all nets.* Same files.
+    ply 30", which its own first quartile contradicted). **`deep8_c1_300_e4` settles earlier
+    again** (2026-09-10): on the same 4000 v2a games its Q median is **36**, exactly the
+    earlier nets' (quartiles 27–40 against their 30–41), while its raw value settles at 39
+    (deep10 41, v2b 43) and its mixed root value at 45; on strong play (deep10's late games, mean length 51.9) everything
+    moves two plies earlier than deep10's reading — **Q 34 (25–40)**, raw 40, root 47. The
+    settled-by-ply curve moves with it: 21 % at ply 0, 23 % at 20, 30 % at 28, 41 % at 32,
+    **60 % at 36**, 77 % at 40, 90 % at 44, 97 % at 48 (deep10: 17 / 20 / 27 / 36 / 52 / 72 /
+    87 / 95). So the 2-ply shift from v2b did not saturate between the two strong nets; it
+    resumed. *Predictive; all nets and `deep8_c1_300_e4`.* `tools/decision.py` →
+    `runs/plan5_A3*_decision_*.out`, `runs/step7c_decision.out`,
+    `runs/plan6/I1_A3a_decision_on_v2a.out`, `runs/plan6/I1_A3b_decision_on_deep10late.out`.
+21. **X wins settle earlier (ply 32) than O wins (39–40) and draws (39–41).**
+    `deep8_c1_300_e4`: 32 / 39 / 40 on the v2a games, 30 / 39 / 39 on strong play (2026-09-10).
+    *Predictive; all nets and `deep8_c1_300_e4`.* Same files.
 22. *Caveat:* the "settled" statistic uses a ±0.33 threshold on a 3-way prediction; deep10
     rates the opening above +0.33 for X, so 10–17 % of X-win games count as settled from
-    ply 0. Medians are robust to this, the 10th percentile is not.
+    ply 0. Medians are robust to this, the 10th percentile is not. The caveat grows with
+    strength: `deep8_c1_300_e4` rates the opening +0.31 on average over its own games and
+    counts **21–22 %** of games as settled at ply 0 (2026-09-10).
 23. **Intuition and search part company in the middlegame.** The raw policy's move differs
     from the 256-sim search's in 34 % of positions overall, 20 % at plies 2–9, **44 % at
     plies 30–39**, 24 % after ply 50; the raw value differs from the search value by 0.19
-    on average, peaking at 0.35 at plies 40–49. Same shape on v2a. *Behavioural vs
-    search-relative.* `tools/surprise.py` → `runs/plan5_B4_surprise_deep10.out`.
+    on average, peaking at 0.35 at plies 40–49. Same shape on v2a. **On `deep8_c1_300_e4`,
+    on the same 7188 positions, the moves agree more and the values do not** (2026-09-10):
+    disagreement **30.8 %** overall, 21.1 % at plies 2–9, **37.8 % at 30–39**, 23.2 % after
+    ply 50, while the mean value gap is 0.191 (deep10 0.185), still peaking at 0.338 at plies
+    40–49 (0.345). The middlegame is where they part on both nets; the stronger net's policy
+    has closed 6 points on its search there and its value head has closed nothing.
+    *Behavioural vs search-relative; deep10, v2a, `deep8_c1_300_e4`.* `tools/surprise.py` →
+    `runs/plan5_B4_surprise_deep10.out`, `runs/plan6/I1_B4_surprise.out`.
 
 ## 5. How games end
 
 24. **X wins about 63 % of strong self-play games, O 24 %, 13 % are drawn** (deep10's
     iterations 280–299, 100 854 games at 64 sims with exploration; deep8_300 61 / 26 / 13;
     v2a 60 / 29 / 11). In paired matches between the strong nets X's share is 59–62 % and
-    15–25 % of games are drawn. *Descriptive; rises with strength.*
-    `tools/corpus_stats.py` → `runs/plan5_A6_corpus_*.out`; `runs/plan5_A8.out`.
+    15–25 % of games are drawn. **`deep8_c1_300_e4` (99 346 of its own games): X 62.7 %,
+    O 20.7 %, drawn 16.6 %** (2026-09-10). X's share has stopped rising; O's keeps falling and
+    the draw share is half again what it was at +242 — what a stronger net takes is not X wins
+    but draws out of O's column. *Descriptive; X flat since deep10, draws still rising.*
+    `tools/corpus_stats.py` → `runs/plan5_A6_corpus_*.out`; `runs/plan5_A8.out`;
+    `runs/plan6/I1_A6_corpus_stats.out`.
 25. **The count rule decides about a quarter of strong games:** 14 % end by a board count
     and 13 % by an equal count (a draw), 73 % by a macro line; flat since v2a (15 / 11 /
-    74). *Descriptive.* Same.
+    74). **It is not flat any more: `deep8_c1_300_e4` ends 16.5 % by a board count and 16.6 %
+    by an equal count — a third of its games, not a quarter — and 67.0 % by a macro line**
+    (2026-09-10). The tiebreak rule stayed a constant share over 250 Elo of strength and then
+    moved 6 points in the last 120. *Descriptive; flat to deep10, then rising.* Same;
+    `runs/plan6/I1_A6_corpus_stats.out`.
 26. **Nearly every draw is 4–4 with one full board:** 96.6 % of deep10's drawn games
     (deep8_300 97.0 %); 3–3 with three full boards is 3 %; the board-count lead changed
     hands during 63 % of draws; draws run 2 plies longer than the average game (53.8 vs
-    51.9). *Descriptive; both strong nets.* `tools/principles.py` →
-    `runs/principles_deep10.json`, `runs/principles_deep8.json`.
+    51.9). `deep8_c1_300_e4`, over its 16 471 drawn games: 96.3 % / 3.7 %, the lead changed
+    hands in 65.5 %, draws 1.7 plies longer (54.5 vs 52.8) (2026-09-10) — the shape of a draw
+    is the same at +363, there are just far more of them (24). *Descriptive; all three of the
+    nets whose own corpora were read.* `tools/principles.py` →
+    `runs/principles_deep10.json`, `runs/principles_deep8.json`,
+    `runs/plan6/I1_principles_deep8e4.json`.
 27. **Games last ~52 plies** (mean 51.9, p10 46, p90 58, max 72–75) and lengthen with
     strength (v2a 49.4). About 4.4 free moves occur per game and 97 % of games contain
-    one. *Descriptive.* `plan5_A6_*.out`.
+    one. **`deep8_c1_300_e4`: mean 52.8** (median 53, p10 47, p90 59, max 74), **5.08 free
+    moves per game** and 98.5 % of games with one (2026-09-10) — both still climbing, the free
+    moves fastest (4.4 → 5.1 over 120 Elo). *Descriptive; lengthens with strength on every net.*
+    `plan5_A6_*.out`, `runs/plan6/I1_A6_corpus_stats.out`.
 
 ## 6. The endgame and what the raw policy misses
 
@@ -252,17 +380,29 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     board in 60 000 held-out positions (701, 1.2 % of them; exact values from the
     one-open-board tablebase, `uttt/tablebase.py`), deep10's raw value head is 100 % exact
     (draws included), its raw policy plays an optimal move 100 % of the time, and the
-    64-sim search 100 %; v2b 99.0 / 99.6 / 100 %, dev1 94.0 / 98.7 / 100 %. A tablebase
-    spliced into the search as a terminal lookup therefore has nothing to add to any of
-    these nets. *Exact; all nets.* `tools/tablebase_grade.py`.
+    64-sim search 100 %; v2b 99.0 / 99.6 / 100 %, dev1 94.0 / 98.7 / 100 %. `deep8_c1_300_e4`
+    on the 689 one-open-board positions (1.1 %) of its own held-out set: **100 / 100 / 100**
+    again (2026-09-10). A tablebase spliced into the search as a terminal lookup therefore has
+    nothing to add to any of these nets. *Exact; all nets and `deep8_c1_300_e4`.*
+    `tools/tablebase_grade.py` → `runs/plan6/I1_C5_tablebase_grade.out`.
 32. **What the raw policy still gets wrong late is the count rule and tempo, not local
     tactics.** On 6000 strong-play positions with ≤ 14 empties, deep10's raw move loses
     exact value in 2.1 % (v2b 3.5 %); the 64-sim search in 0.12 % (7 positions). Motifs of
     the failures, in the same order as on v2b: tiebreak conversion 71 > giving a free move
     61 > holding a draw 51 > denying a free move 37 > a local win 20 > closing a board 4 >
-    a macro win 0. Local-tactics failures fell most (26 → 16 % of puzzles). *Exact; v2b and
-    deep10.* `tools/puzzles.py` → `suites/puzzles_v2_dev.npz` (+ `.json`, the 5 hard
-    puzzles), `runs/plan5_A7_puzzles_deep10_on_deep8late.out`.
+    a macro win 0. Local-tactics failures fell most (26 → 16 % of puzzles). **On
+    `deep8_c1_300_e4` the rate halves again** (2026-09-10, a fresh
+    6001-position sample of the same corpus, written as `suites/puzzles_v3_dev.npz`): the raw
+    move loses exact value in **1.0 %** (61 puzzles) and the 64-sim search in **0.03 %** (2 of
+    6001). The head of the motif order holds — tiebreak conversion 32 > holding a draw 26 >
+    giving a free move 23 > denying a free move 21 > a local win 15 > a macro win 3 > closing a
+    board 0 — but local tactics are now a *larger* share of a smaller set (25 % of puzzles
+    against deep10's 16 %), so "local-tactics failures fell most" describes the step from v2b to
+    deep10 and not this one; what the strongest net's raw policy still gets wrong is the count
+    rule and tempo, in the same proportion as before. *Exact; v2b, deep10 and
+    `deep8_c1_300_e4`.* `tools/puzzles.py` → `suites/puzzles_v2_dev.npz` (+ `.json`, the 5 hard
+    puzzles), `suites/puzzles_v3_dev.npz` (+ `.json`, the 2 hard puzzles),
+    `runs/plan5_A7_puzzles_deep10_on_deep8late.out`, `runs/plan6/I1_A7_puzzles.out`.
 
 ## 7. Folk claims, tested
 
@@ -271,24 +411,35 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     36 %) — 2 % in the opening, 25 % at plies 20–31, 51 % at 32–43, 67 % from ply 44 —
     and the **solver's optimal move does it 69 % of the time** on solved positions (64 %
     when the mover is winning, 51 % in drawn positions, 84 % when lost). deep8_300: 24 %
-    and 70 %. *Behavioural and exact; both strong nets.* `runs/principles_*.json`.
+    and 70 %. **`deep8_c1_300_e4`: 24.6 % and 70.2 %** — by ply 2.2 / 26.5 / 50.6 / 66.5 %
+    (2026-09-10). (The solver's column is a property of the position set, not of the net: read
+    on the same held-out positions it is deep8_300's number to every digit.) *Behavioural and
+    exact; all three nets read.* `runs/principles_*.json`,
+    `runs/plan6/I1_principles_deep8e4.json`.
 34. **What is true instead:** the optimal move *never* hands the opponent an immediate
-    macro win when the mover is not already lost (0.0 % of 3000+ solved positions), and
+    macro win when the mover is not already lost (0.0 % of 3000+ solved positions; 0.0 % of
+    `deep8_c1_300_e4`'s 4791, 2026-09-10), and
     the agent avoids sending to a winnable board early. The rule is a macro-line rule and
     an opening rule, not a general one. Same files.
 35. **Conceding the centre board ("the Orlin gambit") costs what its lines cost, no more.**
     With threats controlled, the opponent owning the centre is worth +0.01 ± 0.04 on the
     search value (the raw head: −0.05 ± 0.04); the centre's premium in the raw head's
-    counterfactual (+0.11 over a corner) is the fourth line through it. *Search-relative /
-    predictive; deep10.* `plan5_B3_value_deep10.out`, `plan5_B4_probe_value_deep10.out`.
+    counterfactual (+0.11 over a corner) is the fourth line through it. `deep8_c1_300_e4`
+    gives the same null on the search value, +0.032 ± 0.044 (raw head −0.060 ± 0.046)
+    (2026-09-10; the counterfactual half was not re-read — `tools/probe_value.py` is not in
+    I1). *Search-relative / predictive; deep10 and `deep8_c1_300_e4`.*
+    `plan5_B3_value_deep10.out`, `plan5_B4_probe_value_deep10.out`,
+    `runs/plan6/I1_B3_value_decomp.out`.
 
 ## 8. What the network computes (the net on its own terms)
 
 36. **The board encoding already exposes** the free-move flag, the target board, the count
     margin, open boards, empties and every board's status: a linear read-out on a randomly
     initialised net recovers them at 98–100 %. No claim that the net "represents" these
-    is meaningful. *Probe control; deep10.* `tools/probe.py`, `tools/probe_report.py` →
-    `runs/deep10_c1_300/probes.{json,png}`.
+    is meaningful. `deep8_c1_300_e4`'s control says the same, 98.5–100 % (2026-09-10).
+    *Probe control; deep10 and `deep8_c1_300_e4`.* `tools/probe.py`, `tools/probe_report.py` →
+    `runs/deep10_c1_300/probes.{json,png}`, `runs/deep8_c1_300_e4/probes.{json,png}`,
+    `runs/plan6/I1_B2_probe_report.out`.
 37. **What the trunk computes, where, and when** (linear probe gain over the random-init
     control, on 10 000 held-out test positions; layer of best read-out; iteration at which
     90 % of the final gain is reached): dead boards (boards neither side can win) R² +0.48
@@ -301,15 +452,27 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     and the same learned-by checkpoints (tactics 60–80, lines 80–120, value 180–220).
     The seed replicate gives the grid a third time (dead boards +0.47 at block 6 by 200,
     the exact value +0.25 at block 10 by 180, the best move +0.14, threats +0.15 at block 6
-    by 110–140, local win +0.13 at block 5 by 40, z +0.05 by 180). *Decodability; all three
-    strong nets.* Same files; `runs/deep8_c1_300/probes.{json,png}`,
-    `runs/deep10_c1_300_s1/probes.{json,png}`.
+    by 110–140, local win +0.13 at block 5 by 40, z +0.05 by 180). **`deep8_c1_300_e4` gives
+    the grid a fourth time, with the same gains and everything learned earlier** (2026-09-10;
+    8 blocks, so its last block is 8): dead boards R² **+0.53 at block 4, by iteration 140**;
+    the exact value of ≤ 14-empty positions **+27 points at block 8, by 140**; the search's best
+    move +14 at block 8, by 160; macro threats for / against R² +0.16 / +0.14 at block 6, by
+    40–100; an available local win +11 at block 5, **by 10**; an opponent's local threat +5 at
+    block 7, by 60; the game result +5 at block 8, by 220. The gains repeat deep10's within a
+    few points and the layer ordering is unchanged; the *learned-by* column is 20–50 iterations
+    earlier on every concept but the last one. *Decodability; all four strong nets.* Same files;
+    `runs/deep8_c1_300/probes.{json,png}`,
+    `runs/deep10_c1_300_s1/probes.{json,png}`, `runs/deep8_c1_300_e4/probes.{json,png}`.
 38. **Tactics are shallow and early, value is deep and late:** local concepts are readable
     by block 5 and learned in the first 60–80 iterations; macro-line threats peak in the
     middle of the trunk and fade toward the heads; the value-like concepts live in the last
     blocks and step at the LR drop, together with the endgame metrics they explain.
-    Nothing new appears after iteration 240 (200 on the seed replicate). *Decodability; all
-    three strong nets.* Same.
+    Nothing new appears after iteration 240 (200 on the seed replicate). `deep8_c1_300_e4`
+    repeats all of it (2026-09-10): tactics at block 5 and inside the first 60 iterations (an
+    available local win by 10), threats peaking at block 6 and fading toward the heads, the
+    exact value stepping **0.901 → 0.917 across the first LR drop** (checkpoints 200 → 220) as
+    deep10's stepped 0.874 → 0.891, and nothing new after 240. *Decodability; all four strong
+    nets.* Same.
 38a. **Which of those the trunk actually computes, and which it merely re-formats.** A
     probe with one hidden layer of its own reads macro threats off a *random* net at R²
     0.81–0.83 and "the mover can win the game this move" at 98 %: those are simple
@@ -322,7 +485,10 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
 39. **The trunk carries little of the line it is about to follow:** the move two plies
     down the search's principal variation is decodable at 38 % vs 34 % on the control
     (the current best move: 71 vs 56 %; seed replicate 38 vs 34 % and 70 vs 56 %).
-    *Decodability; both seeds.* Same.
+    `deep8_c1_300_e4` reads higher on both and keeps the ordering: **44.8 % against a 37.8 %
+    control** for the move two plies on, 72.8 vs 58.7 for the current move (2026-09-10) — +7
+    points of gain for the line it is about to follow against +14 for the move it is about to
+    play. *Decodability; both seeds and `deep8_c1_300_e4`.* Same.
 40. **The auxiliary ownership head learns the late game's ownership and little else — and
     none of it showed up as strength.** Graded on *open* boards only (PLAN6 E9; the earlier
     aggregate — head 60.3 %, trained-trunk probe 60.1 %, random-trunk probe 59.0 % — mixed in
@@ -333,13 +499,18 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     the local-feature logistic and the random-trunk probe (45–52 %); at plies 32–43 it is
     57 % against 51 / 51; at plies 44+ **68 % against 50 (local) / 50 (random trunk) / 65
     (trained trunk)**. deep8_300 on deep10's games: 66 % late against 51 / 54 / 64, the same
-    shape. So the trunk computes late-game ownership that neither the board's local features
+    shape. `deep8_c1_300_e4` on deep10's games, 73 749 open boards (2026-09-10): 51.8 %
+    overall (majority 39.3, local logistic 48.0, trained-trunk probe 51.7, random-trunk probe
+    49.8), within 2 points of the local features before ply 32, 57.7 % against 49.7 / 52.9 at
+    32–43, and **70.8 % against 51.1 (local) / 53.6 (random trunk) / 65.9 (trained trunk)** at
+    plies 44+ — the same shape a third time. So the trunk computes late-game ownership that
+    neither the board's local features
     nor an untrained trunk carry, and the head reads it; early ownership is not predictable
     from the position by any of these read-outs. Switching the auxiliary heads off was a
     strength null (RETROSPECTIVE §3): the head's late-game knowledge is what the value head
-    needs anyway. *Decodability + behavioural null; both strong nets.*
+    needs anyway. *Decodability + behavioural null; both strong nets and `deep8_c1_300_e4`.*
     `tools/ownership_grade.py` → `runs/plan6_E9_ownership_deep10.out`,
-    `runs/plan6_E9_ownership_deep8.out`.
+    `runs/plan6_E9_ownership_deep8.out`, `runs/plan6/I1_E9_ownership_grade.out`.
 41. **The net has not fully learned the board's symmetry, and it costs a rung.** Training
     augments every sampled example with an independent random D4 element
     (`train2.symmetrise`); equivariance is not enforced, and what follows is the residual
@@ -544,6 +715,29 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     full 2.39 M-parameter trunk on which augmentation is still informative; the tying is only
     in the read-out. `runs/plan6/H4_lr_*.json`, `runs/plan6/H4_lr2_*_x32.json`,
     `runs/plan6/H4_lr3_resnet8_tied_lr0.02.json`.
+    **Restated 2026-09-10 (PLAN6 §9b, G arm (g)): at the ResNet's *parameter* count the G-CNN
+    closes the same way, and the equivariant line closes with it.** `gcnn8x46` — 8 blocks of 46
+    base filters × 8 orientations, **2 459 392 parameters against resnet8's 2 456 014** (0.1 %
+    apart) and **7.0× its measured inference cost** (595 vs 85 ms per 4096 evaluations on the
+    3060, 1.28× at batch 1; `runs/plan6/G_timing_3060_gcnn8x46.json`), so it is expressly *not*
+    an equal-cost arm — on `gdata_v1` at lr 0.02, seed 0, dev policy KL vs the teacher, with
+    resnet8 / gcnn8x16 at the same steps in brackets: 3 120 steps **0.7636** [0.884 / 0.806] —
+    **the best fit of any student this project has trained at the gate's step count** (top-1
+    0.639, exact 3-way 0.829, endgame_v2_dev WDL 69.4 %, regret 0.140); 6 240 steps **0.9195**
+    [0.8145 / 0.7875]; 12 480 steps **1.0336** [0.7630 / 0.8298]. Its KL on the dev positions
+    with no canonical twin in train rises 1.033 → 1.322 → 1.516 (the ResNet's 0.960 → 0.931 over
+    the same last doubling); the D4 residual is 0 at every point. Read by §9b's pre-registered
+    rule at 12 480 steps: **it trails resnet8, and the margin reverses by 6 240** — the
+    equivariant line closes, and nothing is proposed. The caveat that goes with the number:
+    at 3 120 steps the wide G-CNN extracts more per step than any net measured here, and what
+    follows is memorisation of 400 000 positions for which D4 augmentation is an exact no-op
+    (the ResNet sees eight views of each), so what the frozen-data protocol shows is that **the
+    wide net is data-limited by ≈ 8× at equal capacity where the ResNet is not** — it cannot say
+    whether its self-play prospect, with fresh data every iteration, differs from the narrow
+    net's. A data-matched supervised test would need ≈ 8× `gdata_v1` (≈ 40 h of teacher
+    labelling on the 3090) and is not proposed: the 7.0× inference cost disqualifies the net as
+    a ladder rung, and the project's purpose does not need the answer.
+    `runs/plan6/G_arm_gcnn8x46.json`, `runs/plan6/G_timing_3060_gcnn8x46.json`.
 49. **Doubling the optimizer steps again is worth another +64 Elo** (PLAN6 H1b, 2026-09-08).
     `deep8_c1_300_e4` is `deep8_c1_300_e2`'s recipe with `--epochs 4`: 1024 steps of batch
     1024 per iteration instead of 512, over the same 4096 × 64 new positions per iteration,
@@ -619,7 +813,11 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
     agent stays `deep8_c1_300_e4/net_0300.pt`. (The run was interrupted at iteration 268 by a
     Windows Update restart and resumed as attempt 1 from iteration 260, every file verified
     intact; iterations 260–268 are a perturbed re-run, so `log.jsonl` is read de-duplicated by
-    iteration.) *Behavioural; one run read against its parent, seed band ≈ 3 points.*
+    iteration.) **And the width is not what cost it the 220 Elo:** the same architecture at the
+    ResNet's parameter count (`gcnn8x46`, 2.46 M parameters at 7.0× the inference cost) also
+    trails the plain ResNet at 12 480 supervised steps, with the margin reversing by 6 240 — the
+    narrow net's curve, one capacity up (48, restated 2026-09-10). *Behavioural; one run read
+    against its parent, seed band ≈ 3 points.*
     `runs/gcnn8_c1_300_e4/{analysis.out,eval_full.jsonl,timeline.json}`,
     `runs/plan6/H4_timeline.out`, `runs/plan6/H4_lr_*.json`, `runs/plan6/H4_lr2_*_x32.json`,
     `runs/plan6/H4_diag/`, PLAN6 log 2026-09-09.
@@ -628,10 +826,15 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
 
 - The opening book stops at depth 4 with three replies per node; nothing is claimed about
   lines beyond it.
-- The per-owned-board residual (14) survived the seed replicate to the third decimal; the
-  class order (15) did not appear on it either, so it stays unresolved. One coefficient
-  path is deep10-only — the raw head's free-move weight falling from +0.19 to +0.14 over
-  training (PLAN5 §3 B3); the search value's rise +0.05 → +0.09 is on both seeds.
+- The per-owned-board residual (14) survived the seed replicate to the third decimal and is
+  smaller again on `deep8_c1_300_e4` (+0.02 … +0.05); the class order (15) did not appear on
+  the replicate and does not on `_e4` either, whose two fits of the same net disagree with each
+  other (A4 centre > edge > corner, B3 corner > edge > centre), so it stays unresolved and is
+  now best read as noise. One coefficient path is deep10-only — the raw head's free-move
+  weight falling from +0.19 to +0.14 over
+  training (PLAN5 §3 B3); the search value's rise +0.05 → +0.09 is on both seeds. *(2026-09-10:
+  confirmed deep10-only. On `deep8_c1_300_e4` the raw path rises, +0.04 → +0.19, as deep8_300's
+  does; 11.)*
 - The self/opponent asymmetry in the ownership coefficients flips between the raw and the
   search value and is not reported.
 - `endgame_v2_test` was read once (30). **A new sealed set exists (PLAN6 E10):** `suites/endgame_v3_test.npz`,
@@ -639,12 +842,19 @@ board, [13] the centre cell of the top-centre board. Boards are called *centre* 
   game before solving, 0 canonical positions shared between the halves and none duplicated within them
   (`tools/suite_overlap.py`). Held out for deep10, deep8_300 and any Phase G student — not for the seed
   replicate, whose games it comes from. To be read once, at the end of Phase G, and logged in PLAN6.
-- An exactly equivariant net at a full run's step budget is untested at any width other than
-  the one measured, 16 base filters × 8 orientations (50): a wider one breaks the equal-cost
-  requirement that made that comparison a fair one, so nothing is claimed about whether the
-  architecture's supervised edge would survive at ResNet-sized capacity. The cheaper
+- An exactly equivariant net at a full run's step budget is measured in self-play at one width
+  only, 16 base filters × 8 orientations (50). **On frozen data the ResNet-capacity question is
+  now answered, and the answer is no** (PLAN6 §9b arm (g), 2026-09-09, read 2026-09-10):
+  `gcnn8x46` — the same architecture at 2.46 M parameters and 7.0× the measured inference cost —
+  trails resnet8 at 12 480 steps and its margin reverses by 6 240 (48). The equivariant line is
+  closed: no self-play run at any width is proposed. What stays open is narrower and is
+  deliberately not being bought — the frozen-data protocol cannot separate "the inductive bias
+  is wrong for this game" from "the net is data-limited by ≈ 8× because D4 augmentation is an
+  exact no-op for it", and the data-matched test needs ≈ 8× `gdata_v1`, ≈ 40 h of teacher
+  labelling, for a net the equal-cost rule already disqualifies as a rung. The cheaper
   D4-tied-heads hedge survives the step-count test of 48 to 12 480 steps with a slowly closing
-  margin; whether that margin survives a full run is untested (proposable as PLAN6 H5, after H3).
+  margin; whether that margin survives a full run is untested (proposable as PLAN6 H5, not
+  proposed).
 - The five hard puzzles are annotated in `docs/positions.md` (C3); a larger annotated set
   (the top surprises of B4) is not.
 - A two-open-board tablebase (the useful frontier after 31a) — not built; it needs
