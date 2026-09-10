@@ -3,6 +3,7 @@ the E7 worker shares the card are contaminated. Run when both cards are idle.
 
     .venv/Scripts/python.exe tools/gtiming.py --device cuda:0 --out runs/plan6/G_timing_3090.json
     .venv/Scripts/python.exe tools/gtiming.py --device cuda:1 --out runs/plan6/G_timing_3060.json
+    .venv/Scripts/python.exe tools/gtiming.py --device cuda:1 --arms resnet8,gcnn8x46 --out runs/plan6/G_timing_3060_gcnn8x46.json  # one arm and its reference
 
 Per arm: graph-replayed fused-evaluator time per call at batch 4096 and batch 1 (ms), parameters, and the parameter
 count of the exported plain net. Random weights: cost does not depend on them.
@@ -27,13 +28,16 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--device", default="cuda:0")
     ap.add_argument("--repeats", type=int, default=3)
+    ap.add_argument("--arms", default="", help="comma-separated subset of ARMS (default: all, in ARMS order)")
     ap.add_argument("--out", default="")
     a = ap.parse_args()
     device = torch.device(a.device)
     torch.backends.cudnn.benchmark = True
     rows = []
     print(f"{torch.cuda.get_device_name(device)}: fused fp16 evaluator, CUDA-graph replay, median of {a.repeats} x 20 calls")
-    for name, make in ARMS.items():
+    want = [x for x in a.arms.split(",") if x] or list(ARMS)
+    for name in want:
+        make = ARMS[name]
         torch.manual_seed(0)
         net = build_net(make()).to(device).eval()
         fe = FusedEvaluator(net, device)

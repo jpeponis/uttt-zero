@@ -311,24 +311,44 @@ where noted:
   confirmed on either; the 8-way average is +32 there as it was +35 on deep10, the canonical
   evaluator a null on both; none of the three re-run on `_e4`). Web UI:
   `python web/server.py runs/deep8_c1_300_e4/net_0300.pt --sims 800 --device cuda:1`.
-- **A chain of three runs is in progress** (PLAN6 Handover, owner-approved 2026-09-07, one
-  change per run): H1b `deep8_c1_300_e4` done 2026-09-08 (+64, above); **H4
-  `gcnn8_c1_300_e4`** — the D4 group-convolutional net in self-play, exactly equivariant at
-  the same inference cost — done 2026-09-09 and **hurt**: 22.0 % [19.9, 24.2], −220 Elo against
-  its parent, +162 vs v2b, with exact symmetry held at all 30 checkpoints and nothing unstable;
-  the cause reads as capacity, not the learning rate (PLAN6 log, 2026-09-09; KNOWLEDGE 50, and
-  48 restated). **H3 `deep8_c1_600_e4`** (600 iterations, one LR drop at 500, ≈ 35 h) is next.
+- **The chain of three runs is closed** (PLAN6 Handover, owner-approved 2026-09-07, one change
+  per run): H1b `deep8_c1_300_e4` done 2026-09-08 (+64, above); **H4 `gcnn8_c1_300_e4`** — the
+  D4 group-convolutional net in self-play, exactly equivariant at the same inference cost —
+  done 2026-09-09 and **hurt**: 22.0 % [19.9, 24.2], −220 Elo against its parent, +162 vs v2b,
+  with exact symmetry held at all 30 checkpoints and nothing unstable; the cause reads as
+  capacity, not the learning rate (PLAN6 log, 2026-09-09; KNOWLEDGE 50, and 48 restated).
+  **H3 `deep8_c1_600_e4` was withdrawn by the owner on 2026-09-09, unrun** — as written it
+  doubles data, updates and teacher exposure together, the confound PLAN6 §0 exists to remove,
+  so its reading could not have said which term moved; its queue scripts stay in the repo,
+  staged but withdrawn. **H5 (`--head_tying 1`) was not proposed**: the supervised margin closes
+  across three doublings of the step count, so the prediction is null-to-small — inside the seed
+  band — and exact policy symmetry has no consumer (41b).
+- **The open list is now three items and no more** (the owner's closing programme, PLAN6 §9,
+  2026-09-09), in launch order: **H1c `deep8_c1_300_e8`** — the third doubling of the optimizer
+  steps (2048 per iteration, parent `deep8_c1_300_e4`, ≈ 22–23 h on the 3090), reading the
+  dose–response curve +100 → +64 → ? to its asymptote or its plateau, with the over-fitting
+  branch of H1's reading finally testable; **G arm (g) `gcnn8x46`** — the D4 G-CNN at the
+  ResNet's *parameter* count (46 base filters × 8 orientations, 2.46 M parameters, ≈ 8× the
+  inference cost) on the frozen teacher, to separate capacity from equivariance in H4's negative
+  result, read at 12 480 steps as KNOWLEDGE 48's restatement requires; **I1** — the analysis
+  second pass, PLAN5 Phase A's tools re-run on the +363 net at the same settings, every claim
+  marked held / moved / reversed, which is the first test of the project's own central
+  methodological claim on the strongest net it has. **E11**, the off-machine backup and the
+  first push to a remote, is scheduled after all three.
 - **Neither depth nor duration is exhausted** — 12-block and 600-iteration runs are the
   obvious continuations, each a committed GPU-day, both on hold per the pause. *(2026-09-06:
   depth 8 → 10 is inside the seed band and an earlier LR drop hurts, so the continuation the
   evidence supports is more constant-LR learning on 8 blocks. "Duration" confounds data,
   updates, teacher and LR timing (PLAN6 §0), so the first run to propose is the cheap arm
   that separates one of them — `--epochs 2` at 300 iterations, PLAN6 H1 — and the
-  600-iteration run with late drops follows its result, PLAN6 H3.)*
+  600-iteration run with late drops follows its result, PLAN6 H3.)* *(2026-09-09: the
+  update axis was separated twice and paid +164; the 600-iteration run was **withdrawn
+  unrun** for the same confound, so duration is still neither separated nor bought.)*
 - Also open, cheaper: a seed replicate of the final recipe (rigor — *done 2026-09-05*,
   PLAN5 §5 D1); an analysis second
   pass with the new net (atlas / decision / freemove / puzzles → `puzzles_v2_dev`, suites
-  refresh with a dev/test split); the 6×64 endgame-overfit diagnostic (now largely
+  refresh with a dev/test split — *approved 2026-09-09 as I1, above*); the 6×64
+  endgame-overfit diagnostic (now largely
   mooted by §3's revision); the CodinGame port (needs the batch-1 latency budget — one
   position at a time under a per-move time limit — not the ladder).
 - Everything is committed; `runs/` holds ~11 GB (games corpora + checkpoints); the

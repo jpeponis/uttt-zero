@@ -111,7 +111,19 @@ Read in this order:
   ResNet overtakes the equivariant net (KNOWLEDGE 50, 48 restated). (The run was interrupted at
   iteration 268 of 300 by a Windows Update restart at 23:55 on 2026-09-08 and resumed at 09:24
   the next morning with every file verified intact; iterations 260–268 are a perturbed re-run.)
-  H3 (`deep8_c1_600_e4`, 600 iterations, ≈ 35 h) is next; see PLAN6's Handover.
+- **The closing programme (owner's decisions, 2026-09-09; PLAN6 §9).** After H4 the owner closed the
+  chain and approved **three items and no more**, in this launch order: **H1c `deep8_c1_300_e8`** — the
+  third doubling of the optimizer steps (2048 per iteration, parent `deep8_c1_300_e4`, ≈ 22–23 h on the
+  3090), reading the dose–response curve +100 → +64 → ? to its asymptote or its plateau; **G arm (g)
+  `gcnn8x46`** — the D4 group-convolutional net at the *ResNet's parameter count* (46 base filters × 8
+  orientations = 2.46 M parameters, ≈ 8× its inference cost, to be measured), supervised on the frozen
+  teacher on the 3060, to separate capacity from equivariance in H4's negative result; and **I1** — the
+  analysis second pass, re-running PLAN5 Phase A's tools on the +363 net so every game claim quoted from
+  the +242 net is re-read 120 Elo higher, each marked held / moved / reversed. **Dropped: H3**
+  (`deep8_c1_600_e4`, 600 iterations — it re-buys the data / updates / teacher confound PLAN6 §0 exists
+  to remove; its queue scripts stay in the repo, staged but withdrawn) and **H5** (`--head_tying 1` — a
+  predicted null whose exact policy symmetry has no consumer). **E11**, the off-machine backup and the
+  first push to a remote, is scheduled after the three. Nothing else is proposed.
 - **Analysis programme (PLAN5 Phases A–C): complete, 2026-09-03.** Every ordering and sign
   from the earlier nets held on the +242 net; two magnitudes moved (the free-move value,
   +0.16 → +0.20, and a small residual value per owned board once macro lines are

@@ -17,9 +17,9 @@ a named parent; judged on the frozen paired suite by the ±3-point rule, final c
 training run starts without the owner's approval; every claim about the game carries its level, CI,
 the nets it held on, and the file that produced it.
 
-## Handover (2026-09-08)
+## Handover (2026-09-09)
 
-**State (2026-09-09 12:45).** H1b is done (E = 4). **H4 is done and read: hurt.** `gcnn8_c1_300_e4/net_0300.pt`
+**State (2026-09-09 13:30).** H1b is done (E = 4). **H4 is done and read: hurt.** `gcnn8_c1_300_e4/net_0300.pt`
 scores **22.0 % [19.9, 24.2], −220 Elo against its parent `deep8_c1_300_e4`** on the full suite @64 (the log's 12:35
 entry) — the run was interrupted at iteration 268 by a Windows Update restart at 23:55 on 2026-09-08 and resumed at
 09:24 as attempt 1 from iteration 260 (files verified bit-clean; the log's 08:25 entry; iterations 260–268 carry
@@ -31,29 +31,53 @@ run's, and the ordering it certified does not survive 12 480 — a supervised ga
 the order of the run's). Written up: KNOWLEDGE 50 and 48, RETROSPECTIVE §2 / §3 / §4 / §5 / §7, README. **Sweep 3
 read (13:01): the tied-heads hedge survives the same test** — resnet8_tied 0.7408 against resnet8's 0.7630 at 12 480
 steps, ahead on every metric, the margin shrinking slowly (0.036 / 0.027 / 0.022 over three doublings) rather than
-reversing (the 08:25 entry's last paragraph). So `--head_tying 1` on the `deep8_c1_300_e4` recipe is *proposable*
-as H5 after H3, at zero inference cost, with the honest prediction "null-to-small"; a 64-pass point (≈ 50 min on the
-3060) first would say whether the margin stabilises. Not to propose: a G-CNN at a lower LR, or a wider G-CNN (§5
-H4's equal-cost requirement). Both cards are idle (13:05). Windows Update is paused until 2026-10-14; the play agent
+reversing (the 08:25 entry's last paragraph). **The owner read H4 and the instance's assessment at ~13:30 and closed
+the chain; the decisions are §9.** H3 is withdrawn — as written it re-buys §0's confound — and H5 is not proposed:
+sweep 3's margin closes across the doublings and exact policy symmetry has no consumer (41b). The approved work is
+three items and no more — **H1c `deep8_c1_300_e8`** on the 3090, then **G arm (g) `gcnn8x46`** and **I1**, the
+analysis second pass on `deep8_c1_300_e4`, on the 3060 — with **E11**, the backup, after them. Still not to propose:
+a G-CNN at a lower LR (the sweeps), and no wider G-CNN in *self-play* except through §9b's reading with its measured
+inference cost declared. Both cards are idle (13:05). Windows Update is paused until 2026-10-14; the play agent
 is `runs/deep8_c1_300_e4/net_0300.pt`.
 
-**Next: H3** (`wscript runs/launch_queue12_hidden.vbs` from the repo root; `runs/queue12.sh` staged as written,
-parent `deep8_c1_300_e4`, ≈ 34–36 h — inside the update pause if launched before 2026-10-12). Preflight: both cards
-idle (`nvidia-smi`; sweep 3 must have ended — the trainer never shares the 3090, and the E7 worker takes the 3060),
-git clean of tracked changes. The 50 % line: the instance that wrote this is above it after the H4 write-up, so H3
-is the owner's launch or the next instance's. Status: `python tools/run_status.py runs/deep8_c1_600_e4 --ref
-runs/deep8_c1_300_e4`; watch: a single-shot background `until [ -f runs/deep8_c1_600_e4/DONE ] || grep -q "FAILED
-after" runs/deep8_c1_600_e4.out; do sleep 300; done` (the Monitor tool delivers nothing from these files on this
+**Next: the closing programme of §9, in this order — H1c on the 3090, then G arm (g) and I1 on the 3060, then E11.**
+
+*1. H1c `deep8_c1_300_e8`* (§9a; ≈ 22–23 h, inside the update pause if launched before 2026-10-13). `runs/queue13.sh`
+is **not yet written**: copy `runs/queue11.sh` and change four things — `R=deep8_c1_300_e8` and
+`PARENT=deep8_c1_300_e4`; **drop `--gcnn 16`** from the `train2` line (H1c is the plain 8×128 ResNet); set
+`--epochs 8` (`--iters 300 --lr_drops 200,280` are already right); point the worker's anchors at
+v2b / `deep8_c1_300_e4` / `deep8_c1_300` and the closing `endgame.py eval` line at `net_0300.pt` — plus
+`runs/launch_queue13_run.cmd` and `runs/launch_queue13_hidden.vbs` from queue12's (change `queue12` → `queue13` and
+the run name in the .vbs comments). Launch: **`wscript runs/launch_queue13_hidden.vbs`** from the repo root.
+Preflight: both cards idle (`nvidia-smi`; the trainer never shares the 3090), git clean of tracked changes, the
+parent's `net_0300.pt` present. Status: `python tools/run_status.py runs/deep8_c1_300_e8 --ref
+runs/deep8_c1_300_e4`; watch: a single-shot background `until [ -f runs/deep8_c1_300_e8/DONE ] || grep -q "FAILED
+after" runs/deep8_c1_300_e8.out; do sleep 300; done` (the Monitor tool delivers nothing from these files on this
 machine). A reboot is the one failure the retry wrapper cannot cover: if the machine restarts mid-run, relaunch the
 same `.vbs` — `train2` resumes from `latest_full.pt` and the worker skips what `eval_full.jsonl` holds (the H4
 precedent, the log's 08:25 entry).
+
+*2. The 3060 queue, started as soon as H1c is launched and running beside it.* First **G arm (g)** (§9b): add
+`"gcnn8x46": lambda: NetConfig(blocks=8, filters=368, gcnn=46)` to `tools/gstudy.py`'s `ARMS`, measure the arm's
+inference cost with `tools/gtiming.py` and record it, then `gstudy.py --arm gcnn8x46 --positions 400000 --passes
+8,16,32 --seeds 0 --lr 0.02 --device cuda:1`, read at the 12 480-step point. Then **I1** (§9c): the Phase A tools
+re-run on `deep8_c1_300_e4/net_0300.pt` at the deep10 pass's settings (`runs/plan5_A_3060.sh`,
+`runs/plan5_A_3090.sh`), everything on `cuda:1` — `book.py` needs `--device cuda:1` passed, its default is the 3090
+— into `runs/plan6/I1_*.out`, each claim marked held / moved / reversed. The E7 worker shares the card throughout
+(≈ 6 min per checkpoint every ≈ 43 min).
+
+*3. E11* (§9d): after all three, the owner creates an empty GitHub repository; then `git remote add origin <url>`,
+`git push -u origin main`, and the `games/`, `net_*.pt` and `suites/` copies off-machine.
+
+The 50 % line still applies to every launch: above it, update this Handover, the log, KNOWLEDGE, RETROSPECTIVE and
+README and hand over rather than launch.
 
 **The owner's decision (2026-09-07): H1b approved, and a conditional pre-approval of the chain H1b → H4 → H3.** The
 next run starts without asking *as long as the instance is under 50 % of its context window when it would start it*;
 above 50 % it updates everything (this Handover first, then the log, KNOWLEDGE, RETROSPECTIVE, README) and hands over
 to the next instance instead of launching. *Amended by the owner at 13:55: H4 is to be launched after H1b regardless
 of the instance's estimate (it judged itself at ≈ 55–60 % after the preflight; the owner judged that fine); the line
-applies again to H3.* Each result is read by its pre-registered rule and written up before the
+applies again to H3.* *(H3 is withdrawn as of 2026-09-09, §9; the line now applies to H1c.)* Each result is read by its pre-registered rule and written up before the
 next launch. Delegate the write-ups and any file-heavy reading to `directed` subagents (opus) to stay under the line.
 
 The Handover's optional hour is done (13:16–13:36 on the 3060, `runs/plan6/H1_reverify.out`; the log's 13:36
@@ -91,14 +115,23 @@ stated beside it. E below is the epochs the chain carries forward.
    misbehaved in RL (diverging losses, many skipped steps) — it did not misbehave; it converged, stably, to a much
    weaker net, and the sweeps read the cause as capacity, not the LR. Not proposed again at this width; the play
    agent stays the parent.
-3. **H3 `deep8_c1_600_e4`** (staged: `runs/queue12.sh` + `runs/launch_queue12_hidden.vbs`, ready to launch once H4 is DONE and written up) — `--iters 600 --lr_drops 500 --epochs 4`, everything else as H1; parent
-   `deep8_c1_300_e4`, the same net as H4's. ≈ 34–36 h (twice H1b's 16.9 h; its late iterations ran 224 s against
-   a 203 s mean). Reading: the E7 full-suite curve from 300 to 500 — flat means duration is exhausted at this data
-   rate, climbing means it is not — and the final net by the rule against the parent. `eval_run.sh` discovers the
-   last `net_*.pt`; the queue's endgame_v2_dev line must say `net_0600.pt`.
+3. **H3 `deep8_c1_600_e4` — WITHDRAWN by the owner 2026-09-09, not run** (§9). `--iters 600 --lr_drops 500
+   --epochs 4`, everything else as H1; parent `deep8_c1_300_e4`; ≈ 34–36 h. The reason: as written it doubles data,
+   updates and teacher exposure together — the confound §0 was written to remove — so its "flat or climbing"
+   reading could not say which of the three moved, and the update axis has now been separated twice (46, 49) while
+   the data and teacher axes never have. `runs/queue12.sh`, `runs/launch_queue12_run.cmd` and
+   `runs/launch_queue12_hidden.vbs` **stay in the repo as staged but withdrawn** — a correct recipe for a run that
+   is not being bought, kept so the shape is on record. Not to be launched.
+4. **H1c `deep8_c1_300_e8` — approved 2026-09-09; the chain's replacement third link** (§9a). `deep8_c1_300_e4`'s
+   recipe with `--epochs 8` (2048 optimizer steps of batch 1024 per iteration) and nothing else changed; parent
+   `deep8_c1_300_e4`. ≈ 22–23 h on the 3090 (t_train ≈ 10 h against H1b's 4.98; self-play ≈ 12 h unchanged — the
+   same 8×128 ResNet). It is the third point of the dose–response curve +100 → +64 → ? and the first direct test of
+   the over-fitting branch H1's reading wrote and never fired. Primary by the rule against the parent; the full
+   pre-registered reading, the queue13 names and the reboot recipe are in §9a.
 
 Not proposed: H2 (the mask; its supervised gain is real but small — 0.008 in KL — and the licence it buys has no
-consumer yet); a 10-block anything (46, 48); self-play on the 3060 (§6).
+consumer yet); H5 (`--head_tying 1`; §9's dropped list); a 10-block anything (46, 48); self-play on the 3060 (§6);
+the G-CNN again at width 128 (50).
 
 ## Log
 
@@ -465,6 +498,54 @@ consumer yet); a 10-block anything (46, 48); self-play on the 3060 (§6).
   at this width; the equal-cost requirement rules out a wider one; the tied-heads hedge waits for sweep 3. The play
   agent stays `deep8_c1_300_e4/net_0300.pt`. KNOWLEDGE 50 (48 restated); RETROSPECTIVE §2, §3, §5, §7; README.
 
+- **2026-09-09, ~13:30 — the owner's decisions after H4: the chain is closed, three items are approved, and the
+  project's remaining work is named.** Read against H4's result (hurt, decisively, with exact symmetry intact) and
+  the instance's assessment of what was left to propose. Recorded in full as **§9**; in short:
+  **Dropped.** *H3 `deep8_c1_600_e4`* — not run. As written it doubles data, updates and teacher exposure together,
+  the confound §0 was written to remove; the update axis has been separated twice (46, 49), the data and teacher
+  axes never, and a 600-iteration run at E = 4 buys the bundle again for ≈ 35 h without saying which term moved.
+  `runs/queue12.sh` and its two launchers stay in the repo as **staged but withdrawn**. *H5 `--head_tying 1`* —
+  not proposed. Sweep 3's margin closes across the three doublings (0.036 / 0.027 / 0.022, the 13:01 entry), so the
+  honest prediction is null-to-small — inside the seed band — and exact policy symmetry has no consumer: the
+  analysis tools already hold the exact 8-way average (41b), which is itself a null at play.
+  **Approved, in launch order.** (1) **H1c `deep8_c1_300_e8`** on the 3090, ≈ 22–23 h: the third doubling of the
+  optimizer steps (2048 per iteration), parent `deep8_c1_300_e4`, `runs/queue13.sh` copied from queue11's form and
+  launched with `wscript runs/launch_queue13_hidden.vbs`. Primary vs the parent on the full suite @64 by the rule;
+  the readings — *helped* → still update-limited at eight passes, *null* → the plateau is between four and eight
+  passes and +164 is the update lever's total, *hurt* → the buffer window is over-fitted, so the buffer is the knob
+  — are §9a. (2) **G arm (g) `gcnn8x46`** on the 3060: the D4 G-CNN at the ResNet's *parameter* count, to separate
+  capacity from equivariance in H4's result. The width was chosen by building the nets, not estimated — 46 base
+  filters × 8 orientations (activation width 368) is 2 459 392 parameters against resnet8's 2 456 014; 44 would be
+  8 % short. It is **not** an equal-cost arm: the exported trunk is 368 filters wide, ≈ 8× (measured 7.0×) the ResNet's convolution
+  work by the square of the width, to be measured with `tools/gtiming.py` and declared before anything else is
+  said about it. Supervised on `gdata_v1` at lr 0.02 × 8 / 16 / 32 passes, **read at 12 480 steps** as 48's
+  restatement requires: a margin over resnet8 that is not closing → the bias is right at equal capacity and a
+  self-play run becomes a proposable science question (never a ladder rung, at that cost); a trailing or closing
+  margin → the bias is wrong for this game at any affordable capacity and the equivariant line closes.
+  (3) **I1**, the analysis second pass on `deep8_c1_300_e4/net_0300.pt` (+363): the net-dependent Phase A tools at
+  the deep10 pass's settings, so every §1–§8 claim quoted from deep10 (+242) is re-read 120 Elo higher and the
+  method's own central claim — orderings and signs stable, magnitudes saturating — is tested on the strongest net
+  for the first time. Per claim: **held / moved / reversed**, defined in §9c; outputs `runs/plan6/I1_*.out`.
+  **Then E11:** the owner will create an empty GitHub repository once the three are done; the instance pushes and
+  copies `runs/*/games`, the remaining `net_*.pt` and `suites/` off-machine. **Nothing else is proposed.** The
+  chain H1b → H4 → H3 is closed with H3 withdrawn. §9, the Handover, README and RETROSPECTIVE §7 carry this.
+
+- **2026-09-09, 21:25 — the closing programme launched.** H1c `deep8_c1_300_e8` at 21:24 through `wscript
+  runs/launch_queue13_hidden.vbs` (`runs/queue13.sh`: queue11's form with `--gcnn 16` dropped and `--epochs 8`; the E7
+  worker beside it on the 3060 with anchors v2b, the parent `deep8_c1_300_e4`, deep8_c1_300 — the 1× point every
+  earlier curve shares; ≈ 22–23 h, so DONE ≈ 20:00 on 2026-09-10 plus `eval_run.sh`). The 3060 queue
+  `runs/plan6/closing_3060.sh` at 21:25, detached (hidden bash): `G_arm_g_3060.sh` first — `gcnn8x46` (2 459 392
+  parameters against resnet8's 2 456 014; **measured cost 7.0× resnet8 at batch 4096 on the 3060, 595 vs 85 ms, 1.28×
+  at batch 1**, `runs/plan6/G_timing_3060_gcnn8x46.json`; the arm added to `tools/gstudy.py`, `--arms` added to
+  `tools/gtiming.py`), 400k × 32 / 8 / 16 passes in that order, ≈ 9–10 h with the worker sharing the card → `G_arm_g.out`,
+  `G_arm_gcnn8x46.json` — then `I1_second_pass_3060.sh` (14 tools, cheapest first, ≈ 4–5 h → `I1_second_pass.out`,
+  `I1_*.out`, `suites/puzzles_v3_dev.npz`, `runs/probe_data_deep10late_e4.npz`, `runs/book_deep8_e4.json`,
+  `runs/deep8_c1_300_e4/{probes,value_decomp}.*`). Two reconstructions in I1 are flagged in its header: the
+  `tablebase_grade` invocation (no recorded one; PLAN5 C5's text plus the tool's defaults) and the book's `--paired`
+  file (the parent match `paired_vs_deep8c1_300e2_64.json`, since `_e4` has no self-match). The instance that launched
+  is above the 50 % line: the readings and write-ups (§9's pre-registered rules) fall to the next instance, from this
+  Handover. E11 after all three: the owner creates the empty GitHub repository, then push and the off-machine copy.
+
 ## 0. The decision in front of the project
 
 **Three things "more strength" could be for, and they call for different work.**
@@ -757,3 +838,223 @@ H3 keeps one drop* — ; after H1 (H3's shape); after G's gate (whether H4 exist
   construction. The worker reads only atomically written checkpoints (E5).
 - "Same seed" means the same initial weights and the same first iteration, and nothing after it
   (§1 item 13). Write comparisons as "against the seed band", never as "paired".
+
+## 9. The closing programme (owner's decisions, 2026-09-09)
+
+After reading H4's result and the instance's assessment, the owner closed the chain and approved
+three items — one training run, one supervised arm, one analysis pass — and no more. Two proposals
+are dropped. Nothing else is proposed: when these three are done the project's remaining work is the
+off-machine backup (E11) and the write-up.
+
+**Dropped.**
+
+- **H3 `deep8_c1_600_e4` — withdrawn, not run.** As written it doubles data, updates and teacher
+  exposure together: exactly the confound §0 was written to remove. The project has now separated
+  the update axis twice (46, 49) and has never separated the data axis from the teacher axis; a
+  600-iteration run buys the confounded bundle again for ≈ 35 h, and its "flat or climbing" reading
+  cannot say which of the three moved. `runs/queue12.sh`, `runs/launch_queue12_run.cmd` and
+  `runs/launch_queue12_hidden.vbs` **stay in the repo as staged but withdrawn** — a correct recipe
+  for a run the owner has decided not to buy, kept so the shape is on record. They are not to be
+  launched.
+- **H5 `--head_tying 1` on the `deep8_c1_300_e4` recipe — not proposed.** Two reasons, neither
+  fatal alone. Sweep 3's margin over the plain ResNet closes across the three doublings — 0.036 /
+  0.027 / 0.022 at 3 120 / 6 240 / 12 480 steps (the log's 13:01 entry) — and a straight line in
+  log-steps reaches zero near the run's 307 200, so the pre-registered prediction is null-to-small:
+  a predicted effect inside the ≈ 3-point seed band. And the thing it buys, exact policy symmetry in
+  the read-out, has no consumer: every analysis tool already uses the exact 8-way average
+  (`uttt/symmetry.py`), which is itself a null at play (41b), and the canonical evaluator is a null
+  too (F1). A GPU-day for a predicted null whose product nothing reads is not the right purchase
+  here.
+
+**Approved, in this order of launch: H1c on the 3090, then arm (g) and I1 on the 3060.**
+
+### 9a. H1c `deep8_c1_300_e8` — the third doubling of the optimizer steps (3090, ≈ 22–23 h)
+
+**Recipe.** `deep8_c1_300_e4`'s recipe with `--epochs 8` and nothing else changed: **2048 optimizer
+steps of batch 1024 per iteration** (`n_steps = epochs × games × steps / batch` = 8 × 4096 × 64 /
+1024, `train2.py:356`), 614 400 in the run against H1b's 307 200; the same 4096 × 64 new positions
+per iteration, the same 2 M-row buffer, LR drops at 200 / 280, seed 0. Parent `deep8_c1_300_e4`.
+
+**Purpose.** The dose–response curve of 46 / 49 — +100 for the first doubling of the update count,
++64 for the second, then what — read to its asymptote or its plateau. Either is a finding, and this
+is the last cheap point on the axis: at eight passes each generated position is sampled eight times
+in expectation from a buffer window of 7.6 iterations, so the run is also the first direct test of
+the over-fitting branch H1's reading wrote and never fired.
+
+**Cost.** t_train ≈ 10 h against H1b's 4.98 (training is the only term that doubles); self-play
+unchanged at ≈ 12 h, because the net is the same 8×128 ResNet and plays and evaluates at exactly
+H1b's cost; wall ≈ 22–23 h against 16.9. Inside the update pause (2026-10-14) with room to spare.
+
+**Operational settings, as every chain run.** Copy `runs/queue11.sh`'s form: the 6-attempt retry
+wrapper, `--eval_every 0 --ckpt_every 10 --anchors ""`, and the E7 worker
+(`tools/eval_worker.py --run runs/deep8_c1_300_e8 --anchors runs/v2b/net_0150.pt,runs/deep8_c1_300_e4/net_0300.pt,runs/deep8_c1_300/net_0300.pt --sims 64 --set suites/endgame_v2_dev.npz --poll 60 --device cuda:1`)
+on the 3060 with anchors v2b, the parent `deep8_c1_300_e4` and `deep8_c1_300`; then
+`bash runs/eval_run.sh deep8_c1_300_e8 cuda:0` and the `endgame_v2_dev` read
+(`tools/endgame.py eval runs/deep8_c1_300_e8/net_0300.pt --set suites/endgame_v2_dev.npz`) at the
+end. Files: `runs/queue13.sh` + `runs/launch_queue13_run.cmd` + `runs/launch_queue13_hidden.vbs`
+(sed the names from queue11's), launched with **`wscript runs/launch_queue13_hidden.vbs`** from the
+repo root. `eval_run.sh` discovers the last `net_*.pt` by itself; the queue's own endgame line must
+say `net_0300.pt`. Status: `python tools/run_status.py runs/deep8_c1_300_e8 --ref runs/deep8_c1_300_e4`.
+
+**Pre-registered reading.**
+
+- *Primary:* the final net vs `deep8_c1_300_e4` on the full paired suite @64 —
+  **≥ 53 % helped, ≤ 47 % hurt, otherwise null** — with the seed band (≈ 3 points) stated beside it.
+- *Secondary:* vs `deep8_c1_300_e2` and `deep8_c1_300`, so the dose–response is read as a curve
+  across 1× / 2× / 4× / 8× the updates and not as one more pairwise step; the E7 full-suite curve
+  against H1b's at matched iterations (does the constant-LR phase lift again, and by how much less);
+  and the budget axes for over-fitting the buffer window (E8's per-iteration fields) — the sampled
+  distinct-position fraction (H1 0.81 → 0.75, H1b 0.67 → 0.62; eight passes should read lower again),
+  the skipped-step count (H1 70 of 153 600, H1b 133 of 307 200 — the same rate) and the policy
+  loss's late trend.
+- *Tertiary:* the endgame reads on `endgame_v1` and `endgame_v2_dev` against H1b's **90.1 % raw
+  WDL / 79.0 % draw recognition / 0.022 regret**.
+
+**Readings, written before the run.** *Helped* → the learner is still update-limited at eight
+passes; state the curve (+100, +64, +X) and where it puts the plateau. *Null* → the plateau lies
+between four and eight passes at this data rate, the update lever is exhausted, and the **+164** of
+the first two doublings stands as its total. *Hurt* → the buffer window is over-fitted at eight
+passes, which is itself the finding — the buffer, not the update count, is the knob. The play agent
+changes only if it helps.
+
+**Reboot recovery.** Windows Update is paused until **2026-10-14**, and a reboot is the one failure
+the retry wrapper cannot cover (the log's 08:25 entry: the bash wrapper dies with the session). If
+the machine restarts mid-run, **relaunch the same `.vbs`** — `train2` prefers `latest_full.pt` and
+restarts from the last buffer save as a perturbed continuation (`attempt: N`; de-duplicate
+`log.jsonl` by iteration when reading it), and the worker skips what `eval_full.jsonl` already holds.
+
+### 9b. G arm (g) `gcnn8x46` — the G-CNN at the ResNet's parameter count, on frozen data (3060)
+
+**Purpose.** Separate *capacity* from *equivariance* in H4's negative result. The sweeps read H4 as
+capacity rather than the learning rate (50, 48 restated), but the only equivariant net this project
+has ever trained carries **312 k parameters against the ResNet's 2.46 M**, so the outsider's
+question is still open: is the inductive bias wrong for this game, or was the net simply too small?
+Phase G exists to answer exactly this kind of question on frozen data for no GPU-day.
+
+**The arm.** The same D4 regular-representation G-CNN (`uttt/equivariant.py`) at the base width that
+matches the ResNet's parameter count. Trunk parameters scale with the square of the base width, so
+the width was picked by building the nets rather than estimated: 8 blocks at **46 base filters × 8
+orientations = activation width 368** has **2 459 392 parameters** against resnet8's **2 456 014**
+(0.1 % apart); 44 base filters gives 2 251 710, 8 % short. One line in `tools/gstudy.py`'s `ARMS`:
+`"gcnn8x46": lambda: NetConfig(blocks=8, filters=368, gcnn=46)` — `filters == 8 * gcnn` is asserted
+in `uttt/equivariant.py`, and `tools/gtiming.py` iterates `ARMS`, so the new arm is timed for free.
+
+**Cost — and the number to measure before queueing.** This is **not** an equal-cost arm and must
+never be written as one. The exported net is an ordinary 368-filter ResNet, and trunk convolution
+work scales with the square of the activation width: (368 / 128)² ≈ **8×** the 8×128 ResNet's — **measured 7.0× on the 3060: 595 vs 85 ms per 4096 evaluations, 1.28× at batch 1** (`runs/plan6/G_timing_3060_gcnn8x46.json`, both cards idle, 2026-09-09 21:00) — not
+the ≈ 2.5× a parameter-count intuition suggests (the G timings are compute-linear — resnet10 is
+1.24× resnet8 at a 1.25× block ratio, 41.1 vs 33.2 ms per 4096 on the 3090). Measure it first —
+`python tools/gtiming.py --device cuda:0 --out runs/plan6/G_timing_wide_3090.json`, batch 4096 and
+batch 1, both cards — and **declare the measured number up front in every sentence about this
+arm**. Budget the 3060 accordingly: gcnn8x16's 12 480-step point took ≈ 28 min there (sweep 2), so
+the wide arm's three points are a large fraction of a 3060-day rather than the ≈ 3 h the width-128
+arms cost. If the card is wanted for I1, the 12 480-step point is the one that must exist.
+
+**Settings.** Supervised on `runs/gdata_v1.npz` through `tools/gstudy.py`:
+`--arm gcnn8x46 --positions 400000 --passes 8,16,32 --seeds 0 --lr 0.02 --device cuda:1 --out runs/plan6/G_arm_gcnn8x46.json`
+— 3 120 / 6 240 / 12 480 steps, the same three step counts the sweeps used, against the points
+already on file (dev policy KL vs the teacher):
+
+| steps | 3 120 | 6 240 | 12 480 |
+|---|---|---|---|
+| resnet8 (2.46 M) | 0.884 | 0.8145 | **0.7630** |
+| gcnn8x16 (312 k) | 0.806 | 0.7875 | **0.8298** |
+
+Dev slice only; `endgame_v3_test` stays sealed.
+
+**Pre-registered reading, taken at 12 480 steps** — as KNOWLEDGE 48's restatement now requires: a
+supervised gate is read at a step count of the order of the run's, or until the curves have crossed
+or clearly will not.
+
+- The wide G-CNN **leads resnet8 at 12 480 steps with a margin that is not closing across the three
+  doublings** → the inductive bias is right at equal capacity, H4's result was the 312 k parameters,
+  and a self-play run at this width becomes a **proposable science question** — with its *measured*
+  inference cost declared up front, and explicitly not a ladder rung: the ladder is read at a fixed
+  inference budget and this net costs several times the ResNet's per evaluation.
+- It **trails, or its margin closes as gcnn8x16's did** → the bias is wrong for this game at any
+  capacity this project can afford. Recorded as a finding in KNOWLEDGE 48 / 50, and **the
+  equivariant line closes**.
+- Two seeds at the 32-pass point (`--seeds 0,1`) if the margin there is inside 0.005.
+
+### 9c. I1 — the analysis second pass on the strongest net (3060, hours)
+
+**Purpose.** The project's central methodological claim is PLAN5 §1c's: orderings and signs are
+stable across strength, magnitudes drift and saturate. It has been tested once, in Phase A at +242,
+where every ordering and sign held and two magnitudes moved (PLAN5 §2). The strongest net is now
+`runs/deep8_c1_300_e4/net_0300.pt` at **+363** — 120 Elo above the net from which every §1–§8 claim
+in `KNOWLEDGE.md` is quoted — and it has never been used to test the claim; the KNOWLEDGE header
+says so in as many words ("the game claims of §1–§8 have not been re-run on it, and 'strongest net'
+in those sections still means deep10"). I1 closes that gap, and it is the last thing the project
+owes its own method.
+
+**What runs.** The net-dependent tools of PLAN5 Phase A at **the same settings as the deep10 pass** —
+`runs/plan5_A_3060.sh` and `runs/plan5_A_3090.sh` are the record of those settings, and
+`runs/plan5_A.out` and `runs/plan5_B.out` of what they cost — with `deep8_c1_300_e4/net_0300.pt` as
+the net under test and held-out positions from **another run's games** as before (PLAN5 §8:
+`deep10_c1_300`'s or `deep8_c1_300`'s iterations 280–299, neither of which `_e4` trained on).
+Everything runs on the **3060** because the trainer holds the 3090 — including `tools/book.py`,
+whose `--device` defaults to `cuda:0` and must be passed `--device cuda:1` explicitly (every other
+net-dependent tool below already defaults to `cuda:1`; `corpus_stats.py` and `principles.py` take no
+device and are CPU work). The E7 worker shares the card while H1c runs: ≈ 6 min per checkpoint every
+≈ 43 min (an `--epochs 8` iteration is ≈ 264 s, checkpoints every 10), so the card is about a
+seventh busy.
+
+| tool | claims it re-reads | settings, as in the PLAN5 pass | measured cost on that pass |
+|---|---|---|---|
+| `tools/atlas.py` | 1–5 | `--nets <net> --budgets 1024,4096,16384 --out runs/plan6/I1_A1_atlas.json` | 16.6 min for **three** nets on the 3090 (`runs/plan5_A.out`, 00:36:04 → 00:52:39); one net on the 3060 is about the same |
+| `tools/book.py`, `tools/book_stats.py` | 7, 7a | `--depth 4 --top 3 --sims 16384 --batch 64 --compare runs/book_deep8.json --device cuda:1` | **38 min on the 3060** at 579 nodes (E1; deep10's was 28 min on the 3090) |
+| `tools/freemove.py` | 8, 10, 11, 13, 14 | `--corpus runs/deep10_c1_300 --last 20 --sims 256` | 5.0 min (00:43:20 → 00:48:21) |
+| `tools/value_decomp.py` | 9, 14–19 | `--data <probe npz> --n 20000 --sims 256 --only <checkpoints>` | 62 min over every checkpoint, 30 min over 11 (`runs/plan5_B.out`); the final checkpoint alone is minutes |
+| `tools/decision.py` | 20–22 | `--corpus runs/deep10_c1_300 --last 20 --games 4000 --sims 64` | 6.7–8.7 min per corpus |
+| `tools/surprise.py` | 23 | `--buffer runs/deep8_c1_300/latest_full.pt --sims 256 --n 8192 --top 30` | 1.2 min |
+| `tools/corpus_stats.py` | 24, 25, 27 | `runs/deep8_c1_300_e4 --last 20` | 38 s, CPU |
+| `tools/principles.py` | 26, 33–35 | `--data <probe npz> --corpus runs/deep8_c1_300_e4 --last 20` | minutes, CPU (needs the probe npz below) |
+| `tools/puzzles.py` | 32 | `--corpus runs/deep10_c1_300 --last 20 --max_empty 14 --n 6000 --processes 12 --out suites/puzzles_v3_dev.npz` | 42 s |
+| `tools/tablebase_grade.py` | 31a | as PLAN5 C5 | minutes; the table is 1 MB and builds in 0.2 s |
+| `tools/probe.py build` + `fit --control`, `tools/probe_report.py`, `tools/ownership_grade.py` | 36–40 | `build --corpus runs/deep10_c1_300 --last 20 --net <net>`; `fit --data <npz> --run runs/deep8_c1_300_e4 --control --only <16 checkpoints>` | build 5.1 min; fit **55–61 min on the 3090** over 16 checkpoints → ≈ 2–2.5 h on the 3060, which PLAN5 §7's budget ("under one 3090-day plus two 3060-days" for §2–§4) prices within a few hours — so the probes are **in**, at the same 16-checkpoint grid |
+
+The endgame reads are already done and need no re-run: `runs/deep8_c1_300_e4/analysis.out` carries
+endgame_v1 **90.1 / 0.022** and endgame_v2_dev **90.5 / 0.029** (28–31; the log's H1b entry).
+`suites/` stays frozen — a new puzzle set is a new name (`puzzles_v3_dev.npz`), never a rewrite of
+`puzzles_v2_dev.npz`.
+
+**Pre-registered reading, per claim** — written before the pass, exactly three verdicts:
+
+- **held** — the sign and the ordering agree with the deep10 reading *and* the new magnitude is
+  inside the earlier CI. The claim's *held across* list gains "all four strong nets".
+- **moved** — the sign and the ordering agree, the magnitude is outside the earlier CI. Report the
+  new magnitude; the claim's "grew with strength" clause is updated with the third point, and PLAN5
+  §2's closing "the magnitudes saturated between deep8_300 and deep10" is re-read against it.
+- **reversed** — a sign or an ordering disagrees. The claim is restated as budget- or
+  strength-relative, and the restatement says at which strength it flipped. This is the outcome the
+  method says cannot happen; if it does, it is the most important line in the file.
+
+**Outputs.** `runs/plan6/I1_*.out`, one per tool, as PLAN5 did — `runs/plan5_A<row>_*.out` becomes
+`runs/plan6/I1_A<row>_*.out` — plus the run's own directory for anything a run owns, and a results
+table appended to this section with every row marked held / moved / reversed.
+
+**Write-up.** Each affected claim in `KNOWLEDGE.md` gains "all four strong nets" in its *held
+across* list or its new magnitude; the header's "strongest net" sentence is updated (it currently
+records the gap this pass closes); RETROSPECTIVE §6 and the explainer's Part 8 are edited only if a
+number moves.
+
+### 9d. Order, GPU roles, and what follows
+
+| when | 3090 | 3060 |
+|---|---|---|
+| from H1c's launch, ≈ 22–23 h | **H1c** (`queue13`), start to `analysis.out` | **G arm (g)** first (hours), then **I1** (hours) — with the E7 worker sharing the card, ≈ 6 min per checkpoint every ≈ 43 min |
+| after all three | idle | idle |
+
+The trainer never shares the 3090 (§8); one CUDA device per process; the worker is a `cuda:1`
+process by construction.
+
+**Then E11, the backup**, deferred since Phase E for want of a destination. **The owner will create
+an empty GitHub repository once these three items are done.** The instance then
+`git remote add origin <url>` and `git push -u origin main`, and copies the things git does not
+carry off this machine as §2 E11 specifies: `runs/*/games` (≈ 160 MB per 300-iteration run), the
+remaining `net_*.pt`, `log.jsonl` and `config*.json`, and `suites/`. `runs/` is ≈ 11 GB.
+
+**Nothing else is proposed.** The chain H1b → H4 → H3 is closed with H3 withdrawn; H5 is not
+proposed; the G-CNN is not proposed again at width 128, and a wider one enters self-play only
+through 9b's reading and only with its measured cost declared. After H1c, arm (g) and I1 the open
+list is the write-up and the backup.

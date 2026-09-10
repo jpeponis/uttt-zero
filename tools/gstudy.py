@@ -20,7 +20,11 @@ JSON with one record per (positions, passes, seed).
 
 Arms (--arm): resnet10 (10x128), resnet8 (8x128), resnet8_mask (8x128 with the closed-board mask, §1 item 7),
 resnet8_tied (8x128 with D4-tied heads, arm (d)), gcnn8x16 (the D4 group-convolutional net at activation width 128,
-arm (e)); uttt.equivariant has the constructions, tests/test_equivariant.py their checks.
+arm (e)), gcnn8x46 (the same G-CNN at activation width 368 -- 2 459 392 parameters against resnet8's 2 456 014, arm (g);
+NOT equal cost: trunk work scales with the square of the activation width, so it costs 7.0x resnet8's per
+evaluation on the 3060 -- 595.5 ms vs 84.8 ms per 4096, runs/plan6/G_timing_3060_gcnn8x46.json); uttt.equivariant
+has the constructions,
+tests/test_equivariant.py their checks.
 """
 from __future__ import annotations
 
@@ -50,6 +54,7 @@ ARMS = {
     "resnet8_mask": lambda: NetConfig(blocks=8, filters=128, mask_closed=1),
     "resnet8_tied": lambda: NetConfig(blocks=8, filters=128, head_tying=1),  # (d): D4-tied heads on the ordinary trunk
     "gcnn8x16": lambda: NetConfig(blocks=8, filters=128, gcnn=16),  # (e): 16 base filters x 8 orientations = width 128
+    "gcnn8x46": lambda: NetConfig(blocks=8, filters=368, gcnn=46),  # (g): 46 x 8 = width 368, the same parameter count as resnet8 (PLAN6 §9b)
 }
 
 

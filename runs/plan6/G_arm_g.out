@@ -1,0 +1,3 @@
+=== G arm (g) gcnn8x46, 400k positions x 32,8,16 passes, lr 0.02, seed 0, dev slice (21:24)
+runs/gdata_v1.npz: train 400560, dev 49726 (33616 with no canonical twin in train); arm gcnn8x46
+  gcnn8x46 positions 400000 passes 32 seed 0

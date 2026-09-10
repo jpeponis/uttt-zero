@@ -1,0 +1,1 @@
+evaluator: suite suites/openings_v1.npz (516 openings), anchors ['v2b_net_0150', 'deep8_c1_300_e4_net_0300', 'deep8_c1_300_net_0300'], 64 sims, endgame set suites/endgame_v2_dev.npz, device NVIDIA GeForce RTX 3060
