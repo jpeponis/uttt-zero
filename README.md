@@ -267,3 +267,22 @@ local web UI for play and analysis. To play the current best net, substitute
 
 Move index convention everywhere: `m = 9*board + cell`, board and cell both
 row-major in their 3×3 grids (so 40 = centre of the centre board).
+
+## License and citation
+
+This repository is two artifacts under one roof, and they are licensed separately.
+
+- **The software** — `uttt/`, `tools/`, `tests/`, `web/`, `play.py` — is under the
+  **MIT license** (`LICENSE`).
+- **The written work and the data** — `README.md`, `KNOWLEDGE.md`, `PLAN6.md`,
+  `RETROSPECTIVE.md`, `knowledge/`, `docs/`, and the released `suites/`, run logs and
+  network checkpoints — is under **CC BY 4.0** (`LICENSE-CC-BY-4.0.txt`).
+
+The split is deliberate. The prose is the substance of the project, not documentation of
+the code: a claim in `KNOWLEDGE.md` carries a measurement, a confidence interval and the
+tool that produced it, and CC BY 4.0 is the license that keeps attribution attached to it
+while allowing reuse. MIT is the plainer instrument for the code, which people should be
+able to lift into their own work without conditions beyond the notice.
+
+Cite it with `CITATION.cff` (GitHub renders a "Cite this repository" button from it).
+

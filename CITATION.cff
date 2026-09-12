@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+title: "uttt-zero: an AlphaZero-style agent for Ultimate Tic-Tac-Toe, built to analyse the game"
+abstract: >-
+  A single-PC AlphaZero-style agent for Ultimate Tic-Tac-Toe under CodinGame
+  rules (closed boards, free moves, most-boards decision), trained by self-play
+  and used as an instrument to establish what is true about the game: opening
+  value, the worth of a free move, when games become decided, and what the
+  network computes internally. Every claim carries its level, effect size,
+  confidence interval, the networks it held across, and the tool that produced
+  it.
+authors:
+  - family-names: Peponis
+    given-names: John
+repository-code: "https://github.com/jpeponis/uttt-zero"
+license:
+  - MIT
+  - CC-BY-4.0
+keywords:
+  - AlphaZero
+  - Monte Carlo tree search
+  - Ultimate Tic-Tac-Toe
+  - self-play
+  - reinforcement learning
+  - interpretability
+date-released: 2026-09-12
