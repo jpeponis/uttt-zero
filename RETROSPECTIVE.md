@@ -393,8 +393,12 @@ where noted:
   running; KNOWLEDGE 51). **The play agent is now `deep8_c1_300_e8/net_0300.pt`.** The closing
   programme is complete, and **nothing further is proposed** — the obvious
   continuation, `--epochs 16`, would cost ≈ 32 h for a step predicted inside the seed band.
-  **E11**, the off-machine backup and the first push to a remote, is next and is all that
-  remains.
+  **E11**, the off-machine backup and the first push to a remote, followed on 2026-09-12 and is
+  **half done**: the repository is public at `https://github.com/jpeponis/uttt-zero` — 52 commits
+  and a 249.27 MiB pack on `main`, MIT for the code and CC BY 4.0 for the written work and the
+  data — and **the off-machine copy is not made**, deferred by the owner for want of any
+  destination on this machine (PLAN6's 2026-09-12 log entry and Handover). The open list is the
+  write-up and that copy.
 - **Neither depth nor duration is exhausted** — 12-block and 600-iteration runs are the
   obvious continuations, each a committed GPU-day, both on hold per the pause. *(2026-09-06:
   depth 8 → 10 is inside the seed band and an earlier LR drop hurts, so the continuation the
@@ -412,7 +416,12 @@ where noted:
   endgame-overfit diagnostic (now largely
   mooted by §3's revision); the CodinGame port (needs the batch-1 latency budget — one
   position at a time under a per-move time limit — not the ladder).
-- Everything is committed; `runs/` holds ~11 GB (games corpora + checkpoints); the
+- Everything is committed **and pushed** — the repository has been public at
+  `https://github.com/jpeponis/uttt-zero` since 2026-09-12. `runs/` holds **17.02 GB in 5 328
+  files** (games corpora + checkpoints), not the ~11 GB recorded here until now. Git carries the
+  code, the documents, `suites/` and every run's `net_0150/0200/0300.pt`, so what is **still
+  single-copy on one machine is the `games/` corpora and the intermediate checkpoints** — 5.23 GB
+  by PLAN6 §2 E11's list, deferred for want of a destination. The
   explainer artifact tells the story through queue5 and does not yet include the
   10-block result or the draw-blindness revision (since added; the 2026-09-05 revision
   carries the seed replicate too).

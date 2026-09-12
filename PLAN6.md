@@ -40,7 +40,26 @@ a G-CNN at a lower LR (the sweeps), and no wider G-CNN in *self-play* except thr
 inference cost declared. Both cards are idle (13:05). Windows Update is paused until 2026-10-14; the play agent
 is `runs/deep8_c1_300_e4/net_0300.pt`.
 
-**State at 19:50 on 2026-09-10: §9's programme is complete.** H1c done and read — helped, **55.8 % [53.3, 58.2], +40 [+23, +57] over `deep8_c1_300_e4`**; the play agent is now `runs/deep8_c1_300_e8/net_0300.pt` (+363 vs v2b, the yardstick saturated; endgame 91.3 / 0.022); G arm (g) and I1 done and read (the log's 07:30, 08:10 and 19:45 entries; §9a–c). Both cards idle. **Nothing further is proposed. Next: E11** — the owner creates the empty GitHub repository, then `git remote add origin <url> && git push -u origin main`, and the off-machine copy of `runs/*/games` (≈ 160 MB per 300-iteration run), the `net_*.pt` not tracked by git, and `suites/`. The game claims of KNOWLEDGE §1–§8 were re-read on `_e4` (I1), not on `_e8`; a third pass on `_e8` is not proposed (+40 is inside what I1 showed to be the drift of magnitudes, and the orderings held). **Next: the closing programme of §9, in this order — H1c on the 3090, then G arm (g) and I1 on the 3060, then E11.**
+**State at 19:50 on 2026-09-10: §9's programme is complete.** H1c done and read — helped, **55.8 % [53.3, 58.2], +40 [+23, +57] over `deep8_c1_300_e4`**; the play agent is now `runs/deep8_c1_300_e8/net_0300.pt` (+363 vs v2b, the yardstick saturated; endgame 91.3 / 0.022); G arm (g) and I1 done and read (the log's 07:30, 08:10 and 19:45 entries; §9a–c). Both cards idle. **Nothing further is proposed.** The game claims of KNOWLEDGE §1–§8 were re-read on `_e4` (I1), not on `_e8`; a third pass on `_e8` is not proposed (+40 is inside what I1 showed to be the drift of magnitudes, and the orderings held). **E11 followed on 2026-09-12; the state below.**
+
+**State at 19:05 on 2026-09-12: E11 is half done — the repository is public, the off-machine copy is not made.**
+`git push -u origin main` landed at 19:04:58 on `https://github.com/jpeponis/uttt-zero` (public; owner `jpeponis`,
+the GitHub handle — the Windows account name is a different identity): **52 commits, 666 tracked files, a 249.27 MiB
+pack**, with `refs/heads/main` verified by `git ls-remote` equal to the local HEAD `10f68f4` and `origin/main`
+tracking (the log's 19:05 entry). The repository is licensed **MIT for the code and CC BY 4.0 for the written work
+and the data**, with `CITATION.cff` (`10f68f4`, E11 part 1); the pre-push sweep for credential shapes found nothing,
+and `runs/codex-review.log` is kept by the owner's explicit decision. **What E11 still owes is the copy**, deferred by
+the owner on 2026-09-12 ("push now, copy later") because no off-machine destination exists here: one physical disk
+(290.8 GB free on C:), no external drive attached, OneDrive not signed in. The payload §2's E11 bullet names —
+`games/` + `net_*.pt` + `log.jsonl` + `config*.json` + `suites/` — is **5.23 GB** (`games/` 2.40, `net_*.pt` 2.81,
+small files 0.02), excluding 11.67 GB of `latest*.pt` optimizer state the spec does not list; `runs/` is 17.02 GB in
+5 328 files. **The residual risk: git carries the code, the documents, `suites/` and every run's
+`net_0150/0200/0300.pt`, but not the `games/` corpora or the intermediate checkpoints — the self-play corpora are
+still single-copy on this machine.** To close it the next instance takes one of the three routes priced for the
+owner: **GitHub Release assets on the same repository** (per-run tarballs of 160–450 MB, far under the 2 GB per-asset
+cap — but the `gh` CLI here is **not authenticated**, so `gh auth login` comes first), an **external drive**, or
+**OneDrive** (the free 5 GB tier does not fit 5.23 GB; only a Microsoft 365 subscription would). **The project's open
+list is now the write-up and that copy.**
 
 *1. H1c `deep8_c1_300_e8`* (§9a; ≈ 22–23 h, inside the update pause if launched before 2026-10-13). `runs/queue13.sh`
 is **not yet written**: copy `runs/queue11.sh` and change four things — `R=deep8_c1_300_e8` and
@@ -66,8 +85,10 @@ re-run on `deep8_c1_300_e4/net_0300.pt` at the deep10 pass's settings (`runs/pla
 — into `runs/plan6/I1_*.out`, each claim marked held / moved / reversed. The E7 worker shares the card throughout
 (≈ 6 min per checkpoint every ≈ 43 min).
 
-*3. E11* (§9d): after all three, the owner creates an empty GitHub repository; then `git remote add origin <url>`,
-`git push -u origin main`, and the `games/`, `net_*.pt` and `suites/` copies off-machine.
+*3. E11* (§9d): **the push is done** (2026-09-12; the repository is public at
+`https://github.com/jpeponis/uttt-zero`, 52 commits and a 249.27 MiB pack on `main`). What remains is the
+off-machine copy of `games/`, the `net_*.pt` git does not carry, `log.jsonl` / `config*.json` and `suites/` —
+5.23 GB, deferred for want of a destination; the routes are in the 2026-09-12 state paragraph above.
 
 The 50 % line still applies to every launch: above it, update this Handover, the log, KNOWLEDGE, RETROSPECTIVE and
 README and hand over rather than launch.
@@ -90,7 +111,8 @@ including the one sealed test read. The G-CNN was smoke-tested through the self-
 (`runs/probe_gcnn_smoke`, untracked, an untrained net: 4 iterations of 256 games on the 3060 — fused graph self-play,
 50 training steps per iteration with falling losses and no skipped steps, atomic checkpoints, a resume that restored
 the scaler and generators, and the E7 worker scoring its checkpoints against a ResNet anchor with the endgame set), so
-H4 was launchable as written. E11 (backup) stays deferred by the owner to the write-up; the repository has no remote.
+H4 was launchable as written. E11's push half is done (2026-09-12) and the repository is public; its off-machine
+copy is still open.
 
 **The chain, with the recipes fixed by the rules already written.** Operational settings for every run: copy
 `runs/queue11.sh` (retry wrapper, `--eval_every 0 --ckpt_every 10`, the E7 worker on the 3060 with the parent among
@@ -629,6 +651,51 @@ the G-CNN again at width 128 (50).
   43, 44, header restated); RETROSPECTIVE §2, §3, §7; README. §9 is done: E11 follows (the owner creates the empty
   GitHub repository; then push, and the off-machine copy of `runs/*/games`, the remaining `net_*.pt` and `suites/`).
 
+- **2026-09-12, 19:05 — E11: the first push to a remote is done; the off-machine copy is deferred, and still owed.**
+  `https://github.com/jpeponis/uttt-zero` — public, owner `jpeponis` (the GitHub handle; the Windows account name is
+  a different identity), created empty by the owner, description "Machine learning experiments in Ultimate Tic Tac
+  Toe". `git push -u origin main` over HTTPS on Git Credential Manager's stored credential, 19:03:59–19:04:58:
+  **52 commits, 666 tracked files, a 249.27 MiB pack** (292.4 MB of tracked bytes). Verified rather than assumed —
+  `git ls-remote origin` gives `refs/heads/main` = `10f68f4`, equal to the local HEAD, and `origin/main` now tracks.
+  Preparation: `git gc` packed 1105 loose objects and `http.postBuffer` went to 500 MB (the pack goes up in one HTTPS
+  POST); a `--dry-run` confirmed acceptance before the real push. Largest tracked blob **12.26 MB**
+  (`runs/deep10_c1_300/net_0200.pt`) — nothing near GitHub's 50 MB warning or its 100 MB block, so **no LFS**.
+  `runs/probe_gcnn_smoke/` stays untracked by design and is the only thing `git status` shows.
+
+  **Licensing, committed first as `10f68f4` (E11 part 1).** The owner asked for whichever license suits an arXiv
+  write-up, so the repository is split by artifact: **MIT** (`LICENSE`) over `uttt/`, `tools/`, `tests/`, `web/`,
+  `play.py`; **CC BY 4.0** (`LICENSE-CC-BY-4.0.txt`, the canonical 18 657-byte legal code fetched from
+  creativecommons.org) over `README.md`, `KNOWLEDGE.md`, `PLAN6.md`, `RETROSPECTIVE.md`, `knowledge/`, `docs/` and the
+  released `suites/`, logs and checkpoints. The reason: the prose is the substance of the project rather than
+  documentation of the code, so the license that keeps attribution attached to a claim belongs there, while MIT is the
+  plainer instrument for the software — and the arXiv submission and the repository text then carry the same terms.
+  `CITATION.cff` added (GitHub renders a "Cite this repository" button from it); README gained a "License and
+  citation" section.
+
+  **The pre-push audit**, which is the reason a first public push was safe to make. A sweep of every tracked file for
+  credential shapes (`ghp_`, `gho_`, `sk-ant-`, `AKIA…`) found nothing; four files matched a broader sweep on the word
+  *token* alone, in its machine-learning sense. The only personal exposure is the owner's name and email in all 52
+  commits' author metadata, under his own public handle. `runs/codex-review.log` — 556 KB of raw Codex CLI transcript
+  carrying the local Windows workdir path, the model name and a session id — is **kept, by the owner's explicit
+  decision**. `tests/test_hygiene.py` and `tests/test_game.py` both pass at HEAD, so what is published is a verified
+  state.
+
+  **The copy half is deferred — the owner's decision of 2026-09-12, "push now, copy later" — and E11 still owes it.**
+  The payload §2's E11 bullet specifies (`games/` + `net_*.pt` + `log.jsonl` + `config*.json`, plus `suites/`)
+  measures **5.23 GB: `games/` 2.40 GB, `net_*.pt` 2.81 GB, small files 0.02 GB**. That excludes **11.67 GB across 37
+  `latest*.pt`** optimizer-state checkpoints, which the spec does not list. `runs/` is now **17.02 GB in 5 328 files**
+  — not the "≈ 11 GB" §9d recorded, a stale estimate, corrected there and in RETROSPECTIVE §7. It is deferred because
+  no off-machine destination exists on this machine: one physical disk (Samsung SSD 970 EVO 1 TB, 290.8 GB free on
+  C:), no external drive attached, and OneDrive not signed in (empty local folder, no account registry keys). The
+  three routes priced for the owner, for the record: **GitHub Release assets on the same repository** — per-run
+  tarballs of 160–450 MB, far under the 2 GB per-asset cap, but the `gh` CLI here is not authenticated, so
+  `gh auth login` comes first; an **external drive**; or **OneDrive**, whose free 5 GB tier does not fit 5.23 GB (only
+  a Microsoft 365 subscription would). **The residual risk, stated plainly: the push carries the code, the documents,
+  `suites/` and every run's `net_0150/0200/0300.pt`, but not the `games/` corpora or the intermediate checkpoints — the
+  self-play corpora remain single-copy on this machine.** Handover, §2's E11 bullet, §9d, README and RETROSPECTIVE §7
+  carry this. KNOWLEDGE is untouched: E11 is engineering, not a claim about the game. The open list is now the
+  write-up and that copy.
+
 ## 0. The decision in front of the project
 
 **Three things "more strength" could be for, and they call for different work.**
@@ -779,7 +846,14 @@ is still not done (E11).
   canonical-key overlap between the halves (should be ≈ 0 at ≤ 14 empties; say what it is).
 - **E11. Backup.** The `games/` corpora (≈ 160 MB per 300-iteration run), `net_*.pt`, `log.jsonl`,
   `config*.json` and `suites/` to a location off this machine. PLAN5 §6's local copy is not a
-  backup.
+  backup. *(2026-09-12: **the git half is done** — the repository is public at
+  `https://github.com/jpeponis/uttt-zero`, 52 commits and a 249.27 MiB pack, which carries the
+  code, the documents, `suites/` and every run's `net_0150/0200/0300.pt`, under MIT for the code
+  and CC BY 4.0 for the prose and data. **The copy half is open**: the payload listed above
+  measures 5.23 GB — `games/` 2.40 GB, `net_*.pt` 2.81 GB, small files 0.02 GB, excluding 11.67 GB
+  across 37 `latest*.pt` optimizer-state checkpoints this bullet does not list — and is deferred by
+  the owner for want of any destination off this machine. The `games/` corpora and the intermediate
+  checkpoints are still single-copy.)*
 
 ## 3. Phase F — cheap measurements on the nets we have (≈ 1 h of GPU)
 
@@ -1131,13 +1205,18 @@ number moves.
 The trainer never shares the 3090 (§8); one CUDA device per process; the worker is a `cuda:1`
 process by construction.
 
-**Then E11, the backup**, deferred since Phase E for want of a destination. **The owner will create
-an empty GitHub repository once these three items are done.** The instance then
-`git remote add origin <url>` and `git push -u origin main`, and copies the things git does not
-carry off this machine as §2 E11 specifies: `runs/*/games` (≈ 160 MB per 300-iteration run), the
-remaining `net_*.pt`, `log.jsonl` and `config*.json`, and `suites/`. `runs/` is ≈ 11 GB.
+**Then E11, the backup**, deferred since Phase E for want of a destination. **Done 2026-09-12, in
+half.** The owner created the empty repository and the instance pushed: `https://github.com/jpeponis/uttt-zero`,
+public, 52 commits and a 249.27 MiB pack on `main`, verified against `git ls-remote` (the log's
+19:05 entry), under MIT for the code and CC BY 4.0 for the prose and the data. What git does not
+carry is still on one machine, and is what the copy owes as §2 E11 specifies: `runs/*/games`
+(≈ 160 MB per 300-iteration run), the remaining `net_*.pt`, `log.jsonl` and `config*.json`, and
+`suites/` — **5.23 GB** measured. `runs/` is **17.02 GB in 5 328 files**; the "≈ 11 GB" this section
+recorded until now was a stale estimate. 11.67 GB of that total is `latest*.pt` optimizer state,
+which §2 E11 does not list and the copy does not include.
 
 **Nothing else is proposed.** The chain H1b → H4 → H3 is closed with H3 withdrawn; H5 is not
 proposed; the G-CNN is not proposed again at width 128, and a wider one enters self-play only
 through 9b's reading and only with its measured cost declared. After H1c, arm (g) and I1 the open
-list is the write-up and the backup.
+list is the write-up and the backup; with E11's push done (2026-09-12) it is the write-up and
+E11's off-machine copy.

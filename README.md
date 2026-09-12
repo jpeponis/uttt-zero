@@ -48,7 +48,7 @@ Read in this order:
    claude in the PLAN3 era, adjudicated in PLAN4). References such as "PLAN4 §3c" in the
    live files mean these.
 
-## Current state (2026-09-10)
+## Current state (2026-09-12)
 
 - **Best network:** `runs/deep8_c1_300_e8/net_0300.pt` — 8 residual blocks of 128
   filters, 300 iterations, **2048 optimizer steps per iteration** (PLAN6 §9a H1c, 2026-09-10):
@@ -94,7 +94,8 @@ Read in this order:
   book's), then Phase F takes an hour of cheap play-time measurements, Phase G answers the
   architecture question on frozen data, and Phase H proposes runs in order: `--epochs 2` on
   8 blocks first (H1), 600 iterations after (H3). **Done 2026-09-06/07:** Phase E (E1–E10; E11,
-  the backup, is deferred by the owner until the write-up — the repository has no remote yet),
+  the backup, was deferred by the owner then — its push half was done on 2026-09-12 and its
+  off-machine copy is still open, the E11 bullet below),
   Phase F (exact equivariance at play is a null, 49.5 % [46.7, 52.3]; at ±2.8 the first LR drop is
   a resolved +5 … +9 on every run and the second does nothing resolvable; the ownership head does
   learn late-game ownership), **Phase G** on the frozen teacher (`runs/gdata_v1.npz`, 500 k
@@ -126,7 +127,7 @@ Read in this order:
   (`deep8_c1_600_e4`, 600 iterations — it re-buys the data / updates / teacher confound PLAN6 §0 exists
   to remove; its queue scripts stay in the repo, staged but withdrawn) and **H5** (`--head_tying 1` — a
   predicted null whose exact policy symmetry has no consumer). **E11**, the off-machine backup and the
-  first push to a remote, is scheduled after the three. Nothing else is proposed.
+  first push to a remote, was scheduled after the three. Nothing else is proposed.
   **All three are now done.** Arm (g) came back on 2026-09-09 and closed the equivariant line; I1 ran
   on 2026-09-10 (below); and **H1c came in on 2026-09-10** — `runs/deep8_c1_300_e8`, 21.96 h on the
   3090 with no crash, **+40 Elo [+23, +57] over its parent**, helped by the pre-registered rule but
@@ -136,7 +137,17 @@ Read in this order:
   the new net scores the same +363 against v2b that `_e4` did, because differences compress near
   90 %. It is the play agent from now on (KNOWLEDGE 51, RETROSPECTIVE §2). **Nothing further is
   proposed** — the obvious continuation, `--epochs 16`, would cost ≈ 32 h for a step predicted inside
-  the seed band. **E11 is next and is all that remains.**
+  the seed band. **E11 followed on 2026-09-12 and is half done — the next bullet.**
+- **E11, the off-machine backup and the first push to a remote, 2026-09-12 (PLAN6 §2, §9d) — half
+  done.** The repository is public at **`https://github.com/jpeponis/uttt-zero`**: 52 commits, 666
+  tracked files, a 249.27 MiB pack on `main`, verified against `git ls-remote` after the push. It is
+  licensed **MIT for the code and CC BY 4.0 for the written work and the data**, with `CITATION.cff`
+  — see "License and citation" at the end. A pre-push sweep of every tracked file for credential
+  shapes found none. **The off-machine copy is still open**: git carries the code, the documents,
+  `suites/` and every run's `net_0150/0200/0300.pt`, but not the `games/` corpora or the intermediate
+  checkpoints — 5.23 GB of payload (`games/` 2.40 GB, `net_*.pt` 2.81 GB), deferred by the owner for
+  want of any destination on this machine, so **the self-play corpora remain single-copy**. `runs/`
+  is 17.02 GB in 5 328 files.
 - **I1, the analysis second pass, done 2026-09-10 (PLAN6 §9c):** PLAN5 Phase A's tools re-run on
   `deep8_c1_300_e4` at the deep10 pass's settings — of 34 game claims re-read, **15 held, 18 moved and 1
   reversed** (after [40] that net prefers the corner reply orbit where both earlier strong
