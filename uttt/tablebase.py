@@ -2,16 +2,18 @@
 
 With one board open, every legal move is in that board, so the game is a single tic-tac-toe whose three outcomes
 (X wins the board / O wins it / it fills) are each mapped by the macro board to a game result: a macro line for the
-winner, else the board count (the most-boards rule; equal is a draw). The tablebase therefore needs only the open
+winner, else the board count under rule="count" (equal is a draw) or a draw outright under rule="draw". The rule
+enters *only* through that outcome map (K1Table.payoffs), so the table itself is shared by both rules and is built
+the same way either way. The tablebase therefore needs only the open
 board's cells (3^9 states), the side to move and the outcome-to-result map (3^3 triples): 19 683 x 2 x 27 = 1.06 M
 entries, one byte each — knowledge/06's 1.2 x 10^10 counted the closed boards' identities and the send, neither of
 which changes the value. Built by backward induction in a second; exact for every position with <= 1 open board
 (the solver already covers these, but the table answers a GPU batch in one gather, which is what a terminal lookup
 inside the search needs).
 
-    tb = K1Table()                              # builds (or loads) the table
+    tb = K1Table(device, rule)                  # builds (or loads) the table
     v, best = tb.lookup(cells, macro, player)   # exact value for the mover and an optimal move, for K=1 rows
-    ev = TablebaseEvaluator(base_evaluator)     # any evaluator: K=1 positions get the exact value and an optimal policy
+    ev = TablebaseEvaluator(base_evaluator, rule=rule)  # any evaluator: K=1 positions get the exact value and an optimal policy
 """
 from __future__ import annotations
 
@@ -19,6 +21,7 @@ import numpy as np
 import torch
 
 from .batch import FULL, consts, legal_mask
+from .rules import check_rule
 
 POW3 = 3 ** np.arange(9)
 LINES_NP = np.array([(0, 1, 2), (3, 4, 5), (6, 7, 8), (0, 3, 6), (1, 4, 7), (2, 5, 8), (0, 4, 8), (2, 4, 6)])
@@ -64,8 +67,9 @@ def _build() -> tuple[np.ndarray, np.ndarray]:
 
 
 class K1Table:
-    def __init__(self, device=None) -> None:
+    def __init__(self, device=None, rule: str = "count") -> None:
         self.V, self.M = _build()
+        self.rule = check_rule(rule)
         self.device = torch.device(device) if device is not None else None
         if self.device is not None:
             self.Vt = torch.from_numpy(self.V).to(self.device)
@@ -84,7 +88,8 @@ class K1Table:
             won_only = m * (m.abs() == 1)
             xl = (won_only[:, lines] == 1).all(-1).any(-1)
             ol = (won_only[:, lines] == -1).all(-1).any(-1)
-            count = torch.sign((m == 1).sum(1) - (m == -1).sum(1)).long()
+            count = (torch.sign((m == 1).sum(1) - (m == -1).sum(1)).long() if self.rule == "count"
+                     else torch.zeros(n, dtype=torch.long, device=macro.device))  # "draw": no line, no winner
             ones = torch.ones_like(count)
             out.append(torch.where(xl, ones, torch.where(ol, -ones, count)))
         return torch.stack(out, 1)
@@ -112,10 +117,13 @@ class K1Table:
 class TablebaseEvaluator:
     """Wraps an evaluator: positions with one open board get the exact value and a one-hot policy on an optimal move."""
 
-    def __init__(self, base, table: K1Table | None = None) -> None:
+    def __init__(self, base, table: K1Table | None = None, rule: str = "count") -> None:
         self.base = base
         self.device = base.device
-        self.tb = table or K1Table(self.device)
+        self.rule = check_rule(rule)
+        self.tb = table or K1Table(self.device, rule)
+        if self.tb.rule != self.rule:
+            raise ValueError(f"table built for rule {self.tb.rule!r}, evaluator asked for {self.rule!r}")
         self._calls = torch.zeros((), dtype=torch.long, device=self.device)  # device-side counters: no host sync
         self._hits = torch.zeros((), dtype=torch.long, device=self.device)   # inside a CUDA-graph capture
 

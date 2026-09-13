@@ -20,6 +20,7 @@ from uttt.batch import BatchUTTT  # noqa: E402
 from uttt.endgame import wdl_probs  # noqa: E402
 from uttt.infer import FusedEvaluator  # noqa: E402
 from uttt.model import load_checkpoint  # noqa: E402
+from uttt.rules import RULES  # noqa: E402
 from uttt.search import BatchedSearch, SearchConfig  # noqa: E402
 from uttt.solver import solve_children  # noqa: E402
 from uttt.tablebase import K1Table  # noqa: E402
@@ -31,17 +32,18 @@ def main() -> None:
     ap.add_argument("checkpoint")
     ap.add_argument("--data", default="runs/probe_data_deep8late.npz")
     ap.add_argument("--sims", type=int, default=64)
+    ap.add_argument("--rule", choices=RULES, default="count", help="terminal rule the tablebase, the solver and the search use")
     ap.add_argument("--device", default="cuda:1")
     a = ap.parse_args()
     device = torch.device(a.device)
     z = np.load(a.data)
     t = lambda k: torch.from_numpy(z[k]).to(device)  # noqa: E731
     cells, macro, nb, player = t("cells"), t("macro"), t("next_board"), t("player")
-    tb = K1Table(device)
+    tb = K1Table(device, a.rule)
     v, best, k1 = tb.lookup(cells, macro, player)
     idx = k1.nonzero(as_tuple=True)[0]
     n = len(idx)
-    print(f"{a.data}: {len(k1)} positions, {n} with exactly one open board ({100 * n / len(k1):.1f} %); "
+    print(f"{a.data}: {len(k1)} positions under rule {a.rule}, {n} with exactly one open board ({100 * n / len(k1):.1f} %); "
           f"exact W/D/L for the mover {float((v[idx] == 1).float().mean()):.2f}/{float((v[idx] == 0).float().mean()):.2f}/{float((v[idx] == -1).float().mean()):.2f}")
     fe = FusedEvaluator(load_checkpoint(a.checkpoint, device), device)
     c, m, b, p = cells[idx], macro[idx], nb[idx], player[idx]
@@ -52,9 +54,9 @@ def main() -> None:
     ex = v[idx]
     acc = float((pred == ex).float().mean())
     draw_rec = float((pred[ex == 0] == 0).float().mean()) if (ex == 0).any() else float("nan")
-    g = BatchUTTT(n, device)
+    g = BatchUTTT(n, device, a.rule)
     g.cells[:], g.macro[:], g.next_board[:], g.player[:] = c, m, b, p
-    s = BatchedSearch(fe, n, SearchConfig(n_sims=a.sims, mode="gumbel", gumbel_scale=0.0, cuda_graph=device.type == "cuda", depth_cap=min(a.sims, 24)), device)
+    s = BatchedSearch(fe, n, SearchConfig(n_sims=a.sims, mode="gumbel", gumbel_scale=0.0, cuda_graph=device.type == "cuda", depth_cap=min(a.sims, 24)), device, rule=a.rule)
     smove = s.search(g.cells, g.macro, g.next_board, g.player, g.done, g.winner, selfplay=False).action.cpu().numpy()
     rmove = probs.argmax(1).cpu().numpy()
     cn, mn, bn, pn = c.cpu().numpy(), m.cpu().numpy(), b.cpu().numpy(), p.cpu().numpy()
@@ -62,12 +64,12 @@ def main() -> None:
     opt_raw = opt_search = 0
     reg_raw = reg_search = 0.0
     for i in range(n):
-        _, ch = solve_children((cn[i], mn[i], int(bn[i]), int(pn[i])))
+        _, ch = solve_children((cn[i], mn[i], int(bn[i]), int(pn[i])), a.rule)
         opt_raw += int(ch[rmove[i]] == exn[i])
         opt_search += int(ch[smove[i]] == exn[i])
         reg_raw += float(exn[i] - ch[rmove[i]])
         reg_search += float(exn[i] - ch[smove[i]])
-    print(f"{a.checkpoint} on the {n} one-open-board positions:")
+    print(f"{a.checkpoint} on the {n} one-open-board positions under rule {a.rule}:")
     print(f"  raw value head: 3-way accuracy {100 * acc:.1f} %, draw recognition {100 * draw_rec:.1f} %")
     print(f"  raw policy: optimal move {100 * opt_raw / n:.1f} %, regret {reg_raw / n:.3f}")
     print(f"  search {a.sims} sims: optimal move {100 * opt_search / n:.1f} %, regret {reg_search / n:.3f}")

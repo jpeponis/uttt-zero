@@ -16,12 +16,13 @@ from uttt.solver import empties_in_open_boards, solve  # noqa: E402
 DEV = os.environ.get("UTTT_DEV", "cuda:0")
 
 
-def test_rules(n_games=300, seed=0):
+def test_rules(n_games=300, seed=0, rule="count"):
     rng = np.random.default_rng(seed)
     buf = np.zeros(81, dtype=np.int64)
+    draw_rule = rule == "draw"
     plies = 0
     for _ in range(n_games):
-        ref = UTTT()
+        ref = UTTT(rule)
         st = np.zeros(LEN, dtype=np.int64)
         st[PL] = 1
         st[NB] = -1
@@ -35,9 +36,9 @@ def test_rules(n_games=300, seed=0):
                 break
             m = int(rng.choice(ref.legal_moves()))
             ref.play(m)
-            _apply(st, m)
+            _apply(st, m, draw_rule)
             plies += 1
-    print(f"bitboard rules agree with the reference engine over {n_games} random games ({plies} plies)")
+    print(f"bitboard rules agree with the reference engine under rule {rule} over {n_games} random games ({plies} plies)")
 
 
 def random_endgame(rng, max_empty):
@@ -102,7 +103,8 @@ def bench(playouts=100_000):
 
 
 if __name__ == "__main__":
-    test_rules()
+    test_rules(rule="count")
+    test_rules(rule="draw")
     test_uct_vs_solver()
     test_reproducible()
     test_beats_random()

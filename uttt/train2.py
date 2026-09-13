@@ -3,6 +3,7 @@
 + margin head + LR schedule + cheap fixed-anchor evaluation.
 
     python -m uttt.train2 --run runs/v2a --iters 150 --games 4096 --steps 64 --sims 32
+    python -m uttt.train2 --run runs/deep8_c1_300_e8_draw --rule draw ...   # PLAN7 §5 K1
 
 Each iteration advances all `games` parallel games by `steps` moves (games × steps positions),
 trains ~`epochs` passes over that many positions sampled from the buffer, and logs one JSON line.
@@ -37,6 +38,7 @@ from .exact import ExactLabeler
 from .infer import FusedEvaluator
 from .model import MARGIN_BINS, NetConfig, build_net, load_checkpoint
 from .openings import Suite, play_paired, summarize
+from .rules import check_rule
 from .search import BatchedSearch, SearchConfig
 from .selfplay_cont import ContinuousSelfPlay, GPUReplayBuffer
 
@@ -96,11 +98,14 @@ class TrainConfig:
     save_buffer_every: int = 10
     device: str = "cuda:0"
     seed: int = 0
+    # the run's TRAINING rule (uttt.rules): self-play, the search trees, the exact labels and the in-run
+    # evaluation all use it, and it is recorded in config.json and its _provenance (PLAN7 §5 K1)
+    rule: str = "count"  # "count" | "draw"
 
 
 class SearchPlayer2:
-    def __init__(self, evaluator, n, cfg: SearchConfig, device) -> None:
-        self.s = BatchedSearch(evaluator, n, cfg, device)
+    def __init__(self, evaluator, n, cfg: SearchConfig, device, rule: str = "count") -> None:
+        self.s = BatchedSearch(evaluator, n, cfg, device, rule=rule)
 
     def act(self, g: BatchUTTT) -> torch.Tensor:
         return self.s.search(g.cells, g.macro, g.next_board, g.player, g.done, g.winner, selfplay=False).action
@@ -192,8 +197,8 @@ class EvalKit:
         ecfg = SearchConfig(n_sims=cfg.eval_sims, mode="gumbel", gumbel_scale=0.0, cuda_graph=graph, depth_cap=min(cfg.eval_sims, 24))
         self.fe = FusedEvaluator(net, device)
         n = suite.n if suite is not None else cfg.eval_games
-        self.pa = SearchPlayer2(self.fe, n, ecfg, device)
-        self.pb = {name: SearchPlayer2(aev, n, ecfg, device) for name, aev in anchors.items()}
+        self.pa = SearchPlayer2(self.fe, n, ecfg, device, cfg.rule)
+        self.pb = {name: SearchPlayer2(aev, n, ecfg, device, cfg.rule) for name, aev in anchors.items()}
         self.eg_cache: dict = {}  # sims -> BatchedSearch reused across endgame evaluations
 
     def run(self, net) -> dict:
@@ -202,19 +207,19 @@ class EvalKit:
         if self.suite is None:
             n = cfg.eval_games
             for name, pb in self.pb.items():
-                r1 = play_games(self.pa, pb, n, self.device, 2)
-                r2 = play_games(pb, self.pa, n, self.device, 2)
+                r1 = play_games(self.pa, pb, n, self.device, 2, cfg.rule)
+                r2 = play_games(pb, self.pa, n, self.device, 2, cfg.rule)
                 out[f"vs_{name}"] = round((r1.wins + r2.losses + 0.5 * (r1.draws + r2.draws)) / (2 * n), 3)
         else:
             for name, pb in self.pb.items():
-                s = summarize(play_paired(self.pa, pb, self.suite, self.device), n_boot=1000)
+                s = summarize(play_paired(self.pa, pb, self.suite, self.device, cfg.rule), n_boot=1000)
                 o = s["overall"]
                 out[f"vs_{name}"] = round(o["score"], 3)
                 out[f"ci_{name}"] = [round(o["ci"][0], 3), round(o["ci"][1], 3)]
                 out[f"suites_{name}"] = {k: round(v["score"], 3) for k, v in s["suites"].items()}
         if self.es is not None:
             res = endgame_evaluate(self.fe, self.es, self.device, sims=(cfg.eval_sims,), n_boot=200, symmetrise=False,
-                                   graph=bool(cfg.eval_graph), search_cache=self.eg_cache)
+                                   graph=bool(cfg.eval_graph), search_cache=self.eg_cache, rule=cfg.rule)
             raw, srch = res["rows"][0], res["rows"][-1]
             out.update({"eg_wdl_acc": round(raw["wdl_acc"], 4), "eg_brier": round(raw["brier"], 4),
                         "eg_regret_raw": round(raw["regret"], 4), "eg_optimal_raw": round(raw["optimal"], 4),
@@ -239,6 +244,7 @@ def _atomic_save(obj, path: str) -> None:
 
 
 def main(cfg: TrainConfig) -> None:
+    check_rule(cfg.rule)
     torch.manual_seed(cfg.seed)
     torch.backends.cudnn.benchmark = True
     device = torch.device(cfg.device)
@@ -248,7 +254,7 @@ def main(cfg: TrainConfig) -> None:
     if os.path.exists(cfg_path):
         attempt += 1
     info = dict(asdict(cfg), _provenance={"argv": sys.argv[1:], "torch": torch.__version__, "git": _git_rev(),
-                                          "started": time.strftime("%Y-%m-%d %H:%M:%S"), "attempt": attempt,
+                                          "started": time.strftime("%Y-%m-%d %H:%M:%S"), "attempt": attempt, "rule": cfg.rule,
                                           "device_name": torch.cuda.get_device_name(device) if device.type == "cuda" else "cpu"})
     if os.path.exists(cfg_path):  # never clobber the original run config; record every (re)invocation beside it
         with open(cfg_path) as f:
@@ -272,11 +278,15 @@ def main(cfg: TrainConfig) -> None:
                         sample_uniform=cfg.sample_uniform, root_prior_floor=cfg.root_prior_floor, c_scale=cfg.c_scale,
                         cuda_graph=bool(cfg.cuda_graph), depth_cap=cfg.depth_cap if cfg.cuda_graph else 32)
     fe = FusedEvaluator(net, device)
-    sp = ContinuousSelfPlay(fe, cfg.games, scfg, device, sym_hash=bool(cfg.dedup_sym), generator=gens["selfplay"])
+    sp = ContinuousSelfPlay(fe, cfg.games, scfg, device, sym_hash=bool(cfg.dedup_sym), generator=gens["selfplay"], rule=cfg.rule)
     def anchor_name(p):  # runs/dev1/net_0200.pt -> dev1_net_0200 (two runs may share a checkpoint name)
         return f"{os.path.basename(os.path.dirname(p))}_{os.path.splitext(os.path.basename(p))[0]}"
 
     anchors = {anchor_name(p): FusedEvaluator(load_net(p, device), device) for p in cfg.anchors.split(",") if p}
+    if cfg.rule != "count":
+        print(f"rule: {cfg.rule} (self-play, search trees, exact labels and in-run evaluation). The anchors "
+              f"{list(anchors)} were TRAINED under count and are played here under {cfg.rule}; scores against them are "
+              "not comparable with a count-rule run's (PLAN7 §5 K1).", flush=True)
     suite = None
     if cfg.suite:
         if not os.path.exists(cfg.suite):
@@ -291,8 +301,12 @@ def main(cfg: TrainConfig) -> None:
         if not os.path.exists(cfg.endgame_set):
             raise FileNotFoundError(f"endgame set {cfg.endgame_set} not found: build it with tools/endgame.py build, or pass --endgame_set ''")
         es = EndgameSet.load(cfg.endgame_set)
-        print(f"evaluation: exact endgame set {cfg.endgame_set} ({es.n} positions)", flush=True)
-    labeler = ExactLabeler(cfg.exact_processes, cfg.exact_max_empty, cfg.exact_per_iter, seed=cfg.seed) if cfg.exact_max_empty > 0 else None
+        if es.rule != cfg.rule:
+            raise ValueError(f"endgame set {cfg.endgame_set} was solved under rule {es.rule!r}, this run trains under "
+                             f"{cfg.rule!r}: build a {cfg.rule}-rule set with tools/endgame.py build --rule {cfg.rule}")
+        print(f"evaluation: exact endgame set {cfg.endgame_set} ({es.n} positions, rule {es.rule})", flush=True)
+    labeler = (ExactLabeler(cfg.exact_processes, cfg.exact_max_empty, cfg.exact_per_iter, seed=cfg.seed, rule=cfg.rule)
+               if cfg.exact_max_empty > 0 else None)
     if labeler:
         print(f"exact labels: <= {cfg.exact_max_empty} empties, <= {cfg.exact_per_iter} positions/iteration, {cfg.exact_processes} workers, "
               f"weight x{cfg.exact_weight}, policy {'replaced' if cfg.exact_policy else 'kept'}", flush=True)
@@ -335,7 +349,7 @@ def main(cfg: TrainConfig) -> None:
         sims_now = max([cfg.sims] + [v for k, v in schedule if it >= k])
         if sims_now != sp.search.cfg.n_sims:
             from dataclasses import replace
-            sp.search = BatchedSearch(fe, cfg.games, replace(scfg, n_sims=sims_now), device, generator=gens["selfplay"])
+            sp.search = BatchedSearch(fe, cfg.games, replace(scfg, n_sims=sims_now), device, generator=gens["selfplay"], rule=cfg.rule)
             print(f"iteration {it}: simulations per move -> {sims_now}", flush=True)
         t0 = time.perf_counter()
         sp.iteration = it

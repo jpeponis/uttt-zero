@@ -6,6 +6,9 @@ optimal-move rate, with confidence intervals from a cluster bootstrap over sourc
 
     uttt.endgame.build_set(...)  -> EndgameSet  (tools/endgame.py build)
     uttt.endgame.evaluate(...)   -> dict        (tools/endgame.py eval)
+
+A set is built under one terminal rule and records it in meta["rule"] (sets built before PLAN7 K1
+read back as "count", which is what they are); evaluate() refuses a rule the set was not solved for.
 """
 from __future__ import annotations
 
@@ -14,6 +17,7 @@ import json
 import os
 import time
 from dataclasses import dataclass
+from functools import partial
 from multiprocessing import Pool
 
 import numpy as np
@@ -21,6 +25,7 @@ import torch
 
 from .batch import apply_symmetry, encode
 from .game import UTTT
+from .rules import check_rule
 from .solver import ILLEGAL, empties_in_open_boards, solve_children  # noqa: F401  (solve_children re-exported)
 
 BUCKETS = ((6, 9), (10, 12), (13, 14), (15, 16))
@@ -34,7 +39,8 @@ def bucket_of(e: int) -> int:
 
 
 # ---- candidate positions with provenance -----------------------------------------------------
-def collect_candidates(files: list[str], per_game: int, min_empty: int, max_empty: int, rng: np.random.Generator) -> dict:
+def collect_candidates(files: list[str], per_game: int, min_empty: int, max_empty: int, rng: np.random.Generator,
+                       rule: str = "count") -> dict:
     """Replay persisted games; keep up to `per_game` random positions per game whose empties in open boards
     lie in [min_empty, max_empty]. Positions carry (file index, game row, ply) as provenance."""
     cols = {k: [] for k in ("cells", "macro", "next_board", "player", "empties", "file", "game", "ply")}
@@ -43,7 +49,7 @@ def collect_candidates(files: list[str], per_game: int, min_empty: int, max_empt
         z = np.load(f)
         moves, lengths = z["moves"], z["lengths"]
         for k in range(len(lengths)):
-            g = UTTT()
+            g = UTTT(rule)
             found = []
             for t in range(int(lengths[k])):
                 e = empties_in_open_boards(g.cells, g.macro)
@@ -69,12 +75,12 @@ def collect_candidates(files: list[str], per_game: int, min_empty: int, max_empt
 
 
 # ---- exact labels ------------------------------------------------------------------------------
-def _solve_many(cands: dict, idx: np.ndarray, processes: int):
+def _solve_many(cands: dict, idx: np.ndarray, processes: int, rule: str = "count"):
     args = [(cands["cells"][i], cands["macro"][i], int(cands["next_board"][i]), int(cands["player"][i])) for i in idx]
     if processes <= 1:
-        return [solve_children(a) for a in args]
+        return [solve_children(a, rule) for a in args]
     with Pool(processes) as pool:
-        return pool.map(solve_children, args, chunksize=8)
+        return pool.map(partial(solve_children, rule=rule), args, chunksize=8)
 
 
 @dataclass
@@ -94,6 +100,11 @@ class EndgameSet:
     def n(self) -> int:
         return int(self.cells.shape[0])
 
+    @property
+    def rule(self) -> str:
+        """The terminal rule the exact labels were solved under (pre-K1 sets are count-rule sets)."""
+        return self.meta.get("rule", "count")
+
     def save(self, path: str) -> None:
         os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
         np.savez_compressed(path, cells=self.cells, macro=self.macro, next_board=self.next_board, player=self.player,
@@ -105,6 +116,7 @@ class EndgameSet:
         z = np.load(path, allow_pickle=False)
         meta = json.loads(str(z["meta"]))
         meta["name"] = os.path.splitext(os.path.basename(path))[0]
+        meta.setdefault("rule", "count")  # every set built before PLAN7 K1 is a count-rule set
         return EndgameSet(z["cells"], z["macro"], z["next_board"], z["player"], z["exact"], z["child"], z["empties"],
                           z["game_id"], z["ply"], meta)
 
@@ -128,16 +140,18 @@ def split_games(cands: dict, split: str, split_seed: int = 0) -> np.ndarray:
 
 
 def build_set(corpus: str, last: int = 5, per_stratum: int = 125, per_game: int = 2, min_empty: int = 6, max_empty: int = 16,
-              max_solve: int = 15000, processes: int = 8, seed: int = 0, log=print, split: str = "", split_seed: int = 0) -> EndgameSet:
+              max_solve: int = 15000, processes: int = 8, seed: int = 0, log=print, split: str = "", split_seed: int = 0,
+              rule: str = "count") -> EndgameSet:
     """Balanced over BUCKETS × {win, draw, loss} × {X, O to move}: up to per_stratum positions each. Candidates are
     solved in random order until every stratum is full or max_solve positions have been solved. With split="dev" or
     "test", only candidates from that half of the source games are used (see split_games)."""
+    check_rule(rule)
     files = sorted(glob.glob(os.path.join(corpus, "games", "games_*.npz")))
     if last:
         files = files[-last:]
     rng = np.random.default_rng(seed)
     t = time.perf_counter()
-    cands = collect_candidates(files, per_game, min_empty, max_empty, rng)
+    cands = collect_candidates(files, per_game, min_empty, max_empty, rng, rule)
     K_all = len(cands["empties"])
     if split:
         keep = split_games(cands, split, split_seed)
@@ -154,7 +168,7 @@ def build_set(corpus: str, last: int = 5, per_stratum: int = 125, per_game: int 
     for start in range(0, min(K, max_solve), 1000):
         idx = order[start : start + 1000]
         idx = idx[[bucket_of(int(cands["empties"][i])) >= 0 for i in idx]]
-        for i, (v, child) in zip(idx, _solve_many(cands, idx, processes)):
+        for i, (v, child) in zip(idx, _solve_many(cands, idx, processes, rule)):
             labels[i] = (v, child)
             s = bucket_of(int(cands["empties"][i])) * 6 + (1 - v) * 2 + int(cands["player"][i] == -1)
             if len(chosen[s]) < per_stratum:
@@ -169,7 +183,7 @@ def build_set(corpus: str, last: int = 5, per_stratum: int = 125, per_game: int 
     child = np.stack([labels[i][1] for i in sel])
     game_id = cands["file"][sel].astype(np.int64) * (1 << 20) + cands["game"][sel].astype(np.int64)
     counts = {f"{BUCKETS[b][0]}-{BUCKETS[b][1]}": [len(chosen[b * 6 + r * 2 + p]) for r in range(3) for p in range(2)] for b in range(len(BUCKETS))}
-    meta = {"corpus": corpus, "corpus_files": [os.path.basename(f) for f in files], "per_stratum": per_stratum, "per_game": per_game,
+    meta = {"corpus": corpus, "corpus_files": [os.path.basename(f) for f in files], "rule": rule, "per_stratum": per_stratum, "per_game": per_game,
             "min_empty": min_empty, "max_empty": max_empty, "seed": seed, "solved": solved, "built": time.strftime("%Y-%m-%d %H:%M"),
             "split": split or "none", "split_seed": split_seed, "candidates": int(K_all),
             "strata_counts (bucket -> [W_X, W_O, D_X, D_O, L_X, L_O])": counts}
@@ -251,13 +265,15 @@ def _row(es: EndgameSet, name: str, wdl: np.ndarray | None, scalar: np.ndarray |
 
 @torch.no_grad()
 def evaluate(fe, es: EndgameSet, device, sims=(32, 64, 256), n_boot: int = 2000, symmetrise: bool = True,
-             graph: bool = True, search_cache: dict | None = None) -> dict:
+             graph: bool = True, search_cache: dict | None = None, rule: str = "count") -> dict:
     """Score a FusedEvaluator (raw heads) and the v2 search at the given budgets on the set.
 
     search_cache: optional {sims: BatchedSearch} dict a repeated caller (train2.EvalKit) owns, so the
     search objects and their CUDA graphs are built once and reused instead of churned per call."""
     from .search import BatchedSearch, SearchConfig
 
+    if check_rule(rule) != es.rule:
+        raise ValueError(f"endgame set {es.meta.get('name')} was solved under rule {es.rule!r}; cannot evaluate under {rule!r}")
     cells, macro, nb, player = _tensors(es, device)
     n = es.n
     done = torch.zeros(n, dtype=torch.bool, device=device)
@@ -273,19 +289,19 @@ def evaluate(fe, es: EndgameSet, device, sims=(32, 64, 256), n_boot: int = 2000,
         bs = search_cache.get(s) if search_cache is not None else None
         if bs is None:
             scfg = SearchConfig(n_sims=s, mode="gumbel", gumbel_scale=0.0, cuda_graph=graph and device.type == "cuda", depth_cap=min(s, 24))
-            bs = BatchedSearch(fe, n, scfg, device)
+            bs = BatchedSearch(fe, n, scfg, device, rule=rule)
             if search_cache is not None:
                 search_cache[s] = bs
         r = bs.search(cells, macro, nb, player, done, winner, selfplay=False)
         rows.append(_row(es, f"search {s} sims", None, r.root_value.cpu().numpy(), r.action.cpu().numpy(), n_boot))
-    return {"rows": rows, "n": n}
+    return {"rows": rows, "n": n, "rule": rule}
 
 
 def evaluate_rollout(player_fn, es: EndgameSet, n_boot: int = 2000) -> dict:
     """Score an arbitrary batch player (e.g. RolloutPlayer) on action regret; player_fn(BatchUTTT) -> moves."""
     from .batch import BatchUTTT
 
-    g = BatchUTTT(es.n, "cpu")
+    g = BatchUTTT(es.n, "cpu", es.rule)
     g.cells[:] = torch.from_numpy(es.cells)
     g.macro[:] = torch.from_numpy(es.macro)
     g.next_board[:] = torch.from_numpy(es.next_board)

@@ -5,7 +5,9 @@ its strength is a fixed function of the playouts per move, so it is an external 
     RolloutPlayer(playouts=100_000).act(batch)   # one move per unfinished game, games in parallel threads
 
 Rules are re-implemented on 9-bit local boards (bit = cell, macro masks for X-won / O-won / full);
-tests/test_rollout.py checks them move by move against uttt.game. Tree: one node per playout,
+tests/test_rollout.py checks them move by move against uttt.game. The terminal rule ("count" or
+"draw", uttt.rules) is an explicit argument, carried into the Numba kernels as a boolean flag, so
+this anchor plays the same game as the net it is measured against. Tree: one node per playout,
 children as linked lists, untried moves as an 81-bit mask; rewards in [0, 1] from the mover's
 perspective; final move = most visited root child; no tree reuse between moves.
 """
@@ -16,6 +18,8 @@ import math
 import numpy as np
 import torch
 from numba import njit, prange
+
+from .rules import check_rule
 
 # state layout (int64 array of length LEN)
 MX, MO, MF, NB, PL, WN, DN, LEN = 18, 19, 20, 21, 22, 23, 24, 25  # [0:9] X boards, [9:18] O boards
@@ -59,7 +63,7 @@ def _popcount(v):
 
 
 @njit(cache=True)
-def _apply(st, m):
+def _apply(st, m, draw_rule):
     """Play move m for the side to move; sets DN/WN when the game ends."""
     b = m // 9
     c = m - 9 * b
@@ -81,10 +85,12 @@ def _apply(st, m):
         st[MF] |= 1 << b
     closed = st[MX] | st[MO] | st[MF]
     if st[DN] == 0 and closed == FULL9:
-        x = _popcount(st[MX])
-        o = _popcount(st[MO])
         st[DN] = 1
-        st[WN] = 1 if x > o else (-1 if x < o else 0)
+        st[WN] = 0  # the "draw" rule stops here
+        if not draw_rule:
+            x = _popcount(st[MX])
+            o = _popcount(st[MO])
+            st[WN] = 1 if x > o else (-1 if x < o else 0)
     st[NB] = c if ((closed >> c) & 1) == 0 else -1
     st[PL] = -p
 
@@ -152,7 +158,7 @@ def _pop_random(LO, HI, node):
 
 
 @njit(cache=True)
-def _uct_search(root, n_playouts, c_uct, seed):
+def _uct_search(root, n_playouts, c_uct, seed, draw_rule):
     """Returns (best move, its win rate for the root player, root child visit counts over 81 moves)."""
     np.random.seed(seed)
     M = n_playouts + 2
@@ -182,7 +188,7 @@ def _uct_search(root, n_playouts, c_uct, seed):
                 PAR[child] = node
                 NEXT[child] = FIRST[node]
                 FIRST[node] = child
-                _apply(st, m)
+                _apply(st, m, draw_rule)
                 LO[child], HI[child] = _mask_of(buf, _legal(st, buf))
                 node = child
                 break
@@ -196,11 +202,11 @@ def _uct_search(root, n_playouts, c_uct, seed):
                     best_u = u
                     best = ch
                 ch = NEXT[ch]
-            _apply(st, MV[best])
+            _apply(st, MV[best], draw_rule)
             node = best
         while st[DN] == 0:  # random playout
             n = _legal(st, buf)
-            _apply(st, buf[np.random.randint(n)])
+            _apply(st, buf[np.random.randint(n)], draw_rule)
         r = 1.0 if st[WN] == 1 else (0.0 if st[WN] == -1 else 0.5)  # X's reward
         while node >= 0:
             N[node] += 1
@@ -223,10 +229,10 @@ def _uct_search(root, n_playouts, c_uct, seed):
 
 
 @njit(parallel=True, cache=True)
-def _search_batch(states, active, n_playouts, c_uct, seeds, moves, values):
+def _search_batch(states, active, n_playouts, c_uct, seeds, moves, values, draw_rule):
     for g in prange(states.shape[0]):
         if active[g]:
-            m, v, _ = _uct_search(states[g], n_playouts, c_uct, seeds[g])
+            m, v, _ = _uct_search(states[g], n_playouts, c_uct, seeds[g], draw_rule)
             moves[g] = m
             values[g] = v
 
@@ -235,10 +241,11 @@ class RolloutPlayer:
     """Batch player for uttt.arena / uttt.openings: one independent UCT search per unfinished game,
     games spread over all CPU threads. `playouts` sets the strength; results are reproducible for a seed."""
 
-    def __init__(self, playouts: int = 100_000, c_uct: float = 1.4, seed: int = 0) -> None:
+    def __init__(self, playouts: int = 100_000, c_uct: float = 1.4, seed: int = 0, rule: str = "count") -> None:
         self.playouts = playouts
         self.c_uct = c_uct
         self.seed = seed
+        self.rule = check_rule(rule)
         self.calls = 0
         self.last_values = None
 
@@ -250,13 +257,14 @@ class RolloutPlayer:
         seeds = (np.arange(G, dtype=np.int64) * 1_000_003 + self.calls * 7919 + self.seed) & 0x7FFFFFFF
         moves = np.zeros(G, dtype=np.int64)
         values = np.zeros(G, dtype=np.float64)
-        _search_batch(states, ~done, self.playouts, self.c_uct, seeds, moves, values)
+        _search_batch(states, ~done, self.playouts, self.c_uct, seeds, moves, values, self.rule == "draw")
         self.calls += 1
         self.last_values = values
         return torch.from_numpy(np.maximum(moves, 0)).to(g.cells.device)
 
 
-def search_position(cells, macro, next_board, player, playouts: int = 100_000, c_uct: float = 1.4, seed: int = 0):
+def search_position(cells, macro, next_board, player, playouts: int = 100_000, c_uct: float = 1.4, seed: int = 0,
+                    rule: str = "count"):
     """Single-position convenience: (best move, win rate for the mover, visits over 81 moves)."""
     st = encode_states(np.asarray(cells)[None], np.asarray(macro)[None], np.array([next_board]), np.array([player]))[0]
-    return _uct_search(st, playouts, c_uct, seed)
+    return _uct_search(st, playouts, c_uct, seed, check_rule(rule) == "draw")

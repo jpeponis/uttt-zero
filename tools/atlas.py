@@ -32,6 +32,7 @@ from uttt.game import UTTT  # noqa: E402
 from uttt.infer import FusedEvaluator  # noqa: E402
 from uttt.model import load_checkpoint  # noqa: E402
 from uttt.openings import canonical, orbit_representatives, reply_orbits  # noqa: E402
+from uttt.rules import RULES, tag_path  # noqa: E402
 from uttt.search import BatchedSearch, SearchConfig  # noqa: E402
 from uttt.symmetry import SymmetryAveragedEvaluator  # noqa: E402
 
@@ -80,18 +81,18 @@ def principal_variations(s: BatchedSearch, max_len: int = 10) -> list[list[int]]
     return out
 
 
-def deep_values(ev, seqs: list[list[int]], sims: int, device, want_pv: bool = False):
+def deep_values(ev, seqs: list[list[int]], sims: int, device, want_pv: bool = False, rule: str = "count"):
     """Search value for X after each move sequence (X's perspective); optionally the PV and the root's
     reply-orbit gap (visit-weighted Q of the most-visited reply orbit minus that of the second most visited
     distinct orbit, mover's perspective; nan when only one orbit was visited)."""
     n = len(seqs)
     assert len({len(s) for s in seqs}) == 1, "one call = sequences of equal length"
-    g = BatchUTTT(n, device)
+    g = BatchUTTT(n, device, rule)
     for t in range(len(seqs[0])):
         g.step(torch.tensor([s[t] for s in seqs], device=device))
     cfg = SearchConfig(n_sims=sims, mode="puct", c_puct=1.25, root_prior_floor=0.0, gumbel_scale=0.0, m_considered=81,
                        cuda_graph=device.type == "cuda", depth_cap=40)
-    s = BatchedSearch(ev, n, cfg, device)
+    s = BatchedSearch(ev, n, cfg, device, rule=rule)
     r = s.search(g.cells, g.macro, g.next_board, g.player, g.done, g.winner, selfplay=False)
     sign = torch.where(g.player == 1, 1.0, -1.0)
     vals = (r.root_value * sign).cpu().numpy()
@@ -145,6 +146,7 @@ def main() -> None:
     ap.add_argument("--budgets", default="1024,4096,16384")
     ap.add_argument("--device", default="cuda:1")
     ap.add_argument("--no_sym", action="store_true")
+    ap.add_argument("--rule", choices=RULES, default="count", help="terminal rule the searches run under")
     ap.add_argument("--out", default="runs/atlas.json")
     ap.add_argument("--report", default="", help="re-read a saved atlas JSON and print the reply-orbit gaps and ranges (no search)")
     a = ap.parse_args()
@@ -167,10 +169,10 @@ def main() -> None:
         ev = fe if a.no_sym else SymmetryAveragedEvaluator(fe)
         for b in budgets:
             if b == budgets[-1]:
-                V1[(nm, b)], pvs[nm], gaps[nm] = deep_values(ev, first, b, device, want_pv=True)
+                V1[(nm, b)], pvs[nm], gaps[nm] = deep_values(ev, first, b, device, want_pv=True, rule=a.rule)
             else:
-                V1[(nm, b)] = deep_values(ev, first, b, device)
-            V2[(nm, b)] = deep_values(ev, reply_seqs, b, device)
+                V1[(nm, b)] = deep_values(ev, first, b, device, rule=a.rule)
+            V2[(nm, b)] = deep_values(ev, reply_seqs, b, device, rule=a.rule)
             print(f"{nm} @{b}: done ({time.perf_counter() - t0:.0f}s)", flush=True)
     cols = list(V1)
     print(f"\nPrincipal variations after each first move at {budgets[-1]} sims (O's reply first) and the root reply-orbit gap (Q of the most-visited orbit - Q of the second):")
@@ -208,12 +210,13 @@ def main() -> None:
               + f"   agreement {agree:.2f}")
         off += k
     print(f"mean best-reply agreement with {ref[0]}@{ref[1]}: {np.mean(agree_all):.2f}")
-    rec = {"nets": nets, "budgets": budgets, "first_moves": reps, "values_first": {f"{nm}@{b}": V1[(nm, b)].tolist() for nm, b in cols},
+    rec = {"rule": a.rule, "nets": nets, "budgets": budgets, "first_moves": reps, "values_first": {f"{nm}@{b}": V1[(nm, b)].tolist() for nm, b in cols},
            "replies": {str(m): replies[m] for m in reps}, "values_replies": {f"{nm}@{b}": V2[(nm, b)].tolist() for nm, b in cols},
            "kendall_first": {f"{c1[0]}@{c1[1]}|{c2[0]}@{c2[1]}": kendall_tau(V1[c1], V1[c2]) for c1 in cols for c2 in cols}}
-    with open(a.out, "w") as f:
+    out = tag_path(a.out, a.rule)
+    with open(out, "w") as f:
         json.dump(rec, f, indent=1)
-    print(f"wrote {a.out}  [{time.perf_counter() - t0:.0f}s]")
+    print(f"wrote {out}  [{time.perf_counter() - t0:.0f}s]")
 
 
 if __name__ == "__main__":

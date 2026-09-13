@@ -14,6 +14,8 @@ from __future__ import annotations
 import torch
 import torch.nn.functional as F
 
+from .rules import check_rule
+
 FULL = 2
 N_PLANES = 7  # base encoding
 N_PLANES_EXTRA = 9  # + first-player plane + won-board count difference (encode(..., extra=True))
@@ -93,9 +95,10 @@ def consts(device) -> dict:
 
 
 class BatchUTTT:
-    def __init__(self, n: int, device: torch.device | str = "cpu") -> None:
+    def __init__(self, n: int, device: torch.device | str = "cpu", rule: str = "count") -> None:
         self.n = n
         self.device = torch.device(device)
+        self.rule = check_rule(rule)
         d = self.device
         self.cells = torch.zeros(n, 81, dtype=torch.int8, device=d)
         self.macro = torch.zeros(n, 9, dtype=torch.int8, device=d)
@@ -111,7 +114,7 @@ class BatchUTTT:
     # ---- state management ------------------------------------------------
     def clone(self) -> "BatchUTTT":
         g = BatchUTTT.__new__(BatchUTTT)
-        g.n, g.device, g._lines, g._idx = self.n, self.device, self._lines, self._idx
+        g.n, g.device, g.rule, g._lines, g._idx = self.n, self.device, self.rule, self._lines, self._idx
         for k in ("cells", "macro", "next_board", "player", "move_count", "done", "winner", "end_reason"):
             setattr(g, k, getattr(self, k).clone())
         return g
@@ -137,7 +140,7 @@ class BatchUTTT:
     def step(self, moves: torch.Tensor) -> None:
         """Apply one move per game (long tensor, shape (n,)). Finished games are untouched."""
         active = ~self.done
-        out = step_state(self.cells, self.macro, self.next_board, self.player, self.done, self.winner, moves)
+        out = step_state(self.cells, self.macro, self.next_board, self.player, self.done, self.winner, moves, self.rule)
         self.cells, self.macro, self.next_board, self.player, self.done, self.winner, reason = out
         self.move_count += active.to(torch.int16)
         self.end_reason = torch.where(active & self.done, reason, self.end_reason)
@@ -147,11 +150,12 @@ class BatchUTTT:
 
 
 # ---- functional forms (usable on stored replay / tree states) --------------
-def step_state(cells, macro, next_board, player, done, winner, moves):
+def step_state(cells, macro, next_board, player, done, winner, moves, rule: str = "count"):
     """Pure batched rules step. Returns new (cells, macro, next_board, player, done, winner, reason).
 
     reason is 0 unless the game ended on this step (1 line, 2 count, 3 draw).
-    Games with done=True are returned unchanged.
+    Games with done=True are returned unchanged. `rule` is "count" or "draw" (uttt.rules): under
+    "draw" a full macro grid with no macro line is a draw (winner 0, reason 3) whatever the count.
     """
     n = cells.shape[0]
     d = cells.device
@@ -177,7 +181,7 @@ def step_state(cells, macro, next_board, player, done, winner, moves):
     mline = (won_only[:, lines] == p.view(n, 1, 1)).all(-1).any(-1)
     all_closed = (macro != 0).all(1)
     diff = (macro == 1).sum(1) - (macro == -1).sum(1)
-    count_winner = torch.sign(diff).to(torch.int8)
+    count_winner = torch.sign(diff).to(torch.int8) if check_rule(rule) == "count" else torch.zeros_like(p)
     newly_done = active & (mline | all_closed)
     winner = torch.where(newly_done, torch.where(mline, p, count_winner), winner)
     reason = torch.where(mline, 1, torch.where(count_winner != 0, 2, 3)).to(torch.int8)

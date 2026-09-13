@@ -13,6 +13,10 @@ the solver's exact line where the position has <= --max_exact empties); exact_va
 split into train / test by source game. Layers: "input" (the encoded planes), "stem", "block01".. Metrics: test
 accuracy (with the majority-class baseline) for class labels, test R² for regressions. Report accuracy above the
 random-init control, never raw accuracy (PLAN5 §1c). Writes <run>/probes[_mlp].json.
+
+--rule count|draw on `build` is the terminal rule the game result (z), the search labels and the exact labels
+are computed under; it is recorded in the dataset's meta and tags its file name. `fit` takes no --rule: it runs
+no search and decides no terminal value, so it reads the rule off the dataset and tags its own output with it.
 """
 from __future__ import annotations
 
@@ -22,6 +26,7 @@ import json
 import os
 import sys
 import time
+from functools import partial
 from multiprocessing import Pool
 
 import numpy as np
@@ -37,6 +42,7 @@ from uttt.concepts import CONCEPTS, concept_labels  # noqa: E402
 from uttt.game import FULL, UTTT  # noqa: E402
 from uttt.infer import FusedEvaluator  # noqa: E402
 from uttt.model import NetConfig, ResNet, load_checkpoint  # noqa: E402
+from uttt.rules import RULES, tag_path  # noqa: E402
 from uttt.search import BatchedSearch, SearchConfig  # noqa: E402
 from uttt.solver import empties_in_open_boards, solve_children  # noqa: E402
 
@@ -49,8 +55,11 @@ LABELS.update({"z": ("class:3", "final result for the mover: loss / draw / win")
 
 
 # ---- build ---------------------------------------------------------------------------------------
-def sample_games(files, per_game, ply_hi, n_max, rng):
-    """Positions with provenance and the source game's end (final macro, winner). ≤ per_game positions per game."""
+def sample_games(files, per_game, ply_hi, n_max, rng, rule="count"):
+    """Positions with provenance and the source game's end (final macro, winner). ≤ per_game positions per game.
+
+    The games are replayed on the reference engine under `rule`, so the z / final-ownership labels of a
+    count-rule corpus read under "draw" are that corpus's games as the draw rule scores them."""
     rows = []
     gid = 0
     for f in files:
@@ -60,7 +69,7 @@ def sample_games(files, per_game, ply_hi, n_max, rng):
             L = int(lengths[k])
             plies = list(range(0, min(ply_hi, L - 1) + 1))
             want = set(rng.choice(plies, size=min(per_game, len(plies)), replace=False).tolist())
-            g = UTTT()
+            g = UTTT(rule)
             snaps = []
             for t in range(L):
                 if t in want:
@@ -74,20 +83,20 @@ def sample_games(files, per_game, ply_hi, n_max, rng):
     return rows
 
 
-def exact_pv3(args):
+def exact_pv3(args, rule="count"):
     """(cells, macro, nb, player) -> (exact value, best move now, best move two plies on or -1) by greedy exact play."""
     cells, macro, nb, player = args
-    g = UTTT()
+    g = UTTT(rule)
     g.cells[:], g.macro[:], g.next_board, g.player = cells, macro, int(nb), int(player)
     g.move_count = int((g.cells != 0).sum())
-    v, ch = solve_children((g.cells, g.macro, g.next_board, g.player))
+    v, ch = solve_children((g.cells, g.macro, g.next_board, g.player), rule)
     m0 = int(np.flatnonzero(ch == ch.max())[0])
     line = [m0]
     for _ in range(2):
         g.play(line[-1])
         if g.done:
             break
-        _, ch = solve_children((g.cells, g.macro, g.next_board, g.player))
+        _, ch = solve_children((g.cells, g.macro, g.next_board, g.player), rule)
         line.append(int(np.flatnonzero(ch == ch.max())[0]))
     return int(v), m0, (line[2] if len(line) == 3 else -1)
 
@@ -98,7 +107,7 @@ def cmd_build(a) -> None:
     t0 = time.perf_counter()
     files = sorted(glob.glob(os.path.join(a.corpus, "games", "games_*.npz")))[-a.last :]
     rng = np.random.default_rng(a.seed)
-    rows = sample_games(files, a.per_game, a.ply_hi, a.n_train + a.n_test, rng)
+    rows = sample_games(files, a.per_game, a.ply_hi, a.n_train + a.n_test, rng, a.rule)
     N = len(rows)
     gid = np.array([r[0] for r in rows])
     ply = np.array([r[1] for r in rows], dtype=np.int16)
@@ -124,12 +133,12 @@ def cmd_build(a) -> None:
     for i in range(0, N, bs):
         sl = slice(i, min(i + bs, N))
         n = sl.stop - sl.start
-        g = BatchUTTT(n, device)
+        g = BatchUTTT(n, device, a.rule)
         g.cells[:] = torch.from_numpy(cells[sl]).to(device)
         g.macro[:] = torch.from_numpy(macro[sl]).to(device)
         g.next_board[:] = torch.from_numpy(nb[sl]).to(device)
         g.player[:] = torch.from_numpy(player[sl]).to(device)
-        s = BatchedSearch(fe, n, SearchConfig(n_sims=a.sims, mode="gumbel", gumbel_scale=0.0, cuda_graph=device.type == "cuda", depth_cap=min(a.sims, 24)), device)
+        s = BatchedSearch(fe, n, SearchConfig(n_sims=a.sims, mode="gumbel", gumbel_scale=0.0, cuda_graph=device.type == "cuda", depth_cap=min(a.sims, 24)), device, rule=a.rule)
         r = s.search(g.cells, g.macro, g.next_board, g.player, g.done, g.winner, selfplay=False)
         pvs = principal_variations(s, 3)
         now[sl] = r.action.cpu().numpy()
@@ -139,16 +148,17 @@ def cmd_build(a) -> None:
     ex = np.flatnonzero(empt <= a.max_exact)
     exact = np.full(N, -1, dtype=np.int64)
     with Pool(a.processes) as pool:
-        res = pool.map(exact_pv3, [(cells[i], macro[i], nb[i], player[i]) for i in ex], chunksize=16)
+        res = pool.map(partial(exact_pv3, rule=a.rule), [(cells[i], macro[i], nb[i], player[i]) for i in ex], chunksize=16)
     for i, (v, m0, m2) in zip(ex, res):
         exact[i], now[i], ply2[i] = v + 1, m0, m2
     lab.update(best_move_now=now, best_move_ply2=ply2, exact_value=exact)
     print(f"exact labels for {len(ex)} positions with <= {a.max_exact} empties [{time.perf_counter() - t0:.0f}s]", flush=True)
-    meta = {"corpus": a.corpus, "files": [os.path.basename(f) for f in files], "net": a.net, "sims": a.sims, "max_exact": a.max_exact,
-            "per_game": a.per_game, "ply_hi": a.ply_hi, "seed": a.seed, "labels": LABELS}
-    np.savez_compressed(a.out, cells=cells, macro=macro, next_board=nb, player=player, ply=ply, game_id=gid, split=split, empties=empt,
+    meta = {"corpus": a.corpus, "files": [os.path.basename(f) for f in files], "net": a.net, "rule": a.rule, "sims": a.sims,
+            "max_exact": a.max_exact, "per_game": a.per_game, "ply_hi": a.ply_hi, "seed": a.seed, "labels": LABELS}
+    out = tag_path(a.out, a.rule)
+    np.savez_compressed(out, cells=cells, macro=macro, next_board=nb, player=player, ply=ply, game_id=gid, split=split, empties=empt,
                         meta=np.array(json.dumps(meta)), **{"label_" + k: v for k, v in lab.items()})
-    print(f"wrote {a.out}: {N} positions, {len(lab)} labels  [{time.perf_counter() - t0:.0f}s]")
+    print(f"wrote {out}: {N} positions, {len(lab)} labels, rule {a.rule}  [{time.perf_counter() - t0:.0f}s]")
 
 
 # ---- fit -----------------------------------------------------------------------------------------
@@ -292,12 +302,14 @@ def cmd_fit(a) -> None:
     layers = ["input", "stem"] + [f"block{i + 1:02d}" for i in range(nets[0][1].cfg.blocks)]
     if a.layers:
         layers = [l for l in layers if l in a.layers.split(",")]
-    out_path = a.out or os.path.join(a.run, "probes_mlp.json" if a.hidden else "probes.json")
-    result = {"meta": {"data": a.data, "data_meta": {k: v for k, v in meta.items() if k != "labels"}, "run": a.run, "hidden": a.hidden, "epochs": a.epochs,
+    data_rule = meta.get("rule", "count")  # fit runs no search and decides no terminal value: the rule is the dataset's
+    out_path = tag_path(a.out or os.path.join(a.run, "probes_mlp.json" if a.hidden else "probes.json"), data_rule)
+    result = {"meta": {"data": a.data, "rule": data_rule, "data_meta": {k: v for k, v in meta.items() if k != "labels"}, "run": a.run,
+                       "hidden": a.hidden, "epochs": a.epochs,
                        "layers": layers, "labels": {k: v[1] for k, v in specs.items()}, "kinds": {k: v[0] for k, v in specs.items()},
                        "n_train": int((split == 0).sum()), "n_test": int((split == 1).sum())}, "checkpoints": {}}
-    print(f"{a.data}: {len(split)} positions ({result['meta']['n_train']} train / {result['meta']['n_test']} test), {len(specs)} labels; "
-          f"{len(nets)} nets x {len(layers)} layers; probe hidden={a.hidden}", flush=True)
+    print(f"{a.data}: {len(split)} positions ({result['meta']['n_train']} train / {result['meta']['n_test']} test), {len(specs)} labels, "
+          f"rule {data_rule}; {len(nets)} nets x {len(layers)} layers; probe hidden={a.hidden}", flush=True)
     for it, net in nets:
         rec = {"ownership_head_acc": ownership_head_accuracy(net, cells, macro, nb, player, labels, split, device), "layers": {}}
         for layer in layers:
@@ -329,6 +341,8 @@ def main() -> None:
     b.add_argument("--max_exact", type=int, default=14)
     b.add_argument("--processes", type=int, default=12)
     b.add_argument("--seed", type=int, default=0)
+    b.add_argument("--rule", choices=RULES, default="count", help="terminal rule the z, search and exact labels are built under; "
+                   "a non-count rule tags the output file name")
     b.add_argument("--device", default="cuda:1")
     b.add_argument("--out", required=True)
     f = sub.add_parser("fit")

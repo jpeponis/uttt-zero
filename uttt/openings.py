@@ -261,9 +261,9 @@ def build_suite(corpus: str, n_natural: int = 250, n_random: int = 250, plies: i
 
 # ---- paired play --------------------------------------------------------------------------
 @torch.no_grad()
-def play_openings(px, po, suite: Suite, device) -> BatchUTTT:
+def play_openings(px, po, suite: Suite, device, rule: str = "count") -> BatchUTTT:
     """One game per opening, px as X and po as O; the opening moves are scripted, then the players move."""
-    g = BatchUTTT(suite.n, device)
+    g = BatchUTTT(suite.n, device, rule)
     scripted = torch.from_numpy(suite.moves.astype(np.int64)).to(device)
     lens = torch.from_numpy(suite.lengths).to(device)
     ply = 0
@@ -286,20 +286,21 @@ class PairedResult:
     reason_ao: np.ndarray
     len_ax: np.ndarray
     len_ao: np.ndarray
+    rule: str = "count"  # the rule these games were played under
 
     @property
     def pair_score(self) -> np.ndarray:
         return 0.5 * (self.score_ax + self.score_ao)
 
 
-def play_paired(pa, pb, suite: Suite, device) -> PairedResult:
+def play_paired(pa, pb, suite: Suite, device, rule: str = "count") -> PairedResult:
     """pa / pb: players (objects with .act(BatchUTTT)) built for batch size suite.n."""
-    g1 = play_openings(pa, pb, suite, device)
-    g2 = play_openings(pb, pa, suite, device)
+    g1 = play_openings(pa, pb, suite, device, rule)
+    g2 = play_openings(pb, pa, suite, device, rule)
     w1 = g1.winner.cpu().numpy().astype(np.float64)
     w2 = g2.winner.cpu().numpy().astype(np.float64)
     return PairedResult(suite, (1 + w1) / 2, (1 - w2) / 2, g1.end_reason.cpu().numpy(), g2.end_reason.cpu().numpy(),
-                        g1.move_count.cpu().numpy(), g2.move_count.cpu().numpy())
+                        g1.move_count.cpu().numpy(), g2.move_count.cpu().numpy(), rule)
 
 
 # ---- statistics ---------------------------------------------------------------------------
@@ -336,7 +337,7 @@ def _stats(r: PairedResult, m: np.ndarray, n_boot: int) -> dict:
 
 
 def summarize(r: PairedResult, n_boot: int = 4000) -> dict:
-    out = {"overall": _stats(r, np.ones(r.suite.n, dtype=bool), n_boot), "suites": {}}
+    out = {"rule": r.rule, "overall": _stats(r, np.ones(r.suite.n, dtype=bool), n_boot), "suites": {}}
     for s in SUITES:
         m = r.suite.names == s
         if m.any():
@@ -357,7 +358,8 @@ def format_report(summary: dict) -> str:
         lines.append(row(s, d))
     o = summary["overall"]
     lines.append(row("all", o))
-    lines.append(f"  end reasons: line {100 * o['end_line']:.1f}%  count {100 * o['end_count']:.1f}%  equal {100 * o['end_equal']:.1f}%  |  mean length {o['mean_len']:.1f}")
+    lines.append(f"  end reasons: line {100 * o['end_line']:.1f}%  count {100 * o['end_count']:.1f}%  equal {100 * o['end_equal']:.1f}%  |  "
+                 f"mean length {o['mean_len']:.1f}  |  rule {summary.get('rule', 'count')}")
     return "\n".join(lines)
 
 

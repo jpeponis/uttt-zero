@@ -11,6 +11,10 @@
 3. What drawn games look like: from a corpus's last N files, the final macro of every game that ended by equal
    count: boards won by each side, boards full, and how many draws had the count settled (no open board could
    change it) some plies before the end.
+
+--rule count|draw is the rule everything here is read under. The probe dataset's own rule (its exact labels)
+must match it; the corpus is relabelled mechanically the way tools/corpus_stats.py does (PLAN7 §5 K1), so
+under "draw" the draw anatomy is the anatomy of every no-line ending, 5-3 counts included.
 """
 from __future__ import annotations
 
@@ -23,16 +27,19 @@ import sys
 import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.dirname(__file__))
+from corpus_stats import corpus_rule, relabel  # noqa: E402
 from uttt.concepts import concept_labels  # noqa: E402
 from uttt.game import FULL, LINES, UTTT  # noqa: E402
+from uttt.rules import RULES, tag_path  # noqa: E402
 
 
-def play_all(cells, macro, nb, player, moves):
+def play_all(cells, macro, nb, player, moves, rule="count"):
     """Play one move per position on the reference engine; returns the child state arrays."""
     N = len(moves)
     out = [np.zeros((N, 81), np.int8), np.zeros((N, 9), np.int8), np.zeros(N, np.int8), np.zeros(N, np.int8), np.zeros(N, bool), np.zeros(N, np.int8)]
     for i in range(N):
-        g = UTTT()
+        g = UTTT(rule)
         g.cells[:], g.macro[:], g.next_board, g.player = cells[i], macro[i], int(nb[i]), int(player[i])
         g.move_count = int((g.cells != 0).sum())
         g.play(int(moves[i]))
@@ -40,11 +47,11 @@ def play_all(cells, macro, nb, player, moves):
     return out
 
 
-def claim_sending(z) -> dict:
+def claim_sending(z, rule: str = "count") -> dict:
     cells, macro, nb, player = z["cells"], z["macro"], z["next_board"], z["player"]
     best = z["label_best_move_now"]
     N = len(best)
-    c_cells, c_macro, c_nb, c_player, c_done, c_winner = play_all(cells, macro, nb, player, best)
+    c_cells, c_macro, c_nb, c_player, c_done, c_winner = play_all(cells, macro, nb, player, best, rule)
     alive = ~c_done
     lab = concept_labels(c_cells[alive], c_macro[alive], c_nb[alive], c_player[alive])  # from the opponent's (new mover's) view
     sent_winnable = lab["local_win_now"].astype(bool)  # the opponent can win a board at once
@@ -53,11 +60,11 @@ def claim_sending(z) -> dict:
     rng = np.random.default_rng(0)
     rand = np.zeros(N, np.int64)
     for i in range(N):
-        g = UTTT()
+        g = UTTT(rule)
         g.cells[:], g.macro[:], g.next_board, g.player = cells[i], macro[i], int(nb[i]), int(player[i])
         g.move_count = int((g.cells != 0).sum())
         rand[i] = int(rng.choice(g.legal_moves()))
-    r_cells, r_macro, r_nb, r_player, r_done, _ = play_all(cells, macro, nb, player, rand)
+    r_cells, r_macro, r_nb, r_player, r_done, _ = play_all(cells, macro, nb, player, rand, rule)
     r_alive = ~r_done
     r_lab = concept_labels(r_cells[r_alive], r_macro[r_alive], r_nb[r_alive], r_player[r_alive])
     r_sent = r_lab["local_win_now"].astype(bool)
@@ -83,17 +90,18 @@ def claim_sending(z) -> dict:
             "solved positions": int(solved.sum())}
 
 
-def claim_draws(corpus: str, last: int, max_games: int = 20000) -> dict:
+def claim_draws(corpus: str, last: int, max_games: int = 20000, rule: str = "count") -> dict:
     files = sorted(glob.glob(os.path.join(corpus, "games", "games_*.npz")))[-last:]
     moves, winners, lengths, reasons = [], [], [], []
     for f in files:
         zz = np.load(f)
         moves.append(zz["moves"]); winners.append(zz["winners"]); lengths.append(zz["lengths"]); reasons.append(zz["reasons"])
     moves, winners, lengths, reasons = map(np.concatenate, (moves, winners, lengths, reasons))
+    winners, reasons, relabelled = relabel(winners, reasons, corpus_rule(corpus), rule)
     draws = np.flatnonzero(winners == 0)[:max_games]
     finals, lead_changes = [], []
     for k in draws:
-        g = UTTT()
+        g = UTTT(rule)
         L = int(lengths[k])
         lead, changes = 0, 0
         for t in range(L):
@@ -111,6 +119,7 @@ def claim_draws(corpus: str, last: int, max_games: int = 20000) -> dict:
         combos[f"X{x}-O{o}-full{f}"] = combos.get(f"X{x}-O{o}-full{f}", 0) + 1
     top = sorted(combos.items(), key=lambda kv: -kv[1])[:6]
     return {"games": int(len(winners)), "draws": int(len(draws)), "draw share": float((winners == 0).mean()),
+            "rule": rule, "corpus rule": corpus_rule(corpus), "games relabelled from a count decision": relabelled,
             "mean boards each side": float(finals[:, 0].mean()), "mean full boards": float(finals[:, 2].mean()),
             "most common final counts (X boards - O boards - full)": {k: v / len(draws) for k, v in top},
             "board-count lead changed hands during the game (share of draws)": float(np.mean(np.array(lead_changes) > 0)),
@@ -123,15 +132,21 @@ def main() -> None:
     ap.add_argument("--data", default="runs/probe_data_deep8late.npz")
     ap.add_argument("--corpus", default="runs/deep10_c1_300")
     ap.add_argument("--last", type=int, default=20)
+    ap.add_argument("--rule", choices=RULES, default="count", help="terminal rule everything is read under")
     ap.add_argument("--out", default="runs/principles.json")
     a = ap.parse_args()
     z = np.load(a.data)
     meta = json.loads(str(z["meta"]))
-    res = {"data": a.data, "search_net": meta["net"], "sending": claim_sending(z), "draws": claim_draws(a.corpus, a.last)}
+    data_rule = meta.get("rule", "count")  # pre-K1 probe datasets were built under count
+    if data_rule != a.rule:
+        sys.exit(f"{a.data} carries {data_rule}-rule exact labels; rebuild it with tools/probe.py build --rule {a.rule}")
+    res = {"rule": a.rule, "data": a.data, "search_net": meta["net"],
+           "sending": claim_sending(z, a.rule), "draws": claim_draws(a.corpus, a.last, rule=a.rule)}
     print(json.dumps(res, indent=1))
-    with open(a.out, "w") as f:
+    out = tag_path(a.out, a.rule)
+    with open(out, "w") as f:
         json.dump(res, f, indent=1)
-    print("wrote", a.out)
+    print("wrote", out)
 
 
 if __name__ == "__main__":

@@ -84,14 +84,15 @@ class SelfPlayStats:
 
 class ContinuousSelfPlay:
     def __init__(self, evaluator, n: int, cfg: SearchConfig, device, sym_hash: bool = False,
-                 generator: torch.Generator | None = None) -> None:
+                 generator: torch.Generator | None = None, rule: str = "count") -> None:
         self.n = n
         self.device = torch.device(device)
         self.sym_hash = sym_hash  # duplicate counting under D4 symmetry
         self.gen = generator  # the search's noise and move sampling draw from it (PLAN6 E4)
+        self.rule = rule  # the run's training rule: the games and the trees use it (uttt.rules)
         d = self.device
-        self.g = BatchUTTT(n, d)
-        self.search = BatchedSearch(evaluator, n, cfg, d, generator=generator)
+        self.g = BatchUTTT(n, d, rule)
+        self.search = BatchedSearch(evaluator, n, cfg, d, generator=generator, rule=rule)
         self.idx = torch.arange(n, device=d)
         self.len = torch.zeros(n, dtype=torch.long, device=d)
         self.st_cells = torch.zeros(n, MAX_PLY, 81, dtype=torch.int8, device=d)

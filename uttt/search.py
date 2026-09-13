@@ -31,6 +31,7 @@ import torch
 
 from .batch import legal_mask, step_state, terminal_value
 from .mcts import MCTSConfig, SearchResult, table_of_considered_visits
+from .rules import check_rule
 
 
 @dataclass
@@ -44,10 +45,12 @@ class SearchConfig(MCTSConfig):
 
 
 class BatchedSearch:
-    def __init__(self, evaluator, n: int, cfg: SearchConfig, device, generator: torch.Generator | None = None) -> None:
+    def __init__(self, evaluator, n: int, cfg: SearchConfig, device, generator: torch.Generator | None = None,
+                 rule: str = "count") -> None:
         self.eval = evaluator
         self.n = n
         self.cfg = cfg
+        self.rule = check_rule(rule)  # the rule the tree expands under (uttt.rules)
         self.device = torch.device(device)
         self.gen = generator  # None: torch's global generator (the pre-PLAN6 behaviour)
         d = self.device
@@ -177,7 +180,7 @@ class BatchedSearch:
         pp = self.s_player[idx, exp_parent]
         pd = self.s_done[idx, exp_parent]
         pw = self.s_winner[idx, exp_parent]
-        nc, nm, nn_, npl, nd, nw, _ = step_state(pc, pm, pn, pp, pd, pw, exp_action)
+        nc, nm, nn_, npl, nd, nw, _ = step_state(pc, pm, pn, pp, pd, pw, exp_action, self.rule)
         probs, value = self.eval(nc, nm, nn_, npl, nd)
         value = torch.where(nd, terminal_value(nw, npl, nd), value)
         nlegal = legal_mask(nc, nm, nn_, nd)

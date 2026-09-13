@@ -35,6 +35,7 @@ from uttt.endgame import EndgameSet, evaluate as endgame_evaluate  # noqa: E402
 from uttt.infer import FusedEvaluator  # noqa: E402
 from uttt.model import load_checkpoint  # noqa: E402
 from uttt.openings import Suite, play_paired, summarize  # noqa: E402
+from uttt.rules import RULES, tag_path  # noqa: E402
 from uttt.search import SearchConfig  # noqa: E402
 
 
@@ -50,6 +51,16 @@ def anchor_name(p: str) -> str:  # runs/v2b/net_0150.pt -> v2b_net_0150 (as trai
     return f"{os.path.basename(os.path.dirname(p))}_{os.path.splitext(os.path.basename(p))[0]}"
 
 
+def run_rule(run: str) -> str:
+    """The rule the run was TRAINED under, from its config.json (pre-K1 runs recorded none: they are count).
+    Reported beside --rule, never substituted for it: the evaluation rule stays the caller's choice."""
+    path = os.path.join(run, "config.json")
+    if not os.path.exists(path):
+        return "unknown"
+    with open(path) as f:
+        return json.load(f).get("rule", "count")
+
+
 class Worker:
     """Candidate evaluator and per-anchor players are built once and reused (the candidate's weights are refreshed
     in place); CUDA graphs are captured once, the way train2.EvalKit does it."""
@@ -62,31 +73,32 @@ class Worker:
         self.es = EndgameSet.load(a.set) if a.set else None
         self.cfg = SearchConfig(n_sims=a.sims, mode="gumbel", gumbel_scale=0.0, cuda_graph=device.type == "cuda", depth_cap=min(a.sims, 24))
         self.anchors = {anchor_name(p): FusedEvaluator(load_checkpoint(p, device), device) for p in a.anchors.split(",") if p}
-        self.pb = {k: SearchPlayer(ev, self.suite.n, self.cfg, device) for k, ev in self.anchors.items()}
+        self.pb = {k: SearchPlayer(ev, self.suite.n, self.cfg, device, rule=a.rule) for k, ev in self.anchors.items()}
         self.fe = self.pa = None
         self.eg_cache: dict = {}
         print(f"evaluator: suite {a.suite} ({self.suite.n} openings), anchors {list(self.anchors)}, {a.sims} sims, "
-              f"endgame set {a.set or 'off'}, device {torch.cuda.get_device_name(device) if device.type == 'cuda' else 'cpu'}", flush=True)
+              f"endgame set {a.set or 'off'}, rule {a.rule} (run trains under {run_rule(a.run)}), "
+              f"device {torch.cuda.get_device_name(device) if device.type == 'cuda' else 'cpu'}", flush=True)
 
     def evaluate(self, path: str) -> dict:
         t0 = time.perf_counter()
         net = load_checkpoint(path, self.device)
         if self.fe is None:
             self.fe = FusedEvaluator(net, self.device)
-            self.pa = SearchPlayer(self.fe, self.suite.n, self.cfg, self.device)
+            self.pa = SearchPlayer(self.fe, self.suite.n, self.cfg, self.device, rule=self.a.rule)
         else:
             self.fe.refresh(net)
-        rec = {"iter": int(os.path.basename(path)[4:8]), "checkpoint": path, "sha256": sha256(path),
+        rec = {"iter": int(os.path.basename(path)[4:8]), "checkpoint": path, "sha256": sha256(path), "rule": self.a.rule,
                "suite": self.suite.meta.get("name"), "openings": self.suite.n, "sims": self.a.sims, "anchors": {}}
         for k, pb in self.pb.items():
             t1 = time.perf_counter()
-            o = summarize(play_paired(self.pa, pb, self.suite, self.device), n_boot=2000)["overall"]
+            o = summarize(play_paired(self.pa, pb, self.suite, self.device, self.a.rule), n_boot=2000)["overall"]
             rec["anchors"][k] = {"score": round(o["score"], 4), "ci": [round(x, 4) for x in o["ci"]], "elo": round(o["elo"], 1),
                                  "elo_ci": [round(x, 1) for x in o["elo_ci"]], "draws": round(o["draws"], 3), "seconds": round(time.perf_counter() - t1)}
         if self.es is not None:
             t1 = time.perf_counter()
             res = endgame_evaluate(self.fe, self.es, self.device, sims=(self.a.sims,), n_boot=200, symmetrise=False,
-                                   graph=self.device.type == "cuda", search_cache=self.eg_cache)
+                                   graph=self.device.type == "cuda", search_cache=self.eg_cache, rule=self.a.rule)
             raw, srch = res["rows"][0], res["rows"][-1]
             rec["endgame"] = {"set": self.es.meta.get("name"), "wdl_acc": round(raw["wdl_acc"], 4), "regret_raw": round(raw["regret"], 4),
                               "optimal_raw": round(raw["optimal"], 4), "regret_search": round(srch["regret"], 4),
@@ -112,6 +124,8 @@ def main() -> None:
     ap.add_argument("--suite", default="suites/openings_v1.npz")
     ap.add_argument("--cap", type=int, default=0, help="openings per sub-suite (0 = the full suite; the point of this worker)")
     ap.add_argument("--set", default="suites/endgame_v2_dev.npz", help="exact endgame set ('' = off)")
+    ap.add_argument("--rule", choices=RULES, default="count", help="terminal rule the matches are PLAYED under; the run's "
+                    "own training rule is printed beside it but never substituted (PLAN7 §5 K1)")
     ap.add_argument("--only", default="", help="comma-separated iterations to evaluate (default: every numbered checkpoint)")
     ap.add_argument("--once", action="store_true", help="evaluate what is pending and exit (do not wait for DONE)")
     ap.add_argument("--poll", type=int, default=30, help="seconds between checks while the run is live")
@@ -119,10 +133,11 @@ def main() -> None:
     a = ap.parse_args()
     device = torch.device(a.device)
     only = {int(x) for x in a.only.split(",") if x} or None
-    out_path = os.path.join(a.run, "eval_full.jsonl")
+    out_path = tag_path(os.path.join(a.run, "eval_full.jsonl"), a.rule)  # two rules must not share one ledger
     done = {json.loads(l)["iter"] for l in open(out_path)} if os.path.exists(out_path) else set()
     worker = Worker(a, device)
-    settings = {"anchors": a.anchors, "sims": a.sims, "suite": a.suite, "cap": a.cap, "set": a.set, "device": a.device}
+    settings = {"anchors": a.anchors, "sims": a.sims, "suite": a.suite, "cap": a.cap, "set": a.set, "device": a.device,
+                "rule": a.rule, "run_rule": run_rule(a.run)}
     while True:
         todo = pending(a.run, done, only)
         finished = os.path.exists(os.path.join(a.run, "DONE"))

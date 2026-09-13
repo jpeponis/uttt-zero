@@ -30,6 +30,7 @@ from uttt.infer import FusedEvaluator  # noqa: E402
 from uttt.model import load_checkpoint  # noqa: E402
 from uttt.game import UTTT  # noqa: E402
 from uttt.openings import canonical, compose, inverse, orbit_representatives, reply_orbits, transform_move  # noqa: E402
+from uttt.rules import RULES, tag_path  # noqa: E402
 from uttt.search import BatchedSearch, SearchConfig  # noqa: E402
 from uttt.symmetry import SymmetryAveragedEvaluator  # noqa: E402
 
@@ -39,19 +40,19 @@ def mv(m: int) -> str:
 
 
 @torch.no_grad()
-def evaluate_level(ev, seqs: list[list[int]], sims: int, device, batch: int):
+def evaluate_level(ev, seqs: list[list[int]], sims: int, device, batch: int, rule: str = "count"):
     """For sequences of equal length: value for X, root visit shares (n, 81), root Q from the mover's view (n, 81),
     legal replies (n, 81)."""
     vals, shares, qs, legals = [], [], [], []
     for i in range(0, len(seqs), batch):
         chunk = seqs[i : i + batch]
         n = len(chunk)
-        g = BatchUTTT(n, device)
+        g = BatchUTTT(n, device, rule)
         for t in range(len(chunk[0])):
             g.step(torch.tensor([s[t] for s in chunk], device=device))
         cfg = SearchConfig(n_sims=sims, mode="puct", c_puct=1.25, root_prior_floor=0.0, gumbel_scale=0.0, m_considered=81,
                            cuda_graph=device.type == "cuda", depth_cap=40)
-        s = BatchedSearch(ev, n, cfg, device)
+        s = BatchedSearch(ev, n, cfg, device, rule=rule)
         r = s.search(g.cells, g.macro, g.next_board, g.player, g.done, g.winner, selfplay=False)
         sign = torch.where(g.player == 1, 1.0, -1.0)
         vals.append((r.root_value * sign).cpu().numpy())
@@ -64,12 +65,12 @@ def evaluate_level(ev, seqs: list[list[int]], sims: int, device, batch: int):
     return np.concatenate(vals), np.concatenate(shares), np.concatenate(qs), np.concatenate(legals)
 
 
-def build(ev, depth: int, top: int, sims: int, device, batch: int, log=print) -> dict:
+def build(ev, depth: int, top: int, sims: int, device, batch: int, log=print, rule: str = "count") -> dict:
     nodes = {}
     frontier = [[m] for m in orbit_representatives()]
     t0 = time.perf_counter()
     for d in range(1, depth + 1):
-        vals, shares, qs, legals = evaluate_level(ev, frontier, sims, device, batch)
+        vals, shares, qs, legals = evaluate_level(ev, frontier, sims, device, batch, rule)
         nxt = {}
         for seq, v, sh, q, lg in zip(frontier, vals, shares, qs, legals):
             kids = [o for o in reply_orbits(seq, lg, sh, q) if o["share"] > 0][:top]
@@ -161,7 +162,8 @@ def paired_stats(path: str) -> dict:
 
 
 def markdown(nodes: dict, meta: dict, paired: dict | None, other: dict | None) -> str:
-    lines = [f"# Opening book: {meta['net']} at {meta['sims']} sims, depth {meta['depth']}, top-{meta['top']} replies per node",
+    lines = [f"# Opening book: {meta['net']} at {meta['sims']} sims, depth {meta['depth']}, top-{meta['top']} replies per node, "
+             f"rule {meta.get('rule', 'count')}",
              "", "Values are the deep-search value for X after the moves (search-relative: what this net + search prefers, "
              "not game-theoretic). Moves are `m(b<board>c<cell>)`, m = 9*board + cell. The line follows the most-visited move.", ""]
     hdr = "| first move | value X | best reply orbit (O) | share | X's next | line to depth " + str(meta["depth"]) + " |"
@@ -218,6 +220,7 @@ def main() -> None:
     ap.add_argument("--no_sym", action="store_true")
     ap.add_argument("--paired", default="", help="paired-suite match JSON to attach X score / draw share per first-move orbit")
     ap.add_argument("--compare", default="", help="another book JSON: per-node agreement on the best move")
+    ap.add_argument("--rule", choices=RULES, default="count", help="terminal rule the searches run under")
     ap.add_argument("--device", default="cuda:0")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
@@ -225,22 +228,23 @@ def main() -> None:
     t0 = time.perf_counter()
     fe = FusedEvaluator(load_checkpoint(a.net, device), device)
     ev = fe if a.no_sym else SymmetryAveragedEvaluator(fe)
-    nodes = build(ev, a.depth, a.top, a.sims, device, a.batch)
+    nodes = build(ev, a.depth, a.top, a.sims, device, a.batch, rule=a.rule)
     chk = audit(nodes)
     print(f"audit: {chk}")
     assert chk["clean"], "book failed its consistency audit"
-    meta = {"net": a.net, "net_name": os.path.basename(os.path.dirname(a.net)), "depth": a.depth, "top": a.top, "sims": a.sims,
+    meta = {"net": a.net, "net_name": os.path.basename(os.path.dirname(a.net)), "rule": a.rule, "depth": a.depth, "top": a.top, "sims": a.sims,
             "symmetry_averaged": not a.no_sym, "built": time.strftime("%Y-%m-%d %H:%M"), "seconds": time.perf_counter() - t0}
-    with open(a.out, "w") as f:
+    out = tag_path(a.out, a.rule)
+    with open(out, "w") as f:
         json.dump({"meta": meta, "nodes": nodes}, f, indent=1)
     paired = paired_stats(a.paired) if a.paired else None
     other = json.load(open(a.compare)) if a.compare else None
     md = markdown(nodes, meta, paired, other)
-    md_path = os.path.splitext(a.out)[0] + ".md"
+    md_path = os.path.splitext(out)[0] + ".md"
     with open(md_path, "w", encoding="utf-8") as f:
         f.write(md + "\n")
     print(md)
-    print(f"\nwrote {a.out} and {md_path}  [{time.perf_counter() - t0:.0f}s]")
+    print(f"\nwrote {out} and {md_path}  [{time.perf_counter() - t0:.0f}s]")
 
 
 if __name__ == "__main__":
