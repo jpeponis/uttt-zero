@@ -646,8 +646,13 @@ Scientific Reports 2023; Piette et al., IEEE CoG 2021; Baier & Kaisers). What fo
   value is deep and late", local concepts readable by block 5 and learned in the first 60
   iterations, macro-line threats peaking mid-trunk and fading toward the heads, value-like
   concepts in the last blocks stepping at the LR drop — is the same shape, replicated on four
-  independently trained nets. **That four-net replication is the part the literature does not
-  have**; McGrath and the Hex work each probe one training trajectory.
+  independently trained nets. The Hex work is **not** a single-trajectory study, as an earlier form
+  of this entry said: its main body reads one agent (`grubby`, 8 layers × 512) over 21
+  checkpoints, and its Appendix D replicates the key figures on three further architectures
+  (`recent` 8×256, `baggy` 4×512, `vital` 2×1024, all from Jones's 9×9 Hex agents)
+  — a cross-*architecture* replication. **What this project adds is a cross-*seed* one**: two
+  seeds of the same 10×128 net beside deep8_300 and `_e4`, on the full layer × iteration
+  grid. McGrath probes one training trajectory (M1, 2026-09-12).
 - **Pálsson and Björnsson, "Empirical Evaluation of Concept Probing for Game-Playing Agents"**
   *(conf, ECAI 2024)*, [IOS Press](https://ebooks.iospress.nl/doi/10.3233/FAIA240574): linear
   probe accuracy is an unreliable proxy for causal importance; more complex probes plus amnesic
@@ -857,8 +862,10 @@ above; each is falsifiable by one counter-citation, so each should be phrased in
     tasks where the surrogate matches the teacher. "The named concepts are individually correct,
     reproduce 41 % of the teacher's moves and R² 0.55 of its value, and lose 661–943 Elo" is a
     different and sharper statement about what a legible account of a game leaves out.
-12. **No cross-net replication in the probing literature.** McGrath probes one AlphaZero
-    trajectory; the Hex work one agent. The project's concept grid repeats on four independently
+12. **No cross-*seed* replication in the probing literature.** McGrath probes one AlphaZero
+    trajectory; the Hex work reads one agent in its main body and replicates its key figures on three
+    further *architectures* in Appendix D (M1, 2026-09-12) — no two independently trained
+    instances of one architecture. The project's concept grid repeats on four independently
     trained nets (two seeds at 10×128, plus deep8_300 and `_e4`) with the same layers, the same
     gains within a few points, and the learned-by column shifting 20–50 iterations earlier with
     strength. Replication across seeds is the cheapest credibility this project can buy and almost
