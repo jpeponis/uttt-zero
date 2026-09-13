@@ -22,7 +22,14 @@ adjudicated in this file before anything acts on it** (§7, as PLAN6 §1 did).
 
 ## Handover (2026-09-12, 23:32 — written for the next instance by the second instance of the day)
 
-**State.** **One thing is running:** K1 item 1, the `_e8` count-rule pass on the 3060
+**State.** **Two things are running.** **K1 itself** — `runs/deep8_c1_300_e8_draw`, launched at the owner's word
+on 2026-09-13 at 00:20:02 (`wscript runs/launch_queue14_hidden.vbs` from `33ebd8a`; `config.json` records
+`rule draw`, `gumbel_scale 1.0` and the resolved search configuration; the E7 worker, pid 4451, under `draw` on
+the 3060; status `python tools/run_status.py runs/deep8_c1_300_e8_draw --ref runs/deep8_c1_300_e8`; ≈ 22 h, so
+≈ 22:30 on 2026-09-13; `eval_run_k1.sh` then runs by itself and `runs/queue14.out` ends "queue14 done" — a
+non-zero exit or a `!!! FAILED` line in `analysis.out` is the failure signal; a reboot is answered by relaunching
+the same `.vbs`, which resumes from `latest_full.pt` under the recorded rule). And **K1 item 1**, the `_e8`
+count-rule pass on the 3060
 (`runs/plan7/K1_parent_pass.out`, started 22:13, on `value_decomp` since 22:55; then `book`, `book_stats`, the
 16-checkpoint probe fit, `probe_report`, `ownership_grade`; done ≈ 03:00 — it is a background job of a session that
 may have ended; read its log, do not look for the job). The 3090 idle. Play agent `runs/deep8_c1_300_e8/net_0300.pt`,
@@ -41,12 +48,16 @@ and merged (`5fa73e6`); the `_e8` count pass launched with `probe_value` added; 
 
 **What the next instance does, in order.**
 
-1. **K1 is with the owner** (§5; the approval was asked for at ≈ 23:30 with the pre-registered readings and what the
-   run cannot say). If approved: `wscript runs/launch_queue14_hidden.vbs` from the repo root — every prerequisite is
-   green (the rule switch and M2's plumbing merged, `test_rules` green, the draw-solved dev set, the launcher
-   syntax-checked). It may be launched while the pass still holds the 3060: the trainer takes the 3090 and the E7
-   worker shares the 3060 until ≈ 03:00, as the I1 pass shared it with H1c's worker. Status:
-   `python tools/run_status.py runs/deep8_c1_300_e8_draw --ref runs/deep8_c1_300_e8`. ≈ 22 h.
+1. **K1 is running** (State, above). Its reading instruments — `runs/plan7/K1_readings_3060.sh` (§5 item 2),
+   `tools/common_positions.py` (item 3 and the paired Δ of item 2, 15 000 positions per corpus) and
+   `tools/paired_contrast.py` (item 4) — are being built and smoke-tested on the two count nets by a worktree agent
+   (`git worktree list` shows it) so they are frozen before `net_0300.pt` exists (R9); merge its branch after a
+   read, run its test, and do not touch the instruments afterwards. When K1 lands (≈ 22:30): read `analysis.out`
+   (the in-run table, the two cross-play matches, the 2 × 2 endgame reads), then run the readings script on the
+   3060, `common_positions.py` on `_e8` vs the draw net (both corpora, both rules) and `paired_contrast.py` on the
+   two cross-play files; every claim marked rule-invariant / rule-dependent / unresolved by §5 item 2's rules, one
+   KNOWLEDGE clause each, a log entry, K1's row in README's ladder table (its Elo column is "n/a — a different
+   game"; the endgame column its draw-set read).
 2. **When the pass finishes (≈ 03:00): its per-claim reading is owed.** `runs/plan7/K1_parent_*.out` against
    `runs/plan6/I1_*.out` (the `_e4` pass) by the I1 rule (HELD / MOVED / REVERSED; the template's header,
    `runs/plan6/I1_second_pass_3060.sh`, states it), one KNOWLEDGE clause per claim, a log entry, the outputs and
@@ -384,6 +395,17 @@ compute — delegate anything that reads more than a few files.
   `bash -n` clean. Not bought: a `tests/test_frontier.py` (the adversarial check is recorded in the agent's note,
   `docs/reviews/M2_designs/M2R_implementation_notes.md`; the J3 / J4 note carries its superseded line). **K1
   now waits only for the owner's word.**
+
+- **2026-09-13, 00:20 — K1 launched at the owner's word** ("Okay, go ahead with K1", 00:19). `wscript
+  runs/launch_queue14_hidden.vbs` from `33ebd8a`; the E7 worker (pid 4451) at 00:20:02 and the trainer's banner
+  within sixteen seconds: `rule: draw` for self-play, the search trees, the exact labels and the in-run
+  evaluation; the anchors count-trained and played under draw (scores not comparable with a count run's);
+  `suites/endgame_v2_dev_draw.npz` (3 000 positions, draw); exact labels ≤ 14 empties, 8 192 per iteration, 12
+  workers, weight × 2, policy replaced. `config.json` carries `rule draw`, `gumbel_scale 1.0` and the resolved
+  `search_config` in `_provenance` — the first run to record its search configuration (M2 row 5). Both cards at
+  100 %: the 3090 training, the 3060 shared by the worker and the count pass's `value_decomp`. The one change
+  from the parent is the rule; §5's readings are frozen and their instruments are being built beside it (R9).
+  ≈ 22 h; `eval_run_k1.sh` follows by itself.
 
 ## 0. The decision in front of the project
 

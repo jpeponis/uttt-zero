@@ -187,10 +187,14 @@ Read in this order:
   `tools/frontier.py`, `tools/empty_board.py`, `tools/review_events.py`. **One provenance finding:**
   `gumbel_scale` was never written to `config.json` and every run trained at the default 1.0 —
   constant across runs, so no result moves; it enters the methods section and K1's provenance.
-  **Open:** the rebuttal round (deferred by the owner's Codex usage limit to 00:30, armed from this
-  session), **M2** (the review of K1's diff and the J3 / J4 designs, armed behind it), **K1** itself
-  (≈ 22 h on the 3090; the owner's approval after M2), J3 / J4 after M2, E11's off-machine copy
-  (5.23 GB, still owed) . Everything is pushed (2026-09-12 22:00). The play agent is unchanged.
+  **Since then (2026-09-12/13):** the rebuttal round, **M2** (K1's diff and the J3 / J4 designs) and **M1** (the
+  account) have all run and are adjudicated in PLAN7 §7e, M2's own rebuttal round too (M1's waits for the next Codex
+  window); M2's engineering is merged and tested. **K1 — `runs/deep8_c1_300_e8_draw`, the play agent's recipe under
+  the plain-draw tiebreak as its one change — was approved by the owner and launched at 00:20 on 2026-09-13**
+  (≈ 22 h on the 3090; `runs/queue14.sh`; PLAN7 §5 holds the pre-registered readings, sharpened by M2). The `_e8`
+  count-rule pass (K1's parent re-read, §5 item 1) ran on the 3060 the same night; J3 / J4 run after it. E11's
+  off-machine copy (5.23 GB) is still owed. Pushed through 2026-09-12 22:00; later commits await the owner's word.
+  The play agent is unchanged.
 - **I1, the analysis second pass, done 2026-09-10 (PLAN6 §9c):** PLAN5 Phase A's tools re-run on
   `deep8_c1_300_e4` at the deep10 pass's settings — of 34 game claims re-read, **15 held, 18 moved and 1
   reversed** (after [40] that net prefers the corner reply orbit where both earlier strong
