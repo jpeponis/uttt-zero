@@ -508,8 +508,8 @@ compute — delegate anything that reads more than a few files.
   dropped (the archive path says 2013, the survey said 2016); the **Padua thesis** is CLOSED with its terminal
   tiebreak unverified. The paper's "five to ten orders above Othello" is deleted (the heuristic stays in
   `knowledge/06`, which still infers a solving cost from it — open for M3); 31a's "solved outright" and 50's
-  width sentence are scoped. The reviewer also caught the adjudication's own "six fits" — fixed there, and
-  here in KNOWLEDGE 14; map row 2's "12 columns" is 15 now. PLAN7's thirteen doubled CR bytes, an artifact of
+  width sentence are scoped. The reviewer also caught the adjudication's own "six fits" — fixed there; the two
+  stale phrases the agent flagged for KNOWLEDGE 14 and map row 2 were already gone by its merge. PLAN7's thirteen doubled CR bytes, an artifact of
   this session's scripted inserts that the agent had to restore around, are normalised (`0b599ce`). Open for
   M3: the Padua terminal rule (its code would settle it), the HUJI year, `knowledge/06`'s inferred cost.
 
