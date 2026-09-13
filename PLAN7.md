@@ -27,8 +27,29 @@ adjudicated (§7e R1–R8; the log's 22:10 entry). The count-pass half of step 3
 3060 (`runs/plan7/K1_parent_pass.out`, ≈ 5 h from 22:19). **M2 returned at 22:24** (267 s, medium, 0.94 M tokens) and is adjudicated (§7e M2, 18 rows; the
 log's 22:31 entry). Its engineering — rows 1, 4–9, 15–16, 18 — and the five I1 tools are with two
 worktree agents (the log entry names them); when they merge: run J3 and J4 as amended (§4), then put K1
-to the owner with §7e M2 attached. M1 is armed (`docs/reviews/M1_account/`) for the next window. The rest
-of the list stands.
+to the owner with §7e M2 attached. The rest of the list stands.
+
+**22:45:** **M1 launched at 22:34 in the same window and returned at 22:42** (498 s, medium, 2.9 M tokens, 2.68 M
+cached; `4235f00` holds the review verbatim); its adjudication is delegated to a third worktree agent (opus
+`directed`) that writes §7e M1, a log entry and the accepted amendments to `docs/paper/*`, the named KNOWLEDGE
+claims and `knowledge/07` — read its table before merging. So **three worktree agents run under
+`.claude/worktrees/`**, on disjoint files: the K1-plumbing / five-I1-tools / tests agent, the J3 / J4 tools
+agent, the M1 adjudicator. Merge order as they return: the two engineering agents first (`--no-ff` after a
+read; re-run `tests/test_rules.py` and `tests/test_solver_bounded.py` on `main`, `UTTT_DEV=cuda:0` while the
+pass holds the 3060), then the adjudicator; retire each worktree and branch. Then, once the pass frees the
+3060 (≈ 03:00): **J3** — `tools/empty_board.py --net runs/deep8_c1_300_e8/net_0300.pt --games 2000 --sims 256
+--root_sims 16384 --device cuda:1 --out runs/plan7/J3_empty_board_e8.json` and the same on `_e4` (≈ 1.5 h);
+**J4** — `tools/frontier.py --run runs/deep8_c1_300_e8 --net runs/deep8_c1_300_e8/net_0300.pt --plies 40 70
+--per_ply 500 --max_nodes 1e8 --sims 256 --device cuda:1 --out runs/plan7/J4_frontier.json` (CPU-bound, ≈ 3.5 h;
+check the merged tools' exact flags first) — their readings become KNOWLEDGE lines. **The pass's per-claim
+reading is owed** (`runs/plan7/K1_parent_*.out` against `runs/plan6/I1_*.out`, HELD / MOVED / REVERSED by the
+I1 rule, one KNOWLEDGE clause per claim, a log entry) — delegate it to an opus agent with the outputs; read so
+far in this session: 8, 10–14, 20–23 (both corpora), 24, 27 held, 12 / 15 / 18 / 35's counterfactual shapes
+held (free move +0.467 vs deep10's +0.413, ownership 1.050 / 0.954 / 0.848, dead-board nulls), 25's by-count
+share 16.5 → 15.7 % and 32's motif tail (denies_free_move fell below local_win; 52 puzzles, 1 hard) to judge
+against the claims' wording. **K1 goes to the owner** after the engineering merges, with §7e M2 attached; M1's
+and M2's rebuttal rounds in the next Codex window (M1's session id is in `docs/reviews/M1_account/events.jsonl`'s
+first line, M2's in `M2_designs/events.jsonl`).
 
 **State.** **Nothing is running**: no training, no review, no background job — the two watchers that
 would have relaunched the rebuttal at 00:30 and chained M2 behind it were stopped at the owner's
