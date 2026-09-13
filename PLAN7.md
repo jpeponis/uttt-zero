@@ -160,6 +160,18 @@ manuscript (J5) and the file updates (§10) follow the readings; M3 and M4 revie
   points on one corpus, the sealed half higher** — claim 30's structure at the top of the ladder,
   and the opposite of what a flattered development set gives. KNOWLEDGE 30 and §10 carry it; no
   sealed endgame set remains. `runs/plan7/J1a_endgame_v3_{test,dev}_e8.out`.
+- **2026-09-12, 20:55 — J3 / J4 engineering merged (`934113a`); J2's revised related-work section
+  adopted.** The Opus agent's worktree work — `solve_bounded`, `tools/frontier.py`,
+  `tools/empty_board.py`, `tests/test_solver_bounded.py` — read (the bounded kernel's abort unwinds
+  before any value reaches the alpha-beta logic; `solve()` is byte-identical), committed in the
+  worktree, merged, its test re-run on `main` (ok, +1.8 %), the worktree retired. Two findings from
+  J3's smoke go to M2 (§4): two floors, and **`gumbel_scale` absent from `config.json`** — every run
+  trained at 1.0, a provenance gap E8 missed, closed for K1 (§5); arm (b) as first specified replays
+  lines (4 distinct of 16, 1 up to symmetry). The empty board reads +0.5087 for X at 256 sims with the
+  corner-board principal line (16 384 sims in the real run, after M2). J2's revision landed with all
+  nine §7e changes made and funded by cuts that drop no claim; adopted as
+  `docs/paper/02_literature.md` (2 603 words), the draft M1 reviews. Still in flight: K1's `--rule`
+  worktree and the 00:30 rebuttal.
 
 ## 0. The decision in front of the project
 
@@ -499,7 +511,18 @@ single new experiment. C6 is recommended and priced in §6.
   split under near-greedy play; (c) 2 000 games at 256 sims under the self-play exploration settings
   (floor on, `sample_moves` as trained) — so (b) − (c) is exploration's contribution at a matched
   budget. Pre-registered: (b)'s split is compared with 24's; the design is reviewed in M2 before it
-  runs. ≈ 1.5 h on the 3060.
+  runs. ≈ 1.5 h on the 3060. *Engineering done 2026-09-12 (merged as `934113a`; `tools/empty_board.py`;
+  the implementer's fourteen design choices are `docs/reviews/M2_designs/J3J4_design_notes.md`, M2's
+  material).* Smoke (16 games at 32 sims, root at 256): (a) the empty board reads **+0.5087 for X**
+  with the principal line `40, 36, 0, 8, 80, 77, 50, 48, 34, 66` — the corner-board line; (b) X 81 /
+  O 0 / draw 19 % over **4 distinct games of 16, 1 up to symmetry**; (c) X 44 / O 38 / draw 19 % over
+  16 distinct. Two findings for M2: **there are two floors** (`sample_uniform` on the sampling
+  distribution, `root_prior_floor` on the tree itself), and **`gumbel_scale` is not in `config.json`**
+  — `train2.py` never sets it, so self-play ran at `MCTSConfig`'s default 1.0, root noise at every ply.
+  Arm (b) as specified is deterministic after ply 4 and replays a handful of lines, so its interval is
+  optimistic by exactly the duplication the tool now reports. M2 decides whether (b) keeps more
+  sampled plies with the floors off or bootstraps over distinct lines; the four knobs that differ
+  between (b) and (c) are stated in the output.
 - **J4. The exact frontier (C3) — with the engineering M0 identified.** `uttt/solver.py solve()` has
   no node budget (its docstring says so): add `solve_bounded(…, max_nodes)` — the Numba negamax checks
   the node counter and unwinds, returning *unknown* — with a test that bounded and unbounded agree
@@ -507,7 +530,17 @@ single new experiment. C6 is recommended and priced in §6.
   ply from 40 to 70, budget 10⁸ nodes; record per ply the fraction solved *among games alive at that
   ply*, the median nodes, and the 256-sim search's optimality *on the solved ones*. The statement is
   conditional at both ends, never "solved from ply N". CPU, unattended, hours; design reviewed in M2.
-  Output `runs/plan7/J4_frontier.{json,out}`.
+  Output `runs/plan7/J4_frontier.{json,out}`. *Engineering done 2026-09-12 (merged as `934113a`):*
+  `solve_bounded` / `solve_children_bounded` in `uttt/solver.py` — a copy of the kernel with an
+  unwinding abort that never reaches the alpha-beta logic, `solve()` untouched;
+  `tests/test_solver_bounded.py`: identical value *and node count* on 500 positions, a completed
+  bounded search correct at budgets 10 / 10³ / 10⁵, +2 % cost — and `tools/frontier.py`, whose field
+  names carry the conditioning. Smoke at plies 60–62 (10⁶ nodes): 100 % solved, 100 % optimal; at
+  plies 40–42 with 2 × 10⁵ nodes, **8 → 17 → 50 % solved** — the selection effect the names exist
+  for. Budget semantics: one `max_nodes` for the position and its whole child enumeration (the grading
+  needs every child). Grading uses the plain evaluator, as `endgame.py eval` does; J3
+  symmetry-averages — the asymmetry is deliberate and documented. Real cost ≈ 6.5 min per ply,
+  ≈ 3.5 h for plies 40–70, after M2.
 - **J5. The manuscript skeleton.** `docs/paper/paper.md` — abstract, the game and its variant,
   methods (the pipeline in a page; the measurement kit; the drift test), the training ledger, the game
   account tier by tier, the equivariance negative, limitations (§0's list), reproducibility (the
@@ -532,7 +565,11 @@ training), `tools/endgame.py build` (a draw-rule solved set for the run's endgam
 `uttt/tablebase.py:76–90` (the one-open-board table's outcome map), the probe and puzzle label builders
 (`tools/probe.py`, `tools/puzzles.py`), evaluator construction, and a rule tag in the name of every
 cached dataset; a checkpoint's *training* rule is recorded in `config.json`, its *evaluation* rule is
-an explicit argument everywhere, and the two are never conflated. Tests: the two engines
+an explicit argument everywhere, and the two are never conflated. And — found by J3's implementer —
+**`gumbel_scale` is not recorded in `config.json`** (`train2.py` never sets it; every run so far
+trained at `MCTSConfig`'s default 1.0): K1's provenance records every exploration knob explicitly
+(`gumbel_scale`, `sample_moves`, `temperature`, `sample_uniform`, `root_prior_floor`), and the
+count-rule parent's re-read states the same values. Tests: the two engines
 cross-checked under both rules on 10⁶ random games; a hand-made 4–4 final position that is a count
 draw under both rules and a 5–3 one that is a win under `count` and a draw under `draw`; the solver
 against brute force on tiny positions under both. The paired suite is opening positions and needs no
@@ -702,7 +739,7 @@ acts on it; the owner sees the adjudication, not just the review.
 |---|---|---|---|---|
 | **M0 — the plan** | now, before Phase J | Are §1's tiers the right partition of the claims? Is §0's recommendation (one paper, the game as subject) right, and is the working title honest? Is K1 the right single run, and are its pre-registered readings sharp enough to be wrong? What in §2 is mis-stated or missing? What is the most likely way the paper over-claims? | this file, KNOWLEDGE, RETROSPECTIVE, PLAN6 §0–§1 and §9, knowledge/01–07 | `docs/reviews/M0_plan/REVIEW.md`, ≤ 2 500 words, a prioritised findings list first |
 | **M1 — the account** | after J1–J2 | Is `01_claims_map.md` faithful to KNOWLEDGE (spot-check 10 claims against their files)? Is `02_literature.md` fair to each comparator's variant? Which claims would a hostile reader call over-stated, and what is the sentence that would survive? | the two docs, KNOWLEDGE, knowledge/07, the named `runs/` outputs | `docs/reviews/M1_account/` |
-| **M2 — K1's pre-registration, and J3 / J4's designs** | before K1's launch and before J3 / J4 run | Is the rule change complete (every place the terminal rule is read, §5's plumbing list)? Are §5's thresholds falsifiable as written, and is the relabel control read correctly? Should anything be measured in-run that cannot be recovered after? Are J3's three measurements the right isolation of exploration at matched budget, and is J4's bounded solver and conditional statement right? | §5, §4 J3–J4, `uttt/batch.py`, `game.py`, `solver.py`, `exact.py`, `selfplay_cont.py`, the K1 diff and its tests, the J3 / J4 scripts | `docs/reviews/M2_designs/`; none of the three runs until it is adjudicated |
+| **M2 — K1's pre-registration, and J3 / J4's designs** | before K1's launch and before J3 / J4 run | Is the rule change complete (every place the terminal rule is read, §5's plumbing list)? Are §5's thresholds falsifiable as written, and is the relabel control read correctly? Should anything be measured in-run that cannot be recovered after? Are J3's three measurements the right isolation of exploration at matched budget, and is J4's bounded solver and conditional statement right? | §5, §4 J3–J4, `docs/reviews/M2_designs/J3J4_design_notes.md` (the implementer's fourteen choices), `uttt/batch.py`, `game.py`, `solver.py`, `exact.py`, `selfplay_cont.py`, the K1 diff and its tests, `tools/empty_board.py`, `tools/frontier.py` | `docs/reviews/M2_designs/`; none of the three runs until it is adjudicated |
 | **M3 — the draft** | after J5 and K1's reading | Referee report, as for a venue: is each claim supported by the cited file at the stated level? Are the limitations complete? Is the contribution stated at the size the evidence supports? Recompute five numbers of the reviewer's choosing from the outputs. | `docs/paper/paper.md` and everything it cites | `docs/reviews/M3_draft/`, a report in referee form |
 | **M4 — the final pass** | before submission | Adversarial: find the sentence that is false. Check every number in the abstract and the tables against its file. Check the rule variant is stated wherever a comparator is quoted. | the final manuscript, KNOWLEDGE, the outputs | `docs/reviews/M4_final/` |
 
@@ -835,8 +872,12 @@ applies to every launch (above it, update this file first and hand over).
   changes any reading.
 - **`docs/explainer.html`** — Part 8 (the game beliefs) carries the +363 numbers and the reversal; the
   training story gains the update lever and the equivariance negative. Republished.
-- **New:** `knowledge/07-literature-2026-survey.md` (the agent's survey); `docs/paper/{01_claims_map,02_literature,paper}.md`;
-  `docs/reviews/M*/`; `runs/plan7/`; `CITATION.cff`'s title once the paper's is fixed.
+- **New:** `knowledge/07-literature-2026-survey.md` (done); `docs/paper/01_claims_map.md` (done — J1's
+  second draft) and `docs/paper/02_literature.md` (done — J2's revision), both drafts for M1;
+  `docs/paper/paper.md` (J5); `docs/reviews/M0_plan/` (done), `docs/reviews/M2_designs/J3J4_design_notes.md`
+  (done), the other `docs/reviews/M*/`; `tools/review_events.py`, `tools/frontier.py`,
+  `tools/empty_board.py` and `uttt/solver.py`'s `solve_bounded` (done, merged `934113a`); `runs/plan7/`
+  (J1a's two reads so far); `CITATION.cff`'s title once the paper's is fixed.
 
 ## 11. Operational notes
 
