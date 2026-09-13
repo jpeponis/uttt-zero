@@ -166,7 +166,7 @@ only what checking the three-column form against the files turned up that is not
    points higher**, intervals overlapping (`runs/plan7/J1a_endgame_v3_test_e8.out:7`,
    `J1a_endgame_v3_dev_e8.out:7`; KNOWLEDGE 30). Row 30 now carries it. What survives of the item: the
    *v2* sealed set has no reading above +242, and the earlier dev/sealed agreement was 0.3 **to 1.3**
-   points — deep8_300 reads 83.5 on `endgame_v2_dev` (KNOWLEDGE `:673`) against 84.8 sealed —
+   points — deep8_300 reads 83.5 on `endgame_v2_dev` (quoted inside KNOWLEDGE 46) against 84.8 sealed —
    not "within 0.3" as this draft and the outline both said.
 2. **Closed before this draft was read (M1).** `KNOWLEDGE.md`:65–70 already reads "No other
    *primary* sign or ordering changed — the ones each claim's first sentence states", names 32's
