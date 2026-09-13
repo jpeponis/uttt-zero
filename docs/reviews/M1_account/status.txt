@@ -1,0 +1,2 @@
+START 2026-09-12T22:34:02 pid=12756 (M1: prompt points at the brief; stdin redirected from an empty file) at 09c687c
+EXIT 0 2026-09-12T22:42:20 elapsed=498s
