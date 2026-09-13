@@ -38,7 +38,9 @@ so we make no "first AlphaZero on this variant" claim. It pairs openings and rep
 intervals against fixed opponents, so *calibrated* must be defined, not denied: what it lacks is an
 independent anchor stronger than a depth-3 alpha-beta, a replicated seed band, a pre-registered rule,
 and any analysis of the game. The compute gap is ≈ 53× the self-play games (1 501 606 against
-28 544), ≈ 22 h on each of two GPUs of different classes — an order of magnitude, not two. The
+28 544), ≈ 29× the nominal search work (a mean of 55.5 simulations per move over `_e8`'s schedule against a
+flat 100), ≈ 22 h on each of two GPUs of different classes — ratios of games and of search work; no
+total-compute ratio is established by either repository's records. The
 academic tail is thin and nothing peer-reviewed touches CLOSED-COUNT; the one result bearing on our
 claims is D'Alberton's best-response study *(thesis; variant to verify)*, finding "significant
 vulnerabilities in self-play agents" — agreement among our four *related* nets is not

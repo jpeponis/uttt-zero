@@ -123,7 +123,8 @@ Read in this order:
   duration. Exact symmetry held throughout — the D4 Jensen–Shannon residual is 0.000 bits at all
   30 checkpoints, against the parent's 0.026 — and nothing was unstable; it converged, stably,
   to a much weaker net whose raw head reads 80.8 % WDL and 0.058 regret on the endgame set
-  against the parent's 90.1 / 0.022. The cause reads as capacity, not the learning rate: the
+  against the parent's 90.1 / 0.022. The mechanism evidence is consistent with capacity rather than
+  the learning rate — not its proof (PLAN7 §7e row 20): the
   supervised advantage that licensed the run reverses by 12 480 training steps, where the plain
   ResNet overtakes the equivariant net (KNOWLEDGE 50, 48 restated). (The run was interrupted at
   iteration 268 of 300 by a Windows Update restart at 23:55 on 2026-09-08 and resumed at 09:24

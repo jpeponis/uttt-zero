@@ -86,7 +86,8 @@ ResNet trunk replaced by a D4 group convolution, exactly equivariant, 312 k para
 below deep8_c1_300, the 1×-update ResNet of the same shape and duration. Exact symmetry held
 throughout (D4 Jensen–Shannon 0.000 bits and value std 0.000 at all 30 checkpoints, against the
 parent's 0.026 / 0.052) and nothing was unstable — it converged, stably, to a much weaker net.
-The cause reads as capacity, not the learning rate: the supervised advantage that licensed the
+The mechanism evidence is consistent with capacity rather than the learning rate, not its proof
+(PLAN7 §7e row 20): the supervised advantage that licensed the
 run (0.078 of dev policy KL at 3 120 optimizer steps) has shrunk to 0.027 by 6 240 and reversed
 by 12 480, where the plain ResNet overtakes, and a quarter of the learning rate at the same
 steps recovers nothing. Its LR drops are the largest any run here has shown — +30.7 points at
@@ -202,7 +203,8 @@ converged, stably, to a much weaker net. What licensed the run was a supervised 
 frozen teacher read at 3 120 optimizer steps, where the group-convolutional net fit far better;
 carried to 12 480 steps the plain ResNet overtakes it and the equivariant net begins over-fitting
 the frozen set, and a quarter of the learning rate at the same steps makes it worse still —
-capacity, not the learning rate, and a gate read at 1 % of the exposure it was gating (§5).
+evidence consistent with capacity rather than the learning rate (not its proof), and a gate read at 1 %
+of the exposure it was gating (§5).
 
 **Did nothing (each a clean, CI-bounded null):** exact endgame labels (replacing the
 self-play outcome z with solver values as the value target — z was already exact in
@@ -360,8 +362,9 @@ where noted:
   per run): H1b `deep8_c1_300_e4` done 2026-09-08 (+64, above); **H4 `gcnn8_c1_300_e4`** — the
   D4 group-convolutional net in self-play, exactly equivariant at the same inference cost —
   done 2026-09-09 and **hurt**: 22.0 % [19.9, 24.2], −220 Elo against its parent, +162 vs v2b,
-  with exact symmetry held at all 30 checkpoints and nothing unstable; the cause reads as
-  capacity, not the learning rate (PLAN6 log, 2026-09-09; KNOWLEDGE 50, and 48 restated).
+  with exact symmetry held at all 30 checkpoints and nothing unstable; the mechanism evidence is
+  consistent with capacity rather than the learning rate, not its proof (PLAN6 log, 2026-09-09; KNOWLEDGE 50,
+  and 48 restated; PLAN7 §7e row 20).
   **H3 `deep8_c1_600_e4` was withdrawn by the owner on 2026-09-09, unrun** — as written it
   doubles data, updates and teacher exposure together, the confound PLAN6 §0 exists to remove,
   so its reading could not have said which term moved; its queue scripts stay in the repo,

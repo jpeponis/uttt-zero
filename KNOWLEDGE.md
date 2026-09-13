@@ -242,7 +242,10 @@ review, 2026-09-12.)*
     +0.021 ± 0.045 / +0.034 ± 0.034 / +0.032 ± 0.031 (B3's) — positive in all six, significant
     in three. Against deep10's A4 intervals the centre (0.049 in [+0.030, +0.110]) and the edge
     (0.038 in [+0.029, +0.083]) sit *inside*, and only the corner (0.026 against [+0.035,
-    +0.095]) falls below — so by I1's rule the corner moved and the other two held. *(An earlier
+    +0.095]) falls below — so by I1's rule, in A4's model, the corner moved and the other two held;
+    in B3's model all three fall below deep10's B3 intervals (0.021 / 0.034 / 0.032 against
+    [0.032, 0.121] / [0.047, 0.111] / [0.038, 0.095]) and all three moved — the two models are
+    reported separately (M0 rebuttal, 2026-09-12). *(An earlier
     form of this line said "every one of them below deep10's interval", which its own numbers
     contradict; corrected after the M0 review, 2026-09-12.)* Over four strong nets the residual is
     **+0.02 … +0.08 and does not grow with strength**; "moved with strength" was the step up
@@ -832,8 +835,8 @@ review, 2026-09-12.)*
     ResNets (+2.6 / +4.1 / −0.4 / −0.3): each LR reduction lowers this net's floor by more
     than a ResNet's. Cost: t_selfplay 12.21 h against 11.93 (**1.02× — the equal-cost claim of
     48 holds at play**), t_train 7.58 h against 4.98 (1.52×, the per-step weight expansion and
-    the per-iteration re-export), wall 19.8 h against 16.9. **The mechanism is capacity, not
-    the effective learning rate.** The obvious story — a bank's gradient is the sum over its 8
+    the per-iteration re-export), wall 19.8 h against 16.9. **The mechanism evidence points to capacity, not
+    the effective learning rate — consistent with capacity, not its proof (M0 row 20).** The obvious story — a bank's gradient is the sum over its 8
     expanded copies, so the effective LR is 8× — is refuted by measurement: the summing is
     real (2.8–6.5× per trunk layer) but the BatchNorm weight-norm equilibrium absorbs it,
     leaving the relative step ‖g‖/‖w‖ 1.19× the ResNet's in the trunk and 1.41× in the heads.
