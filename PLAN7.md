@@ -20,47 +20,82 @@ game carries its level, CI, the nets it held on, and the file that produced it. 
 assembled from the claims file, not written beside it), and **every outside-review finding is
 adjudicated in this file before anything acts on it** (§7, as PLAN6 §1 did).
 
-## Handover (2026-09-12)
+## Handover (2026-09-12, 21:50 — written for the next instance; this one stopped at ≈ 77 % of its context)
 
-**State (2026-09-12, evening).** Nothing is running on either card (the 3090 shows 827 MiB and ≈ 10 %
-because it drives the desktop; that is not a job). The play agent is `runs/deep8_c1_300_e8/net_0300.pt`
-(+40 [+23, +57] over `_e4`, +363 vs v2b, endgame 91.3 / 0.022, 256-sim search 100 % optimal on both
-solved sets). The repository is public at `https://github.com/jpeponis/uttt-zero` (commit `cfc290e`:
-MIT for the code, CC BY 4.0 for the prose and data, `CITATION.cff`); **E11's off-machine copy is still
-owed** — 5.23 GB (`games/` 2.40, `net_*.pt` 2.81) with no destination on this machine (PLAN6 Handover
-2026-09-12; the `games/` corpora are single-copy). `runs/` is 17.02 GB.
+**State.** **Nothing is running**: no training, no review, no background job — the two watchers that
+would have relaunched the rebuttal at 00:30 and chained M2 behind it were stopped at the owner's
+request. **The owner has redeemed a Codex usage reset, so the window is live now**, and has set
+`gpt-6-astra`'s reasoning effort to **`medium`** in `~/.codex/personal.config.toml` (M0 ran at xhigh
+and cost 4.15 M input tokens; the owner suspects xhigh drove it — expect less, and note the effort in
+each review's log entry). Both cards idle (the 3090's ≈ 830 MiB is the desktop). Play agent
+`runs/deep8_c1_300_e8/net_0300.pt`, unchanged. `main` at the handoff commit, **14 commits ahead of
+`origin/main` (`cfc290e`), unpushed** — the owner's standing instruction is to push only on their word;
+**ask, and push first thing if told**. Tree clean apart from the deliberately untracked
+`runs/probe_gcnn_smoke/`. E11's off-machine copy is still owed (5.23 GB, no destination here);
+`runs/` is 17.02 GB. The repository is public at `https://github.com/jpeponis/uttt-zero`.
 
-**Done for this plan today:** the reading (KNOWLEDGE, RETROSPECTIVE, knowledge/01–06, PLAN6 §0–§1,
-§5, §9, REVIEW-astra's structure and the codex-review log's brief); the audit in §1; the preflight of
-the review mechanics (§7a — `codex-sp exec` ran `gpt-6-astra` at xhigh in a read-only sandbox in 6 s,
-session `01a097ef-822f-74b1-9320-ea4f93e2799a`); the literature survey delegated to an Opus agent —
-`knowledge/07-literature-2026-survey.md`, 885 lines, **landed and merged into §2** (the log's second
-entry; its one novelty-changing finding, a public AlphaZero on these exact rules, was verified against
-GitHub before it went in). **M0 done** — launched 19:54, returned 20:03 (564 s; `docs/reviews/M0_plan/REVIEW.md`,
-2 106 words; session `01a0980a-d906-7c61-a884-52d315a082d8`): seven prioritised findings and ≈ thirty
-specific corrections, **every one checked against the code or the logs here and adjudicated in §7e**
-— accepted, with the plan amended in §0 (title, the novelty sentence, the form of every headline
-number), §1a (the tiers restated as level / coverage / drift; nine claim-level corrections, three of
-them now written into KNOWLEDGE), §2 (four comparator corrections and one added), §3, §4 (J3
-redesigned, J4 gains a bounded solver), §5 (K1 gains a relabel control, the `_e8` parent re-read, a
-common position set, numerical thresholds and an *unresolved* verdict), §6, §7 and §8. The J1
-draft's independent tier check (the log's third entry) converged with M0 on every structural point.
-The rebuttal round is next.
+**Done today (the log has every number):** PLAN7 written; `knowledge/07` merged (novelty corrected:
+`pc29277/AlphaZero_UTTT`); **M0** — the review of this plan, 36 rows adjudicated in §7e, all accepted,
+the plan amended throughout; KNOWLEDGE 14 / 31a / 33 / the §1 note and knowledge/06 / 07 corrected;
+J1's claims map and J2's related-work section adopted into `docs/paper/` (drafts for M1); **J1a** —
+the last sealed endgame set read once on `_e8`, 92.7 [91.8, 93.6] against its dev half's 91.6 [90.6,
+92.6]; **K1's engineering** (`781dfca`, the `--rule count|draw` switch with a bit-for-bit `count`
+fixture, `test_rules.py` passing on the merged tree) and **J3 / J4's** (`934113a`, `solve_bounded`,
+`tools/empty_board.py`, `tools/frontier.py`) merged; `docs/reviews/M2_designs/` holds M2's brief,
+launcher and the two implementers' design notes; README / RETROSPECTIVE / history updated and PLAN6
+moved to `docs/history/` (J6, `f289c0a`).
 
-**What the next instance does, in order.** (1) *Done 2026-09-12:* `knowledge/07` merged into §2, §3
-re-ranked (C1's claim reworded, §2c). (2) *Done:* M0 launched, returned in 564 s, adjudicated (§7e),
-the plan amended. The **rebuttal round** (`codex exec resume`, the four questions §7e names) was cut
-off by the owner's Codex five-hour usage limit at 20:28 and **relaunches itself at 00:30** from a
-background job in this session (the log's 20:29 entry; by hand: `pwsh -NoProfile -ExecutionPolicy
-Bypass -File docs/reviews/M0_plan/launch_rebuttal.ps1`); its reply is recorded under §7e's table
-when it lands. **M2 is armed behind it**: a second background job launches
-`docs/reviews/M2_designs/launch.ps1` in the same window once `REBUTTAL.md` exists (by hand: the same
-`pwsh … -File` form); M2's brief is scoped to the K1 diff and the J3 / J4 designs, and its
-adjudication in §7e gates J3, J4 and K1's proposal to the owner. (3) Phase J (§4) on the desk and
-the 3060 — J1–J4 need no approval. (4) Put **K1** (§5) to the owner with M2's pre-registration review
-attached; launch only on approval, and only if the instance is under the 50 % line (PLAN6 Handover's
-rule, unchanged). (5) Phase L (§6) is the owner's call; §3 says why it is recommended. (6) The
-manuscript (J5) and the file updates (§10) follow the readings; M3 and M4 review the draft.
+**What the next instance does, in order.**
+
+1. **Launch the rebuttal round now** — the window is live. From the repo root, in PowerShell:
+   `pwsh -NoProfile -ExecutionPolicy Bypass -File docs/reviews/M0_plan/launch_rebuttal.ps1`
+   (or detached through `Start-Process`, §7a's form). The script resumes session
+   `01a0980a-d906-7c61-a884-52d315a082d8` with the brief `docs/reviews/M0_plan/rebuttal_brief.md` and
+   writes `status_rebuttal.txt`, `events_rebuttal.jsonl`, `REBUTTAL.md`. Watch it with
+   `python tools/review_events.py docs/reviews/M0_plan/events_rebuttal.jsonl`; wait with a background
+   `until [ -s docs/reviews/M0_plan/REBUTTAL.md ] || grep -q '^EXIT' docs/reviews/M0_plan/status_rebuttal.txt; do sleep 60; done`.
+   If it dies with the usage-limit message again, the window is spent — wait for the reset. When it
+   lands: record its answers under §7e's table (the four questions: (a) Wang et al.'s reuse conversion,
+   (b) pc29277's compute ratio, (c) the two relabel figures' source lines, (d) disputed rows); amend
+   §2b, §5 item 0 and §0 if it corrects a number; commit `REBUTTAL.md` with the entry.
+2. **Launch M2** in the same window (M2 is scoped; the one-per-window rule is for whole-repository
+   reviews): `pwsh -NoProfile -ExecutionPolicy Bypass -File docs/reviews/M2_designs/launch.ps1` — a
+   fresh `exec` on `docs/reviews/M2_designs/brief.md`, scoped to the K1 diff (`git diff 417e105 781dfca`),
+   the J3 / J4 designs and the two design-notes files. Adjudicate into §7e as M0 was — a new table,
+   PLAN6 §1's columns, **every evidence cell re-derived from the code or the logs before its verdict**;
+   amend §4 J3 / J4 and §5 as required. The J3 questions it must settle: the two floors, `gumbel_scale`,
+   arm (b)'s duplication (`J3J4_design_notes.md` items 1, 2, 6).
+3. **After M2:** run J3 (`tools/empty_board.py`, 3060, ≈ 1.5 h) and J4 (`tools/frontier.py`, CPU,
+   ≈ 3.5 h) as amended; their readings become KNOWLEDGE lines (and §10) and log entries. Thread
+   `--rule` through the five I1 tools K1's readings need — `decision.py`, `surprise.py`,
+   `ownership_grade.py`, `timeline.py`, `probe_value.py` (§5) — by a worktree agent on K1's pattern.
+   Run K1 item 1, the `_e8` count-rule pass (the I1 tool set on `_e8`, ≈ 5 h on the 3060;
+   `runs/plan6/I1_second_pass_3060.sh` is the template; outputs `runs/plan7/K1_parent_*.out`), and
+   item 0, the relabel control (minutes).
+4. **Put K1 to the owner** (§5) with M2's adjudication attached; launch only on approval and under
+   the 50 % line; ≈ 22 h on the 3090. `runs/queue13.sh` is the launcher template
+   (`R=deep8_c1_300_e8_draw`, `PARENT=deep8_c1_300_e8`, add `--rule draw` to the trainer and the E7
+   worker, anchors as before).
+5. **M1** — the review of the account (`docs/paper/01_claims_map.md`, `02_literature.md`) in a later
+   window; the claims map's judgement cells (the log's 20:40 entry lists them) are its first question.
+   Then **J5**, the manuscript skeleton, and §10's remaining file updates (the explainer's Part 8).
+6. Phase L (§6) is the owner's call. E11's copy when a destination exists. Everything in §8 stays
+   unproposed.
+
+**Traps — each cost time today.** Never pipe a brief into `codex-sp`: it is a PowerShell *function*,
+stdin does not reach the binary inside it, and `exec … -` hangs on the console's stdin (0 CPU, 0
+bytes); the launchers pass a one-line prompt naming the brief file and redirect the child's stdin from
+`empty_stdin.txt`. `Start-Process -ArgumentList` takes one quoted string, not an array — the array
+splits at the space in the user name and the child exits at once having run nothing. One
+whole-repository review per five-hour Codex window; rebuttals in the next. `tests/test_symmetry.py`
+passes on `cuda:0` only (§11). Agent worktrees live under `.claude/worktrees/` (ignored), start from
+the commit current at launch, lack `.venv` and `runs/*/games`, and two agents on one file conflict at
+merge — resolve into one design, then remove the worktree and its branch. `gumbel_scale` is in no
+`config.json`; every run trained at 1.0. The Monitor tool delivers nothing from files on this machine —
+use a background `until` loop. The PowerShell tool refuses any command containing `Remove-Item` on a
+variable path (a static check) — clean up from bash. Delegate write-ups and file-heavy work to
+`directed` (opus) agents, scratchpad drafts first, adopt after a read; keep the reviewed files frozen
+while a reviewer is running.
 
 ## Log
 
@@ -184,7 +219,16 @@ manuscript (J5) and the file updates (§10) follow the readings; M3 and M4 revie
   `test_exact`, `test_endgame`, `test_tablebase` pass on the merged tree; **`test_rules.py` passed on
   it at 21:23** (exit 0, 603 s — the 2 000-game fixture bit for bit, 43 of 200 solver values
   differing by rule, 100 000 cross-engine games per rule with the same 77 913 line endings: every
-  line identical to the agent's run in its worktree). Its report also found `tests/test_symmetry.py` failing — characterised here as
+  line identical to the agent's run in its worktree).
+- **2026-09-12, 21:50 — handoff.** The owner redeemed a Codex usage reset (the window is live) and set
+  `gpt-6-astra`'s reasoning effort to **medium** in `~/.codex/personal.config.toml` (M0 and the first
+  rebuttal attempt ran at xhigh; the owner suspects xhigh drove the 4.15 M-token cost). At the owner's
+  request the two background jobs — the 00:30 rebuttal relaunch and the M2 chain behind it — were
+  stopped; nothing is running. J6 done (`f289c0a`: README, RETROSPECTIVE §7, the history index, PLAN6
+  moved). The Handover is rewritten for the next instance: launch the rebuttal by hand now, then M2,
+  adjudicate, J3 / J4, the five tools, the `_e8` count pass, K1 to the owner. `main` is 14 commits
+  ahead of `origin/main`, unpushed pending the owner's word. This instance stopped at ≈ 77 % of its
+  context. Its report also found `tests/test_symmetry.py` failing — characterised here as
   device-specific, `cuda:1` only, the process-global capture stream (§11). §5 records what is not yet
   threaded and must be before K1's readings (five I1 tools). `docs/reviews/M2_designs/brief.md` and
   `launch.ps1` are written; M2 launches in the Codex window after the rebuttal.
@@ -724,7 +768,10 @@ The `personal` profile (`~/.codex/personal.config.toml`) sets **`model = "gpt-6-
   cut off after 456 s by *"You've hit your usage limit … try again at Sep 13th, 2026 12:24 AM"*
   (`turn.failed`; the log's 20:29 entry). So: one whole-repository review per five-hour window; later
   stages' briefs name the files to read rather than the repository; a rebuttal is launched in the
-  *next* window, not the same one.
+  *next* window, not the same one. **Reasoning effort:** M0 and the first rebuttal attempt ran at
+  xhigh; at handoff (2026-09-12, 21:50) the owner set the profile to `medium` after redeeming a usage
+  reset — later stages run at medium unless the owner says otherwise, and each review's log entry
+  states the effort so costs can be compared.
 - **Monitoring from this session:** a background shell per review, its JSONL tailed with `Read`;
   the event types worth watching are the agent's messages (its running commentary), each `exec`
   (what it is checking) and the final `-o` write. A review that stops emitting for 20 min is checked,
