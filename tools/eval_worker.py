@@ -71,6 +71,9 @@ class Worker:
         if a.cap:
             self.suite = self.suite.subset(a.cap)
         self.es = EndgameSet.load(a.set) if a.set else None
+        if self.es is not None and self.es.rule != a.rule:  # before a single match is played, not at grading time (M2 row 9)
+            sys.exit(f"endgame set {a.set} was solved under rule {self.es.rule!r} and --rule is {a.rule!r}: its exact labels "
+                     f"would be wrong. Build a {a.rule}-rule set with tools/endgame.py build --rule {a.rule}, or pass --set ''.")
         self.cfg = SearchConfig(n_sims=a.sims, mode="gumbel", gumbel_scale=0.0, cuda_graph=device.type == "cuda", depth_cap=min(a.sims, 24))
         self.anchors = {anchor_name(p): FusedEvaluator(load_checkpoint(p, device), device) for p in a.anchors.split(",") if p}
         self.pb = {k: SearchPlayer(ev, self.suite.n, self.cfg, device, rule=a.rule) for k, ev in self.anchors.items()}

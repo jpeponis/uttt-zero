@@ -6,6 +6,10 @@ Held-out corpus games (another run's self-play) are replayed; at every ply the n
 search's root value predict the final result. Reported by ply: log-loss and accuracy of the raw WDL head,
 sign accuracy of raw and search values, and the share of games already "settled" (the 3-way prediction is
 correct at this ply and at every later ply). Also the distribution of each game's settling ply.
+
+--rule count|draw is the rule the games are REPLAYED under and the rule the trees expand under; the corpus's
+own outcomes are relabelled to it the way tools/corpus_stats.py does (a game ends at the same ply under either
+rule, so only the verdict moves), and the impossible direction is refused (PLAN7 §5 K1).
 """
 from __future__ import annotations
 
@@ -18,10 +22,13 @@ import numpy as np
 import torch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.dirname(__file__))
+from corpus_stats import corpus_rule, relabel  # noqa: E402
 from uttt.batch import BatchUTTT  # noqa: E402
 from uttt.endgame import wdl_probs  # noqa: E402
 from uttt.infer import FusedEvaluator  # noqa: E402
 from uttt.model import load_checkpoint  # noqa: E402
+from uttt.rules import RULES  # noqa: E402
 from uttt.search import BatchedSearch, SearchConfig  # noqa: E402
 
 
@@ -37,6 +44,9 @@ def main() -> None:
     ap.add_argument("--last", type=int, default=2)
     ap.add_argument("--games", type=int, default=4000)
     ap.add_argument("--sims", type=int, default=64)
+    ap.add_argument("--rule", choices=RULES, default="count", help="terminal rule the games are replayed and searched under")
+    ap.add_argument("--corpus_rule", choices=RULES, default="", help="the rule the corpus was GENERATED under, for a "
+                    "directory with no config.json and no rule tag in its game files")
     ap.add_argument("--device", default="cuda:1")
     a = ap.parse_args()
     device = torch.device(a.device)
@@ -44,13 +54,17 @@ def main() -> None:
     moves = np.concatenate([np.load(f)["moves"] for f in files])
     winners = np.concatenate([np.load(f)["winners"] for f in files])
     lengths = np.concatenate([np.load(f)["lengths"] for f in files])
+    reasons = np.concatenate([np.load(f)["reasons"] for f in files])
+    src = corpus_rule(a.corpus, a.corpus_rule)
+    n_window = len(winners)
+    winners, reasons, relabelled = relabel(winners, reasons, src, a.rule)  # refuses draw -> count
     rng = np.random.default_rng(0)
     sel = rng.choice(len(winners), size=min(a.games, len(winners)), replace=False)
     moves, winners, lengths = moves[sel], winners[sel], lengths[sel]
     G, T = len(sel), int(lengths.max())
     fe = FusedEvaluator(load_checkpoint(a.checkpoint, device), device)
-    srch = BatchedSearch(fe, G, SearchConfig(n_sims=a.sims, mode="gumbel", gumbel_scale=0.0, cuda_graph=device.type == "cuda", depth_cap=min(a.sims, 24)), device)
-    g = BatchUTTT(G, device)
+    srch = BatchedSearch(fe, G, SearchConfig(n_sims=a.sims, mode="gumbel", gumbel_scale=0.0, cuda_graph=device.type == "cuda", depth_cap=min(a.sims, 24)), device, rule=a.rule)
+    g = BatchUTTT(G, device, a.rule)
     mv = torch.from_numpy(moves.astype(np.int64)).to(device)
     final = torch.from_numpy(winners.astype(np.int64)).to(device)
     y = (1 - final)  # X's class: win 0 / draw 1 / loss 2
@@ -85,6 +99,8 @@ def main() -> None:
 
     set_raw, set_srch, set_q = settled_from(raw_v), settled_from(srch_v), settled_from(q_v)
     print(f"{G} held-out games from {[os.path.basename(f) for f in files]} ({a.corpus}); net {a.checkpoint}; search {a.sims} sims")
+    print(f"rule {a.rule} (corpus generated under {src}; {relabelled} of the window's {n_window} outcomes relabelled "
+          f"from a count decision to a draw before sampling)")
     print(f"result X/O/draw: {(fin == 1).mean():.3f}/{(fin == -1).mean():.3f}/{(fin == 0).mean():.3f}; mean length {lengths.mean():.1f}")
     print(f"\n{'ply':>4s} {'alive':>6s} {'WDL logloss':>12s} {'WDL acc':>8s} {'raw sign':>9s} {'srch sign':>10s} {'Q sign':>7s} {'settled raw':>12s} {'settled srch':>13s} {'settled Q':>10s}")
     for t in range(0, T, 4):

@@ -11,6 +11,10 @@ Probes:
   close-board : positions where board B is open and the mover is NOT sent there -> mark it drawn/full
                 (removes it from play for both), measuring how much an open board is worth to the mover.
 Values are raw (no search); the caveat from knowledge/05 applies: this measures what the net believes.
+
+--rule count|draw is the rule the reading is made under. Nothing here searches or ends a game, so the rule
+changes no arithmetic; it is carried so that the reading is labelled, and so that a buffer belonging to a run
+trained under another rule is refused instead of being read as if it were this one's (PLAN7 §5 K1).
 """
 from __future__ import annotations
 
@@ -21,12 +25,29 @@ import sys
 import torch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.dirname(__file__))
+from corpus_stats import corpus_rule  # noqa: E402
 from uttt.batch import FULL  # noqa: E402
 from uttt.infer import FusedEvaluator  # noqa: E402
 from uttt.model import load_checkpoint  # noqa: E402
+from uttt.rules import RULES  # noqa: E402
 from uttt.symmetry import SymmetryAveragedEvaluator  # noqa: E402
 
 CENTRE, CORNERS, EDGES = [4], [0, 2, 6, 8], [1, 3, 5, 7]
+
+
+def check_buffer_rule(buffer_path: str, rule: str, override: str = "") -> str:
+    """Refuse a buffer whose positions came from a run trained under another rule (M2 row 9's pattern).
+
+    The rule is taken from the run directory the checkpoint sits in — its config.json, or the rule tag in its
+    game files — and not from the checkpoint, so that establishing it costs no multi-gigabyte torch.load of a
+    buffer file. The two cannot disagree: a resume under another rule is refused in uttt.train2."""
+    src = corpus_rule(os.path.dirname(buffer_path), override)
+    if src != rule:
+        sys.exit(f"{buffer_path} holds positions from a {src}-rule run and --rule is {rule}: its values, "
+                 f"ownership and margin targets were decided under {src}. Read it under --rule {src}, "
+                 f"or point --buffer at a {rule}-rule run.")
+    return src
 
 
 def load_eval(path, device):
@@ -82,13 +103,16 @@ def main() -> None:
     ap.add_argument("--n", type=int, default=60000)
     ap.add_argument("--ply_lo", type=int, default=6)
     ap.add_argument("--ply_hi", type=int, default=60)
+    ap.add_argument("--rule", choices=RULES, default="count", help="terminal rule this reading is made under; the buffer must belong to a run of that rule")
+    ap.add_argument("--corpus_rule", choices=RULES, default="", help="the buffer's run rule, when neither the checkpoint nor the run directory records one")
     ap.add_argument("--device", default="cuda:1")
     a = ap.parse_args()
     device = torch.device(a.device)
+    check_buffer_rule(a.buffer, a.rule, a.corpus_rule)
     ev = load_eval(a.checkpoint, device)
     P = load_positions(a.buffer, device, a.n, a.ply_lo, a.ply_hi)
     cells, macro, nb, player, ply = P["cells"], P["macro"], P["next_board"], P["player"], P["ply"].long()
-    print(f"{cells.shape[0]} distinct positions, plies {a.ply_lo}-{a.ply_hi}, from {a.buffer}")
+    print(f"{cells.shape[0]} distinct positions, plies {a.ply_lo}-{a.ply_hi}, from {a.buffer}; rule {a.rule}")
     base = value(ev, cells, macro, nb, player)
     print(f"baseline value (side to move): mean {float(base.mean()):+.3f}\n")
 

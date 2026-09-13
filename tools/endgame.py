@@ -65,7 +65,7 @@ def cmd_eval(a) -> None:
         from uttt.rollout import RolloutPlayer
 
         t2 = time.perf_counter()
-        row = evaluate_rollout(RolloutPlayer(a.rollout, rule=a.rule).act, es, a.boot)
+        row = evaluate_rollout(RolloutPlayer(a.rollout, rule=a.rule).act, es, a.boot, rule=a.rule)
         row["name"] = f"rollout UCT {a.rollout} playouts"
         extra.append(row)
         print(f"rollout anchor scored in {time.perf_counter() - t2:.0f}s")

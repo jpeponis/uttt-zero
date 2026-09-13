@@ -13,6 +13,11 @@ test split of a probe dataset (tools/probe.py build), by ply bucket, against:
              on the trained net and (--control) on a randomly initialised net of the same shape.
 
     .venv/Scripts/python.exe tools/ownership_grade.py --data runs/probe_data_deep8late.npz --net runs/deep10_c1_300/net_0300.pt --control --device cuda:1 --out runs/plan6_E9_ownership_deep10.json
+
+--rule count|draw is the rule this reading is made under. Final board ownership is a property of the final
+macro grid and so is the same under both rules, but the probe dataset was BUILT under one rule (its exact
+labels and its sampled positions), and a dataset of another rule is refused rather than quietly mixed into
+a reading labelled with this one — the same closure as tools/principles.py (PLAN7 §5 K1).
 """
 from __future__ import annotations
 
@@ -31,6 +36,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from probe import layer_activations  # noqa: E402
 from uttt.batch import LINES, encode  # noqa: E402
 from uttt.model import NetConfig, ResNet, load_checkpoint  # noqa: E402
+from uttt.rules import RULES, tag_path  # noqa: E402
 
 PLY_BUCKETS = ((0, 7), (8, 19), (20, 31), (32, 43), (44, 80))
 BOARD_CLASS = torch.tensor([0, 1, 0, 1, 2, 1, 0, 1, 0])  # corner / edge / centre
@@ -128,12 +134,17 @@ def main() -> None:
     ap.add_argument("--data", default="runs/probe_data_deep8late.npz")
     ap.add_argument("--net", default="runs/deep10_c1_300/net_0300.pt")
     ap.add_argument("--control", action="store_true", help="also probe a randomly initialised net of the same shape")
+    ap.add_argument("--rule", choices=RULES, default="count", help="terminal rule this reading is made under; the dataset must carry it")
     ap.add_argument("--device", default="cuda:1")
     ap.add_argument("--out", default="")
     a = ap.parse_args()
     device = torch.device(a.device)
     t0 = time.perf_counter()
     z = np.load(a.data, allow_pickle=True)
+    data_rule = json.loads(str(z["meta"])).get("rule", "count") if "meta" in z.files else "count"  # pre-K1 datasets: count
+    if data_rule != a.rule:
+        sys.exit(f"{a.data} was built under rule {data_rule!r} and --rule is {a.rule!r}: rebuild it with "
+                 f"tools/probe.py build --rule {a.rule}, or read it under --rule {data_rule}")
     t = lambda k, dt: torch.from_numpy(np.asarray(z[k], dtype=dt)).to(device)  # noqa: E731
     cells, macro, nb, player = t("cells", np.int8), t("macro", np.int8), t("next_board", np.int8), t("player", np.int8)
     ply = t("ply", np.int64)
@@ -143,7 +154,7 @@ def main() -> None:
     tr = torch.from_numpy(np.flatnonzero(split == 0)).to(device)
     te = torch.from_numpy(np.flatnonzero(split == 1)).to(device)
     N = cells.shape[0]
-    print(f"{a.data}: {N} positions, test split {len(te)}; open boards in test: {int(open_mask[te].sum())} of {9 * len(te)}", flush=True)
+    print(f"{a.data}: {N} positions, test split {len(te)}; open boards in test: {int(open_mask[te].sum())} of {9 * len(te)}; rule {a.rule}", flush=True)
 
     net = load_checkpoint(a.net, device)
     preds = {"head": head_predictions(net, cells, macro, nb, player, device)}
@@ -182,9 +193,10 @@ def main() -> None:
         print(f"  {r['ply']:6s} {r['n_open_boards']:7d}   {str(r['class_shares_test']):22s} " + "  ".join(f"{100 * r[c]:12.1f}" for c in cols))
     print(f"  ({time.perf_counter() - t0:.0f}s)")
     if a.out:
-        with open(a.out, "w") as f:
-            json.dump({"data": a.data, "net": a.net, "rows": rows, "columns": cols}, f, indent=1)
-        print(f"wrote {a.out}")
+        out = tag_path(a.out, a.rule)
+        with open(out, "w") as f:
+            json.dump({"rule": a.rule, "data": a.data, "net": a.net, "rows": rows, "columns": cols}, f, indent=1)
+        print(f"wrote {out}")
 
 
 if __name__ == "__main__":
