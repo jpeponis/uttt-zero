@@ -24,8 +24,11 @@ adjudicated in this file before anything acts on it** (§7, as PLAN6 §1 did).
 
 **Update (2026-09-12, 22:19, the next instance).** Step 1 is done: the rebuttal returned in 123 s and is
 adjudicated (§7e R1–R8; the log's 22:10 entry). The count-pass half of step 3 is **running**: K1 item 1 on the
-3060 (`runs/plan7/K1_parent_pass.out`, ≈ 5 h from 22:19). M2 launches next in the same window. The rest of
-the list stands.
+3060 (`runs/plan7/K1_parent_pass.out`, ≈ 5 h from 22:19). **M2 returned at 22:24** (267 s, medium, 0.94 M tokens) and is adjudicated (§7e M2, 18 rows; the
+log's 22:31 entry). Its engineering — rows 1, 4–9, 15–16, 18 — and the five I1 tools are with two
+worktree agents (the log entry names them); when they merge: run J3 and J4 as amended (§4), then put K1
+to the owner with §7e M2 attached. M1 is armed (`docs/reviews/M1_account/`) for the next window. The rest
+of the list stands.
 
 **State.** **Nothing is running**: no training, no review, no background job — the two watchers that
 would have relaunched the rebuttal at 00:30 and chained M2 behind it were stopped at the owner's
@@ -265,6 +268,26 @@ while a reviewer is running.
   reading (HELD / MOVED / REVERSED against `_e4`) is also the baseline every K1 draw reading is read against.
   The five un-threaded I1 tools run count-by-construction here and are threaded after M2, before any draw
   reading. Next: M2.
+- **2026-09-12, 22:31 — M2 returned (22:24) and is adjudicated (§7e M2, 18 rows).** Launched 22:19 from
+  `5a4e348` after §5 and its brief carried the rebuttal's 33.0 %: **267 s**, 943 141 input tokens (816 512
+  cached), 6 298 output, 12 commands, 434 KB read, 2 063 words — a scoped review at medium costs a fifth
+  of M0. Every one of its eight findings re-derived from the code before its verdict; all accepted, two
+  with a change of remedy (rows 6, 14). What it changed: **the count-coefficient prediction was already
+  satisfied by the count-trained parent** (`_e4`'s search coefficient +0.014, KNOWLEDGE 16) — §5 item 2
+  now reads a paired Δ on the common set with a 0.005 margin, and an interval rule for the draw net's own
+  coefficient; **J3's duplication correction was statistically wrong** (my predecessor's, not the
+  reviewer's) — i.i.d. games from a narrow policy are independent draws, so the interval stands and the
+  concentration is reported beside it; (b) and (c) play with the plain evaluator, (a) alone averaged;
+  **the relabel control now has the parent's own figures**, 15.7 % of outcomes and 32.3 % no-line
+  endings from the pass's `K1_parent_A6_corpus_stats.out`, and the draw-share prediction is read against
+  that 32.3 %, not a 30 % floor relabelling already clears; the cross-play contrast is two scores and a
+  difference, with no "collect boards" mechanism attached; J4's ordinate is *complete legal-action value
+  coverage within budget*, with Wilson intervals and a per-position table; `gumbel_scale` gets recorded
+  at last, and a cross-rule resume, the sims-keyed search cache, the count-only surrogate, `book.py`'s
+  paired file, an untagged corpus and `principles`' first-20 000 truncation are each closed. The
+  engineering goes to two worktree agents (below), the five I1 tools with it; J3 and J4 run after they
+  merge; K1 goes to the owner with this table attached. The E7 worker and every reading tool keep the
+  plumbing they have.
 
 ## 0. The decision in front of the project
 
@@ -546,8 +569,9 @@ Ranked by what each adds to the paper per unit of cost, with the honest form of 
   the tiebreak adds". Owner's approval required.
 - **C3. The exact frontier as a curve — hours on the CPU (J4).** For strong-play positions at each
   ply, the fraction the solver completes within a fixed budget, and the agent's optimality there. Gives,
-  per ply, the solved fraction *conditional on games alive at that ply* under a stated node budget
-  (an unfinished search returns *unknown*) and the agent's optimality *conditional on solved* — a
+  per ply, the fraction admitting *complete legal-action value coverage* within a stated node budget,
+  conditional on games alive at that ply (an unfinished search returns *unknown*), and the agent's
+  optimality conditional on that (M2) — a
   measured curve, not a milestone and not "solved from ply N" (M0). Needs a bounded solver first (J4);
   its design is reviewed in M2. No approval needed.
 - **C4. The sample-reuse dose–response and the equivariance negative — already in hand, free.** The
@@ -601,7 +625,8 @@ single new experiment. C6 is recommended and priced in §6.
 - **J3. The empty board (C5) — redesigned after M0.** The first design ("2 000 greedy games") was
   defective: with sampling off the search is deterministic and repeats one trajectory; with it on,
   `sample_moves` / `temperature` gate the opening sampling, not the Gumbel scale
-  (`uttt/search.py:308–318`). Three measurements on `deep8_c1_300_e8` and `_e4`, symmetry-averaged:
+  (`uttt/search.py:308–318`). Three measurements on `deep8_c1_300_e8` and `_e4` — (a) symmetry-averaged, (b) and (c) with the plain
+  evaluator, the agent that generated the corpus (M2 row 15):
   (a) the root value of the empty board and its deterministic principal line at 16 384 sims — one
   number and one line, reported as search-relative; (b) 2 000 games at 256 sims with the search
   policy sampled proportionally for the first 4 plies and the uniform floor *off* — the X / O / draw
@@ -616,10 +641,18 @@ single new experiment. C6 is recommended and priced in §6.
   16 distinct. Two findings for M2: **there are two floors** (`sample_uniform` on the sampling
   distribution, `root_prior_floor` on the tree itself), and **`gumbel_scale` is not in `config.json`**
   — `train2.py` never sets it, so self-play ran at `MCTSConfig`'s default 1.0, root noise at every ply.
-  Arm (b) as specified is deterministic after ply 4 and replays a handful of lines, so its interval is
-  optimistic by exactly the duplication the tool now reports. M2 decides whether (b) keeps more
-  sampled plies with the floors off or bootstraps over distinct lines; the four knobs that differ
-  between (b) and (c) are stated in the output.
+  Arm (b) as specified is deterministic after ply 4 and replays a handful of lines. *M2 (§7e M2 rows 3,
+  15), adopted:* the games are independent draws from that stochastic policy, so the Wilson interval is
+  correct for the policy's outcome distribution and the concentration (distinct games, distinct openings)
+  is reported beside it, not corrected for — the first form's "optimistic by exactly the duplication" was
+  wrong, no bootstrap over distinct lines, no wider sampling to raise the distinct count; (b) and (c) are
+  played with the plain evaluator and only (a) is symmetry-averaged; (b) − (c) is the exploration
+  *package* at a matched budget (four knobs — sampled plies 4 vs 8, sampling floor 0 vs 0.15, prior floor
+  0 vs 0.03, Gumbel 0 vs 1 — not attributed singly); (a) is a different search (PUCT, depth cap 40) and a
+  separate measurement; the meta states the depth cap (24 against the trained 12) and the budget (256
+  against the trained 32 → 64); the tool labels `timeline.json`'s first-move statistic as the raw policy's
+  probability and prints the log's generated-game share beside it (0.982 against 0.835 at iteration 299;
+  row 7); `--rule` threaded, `count` for these parents.
 - **J4. The exact frontier (C3) — with the engineering M0 identified.** `uttt/solver.py solve()` has
   no node budget (its docstring says so): add `solve_bounded(…, max_nodes)` — the Numba negamax checks
   the node counter and unwinds, returning *unknown* — with a test that bounded and unbounded agree
@@ -637,7 +670,17 @@ single new experiment. C6 is recommended and priced in §6.
   for. Budget semantics: one `max_nodes` for the position and its whole child enumeration (the grading
   needs every child). Grading uses the plain evaluator, as `endgame.py eval` does; J3
   symmetry-averages — the asymmetry is deliberate and documented. Real cost ≈ 6.5 min per ply,
-  ≈ 3.5 h for plies 40–70, after M2.
+  ≈ 3.5 h for plies 40–70, after M2. *M2 (§7e M2 rows 4, 16), adopted:* the ordinate is **complete
+  legal-action value coverage within the budget**, stricter than root solvability and named so in the
+  fields; terminal children cost zero counted nodes (the count bounds search work, not wall time);
+  Wilson intervals for both proportions (the bootstrap on an all-success sample printed [100, 100]) with
+  a finite-population note where the sample is the whole alive set; the per-position table (game, ply,
+  completion, nodes, child values, chosen move, regret) saved beside the aggregates; across-ply
+  comparisons need game-linked resampling. The supportable sentence: *among games in this checkpoint's
+  late corpus still alive at each sampled ply, the measured fraction admitted complete action-value
+  enumeration within 10⁸ counted nodes, and the 256-simulation agent achieved the reported optimal-move
+  rate on that subset* — no monotonicity, no frontier, no "solved from ply N", even from 100 % sampled
+  success.
 - **J5. The manuscript skeleton.** `docs/paper/paper.md` — abstract, the game and its variant,
   methods (the pipeline in a page; the measurement kit; the drift test), the training ledger, the game
   account tier by tier, the equivariance negative, limitations (§0's list), reproducibility (the
@@ -681,7 +724,14 @@ exactly the 280 count endings into draws; hand-made terminals; solver vs brute f
 **Before item 2's readings — not before the launch:** `decision.py`, `surprise.py`,
 `ownership_grade.py`, `timeline.py` and `probe_value.py` are I1 tools that are not yet threaded and
 would search under `count` on a draw net; they get the same two-line treatment first (`gdata.py`,
-`annotate.py`, `endgame_accuracy.py` likewise if used). The K1 diff is M2's first object. Tests: the two engines
+`annotate.py`, `endgame_accuracy.py` likewise if used). The K1 diff was M2's first object; *its findings (§7e M2 rows 1, 5, 6, 8, 9, 18), all accepted, are
+applied before the launch:* a cross-rule resume refused before anything is written; the endgame search
+cache keyed by rule; `gumbel_scale` in `TrainConfig` (1.0, unchanged) and the resolved search
+configuration written into `_provenance`; `surrogate:` players refused under a non-count rule; `book.py`'s
+paired file checked for its rule; `corpus_stats` refusing a corpus with no `config.json` unless
+`--corpus_rule` says what it is, and every new game file tagged with its rule; `principles` sampling its
+draws uniformly over the window and reporting X and O separately; the E7 worker checking its endgame set
+at construction; `evaluate_rollout` given its rule explicitly; the tests M2 listed. Tests: the two engines
 cross-checked under both rules on 10⁶ random games; a hand-made 4–4 final position that is a count
 draw under both rules and a 5–3 one that is a win under `count` and a draw under `draw`; the solver
 against brute force on tiny positions under both. The paired suite is opening positions and needs no
@@ -697,7 +747,10 @@ plus ≈ 6 h on the 3060 for the readings. Inside the Windows Update pause (to 2
    and 33.0 % reach the no-line terminal (`runs/plan6/I1_A6_corpus_stats.out` lines 2–3: by line 67.0 %,
    by count 16.5 %, equal count 16.6 % — the categories are exhaustive, so the no-line share is
    100 − 67.0 = 33.0 %, not the 33.1 % of two separately rounded parts; rebuttal R3) — two different
-   quantities, both stated. This measures mechanical relabelling and claims nothing about how an agent
+   quantities, both stated. **On the parent itself** (`runs/plan7/K1_parent_A6_corpus_stats.out:1–3`,
+   2026-09-12): 98 581 games, by count **15.7 %**, equal count 16.6 %, by line 67.7 % — so **15.7 % of
+   outcomes change and 32.3 % reach the no-line terminal**; these are the control's numbers (M2 row 10;
+   the log-weighted 32.33 % the reviewer computed agrees). This measures mechanical relabelling and claims nothing about how an agent
    trained under the rule would have played.
 1. **The count-rule parent, re-read.** K1's parent is `_e8`, and the count-rule game claims were read
    on `_e4`; comparing a draw-trained `_e8` with a count-trained `_e4` would mix the rule with +40 Elo
@@ -709,25 +762,40 @@ plus ≈ 6 h on the 3060 for the readings. Inside the Windows Update pause (to 2
    (sign and ordering as under `count`, magnitude inside the count reading's interval where one
    exists), **rule-dependent** (a sign or ordering differs, or the magnitude falls outside the interval
    by a stated margin), or **unresolved** (neither resolves at the precision available). Predictions,
-   with thresholds: 1 invariant ([40] rank 1 at all three budgets; uttt.ai's draw-variant engine
-   agrees); 24 dependent — the draw share of self-play games ≥ 30 % against 16.6 % under `count`
-   (SaltZero's 48 % under `draw` is the only datum); 25 not applicable (no count endings); 16 — the
-   board-count coefficient on the search value falls to |β| ≤ 0.015 with a 95 % interval excluding
-   0.03, *or* unresolved, stated weakly on purpose: the count still correlates with line
-   opportunities, and the unchanged recipe keeps the margin and ownership auxiliary targets
-   (`uttt/selfplay_cont.py:159–169`), which are count-flavoured; 8 and 13 invariant (a free move and
-   a macro threat within the count reading's intervals); 7's reply after [40] — no prediction, with a
-   tie tolerance of 0.02 on the visit share; 33–34 invariant (a line rule).
+   with thresholds: 1 invariant ([40] rank 1 at all three budgets by search value, a gap ≤ 0.01 to the runner-up
+   counting as a tie → unresolved; uttt.ai's draw-variant engine agrees); 24 dependent — the draw share of the draw net's self-play read against the **mechanical relabel
+   baseline of 32.3 %** (item 0): above it by ≥ 2 points (a Wilson interval on ≈ 98 k games is ± 0.3)
+   means adaptation towards draws, below it by ≥ 2 away from them, between unresolved; ≥ 30 % against
+   16.6 % under `count` is only the floor, satisfied by relabelling alone (SaltZero's 48 % under `draw`
+   is the only datum; M2 row 11); 25 not applicable (no count endings); 16 — **primary:**
+   the paired difference Δ = β_draw − β_count of the count-margin coefficient, raw head and search value
+   each, on the common position set (item 3) with the same design matrix and game-clustered paired
+   inference; prediction Δ ≤ −0.005 with the interval excluding 0 (a pre-declared practical margin, not
+   a derived constant). **Secondary**, the draw net's own coefficient with interval I: *supported* if
+   I ⊆ [−0.015, +0.015], *contradicted* if I lies wholly outside it, *unresolved* otherwise — unresolved
+   means insufficient precision, never an inconvenient result. Restated this way because the
+   count-trained parent already satisfies the first form's band (`_e4`'s search coefficient is +0.014,
+   KNOWLEDGE 16; M2 row 2); the margin and ownership auxiliaries stay count-flavoured
+   (`uttt/selfplay_cont.py:159–169`) and give no ground for relaxing it; 8 and 13 — read as
+   *differences* on the common set, paired by game: |Δ| < 0.03 utility invariant, ≥ 0.03 with the
+   interval excluding 0 dependent, otherwise unresolved ("inside the count reading's interval" is
+   compatibility, not equivalence; M2 row 12); 7's reply after [40] — no prediction, a tie tolerance of
+   0.02 on the aggregated reply-orbit *visit share* at the book's 16 384 sims (not a value tolerance),
+   visits and Q both saved; 33–34 invariant (a line rule; 33's counterexample can survive while its
+   percentages change, and 34's immediate-loss avoidance is read apart from them).
 3. **A common position set.** Both nets evaluated under both rules on one frozen set of natural
    positions (2 000 from each corpus), so the rule's effect on the *value* is read on identical
    inputs; on the solved subset the rule-induced change in the *exact* minimax value is computed with
-   no net at all.
+   no net at all — reported by source corpus and on the intersection solved under both rules (M2
+   row 17).
 4. **Cross-play (secondary), defined algebraically.** The paired suite at 64 sims gives one
    independent score per rule — the draw net against the count net under `count`, and under `draw` —
    each with its pair-bootstrap interval (colour-swapped cells are complementary, not four numbers).
    Pre-registered contrast: the count-trained net's score under `draw` minus the draw-trained net's
-   score under `count`; prediction positive (the count rule adds a skill the draw net never learned —
-   the "collect boards" endgame, 32's tiebreak-conversion motif), read by the ± 3 rule.
+   score under `count` (1 − s_D − s_C in the draw net's two scores); prediction positive, read by the
+   ± 3 rule with a joint pair bootstrap over opening IDs (the two scores share the suite). Two scores
+   and a contrast — not an interaction: either net's general superiority moves it, so no mechanism
+   ("collect boards", 32's tiebreak-conversion motif) is attributed to it (M2 row 13).
 5. **Corpus (tertiary).** Draw share, length, free moves per game, the self-send rate, end reasons
    over the last 20 iterations; the draw anatomy (26) under a rule where 5–3 is a draw.
 6. **Strength under its own rule.** The draw net's E7 curve against the `count` anchors *under
@@ -953,6 +1021,41 @@ al. reuse conversion; (b) pc29277's compute in comparable units; (c) the two rel
 
 *Not put to the reviewer, noted for M1:* the reviewer's answers (a) and (b) are recomputations a
 reader can repeat from the two repositories' public records; the paper quotes them in that form.
+
+**M2 — K1's pre-registration and the J3 / J4 designs (`docs/reviews/M2_designs/REVIEW.md`, commit
+`5a4e348`, 2026-09-12 22:19–22:24, reasoning effort medium: 267 s, 943 141 input tokens of which 816 512
+cached, 6 298 output, 12 commands, 434 KB read; 2 063 words — eight findings and answers to all six
+questions).** Verdicts as before; every evidence cell re-derived here from the code or the outputs before
+its verdict.
+
+| # | review item | verdict | evidence / reason | lands in |
+|---|---|---|---|---|
+| 1 | F1: a cross-rule resume restores weights, optimizer and buffer behind a config-differs warning (`train2.py:259–266, 319–336`); `endgame.py:288–295`'s search cache is keyed by sims alone, so one process could grade a draw set with a count search | accept | Read: the resume block loads `ck["net" / "opt" / "buffer"]` after the WARNING with no rule comparison; `search_cache.get(s)` returns the `BatchedSearch` built with the first call's rule. Neither caller (EvalKit, the E7 worker) changes rule within a process, so it has not bitten; it is unsafe by construction | `train2.py`: a resume whose `config.json` rule differs is refused before anything is written; the cache keyed by (sims, rule); tests for both |
+| 2 | F2: the count-coefficient prediction has no failure outcome and may already describe the control — `_e4`'s search coefficient is +0.014, inside the band | **accept** | KNOWLEDGE 16: "`_e4` … the search's +0.047 → +0.014"; the raw head's +0.022 ± 0.012. A band the count-trained parent already satisfies cannot test rule dependence | §5 item 2: a paired Δ on the common set with a 0.005 margin as the primary; the interval rule (supported / contradicted / unresolved) for the draw net's own coefficient as the secondary |
+| 3 | F3: J3's "duplicated games make the interval optimistic" is wrong — i.i.d. games from a concentrated policy are independent draws; duplicate outcomes are not dependent draws; a bootstrap over distinct lines would change their weights | **accept** | `empty_board.py:108–109` says exactly that. The games are independent samples from the specified stochastic policy, so the Wilson interval is right for that policy's outcome distribution; my predecessor's "optimistic by exactly the duplication" in §4 J3 is withdrawn | §4 J3; `empty_board.py`'s note: the interval is the policy's, the concentration is reported beside it |
+| 4 | F4: J4 prints zero-width intervals from an all-success bootstrap and no interval at all on solvability | accept | `endgame.py:255–261` bootstraps `optimal`; an all-ones vector gives [1, 1]; `frontier.py:199–205` copies it; `fraction_solved` carries none | `frontier.py`: Wilson intervals for both proportions (a finite-population note where the sample is the whole alive set); the bootstrap kept for regret |
+| 5 | F5: `gumbel_scale` is neither recorded nor passed (`train2.py:48–102, 256–279`), against §5's promise | accept | `TrainConfig` has no such field; the `SearchConfig(...)` at 280–282 omits it and inherits 1.0. §5's "records every exploration knob" was a requirement, not yet code | `train2.py`: `gumbel_scale` in `TrainConfig` (default 1.0 — documentation of the recipe, not an intervention), passed to the search; the resolved `SearchConfig` written into `_provenance` |
+| 6 | F6: three untagged paths — `openings.py:55–62` accepts a count-only surrogate under `--rule draw`; `book.py:151–161, 239–242` attaches paired statistics without checking their rule; `corpus_stats.py:33–39` reads a corpus with no `config.json` as count | accept with change | All three read as described. The surrogate is a learned count model → refused under any other rule; `paired_stats` never reads the JSON's `"rule"` → checked against `--rule`; a corpus with no `config.json` → refused unless `--corpus_rule` names its rule (the reviewer's "positively identified legacy artifacts"), and every new game file carries a `rule` array (`selfplay_cont.py:176–184` writes moves, root values, winners, reasons and lengths only), which `corpus_rule()` prefers when present | `openings.py`, `book.py`, `corpus_stats.py`, `selfplay_cont.py` |
+| 7 | F7: J3 labels `timeline.json`'s first-move statistic "self-play at its training budget"; it is the raw policy's probability (`timeline.py:129–130`), 0.982 at the end, where iteration 299's generated games put 0.835 on [40] (`log.jsonl:300`) | accept | `timeline.py:130`: `first_top_share=float(probs.max())` from `fe(empty…)` — the raw head; `log.jsonl` line 300: `first_move_top: 40`, `first_move_top_share: 0.835`. KNOWLEDGE 6 already says "raw first-move probability": the claim is right, the tool's label wrong | `empty_board.py`: the label corrected, the log's generated share printed beside it |
+| 8 | F8: `principles.py:101` takes the first `max_games` draws, truncating a draw-rule corpus chronologically; `:123` reports X's mean count as "mean boards each side" | accept | `draws = np.flatnonzero(winners == 0)[:max_games]`, `max_games = 20000`; `_e4`'s corpus had 16 471 draws (untruncated); ≥ 32 % of 98 k games is ≈ 31 000, cut to the earliest two-thirds of the window; `"mean boards each side": finals[:, 0].mean()` is X's alone | `principles.py`: a seeded uniform sample over the window, sampled and total counts recorded, X and O separately |
+| 9 | A1: the terminal path is complete where inspected (both engines, both kernels, exact labels, the tablebase map, both searches, the rollout anchor); `evaluate_rollout` infers its rule from the set (`endgame.py:300–309`); the E7 worker discovers a mismatched set only after its matches (`eval_worker.py:73–104`); reverse relabelling "requires replay", not rebuilding; J3 / J4 default silently to count; `value_decomp` and `tablebase_grade` need not refuse a dataset labelled under another rule | accept (the last item noted) | Read as described: `BatchUTTT(es.n, "cpu", es.rule)`; the worker loads the set at line 73 and checks nothing until `endgame_evaluate` at 98; the game files keep every move, so a draw corpus *can* be re-read under count by replay. The `value_decomp` / `tablebase_grade` refusals are stricter than necessary and stay: a rebuild costs five minutes, a refusal nothing | `endgame.py`, `eval_worker.py`, `corpus_stats.py`'s message; J3 / J4 gain `--rule` and a `"rule"` field |
+| 10 | A2: 16.5 % / 33.0 % are `_e4`'s; from `_e8`'s log: 98 581 games, 16.60 % draws, 32.33 % after relabelling | accept | The pass's own read of `_e8`'s last 20 files, this session: `runs/plan7/K1_parent_A6_corpus_stats.out:1–3` — 98 581 games, draws 16.6 %, by count 15.7 %, by line 67.7 % → 32.3 % reach the no-line terminal (the log-weighted 32.33 agrees) | §5 item 0: the parent's figures, **15.7 % and 32.3 %** |
+| 11 | A2: "≥ 30 %" is falsifiable but below the mechanical baseline, so it cannot show draw-seeking adaptation | **accept** | 30 < 32.3 | §5 item 2: the draw share read against 32.3 % with a 2-point margin; 30 % kept only as the floor |
+| 12 | A2: "inside the count interval" is compatibility, not equivalence — freeze difference margins, populations and estimators for 8 and 13; claim 1's ties; claim 7's 0.02 is a visit-share tolerance at a stated budget, not a value tolerance; save visits and Q | accept | — | §5 item 2: differences on the common set, paired by game, |Δ| < 0.03 invariant; claim 1 a tie at a value gap ≤ 0.01; claim 7 reply-orbit visit shares at 16 384 sims with visits and Q saved |
+| 13 | A2: the cross-play contrast (1 − s_D − s_C) is falsifiable at ± 3 but is not an interaction isolating a "collect boards" skill; bootstrap the two scores jointly by opening | accept | The contrast as written in §5 item 4 is that expression; either net's general superiority moves it | §5 item 4: the attribution dropped; a joint pair bootstrap by opening ID |
+| 14 | A2: in-run retention — resolved configuration, artifact hashes, a small diagnostic decision sample, sparse gradient-norm logs | accept with change | The configuration comes with row 5 and the hashes with `config.json`'s `_provenance` and the E7 worker's `sha256`; the decision sample and gradient norms have no pre-registered consumer — every K1 reading is post hoc on checkpoints and game files, the E7 worker supplies the curve | Row 5; the rest noted, not bought |
+| 15 | A3: keep the 4-ply arm as a named policy-distribution experiment; (b) − (c) isolates the exploration package, not four knobs; play (b) and (c) with the plain evaluator (the corpus-generating agent's), keep symmetry averaging for (a); (a) is a different search (PUCT, depth cap 40) and a separate measurement; disclose depth cap 24 and 256 sims against training's 12 and 32 → 64 | accept | `atlas.py:93–94`: `mode="puct", c_puct=1.25, depth_cap=40`; `empty_board.py:162–165`: the trained mode with `depth_cap=min(sims, 24)`; `ev = SymmetryAveragedEvaluator(fe)` serves all three arms today | §4 J3; `empty_board.py` plays (b) / (c) plain by default and states cap and budget in its meta |
+| 16 | A4: the shared budget is sound but stricter than root solvability — name the ordinate "complete legal-action value coverage within budget"; terminal children cost zero nodes (`solver.py:255–263`); save per-position records; across-ply comparisons need game-linked resampling; the supportable sentence | accept | `solve_children_bounded`: `if h.done: child[m] = …; continue` — no node counted; `frontier.py:177–211` keeps aggregates only | §4 J4 and §3 C3 in the reviewer's sentence; `frontier.py` renames the fields, saves the per-position table, documents the count |
+| 17 | A5: no extra GPU-day; report the 2 × 2 matrix by source corpus and on the intersection solved under both rules; §5's "observed in this pair of runs" already concedes the confounds | accept | — | §5 item 3 |
+| 18 | A6: the cross-engine check compares the legal mask per ply and the terminal state only (`test_rules.py:85–99`); the bounded solver's property 2 runs under count only; add tests for bounded child enumeration under a shared budget, tight budgets under draw, tablebase payoffs against the solver under both rules, terminal backup in both searches, the resume / cache / refusal boundaries, `relabel()` | accept | `cross_check`: `np.array_equal(legal[i], g.legal_mask())` per ply, winner / reason / macro at the end; `test_complete_is_always_right` calls `solve_bounded` without `rule` | `tests/`: `done`, `next_board`, `player`, `move_count` compared every ply in the cross-check; the listed tests |
+
+**What the review confirmed, unasked:** the fresh-run terminal path has no count-only branch left
+anywhere it looked (both engines, both kernels, exact labels, the tablebase map, both searches, the
+rollout anchor); the margin and ownership labels are observations, not terminal values, and leaving them
+is coherent; the refusals for a set and a table are in the right places. **Open for M2's rebuttal round**
+(next window, `exec resume` on its thread): (a) whether 0.005 (the paired Δ) and 0.03 (the difference
+margin for 8 and 13) are the right sizes; (b) row 9's kept refusals; (c) anything above that misreads a
+finding.
 
 ## 8. Not proposed
 
