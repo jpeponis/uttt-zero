@@ -7,14 +7,18 @@ tests/test_rules.py checks that the two rules are what they claim to be. This fi
 
 1. Resume.        A run whose config.json records one rule cannot be resumed under another, and the refusal
                   lands before config_resume_*.json is written and before any checkpoint or buffer is read.
-                  A config.json with no `rule` key is a pre-K1 run, i.e. count.
-2. Search cache.  uttt.endgame.evaluate's cache is keyed by (sims, rule), and a cache poisoned with a search
-                  of the wrong rule is caught rather than used.
+                  A config.json with no `rule` key is a pre-K1 run, i.e. count. Where config.json cannot
+                  speak -- an orphaned run directory, or a checkpoint copied in from another run -- the
+                  checkpoint's own recorded rule is the gate, and an ambiguous directory is refused.
+2. Search cache.  uttt.endgame.evaluate's cache is keyed by (sims, rule), a cache poisoned with a search of
+                  the wrong rule is caught rather than used, and one keyed the old way (by sims alone) is
+                  refused rather than silently ignored.
 3. Explicit rule. evaluate_rollout takes its rule as an argument and checks it against the set's.
 4. relabel.       The count -> draw re-reading is exactly "reason 2 becomes reason 3, winner becomes 0", and
                   the reverse direction is refused with the reason (it needs a replay, not a rebuild).
 5. Corpora.       The rule a corpus was generated under is read from the game files' tag, else from
-                  config.json; a directory with neither is refused unless --corpus_rule names it.
+                  config.json; a directory with neither is refused unless --corpus_rule names it, and one
+                  mixing tagged and untagged files is refused unless config.json vouches for the untagged.
 6. Tools.         A count-only surrogate player is refused under `draw`; a paired match file of one rule
                   cannot be attached to a book of the other.
 7. Draw sample.   tools/principles.py samples the draws uniformly over the window, reproducibly, and not at
@@ -113,6 +117,71 @@ def test_a_config_without_a_rule_key_is_a_count_run():
           "configuration (gumbel_scale 1.0 included) is recorded in _provenance")
 
 
+def _tiny(run, **kw):
+    """A TrainConfig small enough that main() can build its net, buffer and self-play on the CPU."""
+    from uttt.train2 import TrainConfig
+
+    return TrainConfig(run=run, device="cpu", iters=0, games=4, steps=1, sims=2, buffer=1000, blocks=1, filters=8,
+                       eval_every=0, suite="", endgame_set="", anchors="", save_buffer_every=0, **kw)
+
+
+def _stub_ckpt(run, name="latest.pt", rule="count", drop_rule=False):
+    """A checkpoint carrying only what the rule gate reads: train2 saves the TrainConfig as "cfg"."""
+    from uttt.train2 import TrainConfig
+
+    cfg = asdict(TrainConfig(run=run, rule=rule))
+    if drop_rule:  # a pre-K1 checkpoint, written before TrainConfig had the field
+        cfg.pop("rule")
+    torch.save({"net": {}, "cfg": cfg, "iter": 7}, os.path.join(run, name))
+
+
+def test_a_checkpoint_is_gated_even_when_config_json_cannot_speak():
+    """The refusal above is keyed on config.json; these three directories have a checkpoint it does not
+    cover, and each one would have resumed one rule's weights under the other (M2 rebuttal (c))."""
+    from uttt.train2 import TrainConfig, main
+
+    with tempfile.TemporaryDirectory() as tmp:
+        run = os.path.join(tmp, "r")
+        os.makedirs(run)
+        # (a) a checkpoint and no config.json: nothing in the directory records the rule it was made under,
+        #     so the directory is ambiguous and is refused under BOTH rules -- the complaint is the missing
+        #     config, not a mismatch -- before anything at all is written
+        _stub_ckpt(run, rule="draw")
+        for rule in ("count", "draw"):
+            msg = _expect(ValueError, main, _tiny(run, rule=rule))
+            assert "config.json" in msg and "latest.pt" in msg, msg
+        assert sorted(os.listdir(run)) == ["latest.pt"], sorted(os.listdir(run))
+        # latest_full.pt alone is the same directory, and the message names it
+        os.replace(os.path.join(run, "latest.pt"), os.path.join(run, "latest_full.pt"))
+        msg = _expect(ValueError, main, _tiny(run, rule="draw"))
+        assert "latest_full.pt" in msg, msg
+        os.replace(os.path.join(run, "latest_full.pt"), os.path.join(run, "latest.pt"))
+        # (b) a draw checkpoint copied into a count run, whose config.json AGREES with the invocation: the
+        #     config gate cannot see this one at all
+        _write_run(run, dict(asdict(TrainConfig(run=run, rule="count")), _provenance={"rule": "count"}))
+        msg = _expect(ValueError, main, _tiny(run, rule="count"))
+        assert "'draw'" in msg and "'count'" in msg and "latest.pt" in msg, msg
+        assert sorted(os.listdir(run)) == ["config.json", "latest.pt"], sorted(os.listdir(run))
+        assert not glob.glob(os.path.join(run, "config_resume_*.json"))
+        assert not os.path.exists(os.path.join(run, "games"))
+        # (c) a pre-K1 checkpoint carries no rule in its cfg: it is count, exactly as a config.json without
+        #     one is, and a draw run refuses it
+        _write_run(run, dict(asdict(TrainConfig(run=run, rule="draw")), _provenance={"rule": "draw"}))
+        _stub_ckpt(run, drop_rule=True)
+        msg = _expect(ValueError, main, _tiny(run, rule="draw"))
+        assert "'count'" in msg and "latest.pt" in msg, msg
+        # (d) and when the checkpoint, the config and the invocation all agree the gate passes: what stops
+        #     this run is the stub checkpoint's missing tensors, after the provenance was written
+        _write_run(run, dict(asdict(TrainConfig(run=run, rule="count")), _provenance={"rule": "count"}))
+        _stub_ckpt(run, rule="count")
+        msg = _expect(Exception, main, _tiny(run, rule="count"))
+        assert "rule" not in msg, msg
+        assert len(glob.glob(os.path.join(run, "config_resume_*.json"))) == 1, "the gate did not pass"
+    print("a checkpoint is gated on its own recorded rule: an orphan without config.json is refused under "
+          "either rule, a copied-in checkpoint of the other rule is refused beside an agreeing config.json, "
+          "a pre-K1 checkpoint counts as count, and an agreeing one passes")
+
+
 # ---- 2 and 3. the endgame search cache and the explicit rollout rule ----------------------------------
 def tiny_set(rule, n=12, max_empty=6, seed=5) -> EndgameSet:
     """A hand-built EndgameSet: the same positions under both rules (the walk down is rule-free), solved
@@ -145,11 +214,19 @@ def test_evaluate_cache_is_keyed_by_rule():
     poisoned = {(4, "draw"): cache[(4, "count")]}
     _expect(AssertionError, evaluate, fe, es_d, device, sims=(4,), n_boot=10, symmetrise=False, graph=False,
             search_cache=poisoned, rule="draw")
+    # a cache keyed the old way -- by sims alone -- is REFUSED, not ignored: ignoring it reads as a miss, so
+    # the wrong-rule searches stay in the caller's dict unexamined beside the new ones (M2 rebuttal (c))
+    legacy = {4: cache[(4, "count")]}
+    msg = _expect(ValueError, evaluate, fe, es_c, device, sims=(4,), n_boot=10, symmetrise=False, graph=False,
+                  search_cache=legacy, rule="count")
+    assert "(sims, rule)" in msg, msg
+    assert list(legacy) == [4], "the refused cache was written to anyway"
     # and a set solved under another rule is refused outright, with or without a search
     msg = _expect(ValueError, evaluate, fe, es_c, device, sims=(), n_boot=10, symmetrise=False, rule="draw")
     assert "solved under rule" in msg, msg
-    print("evaluate's cache is keyed by (sims, rule); a count search cannot grade a draw set, and a set of the "
-          "wrong rule is refused before any of it is read")
+    print("evaluate's cache is keyed by (sims, rule); a count search cannot grade a draw set, a cache keyed by "
+          "sims alone is refused rather than silently ignored, and a set of the wrong rule is refused before "
+          "any of it is read")
 
 
 def test_evaluate_rollout_takes_its_rule_and_checks_it():
@@ -179,13 +256,13 @@ def test_relabel():
 
 
 # ---- 5. what rule a corpus was generated under ---------------------------------------------------------
-def _corpus(run, rule_tag=None, n=6):
+def _corpus(run, rule_tag=None, n=6, name="games_0000.npz"):
     os.makedirs(os.path.join(run, "games"), exist_ok=True)
     cols = dict(moves=np.zeros((n, 82), np.int8), winners=np.zeros(n, np.int8), reasons=np.full(n, 3, np.int8),
                 lengths=np.full(n, 81, np.int64), root_values=np.zeros((n, 82), np.float32))
     if rule_tag is not None:
         cols["rule"] = np.array(rule_tag)
-    np.savez_compressed(os.path.join(run, "games", "games_0000.npz"), **cols)
+    np.savez_compressed(os.path.join(run, "games", name), **cols)
 
 
 def test_corpus_rule_is_read_never_guessed():
@@ -215,6 +292,42 @@ def test_corpus_rule_is_read_never_guessed():
         assert "game files are tagged" in msg, msg
     print("a corpus's rule comes from its game files' tag, else config.json (no key = count); an untagged "
           "orphan is refused unless --corpus_rule names it, and a tag contradicting config.json is a fault")
+
+
+def test_a_directory_mixing_tagged_and_untagged_game_files_is_refused():
+    """A tag vouches for its own file. Every run's files are all tagged (K1 on) or all untagged (pre-K1), so
+    a directory holding both was assembled from two corpora; reading the tagged ones and ignoring the rest
+    let one draw-tagged file speak for a directory of count games (M2 rebuttal (e))."""
+    with tempfile.TemporaryDirectory() as tmp:
+        run = os.path.join(tmp, "mixed")
+        _corpus(run, "draw", name="games_0000.npz")
+        _corpus(run, None, name="games_0001.npz")
+        _corpus(run, None, name="games_0002.npz")
+        msg = _expect(SystemExit, games_rule, run)
+        assert "games_0001.npz" in msg and "games_0002.npz" in msg, msg
+        assert "1 tagged 'draw'" in msg and "2 carrying no tag" in msg, msg
+        _expect(SystemExit, corpus_rule, run)  # and the caller that asks for the corpus's rule sees it too
+        _expect(SystemExit, corpus_rule, run, "draw")  # --corpus_rule cannot wave it through either
+        # a config.json agreeing with the tag vouches for the untagged files; one that disagrees does not
+        cfg_path = os.path.join(run, "config.json")
+        with open(cfg_path, "w") as f:
+            json.dump({"run": run, "rule": "draw"}, f)
+        assert games_rule(run) == "draw" and corpus_rule(run) == "draw"
+        with open(cfg_path, "w") as f:
+            json.dump({"run": run, "rule": "count"}, f)
+        msg = _expect(SystemExit, games_rule, run)
+        assert "config.json records rule 'count'" in msg, msg
+        with open(cfg_path, "w") as f:  # a pre-K1 config.json has no rule key, i.e. count: it vouches for count
+            json.dump({"run": run, "sims": 32}, f)
+        msg = _expect(SystemExit, games_rule, run)
+        assert "config.json records rule 'count'" in msg, msg
+        # and a uniformly tagged directory is untouched by any of this
+        os.remove(os.path.join(run, "games", "games_0001.npz"))
+        os.remove(os.path.join(run, "games", "games_0002.npz"))
+        os.remove(cfg_path)
+        assert games_rule(run) == "draw"
+    print("a directory mixing tagged and untagged game files is refused by name unless a config.json agreeing "
+          "with the tag vouches for the untagged ones; a uniformly tagged one still identifies itself")
 
 
 # ---- 6. the two tool closures ---------------------------------------------------------------------------
@@ -308,9 +421,11 @@ if __name__ == "__main__":
     test_relabel()
     test_draw_sample_is_uniform_seeded_and_a_no_op_under_the_cap()
     test_corpus_rule_is_read_never_guessed()
+    test_a_directory_mixing_tagged_and_untagged_game_files_is_refused()
     test_book_refuses_a_paired_file_of_another_rule()
     test_surrogate_is_refused_under_a_non_count_rule()
     test_cross_rule_resume_is_refused_before_anything_is_written()
+    test_a_checkpoint_is_gated_even_when_config_json_cannot_speak()
     test_evaluate_cache_is_keyed_by_rule()
     test_evaluate_rollout_takes_its_rule_and_checks_it()
     test_terminal_backup_in_both_searches()

@@ -65,7 +65,6 @@ from uttt.game import UTTT  # noqa: E402
 from uttt.infer import FusedEvaluator  # noqa: E402
 from uttt.model import load_checkpoint  # noqa: E402
 from uttt.rules import RULES, check_rule, tag_path  # noqa: E402
-from uttt.search import BatchedSearch, SearchConfig  # noqa: E402
 from uttt.solver import ILLEGAL, empties_in_open_boards, solve_children_bounded  # noqa: E402
 
 Z95 = 1.959963984540054
@@ -157,29 +156,17 @@ def graded_set(pos: dict, solved: list, ply: int, meta: dict, rule: str) -> Endg
                       dict(meta, name=f"ply {ply}, complete coverage", rule=rule))
 
 
-@torch.no_grad()
-def search_moves(fe, es: EndgameSet, device, sims: int, rule: str, graph: bool) -> np.ndarray:
-    """The move the graded search chooses at each position, under exactly the SearchConfig
-    uttt.endgame.evaluate builds for it (endgame.py:291-292) — evaluate returns the regret but not the
-    move, and the per-position table wants the move."""
-    t = lambda a: torch.from_numpy(a).to(device)  # noqa: E731
-    n = es.n
-    cfg = SearchConfig(n_sims=sims, mode="gumbel", gumbel_scale=0.0, cuda_graph=graph and device.type == "cuda",
-                       depth_cap=min(sims, 24))
-    bs = BatchedSearch(fe, n, cfg, device, rule=rule)
-    r = bs.search(t(es.cells), t(es.macro), t(es.next_board), t(es.player),
-                  torch.zeros(n, dtype=torch.bool, device=device), torch.zeros(n, dtype=torch.int8, device=device),
-                  selfplay=False)
-    return r.action.cpu().numpy()
-
-
 def position_rows(pos: dict, solved: list, ply: int, es: EndgameSet | None, moves: np.ndarray | None,
                   regret: np.ndarray | None) -> dict:
     """One ply of the per-position table: every sampled position, complete or not (M2 §7e M2 row 16).
 
     complete=False rows carry nodes spent and nothing else: move -1, optimal -1, regret NaN, and a child
     row of NULL_ROW (-3) throughout — distinct from ILLEGAL (-2), which marks an illegal move in a
-    complete row."""
+    complete row.
+
+    `moves` and `regret` are the grader's own, both out of the one uttt.endgame.evaluate call (its
+    _per["move"] and _per["regret"]), so the recorded move is by construction the move the recorded
+    regret was computed from. The assertion at the end of this function is that identity, checked."""
     n = len(pos["player"])
     ok = np.array([s[3] for s in solved], dtype=bool)
     where = np.full(n, -1, dtype=np.int64)
@@ -200,6 +187,11 @@ def position_rows(pos: dict, solved: list, ply: int, es: EndgameSet | None, move
             opt[i] = np.int8(regret[where[i]] == 0)
     assert es is None or int(ok.sum()) == es.n, (int(ok.sum()), None if es is None else es.n)
     assert bool((child[ok] >= ILLEGAL).all()), "a complete position produced a NULL child value"
+    if moves is not None and ok.any():  # regret == exact_root_value - child_values[move], on every complete row
+        rows_ok = np.flatnonzero(ok)
+        want = root[rows_ok].astype(np.int64) - child[rows_ok, mv[rows_ok]].astype(np.int64)
+        assert np.array_equal(reg[rows_ok].astype(np.int64), want), \
+            f"ply {ply}: the recorded move and regret are not each other's ({int((reg[rows_ok] != want).sum())} rows)"
     return {"ply": np.full(n, ply, dtype=np.int16),
             "file_index": pos["file_index"].astype(np.int32), "game_row": pos["game_row"].astype(np.int64),
             "game_id": pos["game_id"].astype(np.int64), "empties": pos["empties"].astype(np.int64),
@@ -294,9 +286,12 @@ def main() -> None:
             "positions_table": "every sampled position, complete or not: ply, file_index (into corpus_files), game_row, "
                                "game_id (the cluster id), empties, complete, nodes, exact_root_value, child_values "
                                "(81 int8: the exact value after each legal move, ILLEGAL=-2 where illegal, the whole "
-                               "row NULL=-3 where the position did not complete), move (the graded search's choice, -1 "
-                               "where not graded), optimal (1/0, -1 where not graded), regret (NaN where not graded). "
-                               "Saved so that later joint uncertainty calculations need no recomputation",
+                               "row NULL=-3 where the position did not complete), move (the graded search's own choice, "
+                               "taken from the grader's per-position record, -1 where not graded), optimal (1/0, -1 "
+                               "where not graded), regret (NaN where not graded). move and regret come out of the SAME "
+                               "search: regret == exact_root_value - child_values[move] holds on every complete row by "
+                               "construction and is asserted. Saved so that later joint uncertainty calculations need "
+                               "no recomputation",
             "warning": "the covered subset is the easy end of a ply and gets easier as the budget binds; every number "
                        "below is conditional as its name says, and 'solved from ply N' does not follow from any of them"}
     print(f"{a.run}: {len(length)} games in {len(names)} files ({names[0]}..{names[-1]}); "
@@ -306,7 +301,7 @@ def main() -> None:
           + (f" (corpus trained under {corpus_rule})" if corpus_rule and corpus_rule != rule else ""), flush=True)
     print("\n" + HEADER)
     print(LEGEND)
-    rows, table, mismatches = [], [], 0
+    rows, table = [], []
     for p in range(a.plies[0], a.plies[1] + 1):
         t = time.perf_counter()
         pos, n_alive = positions_at_ply(moves, fidx, row, length, p, a.per_ply, rng, rule)
@@ -354,20 +349,20 @@ def main() -> None:
                     "interval is reported; the optimal-move rate's Wilson interval is the uncertainty statement here.")
             else:
                 d["search_mean_regret_ci_conditional_on_complete"] = list(r["regret_ci"])
-            mv = search_moves(fe, es, device, a.sims, rule, graph=True)
-            chk = (es.exact.astype(np.int64) - es.child[np.arange(es.n), mv].astype(np.int64)).astype(np.float64)
-            bad = int((chk != per_reg).sum())
-            mismatches += bad
-            if bad:
-                print(f"  WARNING ply {p}: {bad}/{es.n} recorded moves disagree with the graded regret "
-                      "(the two searches are not reproducing each other)", flush=True)
-            table.append(position_rows(pos, solved, p, es, mv, per_reg))
+            # The graded search's own moves, out of the same evaluate() call as the regret above
+            # (endgame.py's _per["move"]). This used to be a SECOND search whose move was paired with the
+            # first search's regret, with disagreements only warned about (M2 rebuttal (c)).
+            table.append(position_rows(pos, solved, p, es, r["_per"]["move"], per_reg))
         elif n:
             table.append(position_rows(pos, solved, p, None, None, None))
         d["seconds"] = round(time.perf_counter() - t, 1)
         rows.append(d)
         print(format_row(d), flush=True)
-    meta["chosen_move_regret_mismatches"] = mismatches
+    meta["chosen_move_regret_mismatches"] = 0  # kept for the JSONs already written under the old scheme
+    meta["chosen_move_regret_mismatches_note"] = (
+        "0 by construction, not by measurement: the recorded move IS the graded move (endgame.evaluate's "
+        "_per[\"move\"]), so there is no second search to disagree with. Earlier files carry a counted value "
+        "from when the move came from a second search of the same positions (M2 rebuttal (c))")
     os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
     with open(out, "w") as fh:
         json.dump({"meta": meta, "plies": rows}, fh, indent=1)

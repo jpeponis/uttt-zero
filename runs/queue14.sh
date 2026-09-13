@@ -30,11 +30,23 @@
 # Status: python tools/run_status.py runs/deep8_c1_300_e8_draw --ref runs/deep8_c1_300_e8
 # Reboot: relaunch the same .vbs; train2 prefers latest_full.pt and continues as attempt N (a cross-RULE resume is
 # refused, M2 row 1); the worker skips what eval_full_draw.jsonl already holds.
-cd "/c/Users/John Peponis/Desktop/uttt-zero"
+# Failure handling (M2 rebuttal (d)): a failed training run must not be post-processed as if it had finished, and
+# the eval worker must not be left polling for a DONE that will never appear (it waits for runs/$R/DONE and exits
+# only once it exists, tools/eval_worker.py:144-150). The worker's PID is kept and it is killed on any terminal
+# failure; run_train's and eval_run_k1.sh's exit statuses both stop the chain and leave queue14.out non-zero.
+set -o pipefail
+cd "/c/Users/John Peponis/Desktop/uttt-zero" || { echo "queue14: cannot cd to the repository"; exit 1; }
 P=.venv/Scripts/python.exe
 PARENT=deep8_c1_300_e8
 R=deep8_c1_300_e8_draw
 SET=suites/endgame_v2_dev_draw.npz
+
+stop_worker() {  # the worker polls for runs/$R/DONE forever; nothing else will ever stop it
+  [ -n "$WORKER" ] || return 0
+  kill "$WORKER" 2>/dev/null
+  wait "$WORKER" 2>/dev/null
+  echo "queue14: stopped the eval worker (pid $WORKER)"
+}
 
 run_train() {  # auto-resume on crash (train2 resumes from latest_full.pt), max 6 attempts
   local name=$1; shift
@@ -52,7 +64,14 @@ run_train() {  # auto-resume on crash (train2 resumes from latest_full.pt), max 
 [ -f $SET ] || { echo "draw-rule endgame set $SET missing: tools/endgame.py build --rule draw first" >> runs/queue14.out; exit 1; }
 mkdir -p runs/$R
 $P -u tools/eval_worker.py --run runs/$R --rule draw --anchors runs/v2b/net_0150.pt,runs/$PARENT/net_0300.pt,runs/deep8_c1_300/net_0300.pt --sims 64 --set $SET --poll 60 --device cuda:1 >> runs/${R}_worker.out 2>&1 &
-run_train $R --rule draw --gumbel_scale 1.0 --endgame_set $SET --iters 300 --games 4096 --steps 64 --sims 32 --sims_schedule 60:48,100:64 --sample_moves 8 --sample_uniform 0.15 --root_prior_floor 0.03 --dedup_alpha 0.5 --c_scale 1.0 --filters 128 --blocks 8 --depth_cap 12 --lr 0.02 --lr_drops 200,280 --epochs 8 --eval_every 0 --ckpt_every 10 --anchors "" --save_buffer_every 10 --cuda_graph 1 --exact_max_empty 14 --exact_per_iter 8192 --exact_processes 12 --device cuda:0
-bash runs/eval_run_k1.sh $R cuda:0
-wait
+WORKER=$!
+echo "queue14: eval worker pid $WORKER, started $(date)"
+run_train $R --rule draw --gumbel_scale 1.0 --endgame_set $SET --iters 300 --games 4096 --steps 64 --sims 32 --sims_schedule 60:48,100:64 --sample_moves 8 --sample_uniform 0.15 --root_prior_floor 0.03 --dedup_alpha 0.5 --c_scale 1.0 --filters 128 --blocks 8 --depth_cap 12 --lr 0.02 --lr_drops 200,280 --epochs 8 --eval_every 0 --ckpt_every 10 --anchors "" --save_buffer_every 10 --cuda_graph 1 --exact_max_empty 14 --exact_per_iter 8192 --exact_processes 12 --device cuda:0 \
+  || { echo "queue14: training FAILED after 6 attempts at $(date) (see runs/$R.out); not post-processing runs/$R"; stop_worker; exit 1; }
+bash runs/eval_run_k1.sh $R cuda:0 \
+  || { echo "queue14: eval_run_k1.sh FAILED at $(date) (see runs/$R/analysis.out); the run itself finished"; stop_worker; exit 1; }
+wait "$WORKER"  # training reached DONE, so the worker finishes its outstanding evaluations and exits by itself
+ws=$?
+[ $ws -eq 0 ] || echo "queue14: the eval worker exited $ws (see runs/${R}_worker.out); the E7 curve may be incomplete"
 echo "queue14 done at $(date)"
+exit $ws

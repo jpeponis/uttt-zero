@@ -92,7 +92,20 @@ def test_build_eval():
             for k in ("regret", "optimal"):
                 if k in r:
                     assert r[k + "_ci"][0] <= r[k] <= r[k + "_ci"][1]
-    print("build / save / load / evaluate ok")
+        # every row that graded a move records the moves it graded, so a caller wanting the move behind a
+        # regret reads it here instead of searching the same positions a second time (M2 rebuttal (c))
+        idx = np.arange(es.n)
+        for r in res["rows"] + [row]:
+            if "regret" not in r:
+                assert "move" not in r["_per"], f"{r['name']} graded no move but recorded one"
+                continue
+            mv = r["_per"]["move"]
+            assert mv.shape == (es.n,), (r["name"], mv.shape)
+            assert np.array_equal(r["_per"]["regret"], es.exact.astype(np.int64) - es.child[idx, mv].astype(np.int64)), r["name"]
+            assert "move" not in r and "move_ci" not in r, f"{r['name']}: the move is a record, not a metric"
+        assert res["rows"][0]["_per"]["move"].tolist() != res["rows"][-1]["_per"]["move"].tolist(), \
+            "the raw policy and the search must not be recording one another's moves"
+    print("build / save / load / evaluate ok; every graded row carries the moves its regret was computed from")
 
 
 if __name__ == "__main__":
