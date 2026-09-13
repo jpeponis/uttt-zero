@@ -69,11 +69,10 @@ and merged (`5fa73e6`); the `_e8` count pass launched with `probe_value` added; 
    M2-R; M1's first attempt hit the usage limit at 23:49): `pwsh -NoProfile -ExecutionPolicy Bypass -File
    docs/reviews/M1_account/launch_rebuttal.ps1` from the repo root (it resumes the M1 thread with
    `docs/reviews/M1_account/rebuttal_brief.md`; watch `status_rebuttal.txt`), then adjudicate its answers into
-   §7e M1 as R-rows, as M2-R was. **Before K1 launches:** merge the M2-R engineering agent's branch (R3, R4,
-   R6, R8, R11 — `train2.py`, `endgame.py`, `frontier.py`, `corpus_stats.py`, the launcher's failure handling;
-   `git worktree list` shows it) after a read, re-run `tests/test_rules_boundaries.py`, `test_endgame.py`,
-   `test_solver_bounded.py`; then write and freeze `runs/plan7/K1_readings_3060.sh` and the common-set tool
-   (§5 items 2–4, R9) — 15 000 positions per corpus.
+   §7e M1 as R-rows, as M2-R was. The M2-R engineering is **merged** (`7b17e48`, 2026-09-13 00:14; its three
+   suites green on `main`, no worktrees left) — **K1's only remaining gate is the owner's word.** During K1's
+   22 h: write and freeze `runs/plan7/K1_readings_3060.sh` and the common-set tool (§5 items 2–4, R9) —
+   15 000 positions per corpus — before `net_0300.pt` exists.
 5. **Then J5** (the manuscript skeleton, after M1's amendments: the map's §3 now carries the surviving sentences and
    a setup-and-limits head), **§10's file updates** (README's "Current state" PLAN7 bullet still says the rebuttal
    is deferred to 00:30 and M2 is armed — stale; the explainer's Part 8), and **K1's readings when it lands** (§5
@@ -369,6 +368,22 @@ compute — delegate anything that reads more than a few files.
   `events_rebuttal_attempt1.jsonl`) — the window opened at 21:50 held four stages at medium (≈ 12 M input
   tokens, ≈ 10.5 M of them cached) before it closed; M1's rebuttal is the next window's first act, its
   launcher ready.
+
+- **2026-09-13, 00:14 — the M2 rebuttal's engineering merged (`7b17e48`).** An opus worktree agent confirmed
+  every premise the rebuttal cited in the code before changing it (all five held at `465e764`) and closed them:
+  a run directory holding a checkpoint but no `config.json` is refused before anything is written, and the
+  checkpoint's own recorded rule is checked again at the restore site; `evaluate` refuses a cache not keyed
+  `(sims, rule)` and now exposes the graded per-position moves; `frontier.py` records that graded move, the
+  second search is gone, and `regret == exact_root_value − child_values[move]` is asserted on every complete
+  row (shown to fire on a swapped move); `games_rule` refuses a directory mixing tagged and untagged game files
+  unless `config.json` vouches for the untagged ones; `queue14.sh` keeps the worker's PID and kills it on any
+  terminal failure — it would otherwise poll for `DONE` forever — and stops on a failed run; `eval_run_k1.sh`
+  refuses anything but a finished run's `net_0300.pt`, records each reading's exit in `analysis.out`, and
+  returns the count of failures (proven on a stubbed harness: four cases). Every training flag byte-identical.
+  `tests/test_rules_boundaries.py`, `test_endgame.py`, `test_solver_bounded.py` green on `main`; both launchers
+  `bash -n` clean. Not bought: a `tests/test_frontier.py` (the adversarial check is recorded in the agent's note,
+  `docs/reviews/M2_designs/M2R_implementation_notes.md`; the J3 / J4 note carries its superseded line). **K1
+  now waits only for the owner's word.**
 
 ## 0. The decision in front of the project
 
