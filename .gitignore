@@ -42,3 +42,6 @@ docs/reviews/*/empty_stdin.txt
 
 # agent worktrees (Claude Code isolation: full copies of the tree under .claude/worktrees/<agent>)
 .claude/worktrees/
+
+# runs/<dir>/*.md records (the reading ledgers), 2026-09-13
+!runs/*/*.md
