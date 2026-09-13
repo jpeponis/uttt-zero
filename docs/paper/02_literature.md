@@ -29,8 +29,12 @@ CLOSED work as "the spatial complexity proved too great to allow for a complete 
 Both public reference systems are CLOSED-DRAW. **uttt.ai** (Nowaczyński 2021) *(repo + blog)*, a
 5 M-parameter offline two-stage net, is evaluated only against its own baselines, never
 independently benchmarked. **SaltZero** (Hu 2019–20) *(repo)* carries the literature's only
-externally anchored number — 113–87 at 400 ms/move against the then-#2 CodinGame bot — and **48 %
-draws**, which matters: under CLOSED-COUNT most of those games would have had a winner. The CodinGame
+externally anchored number — a **113–87 score** over 200 games at 400 ms/move against the then-#2
+CodinGame bot, its README's "+ 65 = 96 - 39", so **96 of the 200 (48 %) were drawn**. What a count
+tiebreak would do to those draws is not established: SaltZero publishes no final board-count
+distribution, and in our own count-rule corpus the no-line third splits almost evenly — 16.5 %
+decided by the count against 16.6 % equal [25] — under a policy trained to collect boards, which a
+draw-rule agent is not. The CodinGame
 arena *(forum)* is the only Elo-like ladder on CLOSED-COUNT; its two neural bots (reCurse's, briefly
 #1, and jacek's) are unreleased and undocumented beyond two forum lines.
 **pc29277/AlphaZero_UTTT** *(repo)*, created 2026-08-19, is an AlphaZero on **exactly these rules**,
@@ -52,7 +56,7 @@ rollout UCT (PLAN7 §0).
 | system | variant | strongest opponent | released |
 |---|---|---|---|
 | uttt.ai *(repo+blog)* | CLOSED-DRAW | own MCTS baselines | code, weights, data |
-| SaltZero *(repo)* | CLOSED-DRAW | #2 CG bot, 113–87 | code, weights, arbiter |
+| SaltZero *(repo)* | CLOSED-DRAW | #2 CG bot, 113–87 **score** (+65 =96 −39) | code, weights, arbiter |
 | reCurse / jacek *(forum)* | CLOSED-COUNT | arena (briefly #1) | nothing |
 | pc29277 *(repo)* | CLOSED-COUNT | depth-3 alpha-beta, 76 % | code, no license |
 | this work | CLOSED-COUNT | own ladder; rollout anchor | code, weights, suites |
@@ -69,8 +73,9 @@ edge-board openings being worst. Nowaczyński *(blog)* calls centre-centre
 ours is the one recorded ordering reversal — the strongest net puts 0.71 of its visits after [40] on
 the corner reply orbit where both weaker strong nets preferred the edge [7] — so the outside engine
 sits on the stronger net's side. The free move has no published quantification: prose from
-uttt.ai and gPress *(blog)*, and one integer — weight 2 against 5 for a board, 10 for the centre board,
-in Lifshitz and Tsurel's 2016 heuristic *(course report)*. Ours is an adjusted association:
+uttt.ai and gPress *(blog)*, and one integer — weight 2 against 5 for a board, 10 for the centre board and 3 for a corner
+board, in Lifshitz and Tsurel's 2016 heuristic *(course report, HUJI; relayed on BGG/SE, its own link
+dead, so its rule variant and whether the weights are additive are unverified)*. Ours is an adjusted association:
 **+0.195 utility** against the 256-simulation search estimate on 30 000 natural positions,
 game-clustered 95 % interval ≈ ± 0.028 (deep10 +0.196 ± 0.028; `_e4` +0.1953 ± 0.0278), falling to
 ≈ +0.08 … +0.12 with the immediate macro win in the model [8, 9]. It is not a price: in the same
@@ -98,13 +103,18 @@ pushing below 10 games per minibatch "hinders training … severe overfitting", 
 [leela-zero#1480](https://github.com/leela-zero/leela-zero/issues/1480) *(forum/issue)*, a value head
 over-fitting at ≈ 12× reuse — the same thread holds the maintainer's view that in-run
 learning-rate drops invite memorisation, our schedule comparator [42]. Wang,
-Emmerich, Preuss and Plaat *(arXiv 2020; journal version 2022)* ran the same knob on 6×6 Othello at
-ep ∈ {5, 10, 15} passes over the whole buffer and recommend keeping the inner-loop parameters low.
-**Their sweep is itself a published dose–response with tournament Elo, in a higher regime:** with
-their 20-iteration replay history, ep ∈ {5, 10, 15} is ≈ 100–300 uses per position [being confirmed],
-above our highest (eight passes over the new data ≈ 1.05 passes over our 7.6-iteration window). The
-two therefore reconcile, consistent with an optimum between them; no claim is made that the lever is
-unpulled, and KataGo's documentation permits raising its 4. Ours is the first positive local sweep
+Emmerich, Preuss and Plaat *(arXiv 2020; journal version 2022)* ran the same knob on **6×6 Othello**
+at ep ∈ {5, 10, 15} passes over the whole buffer, and their two findings must be quoted together:
+at fixed outer settings "generally, larger *m* and larger *ep* lead to higher Elo ratings" — with one
+exception, "the Elo rating of ep = 10 is higher than that of ep = 15 for *m* = 75" — while under a
+fixed *time* budget "more training within one iteration does not show improvement for Elo ratings"
+(§6.2 and Fig. 6). **Their sweep is a published dose–response with tournament Elo, in a higher
+regime:** with their 20-iteration replay history (rs = 20, Table 1), ep ∈ {5, 10, 15} is a nominal
+20·ep = **100–300** uses per position, or **≈ 62–262** over their finite runs of I ∈ {25,
+50, 75} iterations with the history filling from empty (R_I = ep(20 − 190/I)) — above our highest
+(eight passes over the new data ≈ 1.05 passes over our 7.6-iteration window). Different games, and
+non-overlapping reuse regimes: **no common optimum is inferred, and none follows.** What does follow
+is that nothing here says the lever is unpullable, and KataGo's documentation permits raising its 4. Ours is the first positive local sweep
 from 1 to 8 under a documented recipe, with a pre-registered rule and a measured seed band:
 **+100, +64, +40 Elo**, one change per run [46, 49, 51], **+211 [+189, +232]** for the eight-pass net
 over the one-pass net of the same shape, free at play time [44, 51], no over-fitting signature at
@@ -112,11 +122,13 @@ eight [51], and a supervised twin showing the fit is a function of optimizer ste
 distinct positions [47]. The concept's home is model-free RL's replay / update-to-data ratio (Fedus
 2020; Nikishin 2022; D'Oro 2023, all *(conf)*), where high ratios need resets;
 here they needed nothing. Two scaling results size a doubling, as *regime* not contradiction: Jones
-*(arXiv)* measures ≈ 500 Elo per decade of training compute on Hex, ≈ 150 per doubling, where ours
-are per doubling of the *training half only*; Neumann and Gros *(arXiv)* [unverified: no venue] find
-published models
-"significantly smaller than their optimal size", whereas at 2.46 M parameters with 8× reuse still
-paying we are update-limited, not parameter-limited. *Caution:* "Wu 2019" names two papers — D. J.
+*(arXiv)* measures "500 Elo per order of magnitude increase in compute" on Hex in its
+linearly-increasing regime — 500·log₁₀ 2 = 150.5 per doubling of *training* compute
+— where ours are per doubling of the *training half only*; Neumann and Gros *(conf, ICLR 2023; arXiv:2210.00849)* find, on
+**Connect Four and Pentago**, strength a power law in parameter count "when not bottlenecked by
+available compute" and published models "significantly smaller than their optimal size"; at 2.46 M
+parameters with 8× reuse still paying we are update-limited **at this size**, which does not
+exclude a parameter limit alongside it. *Caution:* "Wu 2019" names two papers — D. J.
 Wu's KataGo (arXiv:1902.10565) and T.-R. Wu et al.'s population-based training *(conf, AAAI 2020)*.
 
 ## Symmetry and equivariance
@@ -125,9 +137,10 @@ The prior is that equivariance buys sample efficiency: Cohen and Welling *(conf,
 G-CNNs "reduce sample complexity by exploiting symmetries", in vision; Carroll and Beel *(arXiv)*,
 the only board-game instance we found, report they "improve the performance of networks playing
 checkers" [unverified: no numbers, no peer-reviewed version, supervised]. The closest published
-analogue: SLAP on Gomoku (Suen and Alonso) *(conf, AISB 2023)* improved supervised
-convergence by 83 % at one-eighth the data, but in self-play "it was not yet evident that it could
-speed up reinforcement learning". The strong systems augment rather than enforce: AlphaZero does
+analogue: SLAP on **Gomoku** (Suen and Alonso) *(conf, AISB 2023)* improved supervised convergence by
+83 % at one-eighth the data, and in reinforcement learning "reduced the number of training samples by
+a factor of 8 and achieved similar winning rate against the same evaluator, but it was not yet evident
+that it could speed up reinforcement learning" — an unproven speed-up, not a failure to transfer. The strong systems augment rather than enforce: AlphaZero does
 neither (chess is unsymmetric) *(journal, Science 2018)*; AlphaGo Zero, Leela Zero and KataGo use 8×
 dihedral augmentation with an **ordinary CNN**, KataGo also averaging its policy over symmetries at
 the search root *(conf, ICML 2023)*. Ours: an exactly D4-equivariant trunk at matched
@@ -151,6 +164,11 @@ onto [40] within the first 30–40 iterations (≥ 0.94 by iteration 20 on `_e4`
 on `_e8` — a `timeline.json` reading [being confirmed]) [6]. Lovering et al. on Hex *(conf, NeurIPS
 2022)* find endgame concepts late and long-term concepts mid-trunk; ours is the same shape — tactics
 at block 5 by iteration 60–80, threats mid-trunk, value in the last block by 180–220 [37, 38].
+Their main body reads one agent (`grubby`, 8 layers × 512) over 21 checkpoints, and their
+Appendix D replicates the key figures on **three further architectures** (`recent` 8×256, `baggy`
+4×512, `vital` 2×1024, all from Jones's 9×9 Hex agents), so the precedent is a
+cross-*architecture* replication; what is new here is a cross-*seed* one — two seeds of the same
+10×128 net beside deep8_300 and `_e4`, on the full layer × iteration grid.
 Pálsson and Björnsson *(conf, ECAI 2024)* show probe accuracy is an unreliable proxy for causal
 importance, and Othello-GPT *(arXiv)* shows linear probes missing what non-linear ones find; ours
 answers with a random-init non-linear control, stripping out what the encoding already exposes
@@ -172,7 +190,9 @@ ply … in a few hours" on a Ryzen 3900X and estimating the full game at **a few
 CPU-hours** ($2M–$10M), with the note that he sees "no clear way to build endgame databases". Scale
 places that: the largest game weakly solved is Othello at ≈ 10²⁸, with exact databases at 36 and 50
 empties *(arXiv)*; checkers is ≈ 5 × 10²⁰ *(journal, Science 2007)* — against CLOSED UTTT's
-10³³–10³⁸ [unverified: this project's estimate, knowledge/06 §2], five to ten orders higher. PN search aims "to produce a single boolean value"
+10³³–10³⁸ [unverified: this project's **heuristic** estimate, knowledge/06 §2] — five
+to ten orders above Othello's *if that estimate holds*, which is the only sense in which the
+comparison is offered. PN search aims "to produce a single boolean value"
 *(docs)*, but from the mover's side the count tiebreak is still win / draw / loss (`uttt/solver.py
 solve()` returns −1 / 0 / +1), so draw-aware PNS suffices; Saffidine and Cazenave's MOPNS
 [no source type in the survey] and the 2025 generalised PN-MCTS of Kowalski et al.
@@ -187,19 +207,19 @@ optimal in 100 % — conditional on solved, a sampled measurement, not a milesto
 
 | comparator | variant | source | claims | ours | reading |
 |---|---|---|---|---|---|
-| First move | CLOSED-DRAW | blog | 5 openings, no scale | 15 orbits, 4 nets [1–3] | best and worst agree |
-| O's reply to [40] | CLOSED-DRAW | blog | corner boards | corner orbit 0.71 [7] | our reversal; engine agrees |
-| First-player edge | CLOSED-COUNT | forum | 60 % for P1 | 62.7/20.7/16.6 %, `_e4` self-play, exploration on [24] | same order, conditioned |
-| Draws, tiebreak | CLOSED-DRAW | repo | 48 % draws | count decides a third [25] | incomparable; ours new |
-| Game length | CLOSED | conf, blog | 30–60 plies | 52.8 plies [27] | adds spread |
-| Free move | CLOSED-DRAW | blog | one integer (2) | +0.195, adjusted association [8] | new; not a price |
-| Never send to a winnable board | CLOSED-DRAW | docs | universal | 24.6 % vs 70.2 % [33] | false; nelhage's form true |
-| Centre board | CLOSED | course report | weight 10 vs 3 | deep10 +0.01 ± 0.04, `_e4` +0.032 ± 0.044 [35] | no resolved residual, lines controlled |
-| Exploitability | CLOSED [verify] | thesis | self-play agents exploitable | not measured | related nets ≠ adversarial |
-| Solved status | OPEN | arXiv | X wins ≤ 43 | exact ≤ 16 empties, optimal given solved [28] | a frontier, not a value |
-| Sample reuse | — | docs, conf | ≈ 1; one sweep at ≈ 100–300 | +100, +64, +40; +211 [46, 51] | above practice; prior sweep higher |
-| Scaling | — | arXiv | models under-sized | update-limited [44] | regime, not conflict |
-| Symmetry | — | conf | efficiency; SLAP did not transfer | −220 [50]; ensemble +35/−201 [41] | augment, don't enforce |
-| LR schedule | — | forum/issue | drops invite memorisation | first real, second null [42] | only the first |
-| Depth vs updates | — | arXiv | deeper is better | 8 × 2 beat 10 by +86 [44] | updates first |
-| Concept probing | — | journal, conf | one trajectory | four nets [37]; −661 [41a] | replication and controls |
+| First move | CLOSED-DRAW | blog | 5 of 15 orbits, undocumented scale | 15 orbits, 4 nets, 3 budgets [1–3] | the best move agrees, and the worst *class* (edge boards); [13]'s rank is ours alone |
+| O's reply to [40] | CLOSED-DRAW | blog (prose) | corner boards | corner orbit 0.71 [7] | our reversal; the agreement is with prose, not a matched-budget engine experiment |
+| First-player edge | CLOSED-COUNT | forum | 60 % for P1, in a bot arena's population | 62.7/20.7/16.6 %, `_e4` self-play, exploration on [24] | same order; different opponent population and an exploration floor |
+| Draws, tiebreak | CLOSED-DRAW | repo | 96 of 200 drawn (48 %) | a third *reach* the no-line terminal; the count **decides 16.5 %**, 16.6 % equal [25] | incomparable; ours new |
+| Game length | CLOSED-DRAW (uttt.ai) / unstated (FLAIRS-35) / CLOSED-COUNT (CG folk) | conf, blog, forum | 40–50 / ≥ 30 / 50–60 plies | 52.8 plies, p10 47, p90 59 [27] | adds the distribution and its drift |
+| Free move | unverified (course report) | course report, blog | one integer (2, against 5 for a board) | +0.195 ± 0.028, adjusted association [8] | new; not a price |
+| Never send to a winnable board | CLOSED-DRAW | folk + docs | universal folk rule; nelhage's narrow theorem | the agent 24.6 % on unsolved positions, the optimal move 70.2 % on 4 791 solved ones [33] | the folk form is false; nelhage's holds. Two populations, not a paired contrast |
+| Centre board | unverified (course report) | course report, blog | centre board 10, any board 5, **corner** board 3; additivity unstated | deep10 +0.01 ± 0.04, `_e4` +0.032 ± 0.044 [35] | no resolved residual, lines controlled |
+| Exploitability | unverified (page unreachable) | thesis | self-play agents exploitable | not measured | related nets ≠ adversarial |
+| Solved status | OPEN | arXiv | X wins ≤ 43 | exact ≤ 14–16 empties on **sampled** positions, optimal given solved [28] | not a solution, and not an established frontier |
+| Sample reuse | — (6×6 Othello for the sweep) | docs, conf | ≈ 1 (Lc0, KataGo published; the rest converted at ± 30 %); one sweep at a nominal 100–300 | +100, +64, +40; +211 [46, 51] | above practice; the prior sweep is a different game and a higher regime |
+| Scaling | — (Hex; Connect Four, Pentago) | arXiv, conf | 500 Elo/decade; models under-sized | update-limited at 2.46 M [44] | regime, not conflict; a parameter limit is not excluded |
+| Symmetry | — (Gomoku) | conf | efficiency; SLAP's RL kept 8× fewer samples at a similar winning rate, speed-up unproven | −220 [50]; ensemble +35/−201 [41] | this equal-cost implementation lost under this recipe; the strong systems augment |
+| LR schedule | — | forum/issue | one maintainer's warning that in-run drops invite memorisation | first real, second null on four ResNets; a resolved +6.5 second drop on the G-CNN [42, 50] | only the first, on ResNets |
+| Depth vs updates | — | practice (no citation) | "deeper is better" as folklore | 8 × 2 beat 10 by +86 at 0.81× the cost [44] | at equal compute and this size, updates first |
+| Concept probing | — | journal, conf | one trajectory (McGrath); one agent + 3 architectures in an appendix (Lovering) | four independently trained nets, two of them seeds of one architecture [37]; −661 [41a] | seed replication and three controls |

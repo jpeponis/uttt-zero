@@ -75,19 +75,23 @@ review, 2026-09-12.)*
    and v2a — and in all 3 of `deep8_c1_300_e4`'s columns (2026-09-10), 12 columns in all.
    *Search-relative; all nets, `deep8_c1_300_e4` included.* `tools/atlas.py` →
    `runs/plan5_A1_atlas.out`, `runs/step7a.out`, `runs/plan6/I1_A1_atlas.out`.
-2. **The first-move ordering is stable across 340 Elo**: Kendall τ between deep10@16k and
+2. **The first-move ordering is stable across 363 Elo**: Kendall τ between deep10@16k and
    v2b@16k is 0.96, deep8_300 vs v2b 0.92; the top four are [40] > [36] > [0] > [37] on
    every strong column (centre-centre, then the centre board's corner and the corner
    board's corner and edge). **`deep8_c1_300_e4` has the same top four in the same order at
    16k** ([0] and [37] swap at 1k and 4k, as they already did on deep8_300), but its ordering
    sits further from the weak net's: **τ 0.85 against v2b@16k**, 0.89 against deep10@16k, 0.92
    against deep8_300@16k (2026-09-10) — the top and the bottom fixed, the middle looser than any
-   earlier pair. *Search-relative; all nets.* Same files; `runs/plan6/I1_A1_atlas.json`.
+   earlier pair. The τ values quoted span v2b (0 Elo) to `deep8_c1_300_e4` (+363); the headline's
+   earlier "340 Elo" was the dev1-to-deep10 span (M1, 2026-09-12). *Search-relative; all nets.* Same
+   files; `runs/plan6/I1_A1_atlas.json`.
 3. **X's edge after [40] is rated +0.447 by deep10 at 16k sims** (v2b: +0.354; dev1: +0.28).
    The *magnitude* rises with strength and is not trusted; the *sign* and the gap to the
    next move (+0.11 to [36]) are. `deep8_c1_300_e4`: **+0.495**, gap to [36] **+0.100**
-   (2026-09-10) — a fourth point on a rise that has not stopped (0.28 → 0.354 → 0.455 /
-   0.447 → 0.495) while the gap stays ≈ 0.10. *Search-relative.* Same files;
+   (2026-09-10) — a fourth point on a rise (0.28 → 0.354 → 0.455 /
+   0.447 → 0.495) that is **not monotone** — deep8_300's 0.455 sits above deep10's 0.447 —
+   and that shows no saturation either way; "has not stopped" was an extrapolation (M1, 2026-09-12).
+   The gap stays ≈ 0.10. *Search-relative.* Same files;
    `runs/plan6/I1_A1_atlas.out`.
 4. **After most first moves there are two or more comparably good replies — and the worst
    reply is clearly worse.** Between the two best *distinct reply orbits* (a reply and its
@@ -239,8 +243,12 @@ review, 2026-09-12.)*
     deep8_300. On v2b this was
     indistinguishable from zero (+0.008 / +0.011 / +0.033). **`deep8_c1_300_e4` is smaller
     again** (2026-09-10): +0.049 ± 0.039 / +0.026 ± 0.030 / +0.038 ± 0.027 (A4's model) and
-    +0.021 ± 0.045 / +0.034 ± 0.034 / +0.032 ± 0.031 (B3's) — positive in all six, significant
-    in three. Against deep10's A4 intervals the centre (0.049 in [+0.030, +0.110]) and the edge
+    +0.021 ± 0.045 / +0.034 ± 0.034 / +0.032 ± 0.031 (B3's) — positive in all six and
+    significantly different from zero in **four** of them: A4's centre (+0.0489 ± 0.0388) and edge
+    (+0.0382 ± 0.0271), B3's corner (+0.0337 ± 0.0336 — a lower endpoint of +0.0001) and edge
+    (+0.0316 ± 0.0306). The corner's margin is the width of the print, which is the fact worth
+    carrying (an earlier form said "significant in three"; M1, 2026-09-12). Against deep10's A4
+    intervals the centre (0.049 in [+0.030, +0.110]) and the edge
     (0.038 in [+0.029, +0.083]) sit *inside*, and only the corner (0.026 against [+0.035,
     +0.095]) falls below — so by I1's rule, in A4's model, the corner moved and the other two held;
     in B3's model all three fall below deep10's B3 intervals (0.021 / 0.034 / 0.032 against
@@ -255,10 +263,15 @@ review, 2026-09-12.)*
     `runs/plan6/I1_A4_freemove.out`, `runs/plan6/I1_B3_value_decomp.out`.
 15. **Which class of board is worth most is not resolved.** deep10 orders centre > corner >
     edge, deep8_300 has edge highest, the seed replicate corner > centre ≈ edge; the
-    differences are inside the CIs on all three. The raw head's
-    *counterfactual* hierarchy (flip a won board's owner: centre +1.05, corner +0.94, edge
-    +0.83) is unchanged to the second decimal since v2a and is the line-count ordering
-    (4 / 3 / 2 lines through the board) in disguise. *Predictive; all nets.*
+    differences are inside the CIs on all three. (Those three orderings are the *self*-ownership
+    coefficients of A4's and B3's models; the self − opp contrast orders the classes differently
+    — deep10 centre +0.066, corner +0.090, edge +0.066 — so the quantity must be named with the
+    ordering; M1, 2026-09-12.) The raw head's
+    *counterfactual* hierarchy (flip a won board's owner: centre +1.052, corner +0.941, edge
+    +0.827) keeps v2a's **ordering** but not its magnitudes — v2a reads +1.026 / +0.910 / +0.794
+    (`runs/v2a/probe_surprise_rerun.out:15–17`), so "unchanged to the second decimal since v2a"
+    was wrong (M1, 2026-09-12) — and it matches the line count through each board (4 / 3 / 2)
+    rather than being shown by this intervention to be it. *Predictive; all nets.*
     `plan5_B4_probe_value_deep10.out`, `runs/v2a/probe_surprise_rerun.out`.
 16. **The raw board count is discounted as the net gets stronger.** The count-margin
     coefficient on the raw value falls from +0.106 (iteration 20) to +0.037 ± 0.010
@@ -269,17 +282,28 @@ review, 2026-09-12.)*
     deep10's interval and on deep8_300's endpoint, so the discount deepens rather than
     saturating. *Predictive / search-relative; all four strong nets' checkpoints.*
     `plan5_B3_value_deep10.out`, `plan5_B3_value_s1.out`, `runs/plan6/I1_B3_value_decomp.out`.
-17. **Line counting is learned first and never moves:** the threat coefficients are at
+17. **Line counting is learned first and changes little after:** the threat coefficients are at
     their final values by iteration 10–20 of 300 on both seeds and on deep8_300 — and on
     `deep8_c1_300_e4`, whose search-value threats read +0.123 / −0.166 at iteration 10 against
-    +0.131 / −0.136 at 300 (2026-09-10). *Descriptive of training; all four strong nets.*
+    +0.131 / −0.136 at 300 (2026-09-10) — the widest swing, threats_against, is 0.030 and falls
+    *outside* the final coefficient's interval (−0.1363 ± 0.0201,
+    `runs/plan6/I1_B3_value_decomp.out:2` and `:43`), so "never moves" is withdrawn and "learned by
+    iteration 10–20" is what the numbers carry (M1, 2026-09-12).
+    *Descriptive of training; all four strong nets.*
     Same; `plan5_B3_value_s1.out`, `runs/plan6/I1_B3_value_decomp.out`.
-18. **An open board that becomes nobody's is worth nothing to the mover:** removing an open
-    board for both sides moves the raw value by +0.017 (v2a: +0.06). *Predictive.*
-    `plan5_B4_probe_value_deep10.out`.
+18. **An open board that becomes nobody's moves the raw value little on average:** removing the
+    open **centre** board for both sides moves it by +0.017 over 33 947 edits, with p10 −0.647
+    and p90 +0.677; a corner board +0.012 (133 431 edits), an edge +0.014 (124 861); v2a's centre
+    +0.060. A small signed mean over a wide two-sided spread, with no interval on the mean reported
+    — the earlier form quoted the centre number for "an open board", gave no spread, and read a
+    near-null as "worth nothing" (M1, 2026-09-12). *Predictive.*
+    `plan5_B4_probe_value_deep10.out:19–21`.
 19. **An opponent's immediate local threat costs ≈ −0.10** (−0.099 ± 0.014); an own
-    immediate local win, once the macro win is separated, is worth nothing by itself
-    (−0.026 ± 0.017). Seed replicate: −0.098 ± 0.014 and −0.028 ± 0.017; deep8_300 −0.082
+    immediate local win, once the macro win is separated, carries a small **resolved negative**
+    coefficient rather than nothing (−0.026 ± 0.017 on deep10 and −0.037 ± 0.018 on
+    `deep8_c1_300_e4`, both intervals excluding zero — "worth nothing by itself" was wrong in sign
+    and in resolution; it is an adjusted association, not a cost. M1, 2026-09-12).
+    Seed replicate: −0.098 ± 0.014 and −0.028 ± 0.017; deep8_300 −0.082
     ± 0.014; **`deep8_c1_300_e4` −0.086 ± 0.015 and −0.037 ± 0.018** (2026-09-10).
     *Search-relative; all four strong nets.* `plan5_B3_value_*.out`,
     `runs/plan6/I1_B3_value_decomp.out`.
@@ -392,12 +416,18 @@ review, 2026-09-12.)*
     +1.0, at the edge of the pre-registered band, the two sets being from different corpora.
     `endgame_v3_test` is a development set from here on.
     `runs/plan7/J1a_endgame_v3_test_e8.out`, `runs/plan7/J1a_endgame_v3_dev_e8.out`.
-31. **"Draw blindness" was never a capacity limit.** The 150-iteration nets recognised
+31. **"Draw blindness" was not a capacity limit — a measurement and an inference.**
+    The 150-iteration nets recognised
     ~55 % of exact draws at every width and depth; the annealed 300-iteration nets
     recognise 67–72 % with the same architecture, loss and labels. The step happens at
     the first learning-rate drop (deep8_300: 58.8 → 65.7 % between checkpoints 200 and
     210), and the draw metric wobbles by up to 20 points between adjacent checkpoints at
-    constant LR. *Exact; deep8_300 and deep10 timelines.* `runs/*/timeline.json`,
+    constant LR. *Exact* — the draw-recognition measurement, graded against the solver on
+    `suites/endgame_v1` every tenth checkpoint; the **diagnosis** (optimisation, not capacity) is
+    **inference** from the step's timing and from width and depth having been varied at 150
+    iterations, and it leaves E (M0 row 2, applied to this line M1, 2026-09-12). *deep8_300 and
+    deep10 timelines; `deep8_c1_300_e4`'s and `_e8`'s carry the later readings — draw recognition
+    70.6 → 74.7 % and 73.1 → 79.6 % across the first drop.* `runs/*/timeline.json`,
     RETROSPECTIVE §3.
 31a. **The last-board phase is solved outright.** On every position with exactly one open
     board in 60 000 held-out positions (701, 1.2 % of them; exact values from the
@@ -407,7 +437,8 @@ review, 2026-09-12.)*
     on the 689 one-open-board positions (1.1 %) of the held-out set built for it from deep10's
     late games (`runs/probe_data_deep10late_e4.npz` — not its own corpus, as an earlier form of
     this line said; M0 review, 2026-09-12): **100 / 100 / 100** again (2026-09-10). A tablebase spliced into the search as a terminal lookup therefore has
-    nothing to add to any of these nets. *Exact; all nets and `deep8_c1_300_e4`.*
+    nothing to add to these nets **on these sampled positions** (701 of 60 000 and 689 of 60 000;
+    no population interval, and no general correctness, follows — M1, 2026-09-12). *Exact; all nets and `deep8_c1_300_e4`.*
     `tools/tablebase_grade.py` → `runs/plan6/I1_C5_tablebase_grade.out`.
 32. **What the raw policy still gets wrong late is the count rule and tempo, not local
     tactics.** On 6000 strong-play positions with ≤ 14 empties, deep10's raw move loses
@@ -416,11 +447,14 @@ review, 2026-09-12.)*
     61 > holding a draw 51 > denying a free move 37 > a local win 20 > closing a board 4 >
     a macro win 0. Local-tactics failures fell most (26 → 16 % of puzzles). **On
     `deep8_c1_300_e4` the rate halves again** (2026-09-10, a fresh
-    6001-position sample of the same corpus, written as `suites/puzzles_v3_dev.npz`): the raw
+    6001-position sample written as `suites/puzzles_v3_dev.npz` — drawn from deep10's last 20
+    iterations where deep10's 6000 came from deep8_300's, so the two are different corpora and not
+    paired; "the same corpus" was wrong, M1, 2026-09-12): the raw
     move loses exact value in **1.0 %** (61 puzzles) and the 64-sim search in **0.03 %** (2 of
     6001). The head of the motif order holds — tiebreak conversion 32 > holding a draw 26 >
     giving a free move 23 > denying a free move 21 > a local win 15 > a macro win 3 > closing a
-    board 0 — but local tactics are now a *larger* share of a smaller set (25 % of puzzles
+    board 0 (the tail swapped as well as the middle: closing a board 4 → 0, a macro win
+    0 → 3 — M1) — but local tactics are now a *larger* share of a smaller set (25 % of puzzles
     against deep10's 16 %), so "local-tactics failures fell most" describes the step from v2b to
     deep10 and not this one; what the strongest net's raw policy still gets wrong is the count
     rule and tempo, in the same proportion as before. *Exact; v2b, deep10 and
@@ -437,7 +471,12 @@ review, 2026-09-12.)*
     when the mover is winning, 51 % in drawn positions, 84 % when lost). deep8_300: 24 %
     and 70 %. **`deep8_c1_300_e4`: 24.6 % and 70.2 %** — by ply 2.2 / 26.5 / 50.6 / 66.5 %
     (2026-09-10). (The solver's column is a property of the position set, not of the net: read
-    on the same held-out positions it is deep8_300's number to every digit. It is also the rate
+    on the same held-out positions it is deep8_300's number to every digit — literally
+    0.7021498643289501 in both `runs/principles_deep8.json` and
+    `runs/plan6/I1_principles_deep8e4.json`, the same 4 791 solved positions, so 70.2 % replicates
+    the set and not the strength (M1, 2026-09-12). The two percentages are measured on **different
+    populations**: the agent's over the *unsolved* positions of each net's 60 000, the solver's over
+    the 4 791 *solved* ones (deep10's set has 4 875) — not a paired agent-versus-solver comparison. It is also the rate
     for *one* optimal policy — `tools/probe.py exact_pv3` takes the lowest-indexed optimal move
     — not the rate at which sending to a winnable board is *necessary*: where several moves are
     optimal, another tie-break could give another number; M0 review, 2026-09-12.) *Behavioural and
@@ -448,13 +487,17 @@ review, 2026-09-12.)*
     `deep8_c1_300_e4`'s 4791, 2026-09-10), and
     the agent avoids sending to a winnable board early. The rule is a macro-line rule and
     an opening rule, not a general one. Same files.
-35. **Conceding the centre board ("the Orlin gambit") costs what its lines cost, no more.**
+35. **Conceding the centre board ("the Orlin gambit") shows no resolved residual in this regression.**
     With threats controlled, the opponent owning the centre is worth +0.01 ± 0.04 on the
     search value (the raw head: −0.05 ± 0.04); the centre's premium in the raw head's
-    counterfactual (+0.11 over a corner) is the fourth line through it. `deep8_c1_300_e4`
+    counterfactual (+0.111 over a corner, `plan5_B4_probe_value_deep10.out:17`) is *consistent with*
+    the fourth line through it — an edit that flips one board's owner does not isolate that line
+    (M1, 2026-09-12). `deep8_c1_300_e4`
     gives the same null on the search value, +0.032 ± 0.044 (raw head −0.060 ± 0.046)
     (2026-09-10; the counterfactual half was not re-read — `tools/probe_value.py` is not in
-    I1). *Search-relative / predictive; deep10 and `deep8_c1_300_e4`.*
+    I1). (The earlier headline — "costs what its lines cost, no more" — is the form M0 row 8
+    replaced in §1a and in the claims map; it stood in this line until M1, 2026-09-12.)
+    *Search-relative / predictive; deep10 and `deep8_c1_300_e4`.*
     `plan5_B3_value_deep10.out`, `plan5_B4_probe_value_deep10.out`,
     `runs/plan6/I1_B3_value_decomp.out`.
 
@@ -577,8 +620,11 @@ review, 2026-09-12.)*
     and target classes …) with a linear value on the position concepts, fitted to deep10's
     256-sim search on 50 000 held-out positions — reproduces the search's move in **41 %**
     of positions (the net's own raw policy: 66 %) and the value with R² 0.55, and then,
-    playing with the same 64-sim search, scores **2.2 % vs v2b (−661 Elo), 0.4 % vs deep10
-    (−943 Elo)** and 14 % against a 10 000-playout random-rollout search (−311). Its largest
+    playing with the same 64-sim search, scores **2.18 % [1.36, 3.05] vs v2b (−661 Elo
+    [−745, −601]), 0.44 % [0.10, 0.87] vs deep10 (−943 [−1200, −822])** and
+    14.29 % [12.16, 16.57] against a 10 000-playout random-rollout search (−311 [−343,
+    −281]) — intervals from `runs/paired_surrogate_vs_*.json`'s `summary.overall`, added so the
+    manuscript can quote them (M1, 2026-09-12). Its largest
     weights are readable and agree with the rest of this file (self-send +0.85, a macro win
     +0.89, letting the opponent win next −0.81, keeping local threats +0.70, a board won
     +0.62, count +0.62; a free move given +0.12). *Behavioural; deep10.* `tools/distill.py`,
@@ -739,7 +785,8 @@ review, 2026-09-12.)*
     steps*, 1 % of the RL exposure they were gating, and do not survive 12 480: **a supervised
     gate has to be read at a step count of the
     order of the run's**, or until the curves have crossed or clearly will not. The self-play
-    reading is 50 — the G-CNN loses 220 Elo to its parent, capacity and not the LR. **The
+    reading is 50 — the G-CNN loses 220 Elo to its parent, consistent with capacity rather than the
+    learning rate, not its proof (M0 row 20, applied to this line M1, 2026-09-12). **The
     tied-heads arm survives the same test** (sweep 3, the same day): resnet8_tied is **0.7877**
     at 6 240 steps and **0.7408** at 12 480 against the ResNet's 0.8145 / 0.7630 — ahead on every
     metric at 12 480 (top-1 0.620 vs 0.611, Brier 0.094 vs 0.096, exact 3-way 0.849 vs 0.840,
@@ -851,10 +898,12 @@ review, 2026-09-12.)*
     agent stays `deep8_c1_300_e4/net_0300.pt`. (The run was interrupted at iteration 268 by a
     Windows Update restart and resumed as attempt 1 from iteration 260, every file verified
     intact; iterations 260–268 are a perturbed re-run, so `log.jsonl` is read de-duplicated by
-    iteration.) **And the width is not what cost it the 220 Elo:** the same architecture at the
-    ResNet's parameter count (`gcnn8x46`, 2.46 M parameters at 7.0× the inference cost) also
-    trails the plain ResNet at 12 480 supervised steps, with the margin reversing by 6 240 — the
-    narrow net's curve, one capacity up (48, restated 2026-09-10). *Behavioural; one run read
+    iteration.) **And the supervised curves do not put the 220 Elo down to the width:** the same architecture at
+    the ResNet's parameter count (`gcnn8x46`, 2.46 M parameters at 7.0× the inference cost) also
+    trails the plain ResNet at 12 480 supervised steps, with *its* margin reversing by 6 240 — the
+    narrow net's curve, one capacity up (48, restated 2026-09-10). That is a frozen-data result: no
+    self-play run exists at that width, so it bears on the 220 Elo by analogy and not by measurement
+    (M1, 2026-09-12). *Behavioural; one run read
     against its parent, seed band ≈ 3 points.*
     `runs/gcnn8_c1_300_e4/{analysis.out,eval_full.jsonl,timeline.json}`,
     `runs/plan6/H4_timeline.out`, `runs/plan6/H4_lr_*.json`, `runs/plan6/H4_lr2_*_x32.json`,
@@ -880,8 +929,9 @@ review, 2026-09-12.)*
     instrument from here on. Against dev1, 95.3 % [94.2, 96.4], +523. **The dose–response of
     the update lever, in full: +100 (256 → 512 steps per iteration, 46), +64 (→ 1024, 49),
     +40 [+23, +57] (→ 2048)** — each doubling worth about two-thirds of the one before it,
-    all three positive, and eight sampled examples per generated position is still not the
-    plateau. The full-suite timeline (`eval_full.jsonl`, every 10th checkpoint at ±2.8),
+    all three positive — so **four** passes was not the plateau; whether **eight** is has not been
+    measured, and §10 predicts the fourth doubling inside the seed band ("eight … is still not the
+    plateau" claimed more than this run can say; M1, 2026-09-12). The full-suite timeline (`eval_full.jsonl`, every 10th checkpoint at ±2.8),
     vs v2b at iterations 10 / 50 / 100 / 150 / 200 / 210 / 220 / 260 / 280 / 290 / 300 with
     H1b's beside it: 32.1 / 74.1 / 78.6 / 81.2 / 82.4 / 86.4 / 88.3 / 89.9 / 90.4 / 90.5 /
     89.0 against 24.7 / 67.0 / 75.0 / 79.1 / 80.5 / 86.1 / 87.3 / 86.6 / 87.2 / 88.1 / 89.0
@@ -892,8 +942,10 @@ review, 2026-09-12.)*
     endgame_v1 WDL **91.3 % [90.3, 92.4]**, draw recognition 81.0 %, regret 0.022 [0.016,
     0.028], optimal 98.1 % (H1b 90.1 / 79.0 / 0.022 / 98.1); endgame_v2_dev 91.7 [90.7,
     92.7], draws 83.6 %, regret 0.020 [0.015, 0.026] (H1b 90.5 / 0.029); the 256-sim search
-    100.0 % optimal at regret 0.000 on both sets. On the timeline's 20 000 held-out
-    positions from deep10_c1_300 the endgame WDL steps 87.0 → 89.9 across the first drop
+    100.0 % optimal at regret 0.000 on both sets. On **`suites/endgame_v1`**, which the timeline grades at every tenth
+    checkpoint (its 20 000 held-out positions from deep10_c1_300 carry the policy, entropy and
+    symmetry metrics, not this one — `timeline.json`'s `meta.endgame_set`; M1, 2026-09-12), the
+    endgame WDL steps 87.0 → 89.9 across the first drop
     (200 → 210) and reaches 91.3 at 300, while the final D4 Jensen–Shannon residual is 0.025
     bits and the value std 0.047 (H1b 0.026 / 0.052): **eight passes bought no more symmetry
     consistency than four or two.** Budget axes: 244 of 614 400 steps were skipped by the
@@ -907,7 +959,7 @@ review, 2026-09-12.)*
     4.98, t_selfplay 11.98 against 11.93, wall 21.96 h against 16.92 — the training half has
     doubled again and the self-play half has not — but it is the same 8×128 ResNet, so exactly
     the same cost per evaluation as `_e4`, `_e2` and deep8_c1_300: the +40 is free at play
-    time (44). The reading: helped, still update-limited at eight passes, and the play agent
+    time (44). The reading: helped, update-limited at least as far as eight passes, and the play agent
     becomes `runs/deep8_c1_300_e8/net_0300.pt`. Nothing further is proposed — PLAN6 §9's
     closing programme is complete and E11 follows. *Behavioural; one run read against its
     parent, seed band ≈ 3 points.*
