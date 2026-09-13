@@ -34,5 +34,8 @@ docs/history/review_astra/numba_cache/
 !runs/plan6/H4_diag/
 !runs/plan6/H4_diag/*.py
 !runs/plan6/*.json
-# outside-review event streams (PLAN7 S7a): REVIEW.md and brief.md are tracked, the JSONL is not
-docs/reviews/*/events.jsonl
+# outside-review event streams (PLAN7 S7a): REVIEW.md, briefs, launch.ps1, status.txt and stderr.txt
+# are tracked; the JSONL stream and the launcher's scratch files are not
+docs/reviews/*/events*.jsonl
+docs/reviews/*/launcher_*.txt
+docs/reviews/*/empty_stdin.txt

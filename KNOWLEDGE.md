@@ -236,7 +236,11 @@ sign or ordering changed.*
     indistinguishable from zero (+0.008 / +0.011 / +0.033). **`deep8_c1_300_e4` is smaller
     again** (2026-09-10): +0.049 ± 0.039 / +0.026 ± 0.030 / +0.038 ± 0.027 (A4's model) and
     +0.021 ± 0.045 / +0.034 ± 0.034 / +0.032 ± 0.031 (B3's) — positive in all six, significant
-    in three, every one of them below deep10's interval. Over four strong nets the residual is
+    in three. Against deep10's A4 intervals the centre (0.049 in [+0.030, +0.110]) and the edge
+    (0.038 in [+0.029, +0.083]) sit *inside*, and only the corner (0.026 against [+0.035,
+    +0.095]) falls below — so by I1's rule the corner moved and the other two held. *(An earlier
+    form of this line said "every one of them below deep10's interval", which its own numbers
+    contradict; corrected after the M0 review, 2026-09-12.)* Over four strong nets the residual is
     **+0.02 … +0.08 and does not grow with strength**; "moved with strength" was the step up
     from v2b, and it has not moved again since deep8_300. *Search-relative; positive on all four
     strong nets, zero on v2b.* `plan5_A4_*.out`,
@@ -383,8 +387,9 @@ sign or ordering changed.*
     one-open-board tablebase, `uttt/tablebase.py`), deep10's raw value head is 100 % exact
     (draws included), its raw policy plays an optimal move 100 % of the time, and the
     64-sim search 100 %; v2b 99.0 / 99.6 / 100 %, dev1 94.0 / 98.7 / 100 %. `deep8_c1_300_e4`
-    on the 689 one-open-board positions (1.1 %) of its own held-out set: **100 / 100 / 100**
-    again (2026-09-10). A tablebase spliced into the search as a terminal lookup therefore has
+    on the 689 one-open-board positions (1.1 %) of the held-out set built for it from deep10's
+    late games (`runs/probe_data_deep10late_e4.npz` — not its own corpus, as an earlier form of
+    this line said; M0 review, 2026-09-12): **100 / 100 / 100** again (2026-09-10). A tablebase spliced into the search as a terminal lookup therefore has
     nothing to add to any of these nets. *Exact; all nets and `deep8_c1_300_e4`.*
     `tools/tablebase_grade.py` → `runs/plan6/I1_C5_tablebase_grade.out`.
 32. **What the raw policy still gets wrong late is the count rule and tempo, not local
@@ -415,7 +420,10 @@ sign or ordering changed.*
     when the mover is winning, 51 % in drawn positions, 84 % when lost). deep8_300: 24 %
     and 70 %. **`deep8_c1_300_e4`: 24.6 % and 70.2 %** — by ply 2.2 / 26.5 / 50.6 / 66.5 %
     (2026-09-10). (The solver's column is a property of the position set, not of the net: read
-    on the same held-out positions it is deep8_300's number to every digit.) *Behavioural and
+    on the same held-out positions it is deep8_300's number to every digit. It is also the rate
+    for *one* optimal policy — `tools/probe.py exact_pv3` takes the lowest-indexed optimal move
+    — not the rate at which sending to a winnable board is *necessary*: where several moves are
+    optimal, another tie-break could give another number; M0 review, 2026-09-12.) *Behavioural and
     exact; all three nets read.* `runs/principles_*.json`,
     `runs/plan6/I1_principles_deep8e4.json`.
 34. **What is true instead:** the optimal move *never* hands the opponent an immediate

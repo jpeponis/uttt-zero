@@ -378,8 +378,12 @@ first, because the literature uses at least four incompatible ones.
 `steps = 64`, `batch = 1024`. So each iteration generates **262,144 new positions** and trains on
 **262,144 · epochs samples** drawn from a 2 M-position window (≈ 7.6 iterations deep). The
 `epochs` knob is therefore *exactly* the **sample-reuse ratio**: each self-play position is used
-≈ 1, 2, 4 or 8 times over its life in the buffer. (A further 8,192 exactly-solved positions per
-iteration are mixed in, so the true ratio is ≈ 0.97 × epochs.) Measured result:
+≈ 1, 2, 4 or 8 times over its life in the buffer. (Exact endgame labels *overwrite* the value targets of existing rows —
+`uttt/selfplay_cont.py apply_exact` — rather than adding rows, so the ratio is `epochs` to three
+decimals: `_e8`'s log gives 629 145 600 rows sampled over 78 536 533 positions generated, **8.0109**;
+M0's recomputation for the four runs is 1.0026 / 2.0027 / 4.0054 / 8.0109. An earlier form of this
+sentence said "≈ 0.97 × epochs" on the assumption that the 8,192 exactly-solved positions per
+iteration were added rows; corrected 2026-09-12.) Measured result:
 **+100 → +64 → +40 Elo per doubling, 1 → 2 → 4 → 8, at fixed data and fixed architecture** —
 +204 Elo in total, for +8.7 h of training on runs of 17–22 h.
 
