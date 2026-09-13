@@ -63,7 +63,11 @@ edge — the first ordering in this file to flip with strength. The moves are mo
 drifting the way strength has always pushed them (a sharper opening, 2–5; earlier settling, 20–22;
 a raw policy that fails half as often, 32), with two that are not: the count rule now decides a
 third of games rather than a quarter (25), and 16.6 % of this net's games are drawn (24). No other
-sign or ordering changed.*
+*primary* sign or ordering changed — the ones each claim's first sentence states; within 32 the
+second and third failure motifs swapped (holding a draw overtook giving a free move), and after [2]
+the best reply orbit moved from a three-net tie to the self-send [20] (5) — both recorded in their
+claims. (The earlier form of this sentence, "no other sign or ordering changed", was too broad; M0
+review, 2026-09-12.)*
 
 1. **[40] — centre of the centre board — is the best first move** on every net and every
    budget tested, and **[13] the worst**: rank 1 and rank 15 in all 9 columns of the atlas

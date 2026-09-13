@@ -360,7 +360,7 @@ itself a methodological point the interpretability literature (§5) does not mak
   by a macro line on `_e4` — and the share *moved* (from a flat 25 % over 250 Elo to 33 % in the
   last 120 Elo, KNOWLEDGE 25). That is a genuinely unclaimed fact about the CodinGame ruleset.
 - **When games are decided.** No prior work on UTTT. The project's retrospective
-  prediction-stability measure (median settle at ply 36 of ~51; 21 % at ply 0; 60 % by ply 36 on
+  prediction-stability measure (median settle at ply 36 of ~51 on the held-out v2a games and 34 on strong play; 21 % at ply 0; 60 % by ply 36 on
   `_e4`, KNOWLEDGE 20–22) has no comparator; the nearest analogue in the wider literature is
   AlphaZero's per-move value curves in ELF OpenGo's Figure 1
   ([Tian et al., ICML 2019](http://proceedings.mlr.press/v97/tian19a/tian19a.pdf)) *(conf)*,
@@ -826,7 +826,7 @@ above; each is falsifiable by one counter-citation, so each should be phrased in
 7. **No dose–response curve of playing strength against the sample-reuse / replay ratio exists
    for an AlphaZero-style board-game system.** Published practice clusters at ≈ 1 sample trained
    per position generated (AlphaZero ≈ 0.5–0.7, AlphaGo Zero ≈ 1.4, ELF ≈ 0.8, Lc0 settling ≈ 1,
-   MiniZero ≈ 1.2, pgx ≈ 1), KataGo caps at 4 and calls it conservative, and the two explicit
+   MiniZero ≈ 1–1.3, pgx ≈ 1), KataGo caps at 4 and calls it conservative, and the two explicit
    experiments in the literature are warnings in the *other* direction (ELF: below 10:1 "hinders
    training … severe overfitting"; Lc0 at ~12× reuse overfitted its value head). The one
    systematic study of the epochs knob (Wang et al. 2020, 6×6 Othello, ep ∈ {5,10,15}) recommends

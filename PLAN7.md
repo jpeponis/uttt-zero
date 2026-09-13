@@ -49,8 +49,11 @@ The rebuttal round is next.
 
 **What the next instance does, in order.** (1) *Done 2026-09-12:* `knowledge/07` merged into §2, §3
 re-ranked (C1's claim reworded, §2c). (2) *Done:* M0 launched, returned in 564 s, adjudicated (§7e),
-the plan amended; the **rebuttal round** through `codex exec resume` (§7a) with the four open
-questions §7e names is the next act, and its reply is recorded under the table. (3) Phase J (§4) on the desk and
+the plan amended. The **rebuttal round** (`codex exec resume`, the four questions §7e names) was cut
+off by the owner's Codex five-hour usage limit at 20:28 and **relaunches itself at 00:30** from a
+background job in this session (the log's 20:29 entry; by hand: `pwsh -NoProfile -ExecutionPolicy
+Bypass -File docs/reviews/M0_plan/launch_rebuttal.ps1`); its reply is recorded under §7e's table
+when it lands. (3) Phase J (§4) on the desk and
 the 3060 — J1–J4 need no approval. (4) Put **K1** (§5) to the owner with M2's pre-registration review
 attached; launch only on approval, and only if the instance is under the 50 % line (PLAN6 Handover's
 rule, unchanged). (5) Phase L (§6) is the owner's call; §3 says why it is recommended. (6) The
@@ -112,6 +115,41 @@ manuscript (J5) and the file updates (§10) follow the readings; M3 and M4 revie
   [38] 0.343 at 20, then [40] 0.760 at 30 and 0.951 at 40** — "≥ 0.95 from iteration 20–30" holds
   marginally on `_e4` and arrives ≈ 10 iterations later on `_e8` (J1's reading; `tools/timeline.py`'s own
   line confirms it before it enters KNOWLEDGE). The draft is being revised to the three-column form.
+- **2026-09-12, 20:29 — the rebuttal round hit the owner's Codex usage limit and is deferred to 00:30.**
+  `codex-sp exec -s read-only --json -o … resume 01a0980a-…` from `417e105` at 20:21:08 — the resume
+  worked (its brief read, 15 commands, ≈ 256 KB re-read, three web fetches: Wang et al.'s HTML and the
+  paper through the research tool, pc29277's README) and it was recomputing KNOWLEDGE 14's intervals
+  from the A4 / B3 files when, at 456 s, the stream ended in `error` / `turn.failed`: *"You've hit your
+  usage limit … try again at Sep 13th, 2026 12:24 AM."* No `REBUTTAL.md`. The cause is M0 itself:
+  one whole-repository xhigh review (≈ 4.15 M input tokens) consumes most of a five-hour window, and
+  the rebuttal began 18 minutes after it. **A background job in this session sleeps to 00:30 and
+  relaunches the same script** (`docs/reviews/M0_plan/launch_rebuttal.ps1`, which resumes the same
+  session, so the reviewer's cache and context survive); by hand it is `pwsh -NoProfile
+  -ExecutionPolicy Bypass -File docs/reviews/M0_plan/launch_rebuttal.ps1` from the repo root. Rule
+  for the remaining stages (§7a): one review per five-hour window, and briefs that name files rather
+  than let the reviewer read the repository whole.
+- **2026-09-12, 20:30 — J2's draft related-work section returned** (Opus, scratchpad only; 2 504 words,
+  eight sections, a 16-row comparator table) with eight places where knowledge/07 and PLAN7 §2 disagree
+  on a number or its net. Fixed in §2a now: Elhage's root estimate is "a few hundred million CPU-hours"
+  (≈ 3 × 10⁸), not ≈ 10⁸; the centre-board null quoted was deep10's (+0.01 ± 0.04), `_e4`'s is +0.032
+  ± 0.044; the "74 % X score after [40]" is the deep10 / deep8_300 books' self-match column, which
+  `_e4`'s book does not have. Fixed in §1b: "+204" is a sum of three matches — the *measured*
+  head-to-head of the eight-pass net over the one-pass net of the same shape is +211 [+189, +232]
+  (51), and the paper quotes that. knowledge/07: MiniZero's ratio stated two ways (≈ 1–1.3 in the table,
+  ≈ 1.2 in the closing claim) and the settling ply quoted unqualified (36 is the held-out v2a games; 34
+  is strong play) — both corrected. The draft itself was written before M0's corrections reached §2 and
+  carried five struck statements (the "confounders controlled" form, the root-only symmetry identity,
+  "no dose–response exists", the MOPNS paragraph, "every net 100 / 100 / 100"); it is being revised
+  against §7e before adoption into `docs/paper/`.
+- **2026-09-12, 20:40 — J1's revised claims map returned:** 59 rows (56 claims; 31, 33 and 35 split
+  where level *and* coverage differ; 11, 14, 21, 23, 30, 32, 37, 42 carry compound drift cells), **22
+  judgement cells enumerated** for the human check, four cells read from files rather than KNOWLEDGE
+  (6's `_e8` series from `timeline.json`; 28–30's `_e8` lines from `analysis.out`). Two findings:
+  **KNOWLEDGE 30's sealed half has no reading above +242** and `endgame_v3_test` is still sealed —
+  J1a (§4) pre-registers its one read on `_e8`; and KNOWLEDGE's §1 note still said "no other sign or
+  ordering changed" against 32's motif swap — corrected now (with 5's reply move after [2] noted
+  beside it). The map is adopted into `docs/paper/01_claims_map.md` after a read, as the draft M1
+  reviews; its judgement cells are M1's first question.
 
 ## 0. The decision in front of the project
 
@@ -265,7 +303,9 @@ with its evidence (RETROSPECTIVE §3, KNOWLEDGE 42–51):
   default for a week and the field's practice. Two passes: +100 Elo for +1.3 h of training. Four:
   +64 more. Eight: +40 more, with each generated row drawn about eight times, the sampled distinct
   fraction down to 0.45, and *nothing complaining* — replay age, skipped steps, losses and self-play
-  statistics all unchanged (46, 49, 51). The supervised twin says the same: for a fixed teacher the fit
+  statistics all unchanged (46, 49, 51). The three steps sum to +204; the *measured* head-to-head of
+  the eight-pass net against the one-pass net of the same shape is **+211 [+189, +232]** (51), and
+  the paper quotes the measurement, not the sum. The supervised twin says the same: for a fixed teacher the fit
   is a function of steps, not of distinct positions — eight passes over 50 k positions equal one pass
   over 400 k (47). The +127 of "duration" (150 → 300 iterations) was mostly its updates.
 - **Schedule:** 300 iterations with LR drops at 200 / 280. The first drop is a fixed ≈ +5 … +9 step on
@@ -319,13 +359,13 @@ for one variant as if it held for another (knowledge/01 §0).
 |---|---|---|---|
 | Best first move | Centre-centre, "undoubtedly the best move" — uttt.ai's prose; gPress's uttt.ai scores CC +11.81 > centre-corner +11.07 > centre-edge +8.16 > corner-of-same-corner +6.47 > corner-of-opposite-corner +6.12, every edge-board opening "bad" — five of the 15 orbits, on uttt.ai's undocumented internal scale (closed / **draw**); royerk's rollout MC puts centre at ≈ 52 % (CG rules) | [40] +0.495 > [36] +0.395 > [0] +0.309 ≈ [37] +0.305 > [5] +0.254 > [8] +0.232 > … > [9] +0.039 > [13] −0.079 at 16k on `_e4`; rank 1 and 15 fixed in 12 of 12 columns; τ 0.85–0.96 across 340 Elo (1–3; `runs/plan6/I1_A1_atlas.out`) | **Agrees on the top two and on "edge-board openings worst"** ([13], [9], [15], [16] are the four lowest). uttt.ai has centre-edge third and corner-same fourth; here [0] and [37] are within 0.004 and swap with budget — the one place the two orderings differ is within noise here, and gPress's scale carries no uncertainty, so nothing is said about a tie *there* (M0). Extension: 15 orbits × 3 budgets × 4 nets with the drift stated, where the literature has one engine's undocumented scale |
 | O's reply to [40] | "O's best reply pushes play into a corner board, and the next ≈ 8 moves stay in the corner boards" (uttt.ai prose, draw variant) | deep10 and deep8_300 prefer the *edge* reply (0.75 / 0.54 of visits); `_e4` prefers the *corner* orbit 36 (0.71) and its PV after [40] is `36, 0, 8, 80, 77, …` — corner boards for eight plies (7; `runs/book_deep8_e4.json`) | **The strongest net agrees with uttt.ai; the two weaker strong nets did not.** This is the one reversal, and an independent engine sits on the stronger side of it. The paper says so |
-| First-player advantage | "P1 has a 60 % winrate" among Legend bots (darkhorse64); random play 50.9 / 7.2 / 41.9 (snowfrogdev, CG rules); "either P1 wins or a draw can be forced" (jacek, an impression) | Self-play with exploration: X 62.7 / O 20.7 / draws 16.6 % at +363 (24); paired-suite X score by opening 74 % after [40], 45–51 % after [9], [8], [13] (7); the root after [40] reads +0.495 utility ≈ 75 % expected score at 16k | Same order as the arena's 60 %; **extension: conditioned on the opening and on strength, with CIs, and the draw share separated** — the literature has no side-conditioned numbers from a strong agent |
+| First-player advantage | "P1 has a 60 % winrate" among Legend bots (darkhorse64); random play 50.9 / 7.2 / 41.9 (snowfrogdev, CG rules); "either P1 wins or a draw can be forced" (jacek, an impression) | Self-play with exploration: X 62.7 / O 20.7 / draws 16.6 % at +363 (24); the paired-suite X score by opening — 74 % after [40], 45–51 % after [9], [8], [13] — from the deep10 / deep8_300 books' self-match column, which `_e4`'s book does not have (its `--paired` file is the parent match; 7); the root after [40] reads +0.495 utility ≈ 75 % expected score at 16k | Same order as the arena's 60 %; **extension: conditioned on the opening and on strength, with CIs, and the draw share separated** — the literature has no side-conditioned numbers from a strong agent |
 | Draws and the tiebreak | SaltZero vs the #2 CG bot: +65 =96 −39, **48 % draws** (closed / draw); Daporan's 2018 objection that the most-boards rule lets P1 "collect small boards"; nobody quantifies how often the count decides a game | 16.6 % drawn at +363 and rising with strength; **a third of games reach the count** (16.5 % decided by it, 16.6 % equal) — flat at a quarter for 250 Elo, then +6 points in the last 120 (24–25); 96 % of draws are 4–4 with one full board (26) | **New:** the first measurement of what the tiebreak does at strength. §5 buys the comparison under the same agent |
 | Game length | uttt.ai self-play 40–50 plies; FLAIRS 2022 "at least 30"; CG folk 50–60 | 52.8 plies (p10 47, p90 59), lengthening with strength; 5.1 free moves per game, 98.5 % of games contain one (27) | Consistent; extension: the distribution and its drift |
 | The free move | "Very powerful" (uttt.ai); "don't give up free moves for free" (gPress); a heuristic weight of 2 vs 5 for a board win and 10 for the centre board (BoardGameGeek); no quantification anywhere | **+0.195 ± 0.028 utility** with everything else controlled, the same to 0.004 on three strong nets; ≈ +0.08 … +0.12 with the immediate macro win in the model; largest late and when ahead (+0.30 at plies 44–50); the raw head over-credits it by 0.09 (8–11) | **New, and the paper's cleanest single number — stated as an adjusted association, not a price** (§0). Beside the folk weights: in the same regression the free-move coefficient (+0.195) exceeds the own-board residual (+0.02 … +0.08) and is of the order of a macro threat's (+0.15); no exchange rate is claimed |
 | "Never send them to a winnable board" | Universal folk advice; Elhage's rigorous version (never send to a board where one move wins *the game*) | The strong move does it 24 % of the time and the **optimal** move 69–70 %; the optimal move never hands an immediate macro win when not already lost (33–34) | **The folk rule is false as stated and Elhage's is the true one** — confirmed against the solver, not against an agent |
-| The centre board | HUJI weights 10 (centre) vs 3 (corner); "an enduring advantage" (gPress); the Orlin gambit | With lines controlled, the opponent owning the centre is +0.01 ± 0.04 (a null); the raw head's centre premium is the fourth line through it (35, 15) | The premium is line-counting in disguise |
-| Solved status | Bertholon 2020: X wins in ≤ 43 (**open-board** rules — a different game); Elhage: ≈ 20-ply positions in hours, the root at ≈ 10⁸ CPU-hours (closed / draw); nothing for the most-boards rule | Exact from ≤ 14–16 empties in ≈ 0.04–0.2 s per position (3 000 positions in 2–9 min); the one-open-board phase solved outright; the agent 100 % optimal at 256 sims on every solved sample (28–32, 31a) | Not a solution and not a milestone: **J4 reports solvability *conditional on games alive at each ply* under a stated node budget, and optimality *conditional on solved*** (M0); the count tiebreak is win / draw / loss for the mover, so draw-aware PNS suffices (knowledge/06 corrected) |
+| The centre board | HUJI weights 10 (centre) vs 3 (corner); "an enduring advantage" (gPress); the Orlin gambit | With lines controlled, the opponent owning the centre is +0.01 ± 0.04 on deep10 and +0.032 ± 0.044 on `_e4` — no resolved residual in this regression; the raw head's *counterfactual* centre premium (+0.11 over a corner) is the fourth line through it and was not re-read (35, 15) | The premium is line-counting in disguise |
+| Solved status | Bertholon 2020: X wins in ≤ 43 (**open-board** rules — a different game); Elhage: ≈ 20-ply positions in hours, the root at "a few hundred million CPU-hours" (≈ 3 × 10⁸; $2–10 M) (closed / draw); nothing for the most-boards rule | Exact from ≤ 14–16 empties in ≈ 0.04–0.2 s per position (3 000 positions in 2–9 min); the one-open-board phase solved outright; the agent 100 % optimal at 256 sims on every solved sample (28–32, 31a) | Not a solution and not a milestone: **J4 reports solvability *conditional on games alive at each ply* under a stated node budget, and optimality *conditional on solved*** (M0); the count tiebreak is win / draw / loss for the mover, so draw-aware PNS suffices (knowledge/06 corrected) |
 | Exploitability | D'Alberton 2024/25 (MSc, Padua; the variant is still to be verified — the page could not be retrieved by M0): best-response training finds "significant vulnerabilities in self-play agents" | Not measured; the stability argument rests on agreement among four *related* nets | **Missing from the argument and added to the limitations (M0):** agreement within one agent family is not adversarial validation; a best-response probe of the play agent is proposable, not proposed |
 
 ### 2b. Comparators on the method
@@ -418,7 +458,16 @@ single new experiment. C6 is recommended and priced in §6.
   single tier column is replaced). 6 is read from `timeline.json` for free (§1a's corrections); 12, 15,
   18 and 35's counterfactual half are one `probe_value.py` run on the 3060; 28–30 gain `_e8`'s lines
   from `runs/deep8_c1_300_e8/analysis.out` (already quoted in 51); 38a and 41–41b need an MLP fit and
-  paired GPU matches and stay quoted as read. KNOWLEDGE 14's three ranges are reconciled here. *Output also:* the list of every claim that the manuscript will quote, in order,
+  paired GPU matches and stay quoted as read. KNOWLEDGE 14's three ranges are reconciled here.
+  **J1a — one sealed read, pre-registered here and done once.** J1 found that KNOWLEDGE 30's sealed
+  half, `endgame_v2_test`, has no reading above +242 (`_e4`'s and `_e8`'s `analysis.out` read v1 and
+  v2_dev only), and that `suites/endgame_v3_test.npz` — PLAN6 E10: 3 000 solved positions from s1's
+  iterations 280–299, split from its dev half by source game, held out for the deep8 family, **never
+  read** — is still sealed. It is read **once, on `deep8_c1_300_e8/net_0300.pt`**, with `tools/endgame.py
+  eval` at the standard settings (raw head; 64- and 256-sim search), logged in KNOWLEDGE 30 and §10 and
+  in this log, and is a development set thereafter. Pre-registered: raw WDL within 1.0 point of
+  `endgame_v2_dev`'s 91.7 %, regret within 0.010 of 0.020, the 256-sim search ≥ 99.9 % optimal; a
+  miss beyond any of those is the finding, not a nuisance. ≈ 5 min on the 3060. *Output also:* the list of every claim that the manuscript will quote, in order,
   which is the manuscript's outline.
 - **J2. The literature table, final.** `knowledge/07` merged into §2; `docs/paper/02_literature.md`
   as the paper's related-work section with every comparator's variant stated. Any comparator the
@@ -586,7 +635,12 @@ The `personal` profile (`~/.codex/personal.config.toml`) sets **`model = "gpt-6-
   `01a097ef-822f-74b1-9320-ea4f93e2799a`, exit 0. **M0 itself: 564 s, 4 152 498 input tokens
   (3 929 728 of them cached), 13 564 output, 26 commands and 13 MCP tool calls** — it fetches sources
   from the web through the `codex_apps` firecrawl plugin, so a review is not offline — far under the
-  1–3 h first estimated; the owner's Codex five-hour and weekly limits are still the budget.
+  1–3 h first estimated. **The owner's Codex five-hour limit is the binding budget, and one such
+  review nearly spends it:** the rebuttal round, resumed on the same session 18 minutes after M0, was
+  cut off after 456 s by *"You've hit your usage limit … try again at Sep 13th, 2026 12:24 AM"*
+  (`turn.failed`; the log's 20:29 entry). So: one whole-repository review per five-hour window; later
+  stages' briefs name the files to read rather than the repository; a rebuttal is launched in the
+  *next* window, not the same one.
 - **Monitoring from this session:** a background shell per review, its JSONL tailed with `Read`;
   the event types worth watching are the agent's messages (its running commentary), each `exec`
   (what it is checking) and the final `-o` write. A review that stops emitting for 20 min is checked,
@@ -643,7 +697,7 @@ changed; each is adjudicated in **§7e** (a table per stage, PLAN6 §1's columns
 
 Of REVIEW-astra's 22 adjudicated items (PLAN6 §1), judged by the three questions of 7b item 7. *Was
 the finding correct:* the two instrument bugs (items 1–4) — yes, and they changed three claims; the
-budget confound (15) — yes, decisively, it is where +204 Elo came from; the ownership grading (17) and
+budget confound (15) — yes, decisively, it is where the update lever's +211 [+189, +232] came from (the three steps, +100 / +64 / +40, sum to +204); the ownership grading (17) and
 the out-of-process evaluator (18) — yes; the RNG finding (13) — the fix was right and the stated cause
 wrong (nondeterminism, not evaluation, is why same-seed runs diverge). *Was the remedy worth buying:*
 every accepted remedy paid for itself within a day except one. *Did the experiment succeed:* the
@@ -731,7 +785,7 @@ generation project; J4's curve is the cheaper form of the same statement). A thi
 | when | desk / this session | 3090 | 3060 |
 |---|---|---|---|
 | Day 0 (today) | PLAN7 committed; **M0 launched, returned in 9.4 min, adjudicated (§7e)**; the rebuttal round | idle | idle |
-| Day 1 | J1 (three columns) and J2 adopted from the drafts; K1's rule flag and tests, J3's protocol and J4's bounded solver written; **M2 launched** on the K1 diff and the J3 / J4 designs | idle | **J1's cheap re-reads**; the `_e8` count-rule pass (K1 item 1, ≈ 5 h) |
+| Day 1 | J1 (three columns) and J2 adopted from the drafts; K1's rule flag and tests, J3's protocol and J4's bounded solver written; **M2 launched** on the K1 diff and the J3 / J4 designs | idle | **J1a, the sealed read** (5 min); **J1's cheap re-reads**; the `_e8` count-rule pass (K1 item 1, ≈ 5 h) |
 | Day 1–2 | M2 adjudicated; **K1 put to the owner** | — | **J3** after M2 (≈ 1.5 h); **J4** on the CPU after M2 |
 | Day 2 → 3 | J5 skeleton; **M1 launched** | **K1** (≈ 22 h) if approved | the E7 worker (≈ 6 min per checkpoint) |
 | Day 3 | M1 adjudicated; K1 done and read by §5's rules | idle | **K1's readings** (≈ 6 h: the I1 tool set under `draw`, the 2 × 2 cross-play) |
