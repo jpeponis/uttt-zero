@@ -1,0 +1,2 @@
+START 2026-09-12T23:46:37 pid=3912 rebuttal (resume 01a09890-65a5-70a2-acac-382ba49581d8) at 465e764
+EXIT 0 2026-09-12T23:48:18 elapsed=102s

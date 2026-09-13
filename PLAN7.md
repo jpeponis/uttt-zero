@@ -65,11 +65,15 @@ and merged (`5fa73e6`); the `_e8` count pass launched with `probe_value` added; 
    and the same on `_e4` (≈ 1.5 h); `tools/frontier.py --run runs/deep8_c1_300_e8 --net runs/deep8_c1_300_e8/net_0300.pt --plies 40 70 --per_ply 500 --max_nodes 1e8 --sims 256 --device cuda:1 --out runs/plan7/J4_frontier.json`
    (CPU-bound, ≈ 3.5 h, 8 solver processes). Readings → KNOWLEDGE lines in the forms §4 J3 / J4 and §7e M2 rows 3,
    15, 16 fix (the J4 sentence is written out there); a log entry each.
-4. **M1's and M2's rebuttal rounds, next Codex window.** Briefs on `docs/reviews/M0_plan/rebuttal_brief.md`'s
-   pattern: M2's questions are the "Open for M2's rebuttal round" list at the end of §7e M2, M1's the six at the end
-   of §7e M1. Launchers on `launch_rebuttal.ps1`'s form, `resume <thread id>` — the id is the `thread_id` on the
-   first line of `docs/reviews/M2_designs/events.jsonl` and `docs/reviews/M1_account/events.jsonl`. One review per
-   window still holds for whole-repository reads; these are resumes. Adjudicate each into its §7e table.
+4. **M1's rebuttal round — the Codex window reopens at 03:07** (M2's ran at 23:46 and is adjudicated, §7e
+   M2-R; M1's first attempt hit the usage limit at 23:49): `pwsh -NoProfile -ExecutionPolicy Bypass -File
+   docs/reviews/M1_account/launch_rebuttal.ps1` from the repo root (it resumes the M1 thread with
+   `docs/reviews/M1_account/rebuttal_brief.md`; watch `status_rebuttal.txt`), then adjudicate its answers into
+   §7e M1 as R-rows, as M2-R was. **Before K1 launches:** merge the M2-R engineering agent's branch (R3, R4,
+   R6, R8, R11 — `train2.py`, `endgame.py`, `frontier.py`, `corpus_stats.py`, the launcher's failure handling;
+   `git worktree list` shows it) after a read, re-run `tests/test_rules_boundaries.py`, `test_endgame.py`,
+   `test_solver_bounded.py`; then write and freeze `runs/plan7/K1_readings_3060.sh` and the common-set tool
+   (§5 items 2–4, R9) — 15 000 positions per corpus.
 5. **Then J5** (the manuscript skeleton, after M1's amendments: the map's §3 now carries the surviving sentences and
    a setup-and-limits head), **§10's file updates** (README's "Current state" PLAN7 bullet still says the rebuttal
    is deferred to 00:30 and M2 is armed — stale; the explainer's Part 8), and **K1's readings when it lands** (§5
@@ -349,6 +353,22 @@ compute — delegate anything that reads more than a few files.
   cached), M2 267 s / 0.94 M, M1 498 s / 2.9 M (2.7 M cached); three review stages in one window at medium cost
   less than M0 alone at xhigh. **Running:** the `_e8` count pass (on `value_decomp` since 22:55; `book`, the probe
   fit and `ownership_grade` follow; ≈ 03:00). **Awaiting the owner:** K1.
+
+- **2026-09-12, 23:52 — the rebuttal rounds, at the owner's word (23:40: "go ahead with the rebuttal rounds",
+  K1 likely approved later).** Briefs and launchers for both (`465e764`). **M2's ran** (23:46–23:48, 102 s,
+  2.04 M input tokens of which 1.87 M cached, 745 words) and is adjudicated as §7e M2-R (R1–R13, all accepted,
+  one with a change): the margins stay but the rules become interval-based (an *established* decrease needs
+  the paired interval's upper endpoint ≤ −0.005; 8 / 13 invariant only when the whole interval lies inside
+  ± 0.03) and the common position set grows to 15 000 per corpus, because at 4 000 those verdicts would be
+  unresolved by construction; my row-9 premise was wrong (only `ownership_grade` refuses) and is corrected;
+  four gaps in the landed remedies (an orphaned checkpoint bypasses the resume refusal; a legacy cache is
+  ignored, not refused; J4's move comes from a second search; one tagged game file vouches for untagged ones)
+  and four holes in the K1 launcher I wrote (a failed run still post-processes on the latest checkpoint; no
+  exit propagation; the worker lingers) are with a worktree agent; K1 waits for its merge. **M1's rebuttal
+  hit the usage limit at 23:49 after 25 s** ("try again at Sep 13th, 2026 3:07 AM"; its stream kept as
+  `events_rebuttal_attempt1.jsonl`) — the window opened at 21:50 held four stages at medium (≈ 12 M input
+  tokens, ≈ 10.5 M of them cached) before it closed; M1's rebuttal is the next window's first act, its
+  launcher ready.
 
 ## 0. The decision in front of the project
 
@@ -693,7 +713,9 @@ single new experiment. C6 is recommended and priced in §6.
   policy sampled proportionally for the first 4 plies and the uniform floor *off* — the X / O / draw
   split under near-greedy play; (c) 2 000 games at 256 sims under the self-play exploration settings
   (floor on, `sample_moves` as trained) — so (b) − (c) is exploration's contribution at a matched
-  budget. Pre-registered: (b)'s split is compared with 24's; the design is reviewed in M2 before it
+  budget. Pre-registered: (b)'s split is *compared* with 24's — 24 is a statistic of the exploratory, changing
+  training policy, and a disagreement would not refute it; (b) estimates one fixed near-greedy policy's
+  outcome distribution, accurately and narrowly (M2 rebuttal R7); the design is reviewed in M2 before it
   runs. ≈ 1.5 h on the 3060. *Engineering done 2026-09-12 (merged as `934113a`; `tools/empty_board.py`;
   the implementer's fourteen design choices are `docs/reviews/M2_designs/J3J4_design_notes.md`, M2's
   material).* Smoke (16 games at 32 sims, root at 256): (a) the empty board reads **+0.5087 for X**
@@ -831,24 +853,31 @@ plus ≈ 6 h on the 3060 for the readings. Inside the Windows Update pause (to 2
    is the only datum; M2 row 11); 25 not applicable (no count endings); 16 — **primary:**
    the paired difference Δ = β_draw − β_count of the count-margin coefficient, raw head and search value
    each, on the common position set (item 3) with the same design matrix and game-clustered paired
-   inference; prediction Δ ≤ −0.005 with the interval excluding 0 (a pre-declared practical margin, not
-   a derived constant). **Secondary**, the draw net's own coefficient with interval I: *supported* if
+   inference; prediction an *established* decrease — the paired 95 % interval's upper endpoint ≤ −0.005; *contradicted*
+   if the interval lies wholly above −0.005; *unresolved* otherwise (0.005 is a pre-declared practical margin,
+   not a derived constant; the estimator is frozen and the paired precision assessed before any outcome is
+   read — M2 rebuttal R1). **Secondary**, the draw net's own coefficient with interval I: *supported* if
    I ⊆ [−0.015, +0.015], *contradicted* if I lies wholly outside it, *unresolved* otherwise — unresolved
    means insufficient precision, never an inconvenient result. Restated this way because the
    count-trained parent already satisfies the first form's band (`_e4`'s search coefficient is +0.014,
    KNOWLEDGE 16; M2 row 2); the margin and ownership auxiliaries stay count-flavoured
-   (`uttt/selfplay_cont.py:159–169`) and give no ground for relaxing it; 8 and 13 — read as
-   *differences* on the common set, paired by game: |Δ| < 0.03 utility invariant, ≥ 0.03 with the
-   interval excluding 0 dependent, otherwise unresolved ("inside the count reading's interval" is
-   compatibility, not equivalence; M2 row 12); 7's reply after [40] — no prediction, a tie tolerance of
+   (`uttt/selfplay_cont.py:159–169`) and give no ground for relaxing it; 8 and 13 — read as paired
+   *differences* on the common set: *invariant* if the whole paired 95 % interval lies within (−0.03, +0.03),
+   *dependent* if it lies wholly beyond either bound, *unresolved* otherwise — a point difference below 0.03
+   is not equivalence ("inside the count reading's interval" is compatibility; M2 row 12, rebuttal R1 / R13); 7's reply after [40] — no prediction, a tie tolerance of
    0.02 on the aggregated reply-orbit *visit share* at the book's 16 384 sims (not a value tolerance),
    visits and Q both saved; 33–34 invariant (a line rule; 33's counterexample can survive while its
    percentages change, and 34's immediate-loss avoidance is read apart from them).
 3. **A common position set.** Both nets evaluated under both rules on one frozen set of natural
-   positions (2 000 from each corpus), so the rule's effect on the *value* is read on identical
-   inputs; on the solved subset the rule-induced change in the *exact* minimax value is computed with
+   positions (**15 000 from each corpus** — 30 000, A4's sample size: with 4 000 the paired differences of
+   item 2's claims 8 and 13 would be unresolved by construction, their independent-difference half-widths
+   being ≈ 0.04 / 0.03 against a 0.03 margin; M2 rebuttal R1), so the rule's effect on the *value* is read on
+   identical inputs; on the solved subset the rule-induced change in the *exact* minimax value is computed with
    no net at all — reported by source corpus and on the intersection solved under both rules (M2
-   row 17).
+   row 17). The two dev endgame sets (`endgame_v2_dev` and its `_draw` twin) are *not* identical-position
+   sets — each is stratified under its own rule's results — so their 2 × 2 reads in `eval_run_k1.sh` are
+   diagnostic and never this item (rebuttal R10). This item's tool, item 2's `runs/plan7/K1_readings_3060.sh`
+   and the joint contrast bootstrap of item 4 are written and frozen before `net_0300.pt` exists (R9).
 4. **Cross-play (secondary), defined algebraically.** The paired suite at 64 sims gives one
    independent score per rule — the draw net against the count net under `count`, and under `draw` —
    each with its pair-bootstrap interval (colour-swapped cells are complementary, not four numbers).
@@ -867,7 +896,8 @@ anything about the open-board variant (a third game). One seed confounds the rul
 optimisation trajectory, a rule-by-recipe interaction and a different visitation distribution, and
 the two-seed count-rule band bounds none of those for regression coefficients or opening ranks — so
 every reading is **"observed in this pair of runs"** (M0), read against the ≈ 3-point band where a
-score is what is read.
+score is what is read. The in-run decision records and gradient norms M2 asked for (row 14) are not kept:
+the mechanism questions they would serve are *unavailable* for this run, not recoverable later (rebuttal R12).
 
 ## 6. Phase L — external calibration (optional; recommended for the paper; owner's budget)
 
@@ -1099,7 +1129,7 @@ its verdict.
 | 6 | F6: three untagged paths — `openings.py:55–62` accepts a count-only surrogate under `--rule draw`; `book.py:151–161, 239–242` attaches paired statistics without checking their rule; `corpus_stats.py:33–39` reads a corpus with no `config.json` as count | accept with change | All three read as described. The surrogate is a learned count model → refused under any other rule; `paired_stats` never reads the JSON's `"rule"` → checked against `--rule`; a corpus with no `config.json` → refused unless `--corpus_rule` names its rule (the reviewer's "positively identified legacy artifacts"), and every new game file carries a `rule` array (`selfplay_cont.py:176–184` writes moves, root values, winners, reasons and lengths only), which `corpus_rule()` prefers when present | `openings.py`, `book.py`, `corpus_stats.py`, `selfplay_cont.py` |
 | 7 | F7: J3 labels `timeline.json`'s first-move statistic "self-play at its training budget"; it is the raw policy's probability (`timeline.py:129–130`), 0.982 at the end, where iteration 299's generated games put 0.835 on [40] (`log.jsonl:300`) | accept | `timeline.py:130`: `first_top_share=float(probs.max())` from `fe(empty…)` — the raw head; `log.jsonl` line 300: `first_move_top: 40`, `first_move_top_share: 0.835`. KNOWLEDGE 6 already says "raw first-move probability": the claim is right, the tool's label wrong | `empty_board.py`: the label corrected, the log's generated share printed beside it |
 | 8 | F8: `principles.py:101` takes the first `max_games` draws, truncating a draw-rule corpus chronologically; `:123` reports X's mean count as "mean boards each side" | accept | `draws = np.flatnonzero(winners == 0)[:max_games]`, `max_games = 20000`; `_e4`'s corpus had 16 471 draws (untruncated); ≥ 32 % of 98 k games is ≈ 31 000, cut to the earliest two-thirds of the window; `"mean boards each side": finals[:, 0].mean()` is X's alone | `principles.py`: a seeded uniform sample over the window, sampled and total counts recorded, X and O separately |
-| 9 | A1: the terminal path is complete where inspected (both engines, both kernels, exact labels, the tablebase map, both searches, the rollout anchor); `evaluate_rollout` infers its rule from the set (`endgame.py:300–309`); the E7 worker discovers a mismatched set only after its matches (`eval_worker.py:73–104`); reverse relabelling "requires replay", not rebuilding; J3 / J4 default silently to count; `value_decomp` and `tablebase_grade` need not refuse a dataset labelled under another rule | accept (the last item noted) | Read as described: `BatchUTTT(es.n, "cpu", es.rule)`; the worker loads the set at line 73 and checks nothing until `endgame_evaluate` at 98; the game files keep every move, so a draw corpus *can* be re-read under count by replay. The `value_decomp` / `tablebase_grade` refusals are stricter than necessary and stay: a rebuild costs five minutes, a refusal nothing | `endgame.py`, `eval_worker.py`, `corpus_stats.py`'s message; J3 / J4 gain `--rule` and a `"rule"` field |
+| 9 | A1: the terminal path is complete where inspected (both engines, both kernels, exact labels, the tablebase map, both searches, the rollout anchor); `evaluate_rollout` infers its rule from the set (`endgame.py:300–309`); the E7 worker discovers a mismatched set only after its matches (`eval_worker.py:73–104`); reverse relabelling "requires replay", not rebuilding; J3 / J4 default silently to count; `value_decomp` and `tablebase_grade` need not refuse a dataset labelled under another rule | accept (the last item noted) | Read as described: `BatchUTTT(es.n, "cpu", es.rule)`; the worker loads the set at line 73 and checks nothing until `endgame_evaluate` at 98; the game files keep every move, so a draw corpus *can* be re-read under count by replay. *Corrected in the rebuttal round (R2): `value_decomp` and `tablebase_grade` never had such a refusal — only `ownership_grade` does — and none is added; the source-corpus rule, the label rule and the evaluation rule stay distinct* | `endgame.py`, `eval_worker.py`, `corpus_stats.py`'s message; J3 / J4 gain `--rule` and a `"rule"` field |
 | 10 | A2: 16.5 % / 33.0 % are `_e4`'s; from `_e8`'s log: 98 581 games, 16.60 % draws, 32.33 % after relabelling | accept | The pass's own read of `_e8`'s last 20 files, this session: `runs/plan7/K1_parent_A6_corpus_stats.out:1–3` — 98 581 games, draws 16.6 %, by count 15.7 %, by line 67.7 % → 32.3 % reach the no-line terminal (the log-weighted 32.33 agrees) | §5 item 0: the parent's figures, **15.7 % and 32.3 %** |
 | 11 | A2: "≥ 30 %" is falsifiable but below the mechanical baseline, so it cannot show draw-seeking adaptation | **accept** | 30 < 32.3 | §5 item 2: the draw share read against 32.3 % with a 2-point margin; 30 % kept only as the floor |
 | 12 | A2: "inside the count interval" is compatibility, not equivalence — freeze difference margins, populations and estimators for 8 and 13; claim 1's ties; claim 7's 0.02 is a visit-share tolerance at a stated budget, not a value tolerance; save visits and Q | accept | — | §5 item 2: differences on the common set, paired by game, |Δ| < 0.03 invariant; claim 1 a tie at a value gap ≤ 0.01; claim 7 reply-orbit visit shares at 16 384 sims with visits and Q saved |
@@ -1117,6 +1147,32 @@ is coherent; the refusals for a set and a table are in the right places. **Open 
 (next window, `exec resume` on its thread): (a) whether 0.005 (the paired Δ) and 0.03 (the difference
 margin for 8 and 13) are the right sizes; (b) row 9's kept refusals; (c) anything above that misreads a
 finding.
+
+**M2's rebuttal round (`docs/reviews/M2_designs/REBUTTAL.md`; thread `01a09890-65a5-70a2-acac-382ba49581d8`
+resumed at `465e764`, 2026-09-12 23:46–23:48, reasoning effort medium: 102 s, 2 041 038 input tokens of which
+1 865 344 cached, 8 813 output, 6 commands; 745 words; launched at the owner's word, K1 waiting).** Five
+questions put: (a) the margins, (b) row 9's refusals, (c) whether the merged remedies landed, (d) the K1
+launcher, (e) disputes. Every premise re-derived here from the merged code before its verdict.
+
+| # | the reviewer's reply | verdict | evidence / reason | lands in |
+|---|---|---|---|---|
+| R1 | (a) Keep 0.005 and 0.03 as practical margins, not precision-derived thresholds; change the decision rules: 8 / 13 *invariant* only if the whole paired 95 % interval lies within (−0.03, 0.03), *dependent* if wholly beyond, otherwise *unresolved*; for the count coefficient an *established* decrease needs the upper endpoint ≤ −0.005, *contradicted* when the interval lies wholly above −0.005; freeze the estimator and assess paired precision first | **accept with change** | The half-widths quoted match the files (free move ± 0.028, threats ± 0.018–0.021, the margin coefficient ± 0.0118 / ± 0.0122); independent-difference half-widths ≈ 0.040 / 0.025–0.030 / 0.017 — so at item 3's 4 000 positions the 8 / 13 verdict would be unresolved by construction. The change: the common set grows to 15 000 positions from each corpus (30 000, A4's n); 256-sim search on 30 000 positions is ≈ 5 min per net per rule on the 3060 | §5 items 2, 3 |
+| R2 | (b) The premise of "kept refusals" does not match the code: `value_decomp` and `tablebase_grade` load the dataset with no rule check; only `ownership_grade` refuses. Conservative defaults accepted, the rationale "positions sampled under another rule are invalid" not — it would obstruct item 3; keep source-corpus rule, label rule and evaluation rule distinct | **accept** | Read here: `tools/value_decomp.py:92`, `tools/tablebase_grade.py:39` — no check; `tools/ownership_grade.py:144–147` — the refusal. Row 9's evidence cell was my description, not the code's; corrected, no refusal added | §7e M2 row 9 |
+| R3 | (c) Resume: the refusal precedes every write, but an orphaned or copied checkpoint directory without `config.json` bypasses it | accept | `uttt/train2.py:257`: the check sits inside `if os.path.exists(cfg_path)` | `train2.py`: an ambiguous directory refused, the checkpoint's own recorded rule checked (the M2-R agent) |
+| R4 | (c) Cache: `(sims, rule)` plus the assert fixes the collision; a legacy integer-keyed cache is ignored rather than rejected | accept | `uttt/endgame.py:291–297` as merged | `endgame.py`: non-tuple keys refused (agent) |
+| R5 | (c) Rollout, the draw sample and J3's evaluator switch and interval note landed; the paired trajectory rows are chronological context, not same-teacher measurements (checkpoint N follows iteration N − 1's generation) | noted | The tool pairs `log_iter = iter − 1` and says so in its docstring | — |
+| R6 | (c) J4: the recorded move comes from a second search and a mismatch against the graded regret only warns; export the graded move or mark mismatched rows invalid | accept | `tools/frontier.py:357–364`: `search_moves(...)`, then a WARNING | `uttt/endgame.py` `_row` exposes the graded per-position moves; `frontier.py` records those and drops the second search (agent) |
+| R7 | (c) The one-line, O-winning J3 smoke shows sensitivity to evaluator and search settings, not O's advantage; keep the registered 256-sim design; 2 000 independent draws estimate a concentrated policy accurately (all-O would give a Wilson lower bound ≈ 99.81 %) but give no opening coverage; claim 24 concerns the exploratory, changing training policy and would not be refuted by a disagreement | accept | 1 − z²/(n + z²) at n = 2 000: 0.9981 ✓ | §4 J3: the comparison with 24 is a comparison, not a test |
+| R8 | (d) The launcher's failure handling: a failed `run_train` still post-processes; the post-run picks the latest checkpoint, possibly an incomplete run's; failures inside the chain do not propagate; the worker can linger | **accept** | `runs/queue14.sh`: `run_train …` followed by `bash runs/eval_run_k1.sh` unconditionally; `eval_run_k1.sh`: `N=$(ls … | tail -1)`. Written tonight by this session; the reviewer is right on every count | `queue14.sh`, `eval_run_k1.sh`: require `DONE` and `net_0300.pt`, kill the worker on terminal failure, propagate exits (agent) |
+| R9 | (d) Items 2, the common-position half of 3, 5 and the joint contrast bootstrap are separate work; freeze their commands, sampling and estimators before any outcome is inspected | accept | — | §5 item 3; the Handover: `runs/plan7/K1_readings_3060.sh` and the common-set tool written before K1's final checkpoint exists |
+| R10 | (d) The count and draw endgame sets are not identical-position twins (independently stratified under each rule's results; different source-game counts) — diagnostic reads, never a substitute for item 3 | accept | `runs/plan7/K1_prep_endgame_v2_draw.out`: 2 932 source games in the test half; the strata are balanced under the draw result | §5 item 3, `eval_run_k1.sh`'s header (already so worded) |
+| R11 | (e) Row 6: `games_rule()` ignores untagged files when tagged ones exist, so one tag vouches for a directory; test mixed directories | accept | `tools/corpus_stats.py:43–52`: only files carrying the tag contribute | `corpus_stats.py`: a mixed directory refused unless `config.json` agrees with every tag (agent) + test |
+| R12 | (e) Row 14: declining the decision / gradient instrumentation is accepted; state that the mechanism questions are then *unavailable*, not recoverable later | accept | — | §5's closing paragraph |
+| R13 | (e) Row 12's point-estimate "invariant" criterion still did not implement equivalence | accept | The same as R1 | §5 item 2 |
+
+**Open after the rebuttal:** nothing of substance; R1's set size (15 000 per corpus) is this session's remedy
+and can be read back to the reviewer with K1's readings (M3). The engineering rows (R3, R4, R6, R8, R11) are
+with a worktree agent; K1 does not launch before they merge.
 
 **M1 — the account (`docs/reviews/M1_account/REVIEW.md`, commit `09c687c`, 2026-09-12 22:34–22:42,
 reasoning effort medium: 498 s, 2 905 159 input tokens of which 2 683 904 cached, 12 168 output, 23
