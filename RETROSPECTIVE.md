@@ -425,7 +425,7 @@ where noted:
   `config.json`, so every run trained at the default 1.0 (constant across runs, so no result moves;
   it enters the methods section and K1's provenance). **Open:** the rebuttal round (deferred to 00:30
   by the owner's Codex usage limit), M2 behind it (K1's diff and the J3 / J4 designs), **K1** itself
-  on the owner's approval after M2 (≈ 22 h on the 3090), J3 / J4, E11's copy and the push.
+  on the owner's approval after M2 (≈ 22 h on the 3090), J3 / J4 and E11's copy; everything is pushed (2026-09-12 22:00).
 - **Neither depth nor duration is exhausted** — 12-block and 600-iteration runs are the
   obvious continuations, each a committed GPU-day, both on hold per the pause. *(2026-09-06:
   depth 8 → 10 is inside the seed band and an earlier LR drop hurts, so the continuation the

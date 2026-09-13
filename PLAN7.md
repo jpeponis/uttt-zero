@@ -28,9 +28,9 @@ request. **The owner has redeemed a Codex usage reset, so the window is live now
 `gpt-6-astra`'s reasoning effort to **`medium`** in `~/.codex/personal.config.toml` (M0 ran at xhigh
 and cost 4.15 M input tokens; the owner suspects xhigh drove it — expect less, and note the effort in
 each review's log entry). Both cards idle (the 3090's ≈ 830 MiB is the desktop). Play agent
-`runs/deep8_c1_300_e8/net_0300.pt`, unchanged. `main` at the handoff commit, **14 commits ahead of
-`origin/main` (`cfc290e`), unpushed** — the owner's standing instruction is to push only on their word;
-**ask, and push first thing if told**. Tree clean apart from the deliberately untracked
+`runs/deep8_c1_300_e8/net_0300.pt`, unchanged. `main` **pushed to `origin/main` at the owner's word, 2026-09-12 22:00** — the handoff commit and
+the fifteen before it, everything since `cfc290e`; the standing instruction stands: push further
+commits only when told. Tree clean apart from the deliberately untracked
 `runs/probe_gcnn_smoke/`. E11's off-machine copy is still owed (5.23 GB, no destination here);
 `runs/` is 17.02 GB. The repository is public at `https://github.com/jpeponis/uttt-zero`.
 
@@ -226,9 +226,9 @@ while a reviewer is running.
   request the two background jobs — the 00:30 rebuttal relaunch and the M2 chain behind it — were
   stopped; nothing is running. J6 done (`f289c0a`: README, RETROSPECTIVE §7, the history index, PLAN6
   moved). The Handover is rewritten for the next instance: launch the rebuttal by hand now, then M2,
-  adjudicate, J3 / J4, the five tools, the `_e8` count pass, K1 to the owner. `main` is 14 commits
-  ahead of `origin/main`, unpushed pending the owner's word. This instance stopped at ≈ 77 % of its
-  context. Its report also found `tests/test_symmetry.py` failing — characterised here as
+  adjudicate, J3 / J4, the five tools, the `_e8` count pass, K1 to the owner. **Pushed at the owner's
+  word at 22:00** — `origin/main` is the handoff commit (16 commits since `cfc290e`). This instance
+  stopped at ≈ 77 % of its context. Its report also found `tests/test_symmetry.py` failing — characterised here as
   device-specific, `cuda:1` only, the process-global capture stream (§11). §5 records what is not yet
   threaded and must be before K1's readings (five I1 tools). `docs/reviews/M2_designs/brief.md` and
   `launch.ps1` are written; M2 launches in the Codex window after the rebuttal.

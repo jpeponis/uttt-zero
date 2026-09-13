@@ -189,7 +189,7 @@ Read in this order:
   **Open:** the rebuttal round (deferred by the owner's Codex usage limit to 00:30, armed from this
   session), **M2** (the review of K1's diff and the J3 / J4 designs, armed behind it), **K1** itself
   (≈ 22 h on the 3090; the owner's approval after M2), J3 / J4 after M2, E11's off-machine copy
-  (5.23 GB, still owed) and the push (12 commits local). The play agent is unchanged.
+  (5.23 GB, still owed) . Everything is pushed (2026-09-12 22:00). The play agent is unchanged.
 - **I1, the analysis second pass, done 2026-09-10 (PLAN6 §9c):** PLAN5 Phase A's tools re-run on
   `deep8_c1_300_e4` at the deep10 pass's settings — of 34 game claims re-read, **15 held, 18 moved and 1
   reversed** (after [40] that net prefers the corner reply orbit where both earlier strong
