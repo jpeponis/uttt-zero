@@ -34,8 +34,8 @@ by itself (item 4's two cross-play matches against the parent, v2b under both ru
 non-zero exit or a `!!! FAILED` line is the failure signal; a reboot is answered by relaunching the same `.vbs` (it
 resumes from `latest_full.pt`; a cross-rule resume is refused). Status: `python tools/run_status.py
 runs/deep8_c1_300_e8_draw --ref runs/deep8_c1_300_e8`. **Nothing else runs**; the 3060 is free apart from the worker;
-no worktrees; the play agent unchanged. `main` is the commit after `76366bd`. **44 commits are unpushed since
-`40b7864` (2026-09-12 22:00)** — push only at the owner's word; ask. The Codex five-hour window last opened at 03:08
+no worktrees; the play agent unchanged. `main` is the commit after `76366bd`. **Pushed at the owner's word, 2026-09-13 08:42: `40b7864..e21499d` (45 commits), `origin/main` verified equal to
+`main` by `git ls-remote`** — the standing instruction stands: push further commits only when told. The Codex five-hour window last opened at 03:08
 (M1's rebuttal), so it is fresh.
 
 **Done in this session (2026-09-12 22:00 → 2026-09-13 08:40; the log has every number).** The M0 rebuttal, M2, M2's
@@ -491,7 +491,8 @@ filled one five-hour window; a stage that hits the limit fails in 25 s with the 
   `runs/plan7/J3J4_reading.md`. **Noted:** J4 cost 32 min, not 3.5 h — only the 1 437 incomplete positions spend the
   budget. Open: the map's §3 outline does not yet place 52 and 53 (J5).
 - **2026-09-13, 08:38 — this instance stops at the owner's word, at ≈ 64 % of its context.** K1 at iteration 123
-  of 300 on the 64-sim leg (≈ 22:40). Everything is in the Handover; 44 commits unpushed since `40b7864`.
+  of 300 on the 64-sim leg (≈ 22:40). Everything is in the Handover. **Pushed at the owner's word at 08:42** (`40b7864..e21499d`, 45 commits, the
+  remote head verified); the standing instruction stands for anything after.
 
 ## 0. The decision in front of the project
 
