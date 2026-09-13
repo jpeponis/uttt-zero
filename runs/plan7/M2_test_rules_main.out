@@ -1,0 +1,15 @@
+rule validation rejects typos; 'count' never renames a file, 'draw' always does
+count rule reproduces 2000 pre-K1 games bit for bit (ended by line 1571, count 280, draw 149)
+draw rule: 280 of 2000 games (14.0 %) turn from a count decision into a draw; the other 1720 are untouched
+4-4 with one drawn board: a draw under both rules
+5-3 with no macro line: an X count win under 'count', a draw under 'draw'
+a macro line wins under both rules, 2-5 down on boards before the move
+  count: solver agrees with brute force on 200 positions (<= 8 empties); 43 of them have a different value under the other rule  [3s]
+  draw : solver agrees with brute force on 200 positions (<= 8 empties); 43 of them have a different value under the other rule  [7s]
+  count: solve_children / solve_batch match the solver on 64 positions, in process and in a pool
+  draw : solve_children / solve_batch match the solver on 64 positions, in process and in a pool
+cross-engine check, 100000 games per rule:
+  count: 100000 random games, both engines agree on the legal mask and, after every ply, on done / next_board / player / move_count (cells and macro every 8 plies and at the end), plus winner and end reason (line 77913, count 14800, draw 7287)  [320s]
+  draw : 100000 random games, both engines agree on the legal mask and, after every ply, on done / next_board / player / move_count (cells and macro every 8 plies and at the end), plus winner and end reason (line 77913, count 0, draw 22087)  [318s]
+ok
+exit=0
