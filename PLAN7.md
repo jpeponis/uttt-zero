@@ -22,7 +22,30 @@ adjudicated in this file before anything acts on it** (§7, as PLAN6 §1 did).
 
 ## Handover (2026-09-12, 23:32 — written for the next instance by the second instance of the day)
 
-**State at 02:44, 2026-09-13 (the latest; the paragraphs below it are the earlier states, kept).** Running: **K1**
+**State at 03:39, 2026-09-13 (the latest; the paragraphs below it are the earlier states, kept).** Running: **K1**
+(≈ iteration 55 of 300, ≈ 213 s each, `end_count` 0.0, draw share ≈ 36 %; ≈ 22:30 today; then `eval_run_k1.sh` by
+itself) and **J3 → J4** on the 3060 (`runs/plan7/J3J4.out`; J3 is ≈ 1 h per net, not 45 min — `_e8` first, then
+`_e4`, so ≈ 04:45; J4 ≈ 3.5 h after, ≈ 08:30; the job notifies its session only at the very end). Nothing else.
+**Done since 02:45:** the pass's reading merged (`2854935`, 37 claims — 27 held / 9 moved / 1 unresolved / 0
+reversed); M1's rebuttal ran at 03:08 and is adjudicated and merged (`e2c8cd6`, R1–R14); M2's was at 23:46
+(§7e M2-R). Every review stage through M2 is now adjudicated with its rebuttal; M3 (the draft) comes after J5.
+**Next, in order:** (1) J3's two outputs and J4's — read them into KNOWLEDGE in §4 J3 / J4's forms (J3: the
+root value and line, the (b) and (c) splits with their concentration beside the intervals, (b) − (c) as the
+exploration package, (b) *compared* with 24; J4: the coverage curve conditional on alive, the optimal-move
+rate conditional on complete, the sentence §4 J4 writes out), a log entry, commit the outputs (`runs/plan7/J3_*`,
+`J4_*`; the `_positions.npz` too). (2) K1 at ≈ 22:30: read `runs/deep8_c1_300_e8_draw/analysis.out`; then on
+the 3060 `bash runs/plan7/K1_readings_3060.sh` (≈ 5 h; item 2), `tools/common_positions.py --corpus_a
+runs/deep8_c1_300_e8_draw --corpus_b runs/deep8_c1_300_e8 --net_a runs/deep8_c1_300_e8_draw/net_0300.pt --net_b
+runs/deep8_c1_300_e8/net_0300.pt --n 15000 --sims 256 --device cuda:1 --out runs/plan7/K1_common_positions.json`
+(item 3 and the DiD of item 2), `tools/paired_contrast.py --count runs/deep8_c1_300_e8_draw/paired_vs_deep8c1_300e8_64.json
+--draw runs/deep8_c1_300_e8_draw/paired_vs_deep8c1_300e8_64_draw.json` (item 4); every claim marked by §5 item
+2's rules, one KNOWLEDGE clause each, K1's row in README's ladder (Elo "n/a — a different game"), a log entry.
+(3) J5, the manuscript skeleton (`docs/paper/paper.md` from the map's §3), then M3. Open for M3, from the
+rebuttals: the Padua terminal rule, the HUJI year, `knowledge/06`'s inferred solving cost, `surprise` /
+`probe_value` reading the draw run's own buffer, the count-play corpora read under draw. **Nothing has been
+pushed since `40b7864` (2026-09-12 22:00) — some forty commits; push when the owner says.**
+
+**State (02:44).** Running: **K1**
 (iteration ≈ 40 of 300 at ≈ 213 s per iteration, `end_count` 0.0, draw share ≈ 39 %; ≈ 22:30 today); **J3 then J4** on
 the 3060 (`runs/plan7/J3J4_3060.sh`, started 02:43; log `runs/plan7/J3J4.out`; J3 on `_e8` and `_e4` ≈ 45 min each,
 J4 ≈ 3.5 h; outputs `runs/plan7/J3_empty_board_{e8,e4}.json|out`, `J4_frontier.json` + `_positions.npz` + `.out` —
@@ -468,6 +491,27 @@ compute — delegate anything that reads more than a few files.
   qualified, not a tenth MOVED. The outputs are committed (`573a1b9`, `de9091c`), the ledger whitelisted in
   `.gitignore` (`!runs/*/*.md`). **M1's rebuttal round ran at 03:08** (475 s, 5.0 M tokens of which 4.66 M
   cached, 922 words) — adjudicated next, in §7e M1's R-rows.
+
+- **2026-09-13, 03:39 — M1's rebuttal round adjudicated (§7e M1 R1–R14) and merged (`e2c8cd6`).** An opus worktree
+  agent, 03:17–03:36: fourteen R-rows — eleven accept, one accept with change, three noted, no reject — every
+  cell re-derived (the three timeline steps 6.9 / 4.1 / 6.5 points on `endgame_v1`; the three paired intervals
+  behind row 44; `_e2`'s 10.7767 inside deep10's [−7, +26]; both primary documents fetched). E31 cost the
+  account its last categorical headline — "It was optimisation, not capacity" is replaced in KNOWLEDGE 31 and
+  map row 31 by the reviewer's sentence, and row 31's `_e4` / `_e8` cells now print draw recognition
+  (70.6 → 74.7 %, 73.1 → 79.6 %) instead of a paired score and a WDL. J2 cost row 44 its [CI] (+86 → +141 →
+  +186 over deep10, each later estimate outside its predecessor's interval); 45 keeps it; "[no CI]" now means
+  *no interval-based drift comparison*, and the interval-based list reads 8, **13**, 19, 35 regression, 45 —
+  the `_e8` pass had given row 13 an interval-based verdict the reviewer could not have seen. The partition
+  4 / 26 / 1 / 20 / 8 does not move; row 42 now says what ± 2.8 is (a per-checkpoint score interval, not a CI
+  on a drop). Both primary documents came back: the **HUJI report** is CLOSED-DRAW ("a tie if all squares have
+  been exhausted"), its free-move 2 and board-win 5 verbatim and "chosen somewhat arbitrarily", its year
+  dropped (the archive path says 2013, the survey said 2016); the **Padua thesis** is CLOSED with its terminal
+  tiebreak unverified. The paper's "five to ten orders above Othello" is deleted (the heuristic stays in
+  `knowledge/06`, which still infers a solving cost from it — open for M3); 31a's "solved outright" and 50's
+  width sentence are scoped. The reviewer also caught the adjudication's own "six fits" — fixed there, and
+  here in KNOWLEDGE 14; map row 2's "12 columns" is 15 now. PLAN7's thirteen doubled CR bytes, an artifact of
+  this session's scripted inserts that the agent had to restore around, are normalised (`0b599ce`). Open for
+  M3: the Padua terminal rule (its code would settle it), the HUJI year, `knowledge/06`'s inferred cost.
 
 ## 0. The decision in front of the project
 
