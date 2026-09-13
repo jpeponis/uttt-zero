@@ -104,19 +104,19 @@ and merged (`5fa73e6`); the `_e8` count pass launched with `probe_value` added; 
    small tool of its own).
 6. Phase L (§6) is the owner's call; E11's copy when a destination exists; §8 stays unproposed.
 
-**Traps — each cost time today.** Never pipe a brief into `codex-sp`: it is a PowerShell *function*,
-stdin does not reach the binary inside it, and `exec … -` hangs on the console's stdin (0 CPU, 0
-bytes); the launchers pass a one-line prompt naming the brief file and redirect the child's stdin from
-`empty_stdin.txt`. `Start-Process -ArgumentList` takes one quoted string, not an array — the array
-splits at the space in the user name and the child exits at once having run nothing. One
-whole-repository review per five-hour Codex window; rebuttals in the next. `tests/test_symmetry.py`
-passes on `cuda:0` only (§11). Agent worktrees live under `.claude/worktrees/` (ignored), start from
-the commit current at launch, lack `.venv` and `runs/*/games`, and two agents on one file conflict at
-merge — resolve into one design, then remove the worktree and its branch. `gumbel_scale` is in no
-`config.json`; every run trained at 1.0. The Monitor tool delivers nothing from files on this machine —
-use a background `until` loop. The PowerShell tool refuses any command containing `Remove-Item` on a
-variable path (a static check) — clean up from bash. Delegate write-ups and file-heavy work to
-`directed` (opus) agents, scratchpad drafts first, adopt after a read; keep the reviewed files frozen
+**Traps — each cost time today.** Never pipe a brief into `codex-sp`: it is a PowerShell *function*,
+stdin does not reach the binary inside it, and `exec … -` hangs on the console's stdin (0 CPU, 0
+bytes); the launchers pass a one-line prompt naming the brief file and redirect the child's stdin from
+`empty_stdin.txt`. `Start-Process -ArgumentList` takes one quoted string, not an array — the array
+splits at the space in the user name and the child exits at once having run nothing. One
+whole-repository review per five-hour Codex window; rebuttals in the next. `tests/test_symmetry.py`
+passes on `cuda:0` only (§11). Agent worktrees live under `.claude/worktrees/` (ignored), start from
+the commit current at launch, lack `.venv` and `runs/*/games`, and two agents on one file conflict at
+merge — resolve into one design, then remove the worktree and its branch. `gumbel_scale` is in no
+`config.json`; every run trained at 1.0. The Monitor tool delivers nothing from files on this machine —
+use a background `until` loop. The PowerShell tool refuses any command containing `Remove-Item` on a
+variable path (a static check) — clean up from bash. Delegate write-ups and file-heavy work to
+`directed` (opus) agents, scratchpad drafts first, adopt after a read; keep the reviewed files frozen
 while a reviewer is running.
 
 **Traps added tonight.** Agent worktrees can start from a commit *older* than HEAD (two of three tonight started at
