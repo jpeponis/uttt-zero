@@ -1,0 +1,42 @@
+98581 games from 20 files; generated under rule count, read under rule count
+X wins 63.2%  O wins 20.2%  draws 16.6%
+ended by line 67.7%  by count 15.7%  equal count 16.6%
+length: mean 53.2  median 53  p10 47  p90 60  max 76
+
+first move by symmetry orbit: games, X score (win=1, draw=0.5)
+  [40]                                     n= 82288  X score 73.9%
+  [5, 7, 21, 25, 55, 59, 73, 75]           n=  1673  X score 63.6%
+  [15, 17, 29, 35, 45, 51, 63, 65]         n=  1631  X score 56.0%
+  [12, 14, 28, 34, 46, 52, 66, 68]         n=  1613  X score 55.2%
+  [2, 6, 18, 26, 54, 62, 74, 78]           n=  1574  X score 60.3%
+  [1, 3, 19, 23, 57, 61, 77, 79]           n=  1554  X score 60.4%
+  [9, 11, 27, 33, 47, 53, 69, 71]          n=  1543  X score 54.2%
+  [4, 22, 58, 76]                          n=   899  X score 63.5%
+  [36, 38, 42, 44]                         n=   860  X score 71.4%
+  [0, 20, 60, 80]                          n=   854  X score 69.4%
+  [8, 24, 56, 72]                          n=   835  X score 61.5%
+  [16, 32, 48, 64]                         n=   829  X score 54.0%
+  [13, 31, 49, 67]                         n=   825  X score 48.6%
+  [37, 39, 41, 43]                         n=   808  X score 66.5%
+  [10, 30, 50, 70]                         n=   795  X score 59.9%
+
+mean root value from X's perspective by ply (X wins | O wins | draws):
+  ply  0: +0.33 | +0.33 | +0.33   (games alive 98581)
+  ply  6: +0.43 | +0.37 | +0.38   (games alive 98581)
+  ply 12: +0.42 | +0.34 | +0.36   (games alive 98581)
+  ply 18: +0.39 | +0.30 | +0.32   (games alive 98581)
+  ply 24: +0.34 | +0.23 | +0.26   (games alive 98581)
+  ply 30: +0.31 | +0.08 | +0.16   (games alive 98581)
+  ply 36: +0.31 | -0.24 | -0.00   (games alive 98555)
+  ply 42: +0.36 | -0.64 | -0.17   (games alive 97285)
+  ply 48: +0.51 | -0.89 | -0.21   (games alive 82079)
+  ply 54: +0.65 | -0.97 | -0.17   (games alive 40577)
+  ply 60: +0.75 | -0.99 | -0.15   (games alive 7850)
+  ply 66: +0.82 | -1.00 | -0.15   (games alive 492)
+  ply 72: +0.92 | -1.00 |   n/a   (games alive 6)
+
+free moves per game (replayed 20000): mean 5.02; games with >=1 free move 98.4%
+  O had more free moves   : n=  7228  X score 53.3%
+  equal                   : n=  3485  X score 74.4%
+  X had more free moves   : n=  9287  X score 82.7%
+closed boards at game end: mean 7.84

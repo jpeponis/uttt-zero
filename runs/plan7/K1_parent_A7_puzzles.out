@@ -1,0 +1,25 @@
+6001 candidate positions from 3076 games (7s)
+solved with children under rule count in 14s; exact W/D/L for the mover 0.440/0.154/0.405
+raw-policy failures (puzzles): 52 (0.9%); search-64 failures (hard): 1 (0.02%)
+puzzle rate by empties: 6: 0.0%, 7: 0.2%, 8: 0.2%, 9: 0.7%, 10: 0.6%, 11: 1.8%, 12: 1.6%, 13: 0.9%, 14: 1.2%
+motifs among puzzles: denies_free_move 12, draw_hold 29, gives_free_move 28, local_win 16, tiebreak_conversion 37
+regret of the raw move among puzzles: 1 (win->draw or draw->loss) 92.3%, 2 (win->loss) 7.7%
+wrote suites/puzzles_v4_dev.npz (52 puzzles, 1 hard) and 1 readable hard puzzles  [34s]
+
+hard puzzle id 4596 (game 2598, ply 42): exact +1, best 25, PV [25, 63, 21, 24, 44, 36, 67, 42], raw 44, search 44, motifs ['denies_free_move', 'tiebreak_conversion']
+to move: X   next board: any   moves: 42
+X . .  O . .  X O X
+X . O  O . .  . O X
+X . O  O . .  . . O
+
+X O .  . X O  . X .
+X O .  X X O  . . O
+. O .  . O .  X X X
+
+O . O  . X .  . . X
+. . O  X . O  O X .
+X . O  . . .  X . .
+macro:
+XO.
+O.X
+O.X

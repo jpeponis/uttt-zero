@@ -1,0 +1,26 @@
+[
+ {
+  "id": 4596,
+  "game_id": 2598,
+  "ply": 42,
+  "exact": 1,
+  "best": 25,
+  "pv": [
+   25,
+   63,
+   21,
+   24,
+   44,
+   36,
+   67,
+   42
+  ],
+  "raw_move": 44,
+  "search_move": 44,
+  "motifs": [
+   "denies_free_move",
+   "tiebreak_conversion"
+  ],
+  "board": "to move: X   next board: any   moves: 42\nX . .  O . .  X O X\nX . O  O . .  . O X\nX . O  O . .  . . O\n\nX O .  . X O  . X .\nX O .  X X O  . . O\n. O .  . O .  X X X\n\nO . O  . X .  . . X\n. . O  X . O  O X .\nX . O  . . .  X . .\nmacro:\nXO.\nO.X\nO.X"
+ }
+]

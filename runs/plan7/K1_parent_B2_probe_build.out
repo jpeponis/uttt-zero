@@ -1,0 +1,4 @@
+60000 positions from 15000 games of runs/deep10_c1_300 (['games_0280.npz', 'games_0281.npz', 'games_0282.npz']...); test games 2500 (10000 positions)  [29s]
+search labels done [512s]
+exact labels for 5560 positions with <= 14 empties [521s]
+wrote runs/probe_data_deep10late_e8.npz: 60000 positions, 47 labels, rule count  [522s]

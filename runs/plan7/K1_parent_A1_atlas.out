@@ -1,0 +1,66 @@
+deep8_c1_300_e8 @1024: done (41s)
+deep8_c1_300_e8 @4096: done (162s)
+deep8_c1_300_e8 @16384: done (606s)
+
+Principal variations after each first move at 16384 sims (O's reply first) and the root reply-orbit gap (Q of the most-visited orbit - Q of the second):
+  [ 0] deep8_c1_300_e8: [8, 80, 77, 46, 10, 14, 50, 47, 20, 19] gap +0.011
+  [ 1] deep8_c1_300_e8: [10, 16, 70, 66, 30, 27, 4, 40, 44, 80] gap +0.005
+  [ 2] deep8_c1_300_e8: [20, 23, 50, 48, 28, 12, 34, 70, 66, 31] gap +0.013
+  [ 4] deep8_c1_300_e8: [40, 36, 5, 50, 52, 70, 68, 53, 80, 78] gap +0.048
+  [ 5] deep8_c1_300_e8: [45, 8, 80, 79, 70, 68, 48, 28, 10, 14] gap +0.013
+  [ 8] deep8_c1_300_e8: [80, 72, 7, 70, 64, 12, 30, 28, 14, 50] gap +0.049
+  [ 9] deep8_c1_300_e8: [5, 50, 46, 15, 60, 61, 70, 71, 80, 74] gap +0.009
+  [10] deep8_c1_300_e8: [16, 66, 30, 32, 50, 52, 63, 0, 2, 20] gap +0.006
+  [12] deep8_c1_300_e8: [28, 14, 50, 46, 13, 40, 39, 34, 70, 66] gap +0.010
+  [13] deep8_c1_300_e8: [40, 37, 12, 30, 32, 50, 47, 20, 24, 60] gap +0.114
+  [15] deep8_c1_300_e8: [60, 62, 80, 74, 20, 19, 14, 50, 48, 30] gap +0.051
+  [16] deep8_c1_300_e8: [70, 66, 30, 28, 15, 60, 56, 20, 25, 68] gap +0.021
+  [36] deep8_c1_300_e8: [5, 45, 4, 42, 55, 15, 54, 3, 29, 20] gap +0.006
+  [37] deep8_c1_300_e8: [10, 9, 0, 3, 30, 32, 50, 53, 80, 79] gap +0.049
+  [40] deep8_c1_300_e8: [36, 0, 8, 80, 77, 50, 48, 34, 66, 33] gap +0.017
+
+First-move orbits: deep-search value for X after the move, by net @ budget (rank in brackets)
+orbit  deep8_c1_300_e8@1024   deep8_c1_300_e8@4096   deep8_c1_300_e8@16384    mean rank
+  [40]  +0.510( 1) +0.522( 1) +0.524( 1)     1.0
+  [36]  +0.424( 2) +0.430( 2) +0.429( 2)     2.0
+  [ 0]  +0.314( 3) +0.319( 3) +0.329( 3)     3.0
+  [37]  +0.303( 4) +0.297( 4) +0.294( 4)     4.0
+  [ 5]  +0.289( 5) +0.295( 5) +0.292( 5)     5.0
+  [ 4]  +0.255( 6) +0.245( 6) +0.244( 6)     6.0
+  [ 8]  +0.239( 7) +0.235( 7) +0.244( 7)     7.0
+  [ 2]  +0.221( 8) +0.223( 9) +0.228( 8)     8.3
+  [10]  +0.221( 9) +0.224( 8) +0.221( 9)     8.7
+  [ 1]  +0.200(10) +0.192(10) +0.194(10)    10.0
+  [12]  +0.190(11) +0.184(11) +0.177(11)    11.0
+  [16]  +0.135(12) +0.132(12) +0.129(12)    12.0
+  [15]  +0.119(13) +0.114(13) +0.121(13)    13.0
+  [ 9]  +0.081(14) +0.079(14) +0.079(14)    14.0
+  [13]  -0.051(15) -0.042(15) -0.060(15)    15.0
+
+Kendall tau between columns (first-move ranking):
+              deep8_@1k deep8_@4k deep8_@16k
+  deep8_@1k        1.00      0.98      1.00
+  deep8_@4k        0.98      1.00      0.98
+  deep8_@16k       1.00      0.98      1.00
+
+best first move per column: [40, 40, 40]  (stable: True)
+
+Replies: best reply class (X's value after it, lower = better for O) per first move and column;
+agreement = share of columns choosing the same best reply as the strongest net at the largest budget
+  after [ 0] (5 reply classes): deep8_@1k: 8(+0.30)  deep8_@4k: 8(+0.32)  deep8_@16k: 8(+0.33)   agreement 1.00
+  after [ 1] (9 reply classes): deep8_@1k:10(+0.19)  deep8_@4k:14(+0.19)  deep8_@16k:10(+0.19)   agreement 0.67
+  after [ 2] (9 reply classes): deep8_@1k:20(+0.22)  deep8_@4k:20(+0.22)  deep8_@16k:20(+0.22)   agreement 1.00
+  after [ 4] (6 reply classes): deep8_@1k:40(+0.25)  deep8_@4k:40(+0.24)  deep8_@16k:40(+0.24)   agreement 1.00
+  after [ 5] (9 reply classes): deep8_@1k:50(+0.28)  deep8_@4k:45(+0.29)  deep8_@16k:45(+0.29)   agreement 0.67
+  after [ 8] (6 reply classes): deep8_@1k:80(+0.23)  deep8_@4k:80(+0.23)  deep8_@16k:80(+0.24)   agreement 1.00
+  after [ 9] (9 reply classes): deep8_@1k: 0(+0.08)  deep8_@4k: 5(+0.07)  deep8_@16k: 5(+0.08)   agreement 0.67
+  after [10] (5 reply classes): deep8_@1k:16(+0.22)  deep8_@4k:16(+0.22)  deep8_@16k:16(+0.22)   agreement 1.00
+  after [12] (9 reply classes): deep8_@1k:28(+0.19)  deep8_@4k:28(+0.18)  deep8_@16k:28(+0.17)   agreement 1.00
+  after [13] (6 reply classes): deep8_@1k:40(-0.05)  deep8_@4k:40(-0.04)  deep8_@16k:40(-0.06)   agreement 1.00
+  after [15] (9 reply classes): deep8_@1k:60(+0.11)  deep8_@4k:60(+0.11)  deep8_@16k:60(+0.12)   agreement 1.00
+  after [16] (6 reply classes): deep8_@1k:70(+0.13)  deep8_@4k:70(+0.12)  deep8_@16k:70(+0.12)   agreement 1.00
+  after [36] (6 reply classes): deep8_@1k: 5(+0.43)  deep8_@4k: 5(+0.43)  deep8_@16k: 5(+0.43)   agreement 1.00
+  after [37] (6 reply classes): deep8_@1k:10(+0.29)  deep8_@4k:10(+0.29)  deep8_@16k:10(+0.29)   agreement 1.00
+  after [40] (2 reply classes): deep8_@1k:36(+0.52)  deep8_@4k:36(+0.52)  deep8_@16k:36(+0.54)   agreement 1.00
+mean best-reply agreement with deep8_c1_300_e8@16384: 0.93
+wrote runs/plan7/K1_parent_A1_atlas.json  [606s]

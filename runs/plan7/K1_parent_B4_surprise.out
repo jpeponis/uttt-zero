@@ -1,0 +1,1724 @@
+7188 positions, 256 sims. Search move != raw argmax in 30.7% of positions; mean |search value - raw value| = 0.187
+by ply:  disagreement %   mean|dv|   mean p_raw(search move)
+   2- 9:  22.9%        0.037       0.602   (n=660)
+  10-19:  27.7%        0.059       0.568   (n=1363)
+  20-29:  35.8%        0.126       0.492   (n=1581)
+  30-39:  38.3%        0.272       0.478   (n=1616)
+  40-49:  27.2%        0.332       0.548   (n=1430)
+  50-70:  19.7%        0.237       0.561   (n=538)
+
+### largest value surprises (search much better for the mover than the net thought)
+========================================================================
+value surprise +1.36   ply 46
+to move: X   next board: 7   moves: 46
+X O .  O X .  O X X
+X . .  O . .  . X .
+X . .  O . .  O X O
+
+. . O  . . O  . . O
+. . X  . X X  . . O
+O . O  O O .  X X O
+
+O X O  . . X  . . X
+X X X  . O O  . . X
+X O .  O X .  . O X
+macro:
+XOX
+..O
+X.X
+raw: value -0.90, top move 64 (board 8 cell 2) p=0.36;   search: value +0.46, move 64 (board 8 cell 2) (raw p=0.361, visits 96/256)
+========================================================================
+value surprise +1.36   ply 53
+to move: O   next board: 7   moves: 53
+. O X  X O X  O O X
+. . O  X . .  O . O
+X O X  X . .  O O .
+
+O X O  . . .  O . X
+O . O  X X X  X O X
+X O O  O . .  X X O
+
+. O O  . . X  X . X
+X . O  X . O  X . X
+X . O  . X .  . . O
+macro:
+.XO
+OXO
+O..
+raw: value -0.76, top move 63 (board 8 cell 1) p=0.28;   search: value +0.60, move 63 (board 8 cell 1) (raw p=0.283, visits 103/256)
+========================================================================
+value surprise +1.27   ply 49
+to move: O   next board: 3   moves: 49
+X O .  X X O  O . X
+X O .  . . X  . . O
+X . .  . O X  . X O
+
+. . .  O O .  O X O
+X . O  . X X  O . X
+X . O  . O .  O X .
+
+. . X  . O .  . O .
+. . X  O X .  X X O
+O . X  X X O  O O X
+macro:
+X..
+..O
+X..
+raw: value -0.72, top move 34 (board 4 cell 8) p=0.69;   search: value +0.55, move 34 (board 4 cell 8) (raw p=0.686, visits 103/256)
+========================================================================
+value surprise +1.23   ply 45
+to move: O   next board: 6   moves: 45
+O . X  . O .  O . X
+. . X  X X .  . . .
+. . X  . O .  O X O
+
+O X .  . . O  X O .
+O . .  . X O  O X O
+X X X  . . O  X . .
+
+. . .  . X X  X . .
+O . O  O . X  X . .
+X O O  . O X  X O O
+macro:
+X..
+XO.
+.XX
+raw: value -0.74, top move 56 (board 7 cell 3) p=0.60;   search: value +0.49, move 56 (board 7 cell 3) (raw p=0.597, visits 96/256)
+========================================================================
+value surprise +1.23   ply 55
+to move: O   next board: 2   moves: 55
+X O .  X X X  O X O
+. X O  O X O  . . X
+. O O  . . .  . O O
+
+. . .  O O O  X O X
+X X X  . X .  O . X
+X O .  O X .  . X O
+
+. O .  X X X  . . X
+O X .  . O O  O . O
+X O .  O X X  X O X
+macro:
+.X.
+XO.
+.X.
+raw: value -0.57, top move 24 (board 3 cell 7) p=0.61;   search: value +0.65, move 24 (board 3 cell 7) (raw p=0.609, visits 107/256)
+========================================================================
+value surprise +1.01   ply 42
+to move: X   next board: 2   moves: 42
+O . .  . . X  X . X
+X X O  . . X  . . .
+. . .  . . X  O . O
+
+O O O  . . O  . O .
+. . .  O X X  . . O
+. X X  . O O  X X X
+
+. . .  X . .  . O O
+O O O  X X .  X X .
+X . .  . O O  X O .
+macro:
+.X.
+O.X
+O..
+raw: value -0.52, top move 25 (board 3 cell 8) p=0.72;   search: value +0.49, move 25 (board 3 cell 8) (raw p=0.723, visits 103/256)
+========================================================================
+value surprise +0.94   ply 34
+to move: X   next board: 1   moves: 34
+. . .  . O X  . . O
+. X .  . . X  . . .
+. O .  . X O  X X .
+
+. . .  X O .  . . .
+. . O  . O .  X . O
+. X .  . . .  X X X
+
+. . O  O X .  . O .
+. . O  O . O  . . .
+. . O  X O O  X X X
+macro:
+...
+..X
+O.X
+raw: value -0.75, top move 9 (board 2 cell 1) p=0.49;   search: value +0.19, move 12 (board 2 cell 4) (raw p=0.426, visits 96/256)
+========================================================================
+value surprise +0.86   ply 38
+to move: X   next board: 5   moves: 38
+O X O  X O .  . . .
+. . .  . . O  O . X
+. X .  . X .  . . X
+
+. . .  . . O  . O .
+O O O  X X X  X O O
+X X .  . . .  . . X
+
+X . X  . X .  O . .
+. . .  . . .  X O X
+O . X  O O O  . . O
+macro:
+...
+OX.
+.OO
+raw: value -0.36, top move 45 (board 6 cell 1) p=0.63;   search: value +0.51, move 45 (board 6 cell 1) (raw p=0.628, visits 96/256)
+========================================================================
+value surprise +0.80   ply 35
+to move: O   next board: 6   moves: 35
+X X .  O . .  . . .
+X . .  X . X  X X X
+O X O  . . O  . . .
+
+O O O  . . O  . . .
+. . .  . X O  . . X
+. O .  . . .  O O O
+
+X . .  O O O  O X .
+. . .  . . .  X . .
+X . .  . X X  . X .
+macro:
+..X
+O.O
+.O.
+raw: value -0.67, top move 62 (board 7 cell 9) p=0.50;   search: value +0.13, move 55 (board 7 cell 2) (raw p=0.397, visits 84/256)
+========================================================================
+value surprise +0.75   ply 45
+to move: O   next board: 7   moves: 45
+X O .  . . X  . . O
+. . .  . . X  X . .
+X O .  . . X  X X X
+
+X O .  O . .  . O O
+X O O  . X .  O . X
+. . X  . X X  X O .
+
+O . .  . . O  . . O
+O . O  X . X  O O X
+O X .  X O X  . O O
+macro:
+.XX
+...
+O..
+raw: value -0.97, top move 67 (board 8 cell 5) p=0.99;   search: value -0.21, move 67 (board 8 cell 5) (raw p=0.985, visits 107/256)
+========================================================================
+value surprise +0.75   ply 44
+to move: X   next board: 4   moves: 44
+X O .  X X X  . . X
+. X .  O . O  O O O
+. O X  . . .  . . .
+
+. X X  . . .  O . .
+X O X  X X .  O . X
+O X O  O O .  . . X
+
+. . O  O O .  O O .
+X . .  O . .  O . .
+X . O  X X .  . X X
+macro:
+XXO
+...
+...
+raw: value -0.18, top move 41 (board 5 cell 6) p=0.84;   search: value +0.57, move 41 (board 5 cell 6) (raw p=0.840, visits 103/256)
+========================================================================
+value surprise +0.74   ply 45
+to move: O   next board: 6   moves: 45
+X O .  X X X  X X O
+. X O  O . O  O X .
+X O O  . . .  . . .
+
+X . .  O O O  . . X
+X . X  . X .  O . X
+X O .  . . .  X O O
+
+. O O  . . .  O . .
+. . X  . . O  O . .
+O . X  X X X  O . X
+macro:
+.X.
+XO.
+.XO
+raw: value -0.98, top move 54 (board 7 cell 1) p=0.47;   search: value -0.24, move 54 (board 7 cell 1) (raw p=0.472, visits 96/256)
+========================================================================
+value surprise +0.74   ply 33
+to move: O   next board: 7   moves: 33
+X . .  . O X  . . .
+O . .  . . .  O O O
+. . .  . X O  . X .
+
+. . X  . . .  . X .
+. . X  . X .  . . .
+. O .  O X .  . X O
+
+. . O  O O X  . X .
+. . O  . . .  X . .
+X . O  X O O  X X .
+macro:
+..O
+...
+O..
+raw: value -0.34, top move 66 (board 8 cell 4) p=0.49;   search: value +0.40, move 68 (board 8 cell 6) (raw p=0.491, visits 107/256)
+========================================================================
+value surprise +0.71   ply 42
+to move: X   next board: 5   moves: 42
+X O .  O . X  X . O
+X . .  O . X  . O X
+X . O  . . .  . . .
+
+. X O  . . .  O O X
+X . O  X X X  X . O
+. X O  O . .  O . .
+
+. . .  O . .  . X .
+O . .  O . .  . O O
+X X X  O X .  . O X
+macro:
+X..
+OX.
+XO.
+raw: value +0.24, top move 53 (board 6 cell 9) p=0.63;   search: value +0.95, move 53 (board 6 cell 9) (raw p=0.632, visits 107/256)
+========================================================================
+value surprise +0.71   ply 33
+to move: O   next board: 2   moves: 33
+O . .  O . .  . O X
+X X X  O . X  . . X
+. . .  O . .  . . .
+
+O . .  . . .  . X O
+X . .  . X .  . . O
+X O .  . O O  . . O
+
+X X X  . . .  . X O
+. . .  O . .  . . .
+O . .  . X X  O . X
+macro:
+XO.
+..O
+X..
+raw: value -0.53, top move 22 (board 3 cell 5) p=0.51;   search: value +0.18, move 22 (board 3 cell 5) (raw p=0.505, visits 86/256)
+========================================================================
+value surprise +0.71   ply 49
+to move: O   next board: 5   moves: 49
+O O O  X O .  X . X
+O . X  X . .  X . X
+. O .  X . .  O . O
+
+X O X  . . O  . . O
+O X X  . X X  O . X
+O X .  . O .  O O X
+
+. . .  X X .  X . O
+O . O  O O O  X . .
+X X X  . X .  . . O
+macro:
+OX.
+...
+XO.
+raw: value -0.98, top move 49 (board 6 cell 5) p=0.43;   search: value -0.27, move 49 (board 6 cell 5) (raw p=0.434, visits 107/256)
+========================================================================
+value surprise +0.69   ply 48
+to move: X   next board: 6   moves: 48
+X X .  . O O  . X X
+. . .  X O O  . . X
+O O O  O X X  O . .
+
+O O .  X O O  X X .
+. . .  . X .  X . O
+O X X  . . .  X O .
+
+. X .  O . O  . X .
+O X O  O . X  X . O
+X . O  X . .  . X O
+macro:
+OO.
+..X
+...
+raw: value -0.03, top move 61 (board 7 cell 8) p=0.75;   search: value +0.66, move 61 (board 7 cell 8) (raw p=0.754, visits 107/256)
+========================================================================
+value surprise +0.67   ply 35
+to move: O   next board: 3   moves: 35
+O O O  X X X  X . X
+. . .  . . .  . . .
+X . .  . O .  O O X
+
+. . .  . . O  X . O
+. . .  . X O  . . X
+. . .  . . .  X X .
+
+. O .  . O .  . . .
+X X O  . . O  . . O
+O . X  X X X  O O .
+macro:
+OX.
+...
+.X.
+raw: value -0.31, top move 32 (board 4 cell 6) p=0.71;   search: value +0.36, move 32 (board 4 cell 6) (raw p=0.714, visits 88/256)
+========================================================================
+value surprise +0.65   ply 36
+to move: X   next board: 5   moves: 36
+. . X  . . X  . . .
+. X O  . . X  O . O
+X O .  . . .  X X .
+
+O . O  O . .  . O .
+X . .  X X O  . X O
+. . .  . . O  . X X
+
+X . .  O O O  X . .
+. . .  . . .  . O X
+O O .  . X X  . . O
+macro:
+X..
+...
+.O.
+raw: value -0.43, top move 51 (board 6 cell 7) p=0.51;   search: value +0.22, move 51 (board 6 cell 7) (raw p=0.506, visits 96/256)
+========================================================================
+value surprise +0.64   ply 42
+to move: X   next board: 8   moves: 42
+. X .  O . X  . O X
+. . .  O X O  . O .
+O X O  O . .  . O .
+
+. . .  X . .  . X .
+O . .  . X .  O . .
+X X X  O O X  . . .
+
+. O O  X X .  O X X
+. . .  X O X  . . .
+X X X  . O O  . O O
+macro:
+.OO
+XX.
+X..
+raw: value -0.08, top move 76 (board 9 cell 5) p=0.36;   search: value +0.56, move 76 (board 9 cell 5) (raw p=0.365, visits 96/256)
+========================================================================
+value surprise +0.64   ply 50
+to move: X   next board: 6   moves: 50
+X X X  . X X  . O X
+O . .  O O O  . O O
+. . .  X . O  . O .
+
+O O X  . X .  . . O
+X X .  X X X  X O X
+O X .  X O O  O . .
+
+. O .  O . .  O X .
+O O .  O . X  . . .
+X X O  O X .  X . X
+macro:
+XOO
+.XO
+.O.
+raw: value +0.34, top move 54 (board 7 cell 1) p=0.35;   search: value +0.99, move 59 (board 7 cell 6) (raw p=0.301, visits 107/256)
+========================================================================
+value surprise +0.64   ply 36
+to move: X   next board: 6   moves: 36
+X O .  . X X  . X O
+. . .  O . O  O . .
+. O .  . . .  O . .
+
+X . .  O . .  . . X
+X . X  . X .  O . X
+X O .  . O .  . O O
+
+. O .  . . X  . . .
+. . X  . X O  O . .
+O . X  X X .  O . X
+macro:
+...
+X..
+.X.
+raw: value -0.45, top move 58 (board 7 cell 5) p=0.35;   search: value +0.18, move 54 (board 7 cell 1) (raw p=0.262, visits 103/256)
+========================================================================
+value surprise +0.63   ply 38
+to move: X   next board: 7   moves: 38
+O . X  . O X  O O .
+. X X  O X O  . . .
+. O X  X X .  . . .
+
+. X .  X O .  X X .
+O X O  . O .  X . .
+. X .  . O .  X O .
+
+. . .  O X .  . O .
+X . O  O . O  . . .
+O . .  . X .  . . .
+macro:
+XX.
+XOX
+...
+raw: value -0.25, top move 71 (board 8 cell 9) p=0.69;   search: value +0.38, move 71 (board 8 cell 9) (raw p=0.694, visits 96/256)
+========================================================================
+value surprise +0.63   ply 49
+to move: O   next board: any   moves: 49
+X X .  O O O  . O X
+O X .  . . .  X O X
+X . .  X X .  . . O
+
+O . .  . . X  O . O
+X . O  . X O  X O X
+O O O  X . O  X X .
+
+. X O  . X .  O . X
+X . O  X . O  X . X
+O . O  . O .  . . X
+macro:
+.O.
+OX.
+O.X
+raw: value -0.53, top move 5 (board 1 cell 6) p=0.37;   search: value +0.10, move 5 (board 1 cell 6) (raw p=0.375, visits 71/256)
+========================================================================
+value surprise +0.62   ply 50
+to move: X   next board: 1   moves: 50
+. X .  . X O  X . O
+O O O  . X X  O X X
+. . .  O O X  . . .
+
+. . .  X X O  O O .
+O . .  . O X  X O O
+X X X  X O .  . X O
+
+X O X  . O .  X O X
+. O X  . X X  . . .
+O . .  X O .  O . O
+macro:
+O..
+X.O
+...
+raw: value -0.04, top move 12 (board 2 cell 4) p=0.53;   search: value +0.59, move 9 (board 2 cell 1) (raw p=0.469, visits 128/256)
+========================================================================
+value surprise +0.62   ply 35
+to move: O   next board: 1   moves: 35
+X X X  O X .  O X .
+. . .  . O .  . . .
+. O .  . X .  O X .
+
+. . O  . . .  . O X
+X . O  O X .  . . X
+. . O  . X .  . O .
+
+. . .  O O O  . . .
+X . O  . . .  X . X
+X . .  O X X  . . O
+macro:
+X..
+O..
+.O.
+raw: value -0.41, top move 15 (board 2 cell 7) p=0.48;   search: value +0.21, move 17 (board 2 cell 9) (raw p=0.354, visits 103/256)
+========================================================================
+value surprise +0.61   ply 44
+to move: X   next board: 0   moves: 44
+X O .  . O X  X . .
+O . .  X . X  X . .
+X X O  . X .  X O .
+
+O O O  . . O  O . .
+X . .  . X .  O . X
+. X .  O . .  . X .
+
+X X O  O O .  O . .
+. X .  O . O  . . O
+O . X  O X O  . X X
+macro:
+..X
+O..
+XO.
+raw: value +0.34, top move 5 (board 1 cell 6) p=0.53;   search: value +0.95, move 4 (board 1 cell 5) (raw p=0.177, visits 107/256)
+========================================================================
+value surprise +0.61   ply 34
+to move: X   next board: 3   moves: 34
+X O .  . . .  . . X
+O . .  . . O  . O .
+. X .  X . X  X . O
+
+O . .  . . O  X . X
+X . X  . X O  O . X
+. . .  . . X  . O X
+
+O O O  . X .  . . .
+. . .  . . O  O X O
+. . .  . . .  X . O
+macro:
+...
+..X
+O..
+raw: value -0.05, top move 35 (board 4 cell 9) p=0.43;   search: value +0.56, move 35 (board 4 cell 9) (raw p=0.434, visits 86/256)
+========================================================================
+value surprise +0.58   ply 38
+to move: X   next board: 1   moves: 38
+O . X  . O .  O . X
+. . X  X X .  O . .
+. . X  . O .  O . O
+
+O X .  . O O  X O .
+O . .  . X O  . . .
+. X X  . . .  . . .
+
+. . .  . X X  . . X
+O X .  . . .  X . .
+X X .  O O X  O O O
+macro:
+X.O
+...
+..O
+raw: value -0.91, top move 15 (board 2 cell 7) p=0.32;   search: value -0.32, move 9 (board 2 cell 1) (raw p=0.208, visits 103/256)
+========================================================================
+value surprise +0.57   ply 36
+to move: X   next board: 0   moves: 36
+O . X  . X .  O . .
+. . .  . . .  . X .
+X . .  . O O  X O .
+
+. . .  . . .  O . .
+O . X  . X X  . O X
+. . .  O . O  X O O
+
+. O .  X X X  . . O
+X O O  . . .  . . O
+O . X  . . .  X X X
+macro:
+...
+..O
+.XX
+raw: value -0.30, top move 4 (board 1 cell 5) p=0.62;   search: value +0.27, move 4 (board 1 cell 5) (raw p=0.624, visits 86/256)
+
+### largest negative value surprises (net too optimistic)
+========================================================================
+value surprise -1.71   ply 42
+to move: X   next board: 5   moves: 42
+X O .  O . .  O . X
+O O O  O . .  . . .
+. X .  O X .  . . .
+
+X . O  . X .  X . .
+X X O  O X O  X . X
+O . X  O . O  . . O
+
+X . .  X X .  X . .
+X . .  . . .  O X O
+X O .  . O O  . . X
+macro:
+OO.
+X..
+X.X
+raw: value +0.78, top move 49 (board 6 cell 5) p=0.56;   search: value -0.93, move 52 (board 6 cell 8) (raw p=0.064, visits 103/256)
+========================================================================
+value surprise -1.65   ply 50
+to move: X   next board: 0   moves: 50
+X O O  O X X  X X O
+X . .  . O O  X . X
+O . O  . O O  O . X
+
+X . O  O X O  . O .
+O O X  . X .  X . .
+O . .  . X .  X O .
+
+X . O  . X .  O X X
+X . .  . X .  O . O
+X O .  . X O  . . X
+macro:
+.O.
+OX.
+XX.
+raw: value +0.69, top move 5 (board 1 cell 6) p=0.91;   search: value -0.96, move 5 (board 1 cell 6) (raw p=0.905, visits 107/256)
+========================================================================
+value surprise -1.58   ply 47
+to move: O   next board: 6   moves: 47
+O X O  X O .  X X X
+. . .  X X .  . . O
+X . .  O O O  . . .
+
+. . .  . . O  O X O
+O O O  . X O  X . X
+. X .  . O O  X O .
+
+. O .  . X X  . . .
+. . X  . . X  X X O
+O O X  X O X  X . O
+macro:
+.OX
+OO.
+.X.
+raw: value +0.62, top move 54 (board 7 cell 1) p=0.75;   search: value -0.96, move 57 (board 7 cell 4) (raw p=0.020, visits 96/256)
+========================================================================
+value surprise -1.56   ply 42
+to move: X   next board: 6   moves: 42
+X O O  . X .  X . .
+. . O  O O .  O . .
+. . O  . X .  O X .
+
+X X X  O . .  . . X
+X . .  . X .  O . X
+O X .  O X .  X . X
+
+. . .  . O O  X . .
+. X O  O . O  O . O
+X O .  . X O  . . X
+macro:
+O..
+X.X
+.O.
+raw: value +0.79, top move 56 (board 7 cell 3) p=0.74;   search: value -0.78, move 62 (board 7 cell 9) (raw p=0.176, visits 103/256)
+========================================================================
+value surprise -1.53   ply 38
+to move: X   next board: 7   moves: 38
+X . O  . . .  . . X
+. . .  . . .  O O O
+O . .  X O .  . . .
+
+O . .  . . X  . . X
+X . .  . X .  O . X
+X X X  X O .  O . .
+
+X O .  . X .  . . .
+O X .  . O .  O . O
+O X X  O X O  . O X
+macro:
+..O
+XX.
+X..
+raw: value +0.60, top move 63 (board 8 cell 1) p=0.62;   search: value -0.93, move 63 (board 8 cell 1) (raw p=0.623, visits 96/256)
+========================================================================
+value surprise -1.52   ply 42
+to move: X   next board: 0   moves: 42
+X O .  X X X  X O X
+O O .  . . .  . . O
+. . .  . O .  O . X
+
+. . .  O . O  O . X
+X . X  X X X  O . X
+O . O  . . .  O X .
+
+. . O  . O O  . . .
+. X .  . . O  . O O
+X X .  . X O  . X X
+macro:
+.X.
+.XO
+.O.
+raw: value +0.76, top move 2 (board 1 cell 3) p=0.61;   search: value -0.76, move 2 (board 1 cell 3) (raw p=0.615, visits 103/256)
+========================================================================
+value surprise -1.47   ply 42
+to move: X   next board: 4   moves: 42
+X X .  O O O  . O X
+O X .  . . .  . O X
+X . .  X X .  . . O
+
+O . .  . . X  O . O
+X . O  . X O  X O X
+O O O  . . O  . . .
+
+. X .  . X .  O . X
+X . .  X . .  X . X
+O . O  . O .  . . X
+macro:
+.O.
+O..
+..X
+raw: value +0.84, top move 42 (board 5 cell 7) p=0.78;   search: value -0.64, move 42 (board 5 cell 7) (raw p=0.780, visits 103/256)
+========================================================================
+value surprise -1.46   ply 40
+to move: X   next board: 5   moves: 40
+X O .  . X X  . X O
+. . .  . . .  . . O
+X O .  O O O  . X O
+
+X O .  O . .  . . .
+X . .  . X .  O . X
+X . .  . . .  . . X
+
+O . O  . X X  . . .
+O . .  . . O  O . O
+X O X  O X O  X X X
+macro:
+.OO
+X..
+..X
+raw: value +0.84, top move 52 (board 6 cell 8) p=0.82;   search: value -0.62, move 52 (board 6 cell 8) (raw p=0.816, visits 86/256)
+========================================================================
+value surprise -1.45   ply 40
+to move: X   next board: 0   moves: 40
+X O .  O X O  X X X
+O . .  X O .  . . .
+X O .  O . X  O . .
+
+X X X  . X O  . . .
+O . .  . X .  . . X
+. . .  . X .  . . O
+
+O . O  O O .  . O .
+O X O  . . .  . O .
+X . .  . X X  . O X
+macro:
+.OX
+XX.
+..O
+raw: value +0.49, top move 4 (board 1 cell 5) p=0.58;   search: value -0.96, move 5 (board 1 cell 6) (raw p=0.185, visits 96/256)
+========================================================================
+value surprise -1.45   ply 42
+to move: X   next board: 1   moves: 42
+X O .  O . .  O O O
+. O O  . . .  . X X
+X X X  . X O  . . .
+
+X . .  O . .  X X X
+X . O  X X O  O . X
+X . .  O . .  . X O
+
+. . O  O . .  . X .
+O X O  O . .  . . O
+X . .  O . .  . X .
+macro:
+X.O
+X.X
+.O.
+raw: value +0.82, top move 10 (board 2 cell 2) p=0.63;   search: value -0.63, move 10 (board 2 cell 2) (raw p=0.626, visits 86/256)
+========================================================================
+value surprise -1.44   ply 41
+to move: O   next board: 1   moves: 41
+O . .  . . .  X X X
+O . .  . . O  . O .
+O X .  . O X  O . .
+
+. . O  . . O  . X O
+X X O  . X X  X . .
+. . O  . O .  . X .
+
+. . .  X O .  X X X
+O . .  X . O  . . .
+X O X  X X O  . O O
+macro:
+O.X
+O..
+.XX
+raw: value +0.47, top move 10 (board 2 cell 2) p=0.95;   search: value -0.97, move 10 (board 2 cell 2) (raw p=0.949, visits 86/256)
+========================================================================
+value surprise -1.42   ply 43
+to move: O   next board: 3   moves: 43
+X . .  O X .  X . O
+O O O  O . .  . X .
+. . X  . X .  O . .
+
+X . .  . O X  . . O
+X . O  . O .  X X X
+O X X  O X X  . . .
+
+. O X  O X .  . . .
+X . .  O . .  O O O
+X X .  O . O  . . X
+macro:
+O..
+..X
+.OO
+raw: value +0.47, top move 29 (board 4 cell 3) p=0.74;   search: value -0.95, move 31 (board 4 cell 5) (raw p=0.121, visits 107/256)
+========================================================================
+value surprise -1.41   ply 47
+to move: O   next board: any   moves: 47
+X X X  O O O  O . X
+. . X  . . X  O . X
+. O .  . X X  O . .
+
+O O O  . . O  O X .
+X . .  . X X  X X O
+. X X  . . O  . O O
+
+. . .  O . X  X X .
+O O O  O . .  X . O
+X . .  X . .  X . O
+macro:
+XOO
+O..
+O.X
+raw: value +0.99, top move 39 (board 5 cell 4) p=0.50;   search: value -0.41, move 68 (board 8 cell 6) (raw p=0.476, visits 73/256)
+========================================================================
+value surprise -1.40   ply 36
+to move: X   next board: 6   moves: 36
+. . .  . X .  . . O
+X X X  O O O  X X X
+. . .  . . .  . . .
+
+. X O  O X X  . . O
+. O X  . O X  O . O
+O X .  . . X  X . O
+
+O O .  . . .  O . .
+X . .  O . .  . . .
+. . .  X . .  O . X
+macro:
+XOX
+OXO
+...
+raw: value +0.58, top move 62 (board 7 cell 9) p=0.62;   search: value -0.82, move 56 (board 7 cell 3) (raw p=0.255, visits 86/256)
+========================================================================
+value surprise -1.39   ply 46
+to move: X   next board: 3   moves: 46
+X O X  . X X  O . X
+X . .  . . X  X O O
+. . .  . O X  O . O
+
+O O X  . . .  . O X
+O . O  X X X  O X .
+X . .  O O .  O . .
+
+. . O  . . .  O O O
+O X .  X . .  . . .
+X O X  X X O  . . X
+macro:
+.XO
+.X.
+..O
+raw: value +0.84, top move 34 (board 4 cell 8) p=0.99;   search: value -0.55, move 34 (board 4 cell 8) (raw p=0.992, visits 107/256)
+========================================================================
+value surprise -1.38   ply 47
+to move: O   next board: any   moves: 47
+X O .  . X .  . . O
+. O .  O X .  . . .
+. X X  . X .  X X X
+
+. . O  O . X  . O X
+X . O  X X X  . O X
+. . O  O X O  . . O
+
+O . O  X O .  O . X
+. O .  X O .  . X O
+X . O  . O .  X O X
+macro:
+.XX
+OX.
+OOX
+raw: value +1.00, top move 5 (board 1 cell 6) p=0.99;   search: value -0.38, move 5 (board 1 cell 6) (raw p=0.990, visits 77/256)
+========================================================================
+value surprise -1.38   ply 39
+to move: O   next board: 8   moves: 39
+X O .  O X .  . . O
+. O .  . . X  . . X
+O . X  O O .  X . .
+
+. . .  X . .  . X .
+. X X  X O .  O O O
+. O X  X . .  . . .
+
+X X .  . O O  O . X
+O . .  . . .  . . .
+O X X  . X X  O . O
+macro:
+...
+.XO
+...
+raw: value +0.57, top move 75 (board 9 cell 4) p=0.72;   search: value -0.80, move 75 (board 9 cell 4) (raw p=0.721, visits 103/256)
+========================================================================
+value surprise -1.36   ply 41
+to move: O   next board: 1   moves: 41
+O X .  X O X  . . O
+. X .  . . X  . . O
+. O .  X O O  X . O
+
+X X X  . O .  . O .
+O . .  . O X  O X O
+. . .  . . .  . X O
+
+. O .  O X .  . X X
+X . .  . . X  . . X
+O . .  . X O  . O X
+macro:
+..O
+X..
+..X
+raw: value +0.45, top move 13 (board 2 cell 5) p=0.98;   search: value -0.91, move 13 (board 2 cell 5) (raw p=0.981, visits 128/256)
+========================================================================
+value surprise -1.35   ply 48
+to move: X   next board: 0   moves: 48
+X . .  . X O  . O X
+. . .  O X .  . X .
+. . O  O X .  X O .
+
+. X O  O . .  O O O
+X . O  O X .  X . X
+X X .  O . .  . O .
+
+. O O  . X .  . . X
+O X .  O X O  . . X
+X O X  X X O  O O X
+macro:
+.XX
+.OO
+.XX
+raw: value +1.00, top move 6 (board 1 cell 7) p=0.94;   search: value -0.35, move 6 (board 1 cell 7) (raw p=0.937, visits 84/256)
+========================================================================
+value surprise -1.34   ply 36
+to move: X   next board: 1   moves: 36
+X . O  . X .  . X O
+. . .  . O O  . . .
+. X .  . X X  . X .
+
+. O .  . O .  O . .
+X . X  . X X  O . X
+. O .  . . .  O . .
+
+. O .  . O .  O . X
+. . .  X O .  O . .
+X X X  O O X  O . .
+macro:
+...
+..O
+XOO
+raw: value +0.48, top move 12 (board 2 cell 4) p=0.39;   search: value -0.87, move 11 (board 2 cell 3) (raw p=0.183, visits 96/256)
+========================================================================
+value surprise -1.34   ply 49
+to move: O   next board: any   moves: 49
+X O .  O X O  . X X
+. . .  . O .  O O X
+X O .  X X O  X . O
+
+O O O  . X X  . . .
+X . .  O X .  X X X
+. . .  O X .  . O O
+
+. O O  X X X  . . .
+. O O  X . .  . . O
+X O .  . O O  X X X
+macro:
+.O.
+OXX
+OXX
+raw: value +1.00, top move 4 (board 1 cell 5) p=1.00;   search: value -0.34, move 4 (board 1 cell 5) (raw p=0.999, visits 84/256)
+========================================================================
+value surprise -1.34   ply 50
+to move: X   next board: any   moves: 50
+X O .  O X .  O X X
+. X .  O . .  . O .
+. O X  X X O  X . .
+
+X . .  . . .  . . X
+X . O  . X .  O . X
+X O .  O O O  O O X
+
+O O O  O X .  . . O
+. O X  X X X  . . O
+X O .  X O X  . X O
+macro:
+X..
+XOX
+OXO
+raw: value +1.00, top move 26 (board 3 cell 9) p=1.00;   search: value -0.34, move 26 (board 3 cell 9) (raw p=1.000, visits 84/256)
+========================================================================
+value surprise -1.34   ply 49
+to move: O   next board: any   moves: 49
+X X X  O O O  O . X
+. . .  . . X  O . X
+. O .  . X X  O . .
+
+O O O  . . O  . X O
+X . .  . X X  X X O
+. X X  . . O  . O O
+
+. . .  O X X  X X .
+O O O  O . X  X . O
+X . .  X O .  X . O
+macro:
+XOO
+O.O
+O.X
+raw: value +1.00, top move 43 (board 5 cell 8) p=0.95;   search: value -0.34, move 43 (board 5 cell 8) (raw p=0.953, visits 84/256)
+========================================================================
+value surprise -1.33   ply 48
+to move: X   next board: any   moves: 48
+. . .  X O O  . O X
+O O O  X . .  O X .
+. . .  O . .  X O X
+
+X . O  . . .  . . .
+O . X  . O .  . . X
+X X .  X X X  O O O
+
+X . O  O X X  X X .
+X O X  O . X  . . .
+O X .  . O X  O O O
+macro:
+O.X
+.XO
+OXO
+raw: value +0.99, top move 13 (board 2 cell 5) p=1.00;   search: value -0.34, move 13 (board 2 cell 5) (raw p=1.000, visits 84/256)
+========================================================================
+value surprise -1.32   ply 39
+to move: O   next board: 0   moves: 39
+X . .  . X X  . . .
+X . .  . O .  . . .
+O . .  . X .  O O O
+
+. O .  . . .  O . X
+X X X  . X O  O . X
+. O .  . O X  . O .
+
+. O .  X O X  . . .
+. . .  O . X  O O O
+X X X  O X .  . . X
+macro:
+..O
+X..
+X.O
+raw: value +0.36, top move 7 (board 1 cell 8) p=0.61;   search: value -0.96, move 7 (board 1 cell 8) (raw p=0.607, visits 86/256)
+========================================================================
+value surprise -1.32   ply 42
+to move: X   next board: any   moves: 42
+O . X  X O .  . . O
+X O O  X . .  . . O
+X . X  X . .  . X O
+
+. O .  X . .  . . .
+X O X  . X O  . . X
+O . .  . . X  O O O
+
+. O .  O X X  . . X
+. O .  . O .  . . X
+X O .  . X O  . O X
+macro:
+.XO
+.XO
+OOX
+raw: value +1.00, top move 7 (board 1 cell 8) p=1.00;   search: value -0.32, move 7 (board 1 cell 8) (raw p=0.999, visits 86/256)
+========================================================================
+value surprise -1.32   ply 52
+to move: X   next board: any   moves: 52
+X O .  X X X  X . O
+X O .  . . .  X X O
+O O X  O O .  X O .
+
+O O O  . . O  . . X
+X . X  . X O  O . X
+. . .  . . O  O O X
+
+O O X  . X X  O . O
+O X .  X . X  . . O
+X . .  . X O  X O X
+macro:
+OXX
+OOX
+X..
+raw: value +1.00, top move 73 (board 9 cell 2) p=1.00;   search: value -0.32, move 73 (board 9 cell 2) (raw p=0.999, visits 86/256)
+========================================================================
+value surprise -1.32   ply 44
+to move: X   next board: 0   moves: 44
+X . .  . X .  O . O
+. . .  . X O  O X .
+X . O  . X .  X X .
+
+. . .  O . O  . O X
+X X O  O X O  O X X
+. X X  . . O  X . .
+
+. O O  O O .  . . X
+. . O  O . .  . . X
+X . O  O X .  . O X
+macro:
+.X.
+.OX
+OOX
+raw: value +1.00, top move 3 (board 1 cell 4) p=1.00;   search: value -0.32, move 3 (board 1 cell 4) (raw p=0.998, visits 86/256)
+========================================================================
+value surprise -1.32   ply 44
+to move: X   next board: 8   moves: 44
+X O .  . X .  . . .
+O X .  . X O  O . .
+. O .  . X .  O X .
+
+O . O  X . .  X O .
+X O X  X O O  X . .
+. X O  . O X  X O .
+
+. . X  O O .  . . X
+X . X  O X .  . O .
+O . .  O X X  . . O
+macro:
+.X.
+O.X
+.O.
+raw: value +0.52, top move 72 (board 9 cell 1) p=0.88;   search: value -0.80, move 72 (board 9 cell 1) (raw p=0.877, visits 86/256)
+========================================================================
+value surprise -1.31   ply 46
+to move: X   next board: any   moves: 46
+O O X  X X O  O X X
+. . X  . . O  O . .
+. . X  . O O  O . .
+
+. X .  X . O  X . .
+X O X  . X .  X . O
+. X O  . . X  X . .
+
+. . .  . O X  O O O
+O O O  . . .  O . .
+X . .  O X X  X O X
+macro:
+XOO
+.XX
+O.O
+raw: value +0.97, top move 27 (board 4 cell 1) p=1.00;   search: value -0.34, move 27 (board 4 cell 1) (raw p=0.995, visits 84/256)
+
+### largest policy surprises (search chooses a move the net almost never considers)
+========================================================================
+policy surprise: raw p(search move) = 0.0037   ply 42
+to move: X   next board: 2   moves: 42
+X X X  O O .  . O X
+. . O  X . X  . . .
+. . .  X X .  . O .
+
+O . .  . . O  X O .
+O X O  X . O  X . O
+. X .  . . O  . X X
+
+O O O  . X .  O . .
+. . .  . . X  O . .
+X . .  O O O  X X X
+macro:
+X..
+.O.
+OOX
+raw: value -1.00, top move 23 (board 3 cell 6) p=0.52;   search: value -0.99, move 18 (board 3 cell 1) (raw p=0.004, visits 86/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0041   ply 44
+to move: X   next board: 4   moves: 44
+O O O  X X .  X . O
+. X O  O O O  . . X
+O X X  . . .  O . O
+
+. O X  O . X  O . .
+. . X  . X .  O . X
+. . .  O . .  O . X
+
+X X X  X . .  X X .
+. O .  X . .  . . .
+X O .  X O .  . O O
+macro:
+OO.
+..O
+XX.
+raw: value -0.99, top move 39 (board 5 cell 4) p=0.83;   search: value -1.00, move 41 (board 5 cell 6) (raw p=0.004, visits 103/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0058   ply 45
+to move: O   next board: 6   moves: 45
+X X O  O X .  . X X
+O . O  . O .  . X .
+. O .  . O O  O X O
+
+. . O  . O .  X X X
+X X O  X X X  . . O
+. X .  O . .  . . .
+
+. . .  O . O  . . O
+O . .  O . X  . O .
+X X .  X O X  . X X
+macro:
+.OX
+.XX
+...
+raw: value -1.00, top move 54 (board 7 cell 1) p=0.95;   search: value -1.00, move 58 (board 7 cell 5) (raw p=0.006, visits 86/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0078   ply 28
+to move: X   next board: 0   moves: 28
+X O .  . X .  O . O
+. X .  . . .  . . .
+. . .  . X O  . X .
+
+. . .  O O .  . . .
+O . X  . X .  X . O
+. . .  . . .  X . O
+
+. . X  O . X  . . .
+. . X  . . .  . . O
+O . .  O O .  . X X
+macro:
+...
+...
+...
+raw: value +0.66, top move 7 (board 1 cell 8) p=0.43;   search: value +0.49, move 5 (board 1 cell 6) (raw p=0.008, visits 86/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0084   ply 38
+to move: X   next board: any   moves: 38
+X O .  . . .  . . X
+. O .  . . .  O . O
+X O .  . X O  O . .
+
+X . X  O . .  . . X
+X . O  . X X  . . X
+X . .  O . .  O X O
+
+X . O  O . .  . X .
+O X O  O . .  O . .
+X . X  O . .  . X .
+macro:
+O..
+X..
+XO.
+raw: value +0.56, top move 39 (board 5 cell 4) p=0.79;   search: value -0.61, move 38 (board 5 cell 3) (raw p=0.008, visits 60/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0099   ply 46
+to move: X   next board: 7   moves: 46
+X . .  . X O  . O X
+. . .  O X .  . X .
+. . O  O X .  X O .
+
+. X O  O . .  . O O
+X . O  O X .  X . X
+X X .  O . .  . O .
+
+. O O  . X .  . . X
+O X .  O . O  . . X
+X O X  X X O  O O X
+macro:
+.XX
+.O.
+..X
+raw: value +1.00, top move 67 (board 8 cell 5) p=0.98;   search: value +0.98, move 65 (board 8 cell 3) (raw p=0.010, visits 107/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0106   ply 48
+to move: X   next board: 5   moves: 48
+X . O  . . .  X O X
+X . O  X X X  O X .
+. . O  . O X  O X .
+
+. O O  . X O  O O .
+X . O  . X .  . . .
+. . O  O O O  . X X
+
+X . .  O O X  . . X
+. O .  X . O  . X X
+X . O  . X .  X O O
+macro:
+OX.
+OO.
+..X
+raw: value -0.83, top move 47 (board 6 cell 3) p=0.86;   search: value -0.99, move 50 (board 6 cell 6) (raw p=0.011, visits 103/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0122   ply 27
+to move: O   next board: 4   moves: 27
+O . .  X O .  . . X
+X X .  . . .  . . .
+. . .  X . .  O . .
+
+. . .  . . .  . . .
+O . .  O X .  . . X
+. X X  O . .  . O X
+
+. X .  . . .  O O O
+. X O  . . O  . . .
+. . .  . X O  . . X
+macro:
+...
+...
+..O
+raw: value -0.60, top move 36 (board 5 cell 1) p=0.55;   search: value -0.81, move 44 (board 5 cell 9) (raw p=0.012, visits 86/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0127   ply 33
+to move: O   next board: 7   moves: 33
+O . .  X . .  . . .
+O . .  X . .  . X .
+. . X  X . .  . . .
+
+. O .  . . O  X O .
+X . X  . X O  . . .
+X O .  . . O  X O .
+
+. O .  . . .  . . .
+O . O  O . .  . X X
+O X O  X X .  X . O
+macro:
+.X.
+.O.
+...
+raw: value -0.31, top move 71 (board 8 cell 9) p=0.87;   search: value -0.82, move 65 (board 8 cell 3) (raw p=0.013, visits 86/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0127   ply 45
+to move: O   next board: any   moves: 45
+X O .  . O X  O O X
+. . .  O . X  . . .
+X X .  . X X  O X .
+
+O . .  . X .  . O .
+X . X  . X .  X O O
+. X O  O X .  X O .
+
+. . O  . X O  . . X
+. . O  O O X  O . X
+X . O  . O O  . . X
+macro:
+.X.
+.XO
+O.X
+raw: value -0.98, top move 2 (board 1 cell 3) p=0.40;   search: value -1.00, move 5 (board 1 cell 6) (raw p=0.013, visits 69/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0152   ply 35
+to move: O   next board: 2   moves: 35
+X O X  . O X  O . O
+. . .  . X .  O . .
+. . O  X . .  X X .
+
+O X X  . . .  . . O
+O . .  . O .  X . O
+. . .  . X .  . . .
+
+. . .  . O X  X . .
+X . .  . . X  . . X
+O O O  . O X  X . O
+macro:
+.X.
+...
+OX.
+raw: value -0.67, top move 26 (board 3 cell 9) p=0.97;   search: value -0.98, move 19 (board 3 cell 2) (raw p=0.015, visits 96/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0154   ply 30
+to move: X   next board: 4   moves: 30
+O . .  . X O  . . X
+X . X  . . O  . . X
+. . .  . . .  . O X
+
+. . O  . . .  O O O
+O . X  . . .  . . .
+. . X  . . .  . X .
+
+. X .  X . .  . . .
+. . .  . O .  X . .
+O X .  X O X  O O O
+macro:
+..X
+..O
+..O
+raw: value +0.27, top move 40 (board 5 cell 5) p=0.45;   search: value -0.07, move 42 (board 5 cell 7) (raw p=0.015, visits 88/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0169   ply 30
+to move: X   next board: any   moves: 30
+X . O  . X X  . . O
+. . .  . . .  . . .
+. . .  . O O  X X .
+
+. O .  . . .  . O .
+X O .  X X .  . . X
+. O .  . X O  . . .
+
+. . .  O X .  . . .
+O O .  O . .  X . O
+X . .  O X .  . . X
+macro:
+...
+O..
+.O.
+raw: value +0.04, top move 26 (board 3 cell 9) p=0.45;   search: value -0.33, move 53 (board 6 cell 9) (raw p=0.017, visits 60/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0170   ply 45
+to move: O   next board: any   moves: 45
+O X .  O O .  X . O
+. X .  O X X  . . .
+. X X  . . X  . . X
+
+. X .  . O .  . O O
+X . O  X X X  O O X
+X X X  O . O  . . .
+
+. . X  O . .  O X .
+O . .  O . .  O O X
+X . O  O X .  . O .
+macro:
+X..
+XX.
+.O.
+raw: value -0.84, top move 58 (board 7 cell 5) p=0.36;   search: value -1.00, move 11 (board 2 cell 3) (raw p=0.017, visits 60/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0185   ply 40
+to move: X   next board: 6   moves: 40
+X X O  . O X  . X X
+. . O  X . O  . . .
+. X X  O X O  O . O
+
+O . .  O . .  O X .
+O . .  . X .  X . .
+O X .  . . .  . X .
+
+X X .  O O .  . O O
+. . .  X . O  . . X
+X O .  O . .  . . X
+macro:
+...
+O..
+...
+raw: value -0.73, top move 59 (board 7 cell 6) p=0.57;   search: value -0.93, move 62 (board 7 cell 9) (raw p=0.019, visits 103/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0199   ply 47
+to move: O   next board: 6   moves: 47
+O X O  X O .  X X X
+. . .  X X .  . . O
+X . .  O O O  . . .
+
+. . .  . . O  O X O
+O O O  . X O  X . X
+. X .  . O O  X O .
+
+. O .  . X X  . . .
+. . X  . . X  X X O
+O O X  X O X  X . O
+macro:
+.OX
+OO.
+.X.
+raw: value +0.62, top move 54 (board 7 cell 1) p=0.75;   search: value -0.96, move 57 (board 7 cell 4) (raw p=0.020, visits 96/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0218   ply 42
+to move: X   next board: any   moves: 42
+. . .  . . .  . O X
+O . .  . . X  . O X
+X . X  O O O  . . .
+
+O . X  . X .  . O .
+X . O  . X .  O . X
+X . O  O X .  . O O
+
+. . .  O X O  X X .
+O O .  X . X  X O .
+X X O  . O .  . X .
+macro:
+.O.
+.X.
+...
+raw: value +0.94, top move 78 (board 9 cell 7) p=0.44;   search: value +0.48, move 26 (board 3 cell 9) (raw p=0.022, visits 60/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0237   ply 25
+to move: O   next board: 3   moves: 25
+X . X  O O .  . O X
+O . O  . . .  . . .
+. . .  X X .  O . .
+
+. . .  . . .  . . O
+X . O  . X .  X . X
+. . .  . . O  . . .
+
+X X .  . X .  O . .
+. . .  . . .  . . .
+O . .  . O .  . . X
+macro:
+...
+...
+...
+raw: value -0.50, top move 34 (board 4 cell 8) p=0.54;   search: value -0.60, move 29 (board 4 cell 3) (raw p=0.024, visits 84/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0240   ply 40
+to move: X   next board: 0   moves: 40
+O . X  O X .  O . .
+. . O  O X .  O . .
+. . X  . X .  X . .
+
+. X .  X O O  . . .
+. X .  . X X  . . O
+. X .  O . O  X X X
+
+. . X  X O .  . O .
+. . X  O . O  . O .
+O X O  O . .  . O X
+macro:
+.X.
+X.X
+..O
+raw: value +0.66, top move 6 (board 1 cell 7) p=0.71;   search: value -0.51, move 3 (board 1 cell 4) (raw p=0.024, visits 103/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0244   ply 11
+to move: O   next board: 1   moves: 11
+. . .  . . .  O . X
+. . .  . . .  . . .
+. X .  . . .  . . .
+
+. . .  . . .  . . O
+O . .  . . .  . . X
+X . .  . . .  . . .
+
+. . .  . X .  . . .
+X . O  . . .  . . .
+. . .  . O .  . . .
+macro:
+...
+...
+...
+raw: value -0.16, top move 10 (board 2 cell 2) p=0.82;   search: value -0.22, move 12 (board 2 cell 4) (raw p=0.024, visits 88/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0259   ply 22
+to move: X   next board: 7   moves: 22
+X O .  . X X  . . X
+. . .  . . .  O . O
+. . .  . O .  . . .
+
+. . .  O . .  . O .
+O . X  . X .  X . .
+X O .  . . .  . . .
+
+. . .  . . .  . . O
+X . .  . . .  . . .
+O . .  . X O  . . X
+macro:
+...
+...
+...
+raw: value +0.48, top move 64 (board 8 cell 2) p=0.81;   search: value +0.35, move 67 (board 8 cell 5) (raw p=0.026, visits 84/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0261   ply 28
+to move: X   next board: 6   moves: 28
+X O .  . X X  . X O
+. . .  O . O  . . .
+. . .  . . .  . . O
+
+. . .  O . .  . . X
+X X X  . X .  O . X
+X O .  O . .  . . O
+
+. O .  . . .  . . .
+O . .  . . O  O . .
+. . .  . X .  X . X
+macro:
+...
+X..
+...
+raw: value +0.42, top move 60 (board 7 cell 7) p=0.42;   search: value +0.32, move 56 (board 7 cell 3) (raw p=0.026, visits 84/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0262   ply 31
+to move: O   next board: 8   moves: 31
+. X .  O X .  . . X
+. . X  O . .  . . .
+. O .  O . .  O . .
+
+X . .  . X O  . O .
+X . O  . X .  X O X
+. X O  . . .  . . .
+
+. . .  . . .  O . .
+O . .  O . O  . . .
+X . X  . X X  . O X
+macro:
+.O.
+...
+...
+raw: value -0.48, top move 77 (board 9 cell 6) p=0.75;   search: value -0.86, move 75 (board 9 cell 4) (raw p=0.026, visits 86/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0269   ply 24
+to move: X   next board: 3   moves: 24
+O . .  . O .  . . O
+X . X  . . X  . . .
+. . .  . . X  . X .
+
+. . .  . . .  O . .
+X . .  . . .  O . X
+O O .  . . .  O . .
+
+. O .  . X X  X . .
+. . .  O . O  . . .
+X X .  . . .  . . O
+macro:
+...
+..O
+...
+raw: value +0.02, top move 35 (board 4 cell 9) p=0.88;   search: value -0.39, move 31 (board 4 cell 5) (raw p=0.027, visits 86/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0272   ply 49
+to move: O   next board: 0   moves: 49
+X . X  . O O  O X X
+O . O  X O X  O . X
+. . O  . O .  . O O
+
+O X O  . X .  X O O
+X . X  . X O  O X X
+. O O  . X .  . O O
+
+. . .  X X X  . . X
+. . .  X O O  X . X
+. . .  . X .  . O X
+macro:
+.O.
+.X.
+.XX
+raw: value -0.93, top move 4 (board 1 cell 5) p=0.93;   search: value -0.99, move 6 (board 1 cell 7) (raw p=0.027, visits 96/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0274   ply 29
+to move: O   next board: 1   moves: 29
+O . .  . O .  . X O
+. . .  X O X  . . O
+X . X  . . .  . . .
+
+. O X  O . .  . X X
+O . X  X X .  O . O
+. . O  . . .  . . .
+
+X . .  . X .  . . .
+. . .  . . .  X . .
+O O .  . . .  X . O
+macro:
+...
+...
+...
+raw: value -0.22, top move 16 (board 2 cell 8) p=0.83;   search: value -0.57, move 9 (board 2 cell 1) (raw p=0.027, visits 103/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0274   ply 44
+to move: X   next board: any   moves: 44
+X O .  . X X  . . X
+X . .  O O O  . . .
+. . .  . O .  O O X
+
+O O O  O X .  . X O
+X . O  . X .  X O X
+X . .  . X .  . X .
+
+. . .  . X .  . . .
+O O O  X . X  . X O
+X . X  O O O  . X O
+macro:
+.O.
+OX.
+OO.
+raw: value -0.11, top move 73 (board 9 cell 2) p=0.83;   search: value -0.48, move 23 (board 3 cell 6) (raw p=0.027, visits 60/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0278   ply 21
+to move: O   next board: 3   moves: 21
+. . .  . O .  . . X
+. . .  O . .  . . .
+. . .  X X .  O . .
+
+. X .  . . O  . O .
+X . .  . X .  . . .
+. . X  . . .  . X .
+
+. . .  . . .  . X .
+O . O  O . X  . . .
+X . .  . O .  . . O
+macro:
+...
+...
+...
+raw: value -0.43, top move 34 (board 4 cell 8) p=0.65;   search: value -0.46, move 29 (board 4 cell 3) (raw p=0.028, visits 86/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0280   ply 20
+to move: X   next board: 2   moves: 20
+X . .  . X .  . . .
+. . O  X . X  . . .
+. . .  . . O  . . .
+
+. O O  . . .  O O .
+. . .  . . X  X . .
+. . .  . O .  O . .
+
+. . .  . O .  . . .
+. X X  . . .  . . .
+. . .  . X .  O . X
+macro:
+...
+...
+...
+raw: value +0.36, top move 24 (board 3 cell 7) p=0.49;   search: value +0.33, move 26 (board 3 cell 9) (raw p=0.028, visits 88/256)
+========================================================================
+policy surprise: raw p(search move) = 0.0291   ply 32
+to move: X   next board: 1   moves: 32
+O X .  . O .  . . X
+. X .  X . .  . . .
+. X .  . X .  . O X
+
+. . .  . O .  O O O
+O . X  . O .  . . X
+. . .  . O X  . . .
+
+X . O  X . .  O . .
+. . O  . X .  . X .
+. . .  X O O  X . O
+macro:
+X..
+.OO
+...
+raw: value -0.09, top move 17 (board 2 cell 9) p=0.61;   search: value -0.03, move 11 (board 2 cell 3) (raw p=0.029, visits 86/256)

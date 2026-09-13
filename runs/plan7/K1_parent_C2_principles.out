@@ -1,0 +1,45 @@
+{
+ "rule": "count",
+ "data": "runs/probe_data_deep10late_e8.npz",
+ "search_net": "runs/deep8_c1_300_e8/net_0300.pt",
+ "sending": {
+  "positions": 60000,
+  "search move (unsolved positions) sends the opponent to a board they can win at once": 0.24605527221843757,
+  "  of which confined (not a free move)": 0.8497455851541454,
+  "  by ply": {
+   "0-19": 0.021619766643788608,
+   "20-31": 0.25555161404753457,
+   "32-43": 0.51437125748503,
+   "44-80": 0.6728708403835307
+  },
+  "  and the opponent can then win the game at once": 0.007456778303536906,
+  "  and the opponent has a macro threat": 0.04483272881262313,
+  "random legal move sends the opponent to a board they can win at once": 0.356871384367012,
+  "OPTIMAL move (solved positions, <= 14 empties) sends the opponent to a board they can win at once": 0.7021498643289501,
+  "  when the mover is winning": 0.6479166666666667,
+  "  when the position is drawn": 0.5130718954248366,
+  "  when the mover is lost": 0.844342037890425,
+  "  and the opponent can then win the game at once, mover not lost": 0.0,
+  "solved positions": 4791
+ },
+ "draws": {
+  "games": 98581,
+  "draws": 16369,
+  "draw share": 0.1660461955143486,
+  "rule": "count",
+  "corpus rule": "count",
+  "games relabelled from a count decision": 0,
+  "mean boards each side": 3.956258781843729,
+  "mean full boards": 1.087482436312542,
+  "most common final counts (X boards - O boards - full)": {
+   "X4-O4-full1": 0.9563809640173498,
+   "X3-O3-full3": 0.04349685380902926,
+   "X2-O2-full5": 0.00012218217362086872
+  },
+  "board-count lead changed hands during the game (share of draws)": 0.6429225975930112,
+  "mean lead changes per draw": 0.9041480847944285,
+  "mean draw length": 54.71635408393915,
+  "mean length all games": 53.2407259005285
+ }
+}
+wrote runs/plan7/K1_parent_principles_deep8e8.json

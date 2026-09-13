@@ -1,0 +1,58 @@
+30000 positions from 6000 held-out games (['games_0280.npz', 'games_0281.npz', 'games_0282.npz', 'games_0283.npz', 'games_0284.npz', 'games_0285.npz', 'games_0286.npz', 'games_0287.npz', 'games_0288.npz', 'games_0289.npz', 'games_0290.npz', 'games_0291.npz', 'games_0292.npz', 'games_0293.npz', 'games_0294.npz', 'games_0295.npz', 'games_0296.npz', 'games_0297.npz', 'games_0298.npz', 'games_0299.npz']), net runs/deep8_c1_300_e8/net_0300.pt, 256-sim search values under rule count
+free-move positions: 0.082; mean value free -0.157 vs confined -0.153 (raw difference -0.003)
+
+OLS of the search value (mover's perspective), cluster-robust SE by game, R^2 = 0.532:
+  intercept        -1.0274 +- 0.1936
+  free_move        +0.1959 +- 0.0283 *
+  ply/10           +0.0428 +- 0.0616
+  (ply/10)^2       +0.0013 +- 0.0052
+  macro_score      +0.0206 +- 0.0112 *
+  open_boards      -0.0145 +- 0.0238
+  empties/10       +0.1017 +- 0.0471 *
+  is_X             +0.7374 +- 0.0139 *
+  threats_for      +0.1410 +- 0.0217 *
+  threats_against  -0.1250 +- 0.0183 *
+
+OLS of the raw value (mover's perspective), cluster-robust SE by game, R^2 = 0.535:
+  intercept        -0.6092 +- 0.2102
+  free_move        +0.2868 +- 0.0319 *
+  ply/10           +0.0091 +- 0.0665
+  (ply/10)^2       -0.0022 +- 0.0055
+  macro_score      +0.0158 +- 0.0119 *
+  open_boards      +0.0301 +- 0.0256 *
+  empties/10       -0.0108 +- 0.0511
+  is_X             +0.8108 +- 0.0147 *
+  threats_for      +0.1532 +- 0.0224 *
+  threats_against  -0.1159 +- 0.0214 *
+
+OLS of the search value on board ownership by class (per board owned), cluster-robust SE by game, R^2 = 0.533:
+  intercept        -1.1729 +- 0.4068
+  free_move        +0.1936 +- 0.0284 *
+  ply/10           +0.0454 +- 0.0634
+  (ply/10)^2       +0.0011 +- 0.0053
+  empties/10       +0.1033 +- 0.0490 *
+  is_X             +0.7410 +- 0.0140 *
+  threats_for      +0.1465 +- 0.0219 *
+  threats_against  -0.1340 +- 0.0189 *
+  full_boards      +0.0390 +- 0.1037
+  centre_self      +0.0410 +- 0.0394 *
+  centre_opp       +0.0301 +- 0.0382
+  corners_self     +0.0208 +- 0.0306
+  corners_opp      +0.0074 +- 0.0302
+  edges_self       +0.0341 +- 0.0275 *
+  edges_opp        -0.0107 +- 0.0267
+  net worth of owning (self - opp coefficient): centre +0.011, corner +0.013, edge +0.045
+
+stratified free - confined difference in search value (cells with >= 30 positions of each kind):
+  ply 20-31, macro score -1: free -0.214 (n=   31)  confined -0.205 (n= 1794)  diff -0.009
+  ply 32-43, macro score -2: free -0.630 (n=  133)  confined -0.483 (n=  659)  diff -0.147
+  ply 32-43, macro score -1: free -0.335 (n=  277)  confined -0.356 (n= 1983)  diff +0.021
+  ply 32-43, macro score +0: free -0.116 (n=  315)  confined -0.226 (n= 2791)  diff +0.109
+  ply 32-43, macro score +1: free -0.041 (n=  144)  confined -0.186 (n= 1725)  diff +0.145
+  ply 32-43, macro score +2: free +0.195 (n=   44)  confined -0.064 (n=  438)  diff +0.260
+  ply 44-50, macro score -2: free -0.665 (n=  184)  confined -0.628 (n=  247)  diff -0.038
+  ply 44-50, macro score -1: free -0.357 (n=  328)  confined -0.437 (n=  579)  diff +0.080
+  ply 44-50, macro score +0: free -0.093 (n=  441)  confined -0.338 (n=  672)  diff +0.245
+  ply 44-50, macro score +1: free +0.301 (n=  285)  confined -0.088 (n=  527)  diff +0.390
+  ply 44-50, macro score +2: free +0.682 (n=  108)  confined +0.343 (n=  228)  diff +0.339
+weighted mean difference: +0.143
