@@ -45,6 +45,21 @@ def test_bounded_matches_unbounded(games=None):
     return games, ref
 
 
+def test_bounded_matches_unbounded_draw(games=None):
+    """Property 1 under the draw rule (PLAN7 K1): the bounded kernel carries the same draw_rule flag as _negamax,
+    so the two must agree in value and node count under "draw" too — and the rule must actually change something."""
+    games = games or positions()
+    ref = [solve(g.cells, g.macro, g.next_board, g.player, rule="draw") for g in games]
+    got = [solve_bounded(g.cells, g.macro, g.next_board, g.player, GENEROUS, rule="draw") for g in games]
+    for g, (v, n), (vb, nb, ok) in zip(games, ref, got):
+        assert ok and (vb, nb) == (v, n), (v, n, vb, nb, ok, str(g))
+    count_vals = [solve(g.cells, g.macro, g.next_board, g.player)[0] for g in games]
+    differ = sum(int(a != b[0]) for a, b in zip(count_vals, ref))
+    assert differ > 0, "the draw rule changed no value on 500 positions — the flag is not reaching the kernel"
+    print(f"draw rule: bounded == unbounded in value and node count on {len(games)} positions; "
+          f"{differ} of them have a different value than under the count rule")
+
+
 def test_complete_is_always_right(games=None, ref=None, budgets=(10, 1000, 100000)):
     """Property 2: a completed bounded search is correct at any budget; nodes never exceed the budget."""
     if games is None:
@@ -85,8 +100,11 @@ if __name__ == "__main__":
     warm = (np.zeros(81, np.int8), np.array([1, 1, 2, -1, -1, 2, 2, 2, 0], np.int8), -1, 1)  # JIT warm-up, both kernels
     solve(*warm)
     solve_bounded(*warm, 10**6)
+    solve(*warm, rule="draw")
+    solve_bounded(*warm, 10**6, rule="draw")
     t = time.perf_counter()
     games, ref = test_bounded_matches_unbounded()
+    test_bounded_matches_unbounded_draw(games)
     test_complete_is_always_right(games, ref)
     test_budget_10(games, ref)
     print(f"ok [{time.perf_counter() - t:.1f}s]")

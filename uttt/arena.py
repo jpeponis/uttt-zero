@@ -1,4 +1,7 @@
-"""Evaluation matches between evaluators (network or baseline) with batched search."""
+"""Evaluation matches between evaluators (network or baseline) with batched search.
+
+Every entry point takes the *evaluation* rule explicitly (uttt.rules; default "count"): the players'
+search trees and the game being played must agree, and neither is inferred from a checkpoint."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -47,10 +50,10 @@ class RandomPlayer:
 class SearchPlayer:
     """Search-based player (v2 search; a plain MCTSConfig is upgraded to SearchConfig)."""
 
-    def __init__(self, evaluator, n: int, cfg: MCTSConfig, device) -> None:
+    def __init__(self, evaluator, n: int, cfg: MCTSConfig, device, rule: str = "count") -> None:
         if not isinstance(cfg, SearchConfig):
             cfg = SearchConfig(**asdict(cfg))
-        self.mcts = BatchedSearch(evaluator, n, cfg, device)
+        self.mcts = BatchedSearch(evaluator, n, cfg, device, rule=rule)
 
     def act(self, g: BatchUTTT) -> torch.Tensor:
         return self.mcts.search(g.cells, g.macro, g.next_board, g.player, g.done, g.winner, selfplay=False).action
@@ -60,11 +63,11 @@ class PhasedSearchPlayer:
     """Search budget by game phase: schedule {ply: sims} (sorted by ply) applied to the batch's current ply,
     which is uniform across the batch in lock-step / paired play. One BatchedSearch per distinct budget."""
 
-    def __init__(self, evaluator, n: int, cfg: SearchConfig, schedule: dict, device) -> None:
+    def __init__(self, evaluator, n: int, cfg: SearchConfig, schedule: dict, device, rule: str = "count") -> None:
         from dataclasses import replace
 
         self.schedule = sorted(schedule.items())
-        self.searches = {s: BatchedSearch(evaluator, n, replace(cfg, n_sims=s, depth_cap=min(s, cfg.depth_cap)), device)
+        self.searches = {s: BatchedSearch(evaluator, n, replace(cfg, n_sims=s, depth_cap=min(s, cfg.depth_cap)), device, rule=rule)
                          for s in {v for _, v in self.schedule}}
 
     def sims_at(self, ply: int) -> int:
@@ -76,13 +79,13 @@ class PhasedSearchPlayer:
 
 
 @torch.no_grad()
-def play_games(px, po, n: int, device, opening_random_plies: int = 0) -> MatchResult:
+def play_games(px, po, n: int, device, opening_random_plies: int = 0, rule: str = "count") -> MatchResult:
     """n lock-step games with px moving as X and po as O. Result from X's perspective.
 
     opening_random_plies > 0 randomises the first plies so deterministic players
     do not replay one identical game n times.
     """
-    g = BatchUTTT(n, device)
+    g = BatchUTTT(n, device, rule)
     rnd = RandomPlayer(device)
     ply = 0
     while not bool(g.done.all()):
@@ -97,8 +100,8 @@ def play_games(px, po, n: int, device, opening_random_plies: int = 0) -> MatchRe
     return MatchResult(w, n - w - l, l)
 
 
-def match(pa_factory, pb_factory, n: int, device, opening_random_plies: int = 2) -> MatchResult:
+def match(pa_factory, pb_factory, n: int, device, opening_random_plies: int = 2, rule: str = "count") -> MatchResult:
     """Side-swapped match: A vs B with n games each way. Result from A's perspective."""
-    r1 = play_games(pa_factory(), pb_factory(), n, device, opening_random_plies)
-    r2 = play_games(pb_factory(), pa_factory(), n, device, opening_random_plies)
+    r1 = play_games(pa_factory(), pb_factory(), n, device, opening_random_plies, rule)
+    r2 = play_games(pb_factory(), pa_factory(), n, device, opening_random_plies, rule)
     return r1 + MatchResult(r2.losses, r2.draws, r2.wins)

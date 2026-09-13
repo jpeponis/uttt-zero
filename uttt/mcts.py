@@ -25,6 +25,7 @@ from dataclasses import dataclass
 import torch
 
 from .batch import legal_mask, step_state, terminal_value
+from .rules import check_rule
 
 
 @dataclass
@@ -79,10 +80,11 @@ def table_of_considered_visits(m: int, n_sims: int) -> torch.Tensor:
 
 
 class BatchedMCTS:
-    def __init__(self, evaluator, n: int, cfg: MCTSConfig, device) -> None:
+    def __init__(self, evaluator, n: int, cfg: MCTSConfig, device, rule: str = "count") -> None:
         self.eval = evaluator
         self.n = n
         self.cfg = cfg
+        self.rule = check_rule(rule)
         self.device = torch.device(device)
         d = self.device
         M = cfg.n_sims + 1
@@ -226,7 +228,7 @@ class BatchedMCTS:
             pp = self.s_player[idx, exp_parent]
             pd = self.s_done[idx, exp_parent]
             pw = self.s_winner[idx, exp_parent]
-            nc, nm, nn_, npl, nd, nw, _ = step_state(pc, pm, pn, pp, pd, pw, exp_action)
+            nc, nm, nn_, npl, nd, nw, _ = step_state(pc, pm, pn, pp, pd, pw, exp_action, self.rule)
             probs, value = self.eval(nc, nm, nn_, npl, nd)
             value = torch.where(nd, terminal_value(nw, npl, nd), value)
             self._put(i, need_expand, nc, nm, nn_, npl, nd, nw, probs, value)

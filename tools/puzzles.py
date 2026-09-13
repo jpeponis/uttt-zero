@@ -18,6 +18,7 @@ import json
 import os
 import sys
 import time
+from functools import partial
 from multiprocessing import Pool
 
 import numpy as np
@@ -28,17 +29,18 @@ from uttt.batch import BatchUTTT  # noqa: E402
 from uttt.game import FULL, UTTT  # noqa: E402
 from uttt.infer import FusedEvaluator  # noqa: E402
 from uttt.model import load_checkpoint  # noqa: E402
+from uttt.rules import RULES, tag_path  # noqa: E402
 from uttt.search import BatchedSearch, SearchConfig  # noqa: E402
 from uttt.solver import ILLEGAL, empties_in_open_boards, solve_children  # noqa: E402
 
 
-def collect(files, per_game, min_empty, max_empty, n_max, rng):
+def collect(files, per_game, min_empty, max_empty, n_max, rng, rule="count"):
     rows = []
     for fi, f in enumerate(files):
         z = np.load(f)
         moves, lengths = z["moves"], z["lengths"]
         for k in range(len(lengths)):
-            g = UTTT()
+            g = UTTT(rule)
             found = []
             for t in range(int(lengths[k])):
                 e = empties_in_open_boards(g.cells, g.macro)
@@ -54,8 +56,8 @@ def collect(files, per_game, min_empty, max_empty, n_max, rng):
     return rows
 
 
-def as_game(cells, macro, nb, player) -> UTTT:
-    g = UTTT()
+def as_game(cells, macro, nb, player, rule="count") -> UTTT:
+    g = UTTT(rule)
     g.cells[:] = cells
     g.macro[:] = macro
     g.next_board, g.player = int(nb), int(player)
@@ -63,9 +65,9 @@ def as_game(cells, macro, nb, player) -> UTTT:
     return g
 
 
-def pv_and_end(cells, macro, nb, player, child, max_len=8):
+def pv_and_end(cells, macro, nb, player, child, max_len=8, rule="count"):
     """Greedy principal variation (an optimal move at every step) and how the game ends under it."""
-    g = as_game(cells, macro, nb, player)
+    g = as_game(cells, macro, nb, player, rule)
     pv = []
     ch = child
     while not g.done and len(pv) < max_len:
@@ -75,16 +77,16 @@ def pv_and_end(cells, macro, nb, player, child, max_len=8):
         g.play(m)
         if g.done:
             break
-        _, ch = solve_children((g.cells, g.macro, g.next_board, g.player))
+        _, ch = solve_children((g.cells, g.macro, g.next_board, g.player), rule)
     # finish greedily without storing more of the PV
     while not g.done:
-        _, ch = solve_children((g.cells, g.macro, g.next_board, g.player))
+        _, ch = solve_children((g.cells, g.macro, g.next_board, g.player), rule)
         g.play(int(np.flatnonzero(ch == ch.max())[0]))
     return pv, g.end_reason
 
 
-def motifs(cells, macro, nb, player, best, raw_move, exact, end_reason) -> list[str]:
-    g = as_game(cells, macro, nb, player)
+def motifs(cells, macro, nb, player, best, raw_move, exact, end_reason, rule="count") -> list[str]:
+    g = as_game(cells, macro, nb, player, rule)
     h = g.clone()
     h.play(best)
     tags = []
@@ -101,7 +103,7 @@ def motifs(cells, macro, nb, player, best, raw_move, exact, end_reason) -> list[
     r.play(raw_move)
     if r.next_board < 0 and not r.done and h.next_board >= 0:
         tags.append("denies_free_move")
-    if end_reason in ("count", "draw"):
+    if end_reason in ("count", "draw"):  # the line-free terminal; under "draw" that is every such ending
         tags.append("tiebreak_conversion")
     if exact == 0:
         tags.append("draw_hold")
@@ -118,13 +120,15 @@ def main() -> None:
     ap.add_argument("--n", type=int, default=6000)
     ap.add_argument("--sims", type=int, default=64)
     ap.add_argument("--processes", type=int, default=8)
+    ap.add_argument("--rule", choices=RULES, default="count", help="terminal rule the exact labels and the search run under; "
+                    "a non-count rule tags the output file name")
     ap.add_argument("--device", default="cuda:1")
     ap.add_argument("--out", required=True, help="output .npz; NEVER an existing suites/ yardstick (a rebuilt suite is a new, incomparable one)")
     a = ap.parse_args()
     device = torch.device(a.device)
     files = sorted(glob.glob(os.path.join(a.corpus, "games", "games_*.npz")))[-a.last :]
     t0 = time.perf_counter()
-    rows = collect(files, 2, a.min_empty, a.max_empty, a.n, np.random.default_rng(0))
+    rows = collect(files, 2, a.min_empty, a.max_empty, a.n, np.random.default_rng(0), a.rule)
     N = len(rows)
     gid = np.array([r[0] for r in rows])
     ply = np.array([r[1] for r in rows])
@@ -135,13 +139,15 @@ def main() -> None:
     empties = np.array([r[6] for r in rows])
     print(f"{N} candidate positions from {len(np.unique(gid))} games ({time.perf_counter() - t0:.0f}s)", flush=True)
     with Pool(a.processes) as pool:
-        solved = pool.map(solve_children, [(cells[i], macro[i], int(nb[i]), int(player[i])) for i in range(N)], chunksize=16)
+        solved = pool.map(partial(solve_children, rule=a.rule),
+                          [(cells[i], macro[i], int(nb[i]), int(player[i])) for i in range(N)], chunksize=16)
     exact = np.array([s[0] for s in solved], dtype=np.int8)
     child = np.stack([s[1] for s in solved])
-    print(f"solved with children in {time.perf_counter() - t0:.0f}s; exact W/D/L for the mover {(exact == 1).mean():.3f}/{(exact == 0).mean():.3f}/{(exact == -1).mean():.3f}", flush=True)
+    print(f"solved with children under rule {a.rule} in {time.perf_counter() - t0:.0f}s; exact W/D/L for the mover "
+          f"{(exact == 1).mean():.3f}/{(exact == 0).mean():.3f}/{(exact == -1).mean():.3f}", flush=True)
 
     fe = FusedEvaluator(load_checkpoint(a.checkpoint, device), device)
-    g = BatchUTTT(N, device)
+    g = BatchUTTT(N, device, a.rule)
     g.cells[:] = torch.from_numpy(cells).to(device)
     g.macro[:] = torch.from_numpy(macro).to(device)
     g.next_board[:] = torch.from_numpy(nb).to(device)
@@ -149,7 +155,7 @@ def main() -> None:
     with torch.no_grad():
         probs, _ = fe(g.cells, g.macro, g.next_board, g.player, g.done)
         raw_move = probs.argmax(1).cpu().numpy()
-        s = BatchedSearch(fe, N, SearchConfig(n_sims=a.sims, mode="gumbel", gumbel_scale=0.0, cuda_graph=device.type == "cuda", depth_cap=min(a.sims, 24)), device)
+        s = BatchedSearch(fe, N, SearchConfig(n_sims=a.sims, mode="gumbel", gumbel_scale=0.0, cuda_graph=device.type == "cuda", depth_cap=min(a.sims, 24)), device, rule=a.rule)
         srch_move = s.search(g.cells, g.macro, g.next_board, g.player, g.done, g.winner, selfplay=False).action.cpu().numpy()
     ar = np.arange(N)
     reg_raw = exact.astype(np.int64) - child[ar, raw_move].astype(np.int64)
@@ -162,11 +168,11 @@ def main() -> None:
     idx = np.flatnonzero(is_puzzle)
     pvs, ends, tags, best = [], [], [], []
     for i in idx:
-        pv, end = pv_and_end(cells[i], macro[i], nb[i], player[i], child[i])
+        pv, end = pv_and_end(cells[i], macro[i], nb[i], player[i], child[i], rule=a.rule)
         pvs.append(pv)
         ends.append(end)
         best.append(int(pv[0]))
-        tags.append(motifs(cells[i], macro[i], nb[i], player[i], int(pv[0]), int(raw_move[i]), int(exact[i]), end))
+        tags.append(motifs(cells[i], macro[i], nb[i], player[i], int(pv[0]), int(raw_move[i]), int(exact[i]), end, a.rule))
     all_tags = sorted({t for tg in tags for t in tg})
     print("motifs among puzzles: " + ", ".join(f"{t} {sum(t in tg for tg in tags)}" for t in all_tags))
     print(f"regret of the raw move among puzzles: 1 (win->draw or draw->loss) {100 * (reg_raw[idx] == 1).mean():.1f}%, 2 (win->loss) {100 * (reg_raw[idx] == 2).mean():.1f}%")
@@ -174,22 +180,23 @@ def main() -> None:
     for j, pv in enumerate(pvs):
         pv_arr[j, : len(pv)] = pv
     tag_str = np.array([",".join(t) for t in tags], dtype=str)
-    os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
-    np.savez_compressed(a.out, cells=cells[idx], macro=macro[idx], next_board=nb[idx], player=player[idx], exact=exact[idx], child=child[idx],
+    out = tag_path(a.out, a.rule)
+    os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
+    np.savez_compressed(out, cells=cells[idx], macro=macro[idx], next_board=nb[idx], player=player[idx], exact=exact[idx], child=child[idx],
                         empties=empties[idx], game_id=gid[idx], ply=ply[idx], raw_move=raw_move[idx], search_move=srch_move[idx],
                         regret_raw=reg_raw[idx], regret_search=reg_srch[idx], hard=is_hard[idx], pv=pv_arr, motifs=tag_str,
                         meta=np.array(json.dumps({"corpus": a.corpus, "files": [os.path.basename(f) for f in files], "net": a.checkpoint,
-                                                  "sims": a.sims, "candidates": int(N), "max_empty": a.max_empty})))
+                                                  "rule": a.rule, "sims": a.sims, "candidates": int(N), "max_empty": a.max_empty})))
     hard_idx = [j for j, i in enumerate(idx) if is_hard[i]][:20]
     readable = []
     for j in hard_idx:
         i = idx[j]
-        gg = as_game(cells[i], macro[i], nb[i], player[i])
+        gg = as_game(cells[i], macro[i], nb[i], player[i], a.rule)
         readable.append({"id": int(i), "game_id": int(gid[i]), "ply": int(ply[i]), "exact": int(exact[i]), "best": best[j], "pv": pvs[j],
                          "raw_move": int(raw_move[i]), "search_move": int(srch_move[i]), "motifs": tags[j], "board": str(gg)})
-    with open(os.path.splitext(a.out)[0] + ".json", "w") as f:
+    with open(os.path.splitext(out)[0] + ".json", "w") as f:
         json.dump(readable, f, indent=1)
-    print(f"wrote {a.out} ({len(idx)} puzzles, {int(is_hard[idx].sum())} hard) and {len(readable)} readable hard puzzles  [{time.perf_counter() - t0:.0f}s]")
+    print(f"wrote {out} ({len(idx)} puzzles, {int(is_hard[idx].sum())} hard) and {len(readable)} readable hard puzzles  [{time.perf_counter() - t0:.0f}s]")
     for r in readable[:3]:
         print(f"\nhard puzzle id {r['id']} (game {r['game_id']}, ply {r['ply']}): exact {r['exact']:+d}, best {r['best']}, PV {r['pv']}, raw {r['raw_move']}, search {r['search_move']}, motifs {r['motifs']}")
         print(r["board"])

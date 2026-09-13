@@ -27,6 +27,7 @@ from freemove import ols_cluster  # noqa: E402
 from uttt.batch import BatchUTTT  # noqa: E402
 from uttt.infer import FusedEvaluator  # noqa: E402
 from uttt.model import load_checkpoint  # noqa: E402
+from uttt.rules import RULES, tag_path  # noqa: E402
 from uttt.search import BatchedSearch, SearchConfig  # noqa: E402
 
 CENTRE, CORNERS, EDGES = [4], [0, 2, 6, 8], [1, 3, 5, 7]
@@ -59,17 +60,17 @@ def design(z, idx, ownership: bool = False) -> tuple[np.ndarray, list[str]]:
 
 
 @torch.no_grad()
-def values(fe, z, idx, sims, device, bs=4096):
+def values(fe, z, idx, sims, device, bs=4096, rule="count"):
     raw, srch = np.zeros(len(idx)), np.zeros(len(idx))
     for i in range(0, len(idx), bs):
         sl = idx[i : i + bs]
         n = len(sl)
-        g = BatchUTTT(n, device)
+        g = BatchUTTT(n, device, rule)
         g.cells[:] = torch.from_numpy(z["cells"][sl]).to(device)
         g.macro[:] = torch.from_numpy(z["macro"][sl]).to(device)
         g.next_board[:] = torch.from_numpy(z["next_board"][sl]).to(device)
         g.player[:] = torch.from_numpy(z["player"][sl]).to(device)
-        s = BatchedSearch(fe, n, SearchConfig(n_sims=sims, mode="gumbel", gumbel_scale=0.0, cuda_graph=device.type == "cuda", depth_cap=min(sims, 24)), device)
+        s = BatchedSearch(fe, n, SearchConfig(n_sims=sims, mode="gumbel", gumbel_scale=0.0, cuda_graph=device.type == "cuda", depth_cap=min(sims, 24)), device, rule=rule)
         r = s.search(g.cells, g.macro, g.next_board, g.player, g.done, g.winner, selfplay=False)
         raw[i : i + n] = r.raw_value.cpu().numpy()
         srch[i : i + n] = r.root_value.cpu().numpy()
@@ -83,6 +84,7 @@ def main() -> None:
     ap.add_argument("--n", type=int, default=20000)
     ap.add_argument("--sims", type=int, default=256)
     ap.add_argument("--only", default="")
+    ap.add_argument("--rule", choices=RULES, default="count", help="terminal rule the values are read under")
     ap.add_argument("--device", default="cuda:1")
     a = ap.parse_args()
     device = torch.device(a.device)
@@ -97,12 +99,13 @@ def main() -> None:
     if a.only:
         keep = {int(x) for x in a.only.split(",")}
         ckpts = [p for p in ckpts if int(os.path.basename(p)[4:8]) in keep]
-    print(f"{len(idx)} positions from {len(np.unique(gid))} games ({a.data}); {len(ckpts)} checkpoints of {a.run}; {len(names) - 1} regressors")
+    print(f"{len(idx)} positions from {len(np.unique(gid))} games ({a.data}); {len(ckpts)} checkpoints of {a.run}; "
+          f"{len(names) - 1} regressors; rule {a.rule}")
     out = []
     for p in ckpts:
         it = int(os.path.basename(p)[4:8])
         fe = FusedEvaluator(load_checkpoint(p, device), device)
-        raw, srch = values(fe, z, idx, a.sims, device)
+        raw, srch = values(fe, z, idx, a.sims, device, rule=a.rule)
         rec = {"iter": it}
         for label, yv in (("raw", raw), ("search", srch)):
             beta, se, e = ols_cluster(X, yv, gid)
@@ -129,13 +132,13 @@ def main() -> None:
         if all(k in d for k in ("centre_self", "centre_opp", "corners_self", "corners_opp", "edges_self", "edges_opp")):
             print(f"  net worth of owning (self - opp, {label[4:]} value): centre {d['centre_self'] - d['centre_opp']:+.3f}, "
                   f"corner {d['corners_self'] - d['corners_opp']:+.3f}, edge {d['edges_self'] - d['edges_opp']:+.3f}")
-    meta = {"run": a.run, "data": a.data, "n": int(len(idx)), "sims": a.sims, "regressors": names, "regressors_ownership": names_o}
-    path = os.path.join(a.run, "value_decomp.json")
+    meta = {"run": a.run, "data": a.data, "rule": a.rule, "n": int(len(idx)), "sims": a.sims, "regressors": names, "regressors_ownership": names_o}
+    path = tag_path(os.path.join(a.run, "value_decomp.json"), a.rule)
     with open(path, "w") as f:
         json.dump({"meta": meta, "rows": out}, f, indent=1)
     print(f"wrote {path}  [{time.perf_counter() - t0:.0f}s]")
     if len(out) > 1:
-        plot(out, meta, os.path.join(a.run, "value_decomp.png"))
+        plot(out, meta, tag_path(os.path.join(a.run, "value_decomp.png"), a.rule))
 
 
 def plot(rows, meta, path) -> None:
@@ -161,7 +164,8 @@ def plot(rows, meta, path) -> None:
         ax.set_xlabel("iteration", fontsize=8, color=MUTED)
     axes[0, 0].legend(frameon=False, fontsize=8, loc="best")
     fig.suptitle(f"{meta['run']}: value regressed on concepts, by checkpoint (R² final: raw {rows[-1]['raw']['r2']:.2f}, search {rows[-1]['search']['r2']:.2f}; "
-                 f"{meta['n']} held-out positions, {meta['sims']}-sim search; bands = 95 % CI, cluster-robust by game)", x=0.06, ha="left", fontsize=10, color=INK)
+                 f"{meta['n']} held-out positions, {meta['sims']}-sim search, rule {meta.get('rule', 'count')}; "
+                 "bands = 95 % CI, cluster-robust by game)", x=0.06, ha="left", fontsize=10, color=INK)
     fig.savefig(path, dpi=130)
     print("wrote", path)
 

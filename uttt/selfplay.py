@@ -32,10 +32,10 @@ class SelfPlayBatch:
 
 
 @torch.no_grad()
-def selfplay(evaluator, n: int, cfg: MCTSConfig, device, mcts: BatchedMCTS | None = None) -> SelfPlayBatch:
+def selfplay(evaluator, n: int, cfg: MCTSConfig, device, mcts: BatchedMCTS | None = None, rule: str = "count") -> SelfPlayBatch:
     d = torch.device(device)
-    g = BatchUTTT(n, d)
-    mcts = mcts or BatchedMCTS(evaluator, n, cfg, d)
+    g = BatchUTTT(n, d, rule)
+    mcts = mcts or BatchedMCTS(evaluator, n, cfg, d, rule=rule)
     rec = {k: [] for k in ("cells", "macro", "next_board", "player", "policy", "ply", "game_id")}
     surprise, steps = 0.0, 0
     first_moves = None

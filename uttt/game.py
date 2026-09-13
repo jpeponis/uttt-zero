@@ -8,8 +8,10 @@ Rule set (the "closed board" variant with most-boards tiebreak, as on CodinGame)
 * A local board is CLOSED once it is won or full; no move may be played in it.
 * If the designated board is closed, the player may play in ANY open board.
 * Three won local boards in a macro line win the game immediately.
-* If no legal move remains (every board closed) with no macro line, the player
-  with MORE won local boards wins; equal counts is a draw.
+* If no legal move remains (every board closed) with no macro line, the outcome
+  depends on `rule` (uttt.rules): under "count" (the default) the player with MORE
+  won local boards wins and equal counts is a draw; under "draw" the game is a draw
+  whatever the count.
 
 Players are +1 (X, moves first) and -1 (O). A local board's macro status is
 0 open, +1/-1 won, 2 closed-as-full-without-winner.
@@ -17,6 +19,8 @@ Players are +1 (X, moves first) and -1 (O). A local board's macro status is
 from __future__ import annotations
 
 import numpy as np
+
+from .rules import check_rule
 
 LINES = np.array(
     [(0, 1, 2), (3, 4, 5), (6, 7, 8), (0, 3, 6), (1, 4, 7), (2, 5, 8), (0, 4, 8), (2, 4, 6)],
@@ -35,9 +39,10 @@ def line_winner(cells9: np.ndarray) -> int:
 
 
 class UTTT:
-    __slots__ = ("cells", "macro", "next_board", "player", "move_count", "done", "winner", "end_reason")
+    __slots__ = ("cells", "macro", "next_board", "player", "move_count", "done", "winner", "end_reason", "rule")
 
-    def __init__(self) -> None:
+    def __init__(self, rule: str = "count") -> None:
+        self.rule = check_rule(rule)
         self.cells = np.zeros(81, dtype=np.int8)
         self.macro = np.zeros(9, dtype=np.int8)
         self.next_board = -1  # -1 = free move
@@ -49,6 +54,7 @@ class UTTT:
 
     def clone(self) -> "UTTT":
         g = UTTT.__new__(UTTT)
+        g.rule = self.rule
         g.cells = self.cells.copy()
         g.macro = self.macro.copy()
         g.next_board = self.next_board
@@ -95,9 +101,9 @@ class UTTT:
         elif np.all(self.macro != 0):
             x, o = int(np.sum(self.macro == 1)), int(np.sum(self.macro == -1))
             self.done = True
-            if x != o:
+            if x != o and self.rule == "count":
                 self.winner, self.end_reason = (1 if x > o else -1), "count"
-            else:
+            else:  # equal counts, or the "draw" rule, which ignores the count
                 self.winner, self.end_reason = 0, "draw"
 
         self.next_board = c if self.macro[c] == 0 else -1

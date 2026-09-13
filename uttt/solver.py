@@ -1,14 +1,19 @@
 """Exact endgame solver (Numba negamax with alpha-beta) under the same rules as uttt.game.
 
-solve(cells, macro, next_board, player) -> +1 / 0 / -1 from the side-to-move's perspective.
+solve(cells, macro, next_board, player, rule) -> +1 / 0 / -1 from the side-to-move's perspective.
 Practical for positions with up to ~14 empty cells in open boards (the remaining-move count
 bounds the depth; boards closing prunes the tree quickly). Used to label endgame positions
 exactly, so the value head and the search can be scored against ground truth.
+
+`rule` is "count" (default) or "draw" (uttt.rules); the Numba kernel takes it as a boolean flag,
+so each rule gets its own specialisation and neither pays for the other.
 """
 from __future__ import annotations
 
 import numpy as np
 from numba import njit
+
+from .rules import check_rule
 
 LINES = np.array([(0, 1, 2), (3, 4, 5), (6, 7, 8), (0, 3, 6), (1, 4, 7), (2, 5, 8), (0, 4, 8), (2, 4, 6)], dtype=np.int64)
 FULL = 2
@@ -24,7 +29,7 @@ def _line_winner(arr, off):
 
 
 @njit(cache=True)
-def _negamax(cells, macro, next_board, player, alpha, beta, nodes):
+def _negamax(cells, macro, next_board, player, alpha, beta, nodes, draw_rule):
     nodes[0] += 1
     # legal boards
     best = -2
@@ -63,18 +68,20 @@ def _negamax(cells, macro, next_board, player, alpha, beta, nodes):
                         all_closed = False
                         break
                 if all_closed:
-                    x = 0
-                    o = 0
-                    for k in range(9):
-                        if macro[k] == 1:
-                            x += 1
-                        elif macro[k] == -1:
-                            o += 1
-                    diff = (x - o) * player
-                    v = 1 if diff > 0 else (-1 if diff < 0 else 0)
+                    v = 0  # the "draw" rule stops here; the count decides only under "count"
+                    if not draw_rule:
+                        x = 0
+                        o = 0
+                        for k in range(9):
+                            if macro[k] == 1:
+                                x += 1
+                            elif macro[k] == -1:
+                                o += 1
+                        diff = (x - o) * player
+                        v = 1 if diff > 0 else (-1 if diff < 0 else 0)
             if v == -2:
                 nb = c if macro[c] == 0 else -1
-                v = -_negamax(cells, macro, nb, -player, -beta, -alpha, nodes)
+                v = -_negamax(cells, macro, nb, -player, -beta, -alpha, nodes, draw_rule)
             # undo
             cells[m] = 0
             macro[b] = old_macro
@@ -87,14 +94,14 @@ def _negamax(cells, macro, next_board, player, alpha, beta, nodes):
     return best
 
 
-def solve(cells, macro, next_board, player):
+def solve(cells, macro, next_board, player, rule: str = "count"):
     """Exact game value from the side-to-move's perspective (+1 win, 0 draw, -1 loss). Returns (value, nodes).
 
     No node budget: keep callers to positions with <= ~18 moves left (see tests/test_solver.py timings)."""
     c = np.array(cells, dtype=np.int8).copy()
     m = np.array(macro, dtype=np.int8).copy()
     nodes = np.zeros(1, dtype=np.int64)
-    v = _negamax(c, m, int(next_board), int(player), -1, 1, nodes)
+    v = _negamax(c, m, int(next_board), int(player), -1, 1, nodes, check_rule(rule) == "draw")
     return int(v), int(nodes[0])
 
 
@@ -102,7 +109,7 @@ ABORT = -3  # _negamax_bounded's "budget exhausted" return: outside {-1, 0, +1} 
 
 
 @njit(cache=True)
-def _negamax_bounded(cells, macro, next_board, player, alpha, beta, nodes, max_nodes):
+def _negamax_bounded(cells, macro, next_board, player, alpha, beta, nodes, max_nodes, draw_rule):
     """_negamax with a node budget. A node that would be the (max_nodes + 1)-th returns ABORT and every
     frame above it returns ABORT at once, undoing its move first: the whole search is abandoned, so an
     unresolved child never reaches the best/alpha/beta logic and no partial result is ever reported as a
@@ -147,18 +154,20 @@ def _negamax_bounded(cells, macro, next_board, player, alpha, beta, nodes, max_n
                         all_closed = False
                         break
                 if all_closed:
-                    x = 0
-                    o = 0
-                    for k in range(9):
-                        if macro[k] == 1:
-                            x += 1
-                        elif macro[k] == -1:
-                            o += 1
-                    diff = (x - o) * player
-                    v = 1 if diff > 0 else (-1 if diff < 0 else 0)
+                    v = 0  # the "draw" rule stops here; the count decides only under "count" (as in _negamax)
+                    if not draw_rule:
+                        x = 0
+                        o = 0
+                        for k in range(9):
+                            if macro[k] == 1:
+                                x += 1
+                            elif macro[k] == -1:
+                                o += 1
+                        diff = (x - o) * player
+                        v = 1 if diff > 0 else (-1 if diff < 0 else 0)
             if v == -2:
                 nb = c if macro[c] == 0 else -1
-                cv = _negamax_bounded(cells, macro, nb, -player, -beta, -alpha, nodes, max_nodes)
+                cv = _negamax_bounded(cells, macro, nb, -player, -beta, -alpha, nodes, max_nodes, draw_rule)
                 if cv == ABORT:  # undo, then unwind: this frame proved nothing
                     cells[m] = 0
                     macro[b] = old_macro
@@ -176,7 +185,7 @@ def _negamax_bounded(cells, macro, next_board, player, alpha, beta, nodes, max_n
     return best
 
 
-def solve_bounded(cells, macro, next_board, player, max_nodes):
+def solve_bounded(cells, macro, next_board, player, max_nodes, rule: str = "count"):
     """solve() under a node budget. Returns (value, nodes, complete).
 
     complete=False means the budget ran out and nothing was proved: value is then None — never a game
@@ -186,7 +195,7 @@ def solve_bounded(cells, macro, next_board, player, max_nodes):
     c = np.array(cells, dtype=np.int8).copy()
     m = np.array(macro, dtype=np.int8).copy()
     nodes = np.zeros(1, dtype=np.int64)
-    v = _negamax_bounded(c, m, int(next_board), int(player), -1, 1, nodes, int(max_nodes))
+    v = _negamax_bounded(c, m, int(next_board), int(player), -1, 1, nodes, int(max_nodes), check_rule(rule) == "draw")
     if v == ABORT:
         return None, int(nodes[0]), False
     return int(v), int(nodes[0]), True
@@ -201,14 +210,15 @@ def empties_in_open_boards(cells, macro) -> int:
 ILLEGAL = -2  # child-value marker for illegal moves
 
 
-def solve_children(args):
+def solve_children(args, rule: str = "count"):
     """(cells, macro, next_board, player) -> (exact root value, (81,) exact value after each legal move from the
-    mover's perspective, ILLEGAL elsewhere). The root value is the max over children. Picklable for pools;
-    this module imports only numpy/numba, so worker processes stay light."""
+    mover's perspective, ILLEGAL elsewhere). The root value is the max over children. Picklable for pools
+    (with functools.partial for a non-default rule); this module imports only numpy/numba, so worker
+    processes stay light."""
     from .game import UTTT
 
     cells, macro, nb, player = args
-    g = UTTT()
+    g = UTTT(rule)
     g.cells[:] = cells
     g.macro[:] = macro
     g.next_board, g.player = int(nb), int(player)
@@ -220,22 +230,23 @@ def solve_children(args):
         if h.done:
             child[m] = 0 if h.winner == 0 else (1 if h.winner == g.player else -1)
         else:
-            child[m] = -solve(h.cells, h.macro, h.next_board, h.player)[0]
+            child[m] = -solve(h.cells, h.macro, h.next_board, h.player, rule)[0]
     return int(child.max()), child
 
 
-def solve_children_bounded(args):
+def solve_children_bounded(args, rule: str = "count"):
     """(cells, macro, next_board, player, max_nodes) -> (root value, (81,) child values, nodes, complete).
 
     solve_children() under one node budget shared by the whole enumeration. Every legal child is solved
     with whatever is left of the budget; the first one that does not resolve ends the job, because the
     root value is the max over children and the search move is graded against all of them, so one unknown
     child leaves the position unsolved. Incomplete: (None, None, nodes spent, False). Lives here rather
-    than in the caller so worker processes can import it by name (tools/frontier.py, like solve_children)."""
+    than in the caller so worker processes can import it by name (tools/frontier.py, like solve_children;
+    functools.partial for a non-default rule)."""
     from .game import UTTT
 
     cells, macro, nb, player, max_nodes = args
-    g = UTTT()
+    g = UTTT(rule)
     g.cells[:] = cells
     g.macro[:] = macro
     g.next_board, g.player = int(nb), int(player)
@@ -248,7 +259,7 @@ def solve_children_bounded(args):
         if h.done:
             child[m] = 0 if h.winner == 0 else (1 if h.winner == g.player else -1)
             continue
-        v, n, ok = solve_bounded(h.cells, h.macro, h.next_board, h.player, max_nodes - used)
+        v, n, ok = solve_bounded(h.cells, h.macro, h.next_board, h.player, max_nodes - used, rule)
         used += n
         if not ok:
             return None, None, used, False
@@ -256,7 +267,7 @@ def solve_children_bounded(args):
     return int(child.max()), child, used, True
 
 
-def solve_batch(args):
+def solve_batch(args, rule: str = "count"):
     """Pool worker: (cells (k,81), macro (k,9), next_board (k,), player (k,)) -> (exact values (k,) int8,
     policy targets (k,81) float16 = uniform over the exactly optimal moves)."""
     cells, macro, nb, player = args
@@ -264,7 +275,7 @@ def solve_batch(args):
     vals = np.zeros(k, dtype=np.int8)
     pol = np.zeros((k, 81), dtype=np.float16)
     for i in range(k):
-        v, child = solve_children((cells[i], macro[i], int(nb[i]), int(player[i])))
+        v, child = solve_children((cells[i], macro[i], int(nb[i]), int(player[i])), rule)
         vals[i] = v
         opt = (child == v).astype(np.float32)
         pol[i] = opt / opt.sum()

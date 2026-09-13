@@ -23,6 +23,7 @@ from uttt.batch import BatchUTTT  # noqa: E402
 from uttt.game import LINES, UTTT  # noqa: E402
 from uttt.infer import FusedEvaluator  # noqa: E402
 from uttt.model import load_checkpoint  # noqa: E402
+from uttt.rules import RULES  # noqa: E402
 from uttt.search import BatchedSearch, SearchConfig  # noqa: E402
 
 
@@ -36,7 +37,7 @@ def macro_threats(macro: np.ndarray, p: int) -> int:
     return t
 
 
-def sample_positions(files, per_game, ply_lo, ply_hi, n_max, rng):
+def sample_positions(files, per_game, ply_lo, ply_hi, n_max, rng, rule="count"):
     rows = []
     gid = 0
     for f in files:
@@ -49,7 +50,7 @@ def sample_positions(files, per_game, ply_lo, ply_hi, n_max, rng):
                 gid += 1
                 continue
             want = set(rng.choice(plies, size=min(per_game, len(plies)), replace=False).tolist())
-            g = UTTT()
+            g = UTTT(rule)
             for t in range(L):
                 if t in want:
                     rows.append((gid, t, g.cells.copy(), g.macro.copy(), g.next_board, g.player))
@@ -82,11 +83,12 @@ def main() -> None:
     ap.add_argument("--per_game", type=int, default=5)
     ap.add_argument("--n", type=int, default=30000)
     ap.add_argument("--sims", type=int, default=256)
+    ap.add_argument("--rule", choices=RULES, default="count", help="terminal rule the search values are read under")
     ap.add_argument("--device", default="cuda:1")
     a = ap.parse_args()
     device = torch.device(a.device)
     files = sorted(glob.glob(os.path.join(a.corpus, "games", "games_*.npz")))[-a.last :]
-    rows = sample_positions(files, a.per_game, 8, 50, a.n, np.random.default_rng(0))
+    rows = sample_positions(files, a.per_game, 8, 50, a.n, np.random.default_rng(0), a.rule)
     N = len(rows)
     gid = np.array([r[0] for r in rows])
     ply = np.array([r[1] for r in rows], dtype=np.float64)
@@ -110,16 +112,17 @@ def main() -> None:
     for i in range(0, N, bs):
         sl = slice(i, min(i + bs, N))
         n = sl.stop - sl.start
-        g = BatchUTTT(n, device)
+        g = BatchUTTT(n, device, a.rule)
         g.cells[:] = torch.from_numpy(cells[sl]).to(device)
         g.macro[:] = torch.from_numpy(macro[sl]).to(device)
         g.next_board[:] = torch.from_numpy(nb[sl]).to(device)
         g.player[:] = torch.from_numpy(player[sl]).to(device)
-        s = BatchedSearch(fe, n, SearchConfig(n_sims=a.sims, mode="gumbel", gumbel_scale=0.0, cuda_graph=device.type == "cuda", depth_cap=min(a.sims, 24)), device)
+        s = BatchedSearch(fe, n, SearchConfig(n_sims=a.sims, mode="gumbel", gumbel_scale=0.0, cuda_graph=device.type == "cuda", depth_cap=min(a.sims, 24)), device, rule=a.rule)
         r = s.search(g.cells, g.macro, g.next_board, g.player, g.done, g.winner, selfplay=False)
         vals[sl] = r.root_value.cpu().numpy()
         raw[sl] = r.raw_value.cpu().numpy()
-    print(f"{N} positions from {len(np.unique(gid))} held-out games ({[os.path.basename(f) for f in files]}), net {a.checkpoint}, {a.sims}-sim search values")
+    print(f"{N} positions from {len(np.unique(gid))} held-out games ({[os.path.basename(f) for f in files]}), net {a.checkpoint}, "
+          f"{a.sims}-sim search values under rule {a.rule}")
     print(f"free-move positions: {free.mean():.3f}; mean value free {vals[free == 1].mean():+.3f} vs confined {vals[free == 0].mean():+.3f} (raw difference {vals[free == 1].mean() - vals[free == 0].mean():+.3f})")
     names = ["intercept", "free_move", "ply/10", "(ply/10)^2", "macro_score", "open_boards", "empties/10", "is_X", "threats_for", "threats_against"]
     X = np.column_stack([np.ones(N), free, ply / 10, (ply / 10) ** 2, score, open_b, empties / 10, is_x, thr_for, thr_against])

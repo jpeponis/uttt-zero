@@ -12,11 +12,13 @@ policy target) in the replay buffer, which can also up-weight them at sampling t
 from __future__ import annotations
 
 import time
+from functools import partial
 from multiprocessing import Pool
 
 import numpy as np
 import torch
 
+from .rules import check_rule
 from .solver import solve_batch
 
 
@@ -26,8 +28,10 @@ def empties_in_open_boards_t(cells: torch.Tensor, macro: torch.Tensor) -> torch.
 
 
 class ExactLabeler:
-    def __init__(self, processes: int = 8, max_empty: int = 12, per_iter: int = 8192, chunk: int = 64, seed: int = 0) -> None:
+    def __init__(self, processes: int = 8, max_empty: int = 12, per_iter: int = 8192, chunk: int = 64, seed: int = 0,
+                 rule: str = "count") -> None:
         self.pool = Pool(processes)
+        self.rule = check_rule(rule)  # the rule the run trains under: the exact labels must agree with its engine
         self.max_empty = max_empty
         self.per_iter = per_iter
         self.chunk = chunk
@@ -52,7 +56,7 @@ class ExactLabeler:
         k = len(cand)
         chunks = [(cells[i : i + self.chunk], macro[i : i + self.chunk], nb[i : i + self.chunk], player[i : i + self.chunk])
                   for i in range(0, k, self.chunk)]
-        self.pending = (slots[cand_d].cpu(), self.pool.map_async(solve_batch, chunks))
+        self.pending = (slots[cand_d].cpu(), self.pool.map_async(partial(solve_batch, rule=self.rule), chunks))
         self.t_submit = time.perf_counter()
         return k
 
