@@ -1,0 +1,441 @@
+{
+ "meta": {
+  "net": "runs/deep8_c1_300_e4/net_0300.pt",
+  "run": "runs/deep8_c1_300_e4",
+  "device": "cuda:1",
+  "games": 2000,
+  "sims": 256,
+  "root_sims": 16384,
+  "batch": 250,
+  "seed": 0,
+  "rule": "count",
+  "train_rule": "count",
+  "built": "2026-09-13 04:33",
+  "evaluators": {
+   "a": "8-way symmetry-averaged (uttt.symmetry)",
+   "b": "plain FusedEvaluator (the agent that generated the run's corpus)",
+   "c": "plain FusedEvaluator (the agent that generated the run's corpus)",
+   "note": "(b) and (c) play with the plain evaluator by default \u2014 the agent that generated this run's corpus, so their splits are comparable with it; --sym symmetry-averages them, which measures a different, stronger player. Arm (a) keeps the symmetry averaging every atlas reading uses (M2 \u00a77e M2 row 15)"
+  },
+  "train_exploration": {
+   "sample_moves": 8,
+   "temperature": 1.0,
+   "sample_uniform": 0.15,
+   "root_prior_floor": 0.03,
+   "c_scale": 1.0,
+   "mode": "gumbel",
+   "sims": 32,
+   "sims_schedule": "60:48,100:64",
+   "depth_cap": 12,
+   "gumbel_scale": null
+  },
+  "budget_and_depth": {
+   "arm_sims": 256,
+   "arm_depth_cap": 24,
+   "trained_depth_cap": 12,
+   "trained_sims": 32,
+   "trained_sims_schedule": "60:48,100:64",
+   "note": "exploration settings as trained; budget and depth cap are not"
+  },
+  "gumbel_scale": {
+   "b": 0.0,
+   "c": 1.0,
+   "c_source": "MCTSConfig's default 1.0 (runs/deep8_c1_300_e4\\config.json has no gumbel_scale key, so the run trained at it)"
+  },
+  "matched_budget": "(b) and (c) play at the same n_sims; their difference is the exploration package (sampled plies, sampling floor, root prior floor, Gumbel scale \u2014 four knobs at once, not attributable singly), not budget",
+  "first_move_statistics": "run_opening_trajectory pairs two different things: the raw policy's first-move probability (timeline.json first_top_share) and the generated games' top-move share (log.jsonl first_move_top_share); neither substitutes for the other (M2 \u00a77e M2 row 7)"
+ },
+ "root": {
+  "sims": 16384,
+  "value_for_x": 0.495007187128067,
+  "principal_line": [
+   40,
+   36,
+   0,
+   8,
+   80,
+   77,
+   48,
+   30,
+   32,
+   46
+  ],
+  "first_move": 40,
+  "symmetry_averaged": true,
+  "evaluator": "8-way symmetry-averaged (uttt.symmetry)",
+  "rule": "count",
+  "search": "tools/atlas.py deep_values: puct, c_puct 1.25, m_considered 81, gumbel_scale 0, depth_cap 40",
+  "comparability": "a DIFFERENT search from the game arms (PUCT at depth cap 40 against their Gumbel search at depth cap 24) and a different evaluator (symmetry-averaged): a separate measurement, not a matched-budget comparator for (b) or (c) (M2 \u00a77e M2 row 15)",
+  "note": "search-relative: what this net and this budget prefer, not a game-theoretic value",
+  "seconds": 50.0
+ },
+ "arms": {
+  "b": {
+   "label": "(b) sampled 4 plies, floor off",
+   "games": 2000,
+   "sims": 256,
+   "evaluator": "plain FusedEvaluator (the agent that generated the run's corpus)",
+   "rule": "count",
+   "search": {
+    "mode": "gumbel",
+    "n_sims": 256,
+    "gumbel_scale": 0.0,
+    "sample_moves": 4,
+    "temperature": 1.0,
+    "sample_uniform": 0.0,
+    "root_prior_floor": 0.0,
+    "c_scale": 1.0,
+    "m_considered": 16,
+    "depth_cap": 24
+   },
+   "x_win_share": 0.999,
+   "x_win_ci95": [
+    0.9963610657309615,
+    0.9997257210823479
+   ],
+   "x_win_n": 1998,
+   "o_win_share": 0.0,
+   "o_win_ci95": [
+    1.0842021724855044e-19,
+    0.001917047281252934
+   ],
+   "o_win_n": 0,
+   "draw_share": 0.001,
+   "draw_ci95": [
+    0.0002742789176520342,
+    0.003638934269038394
+   ],
+   "draw_n": 2,
+   "mean_length": 51.003,
+   "sd_length": 0.30006002401020454,
+   "end_line_share": 0.999,
+   "end_count_share": 0.0,
+   "end_equal_share": 0.001,
+   "distinct_games": 7,
+   "distinct_openings_4ply": 7,
+   "distinct_openings_4ply_canonical": 7,
+   "seconds": 1635.4,
+   "interval_note": "the games are independent draws from this arm's stochastic policy, so the Wilson intervals above are the correct 95 % intervals for that policy's outcome distribution. Identical games are duplicate OUTCOMES of independent draws, not dependent draws: distinct_games, distinct_openings_4ply and distinct_openings_4ply_canonical report how concentrated the policy is, and are NOT a correction to the intervals (M2, PLAN7 \u00a77e M2 row 3). A bootstrap over distinct lines would reweight them and estimate a different policy; widening the sampled plies would define a different experiment."
+  },
+  "c": {
+   "label": "(c) exploration as trained",
+   "games": 2000,
+   "sims": 256,
+   "evaluator": "plain FusedEvaluator (the agent that generated the run's corpus)",
+   "rule": "count",
+   "search": {
+    "mode": "gumbel",
+    "n_sims": 256,
+    "gumbel_scale": 1.0,
+    "sample_moves": 8,
+    "temperature": 1.0,
+    "sample_uniform": 0.15,
+    "root_prior_floor": 0.03,
+    "c_scale": 1.0,
+    "m_considered": 16,
+    "depth_cap": 24
+   },
+   "x_win_share": 0.6975,
+   "x_win_ci95": [
+    0.6770060073138875,
+    0.7172367590100175
+   ],
+   "x_win_n": 1395,
+   "o_win_share": 0.135,
+   "o_win_ci95": [
+    0.1207213108764002,
+    0.1506781336389144
+   ],
+   "o_win_n": 270,
+   "draw_share": 0.1675,
+   "draw_ci95": [
+    0.15177506619529307,
+    0.18449977024674008
+   ],
+   "draw_n": 335,
+   "mean_length": 53.9685,
+   "sd_length": 4.9460832605011715,
+   "end_line_share": 0.656,
+   "end_count_share": 0.1765,
+   "end_equal_share": 0.1675,
+   "distinct_games": 1683,
+   "distinct_openings_4ply": 300,
+   "distinct_openings_4ply_canonical": 209,
+   "seconds": 1278.0,
+   "interval_note": "the games are independent draws from this arm's stochastic policy, so the Wilson intervals above are the correct 95 % intervals for that policy's outcome distribution. Identical games are duplicate OUTCOMES of independent draws, not dependent draws: distinct_games, distinct_openings_4ply and distinct_openings_4ply_canonical report how concentrated the policy is, and are NOT a correction to the intervals (M2, PLAN7 \u00a77e M2 row 3). A bootstrap over distinct lines would reweight them and estimate a different policy; widening the sampled plies would define a different experiment."
+  }
+ },
+ "run_opening_trajectory": [
+  {
+   "iter": 10,
+   "log_iter": 9,
+   "raw_policy_first_move": 58,
+   "raw_policy_first_move_prob": 0.049812279641628265,
+   "generated_games_first_move": 80,
+   "generated_games_top_move_share": 0.121,
+   "generated_games": 5346
+  },
+  {
+   "iter": 20,
+   "log_iter": 19,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9410558938980103,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.844,
+   "generated_games": 5318
+  },
+  {
+   "iter": 30,
+   "log_iter": 29,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9495172500610352,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.841,
+   "generated_games": 5280
+  },
+  {
+   "iter": 40,
+   "log_iter": 39,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9666913151741028,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.827,
+   "generated_games": 5276
+  },
+  {
+   "iter": 50,
+   "log_iter": 49,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9713079929351807,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.84,
+   "generated_games": 5205
+  },
+  {
+   "iter": 60,
+   "log_iter": 59,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9338133931159973,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.835,
+   "generated_games": 5159
+  },
+  {
+   "iter": 70,
+   "log_iter": 69,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9907587766647339,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.836,
+   "generated_games": 5069
+  },
+  {
+   "iter": 80,
+   "log_iter": 79,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9161648750305176,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.84,
+   "generated_games": 5069
+  },
+  {
+   "iter": 90,
+   "log_iter": 89,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9746681451797485,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.842,
+   "generated_games": 5142
+  },
+  {
+   "iter": 100,
+   "log_iter": 99,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9741902351379395,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.823,
+   "generated_games": 5076
+  },
+  {
+   "iter": 110,
+   "log_iter": 109,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9680629372596741,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.84,
+   "generated_games": 4947
+  },
+  {
+   "iter": 120,
+   "log_iter": 119,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.868364691734314,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.847,
+   "generated_games": 5009
+  },
+  {
+   "iter": 130,
+   "log_iter": 129,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9586572051048279,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.839,
+   "generated_games": 4966
+  },
+  {
+   "iter": 140,
+   "log_iter": 139,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.975716233253479,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.825,
+   "generated_games": 5050
+  },
+  {
+   "iter": 150,
+   "log_iter": 149,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9459002017974854,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.845,
+   "generated_games": 5067
+  },
+  {
+   "iter": 160,
+   "log_iter": 159,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9278406500816345,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.839,
+   "generated_games": 5007
+  },
+  {
+   "iter": 170,
+   "log_iter": 169,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9688929319381714,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.837,
+   "generated_games": 4885
+  },
+  {
+   "iter": 180,
+   "log_iter": 179,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9605868458747864,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.829,
+   "generated_games": 4868
+  },
+  {
+   "iter": 190,
+   "log_iter": 189,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9703626036643982,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.842,
+   "generated_games": 5015
+  },
+  {
+   "iter": 200,
+   "log_iter": 199,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9667350053787231,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.841,
+   "generated_games": 4937
+  },
+  {
+   "iter": 210,
+   "log_iter": 209,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9726754426956177,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.839,
+   "generated_games": 4982
+  },
+  {
+   "iter": 220,
+   "log_iter": 219,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9807146191596985,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.833,
+   "generated_games": 4990
+  },
+  {
+   "iter": 230,
+   "log_iter": 229,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.984142005443573,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.831,
+   "generated_games": 4972
+  },
+  {
+   "iter": 240,
+   "log_iter": 239,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9784308075904846,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.841,
+   "generated_games": 4892
+  },
+  {
+   "iter": 250,
+   "log_iter": 249,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9817874431610107,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.837,
+   "generated_games": 4968
+  },
+  {
+   "iter": 260,
+   "log_iter": 259,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.986368715763092,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.833,
+   "generated_games": 4986
+  },
+  {
+   "iter": 270,
+   "log_iter": 269,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9899601936340332,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.845,
+   "generated_games": 4975
+  },
+  {
+   "iter": 280,
+   "log_iter": 279,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9863101243972778,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.828,
+   "generated_games": 4994
+  },
+  {
+   "iter": 290,
+   "log_iter": 289,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9940755367279053,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.83,
+   "generated_games": 5005
+  },
+  {
+   "iter": 300,
+   "log_iter": 299,
+   "raw_policy_first_move": 40,
+   "raw_policy_first_move_prob": 0.9899174571037292,
+   "generated_games_first_move": 40,
+   "generated_games_top_move_share": 0.841,
+   "generated_games": 5005
+  }
+ ],
+ "run_opening_trajectory_source": "timeline.json + log.jsonl"
+}

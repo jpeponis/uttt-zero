@@ -1,0 +1,886 @@
+{
+ "meta": {
+  "run": "runs/deep8_c1_300_e8",
+  "net": "runs/deep8_c1_300_e8/net_0300.pt",
+  "corpus_files": [
+   "games_0280.npz",
+   "games_0281.npz",
+   "games_0282.npz",
+   "games_0283.npz",
+   "games_0284.npz",
+   "games_0285.npz",
+   "games_0286.npz",
+   "games_0287.npz",
+   "games_0288.npz",
+   "games_0289.npz",
+   "games_0290.npz",
+   "games_0291.npz",
+   "games_0292.npz",
+   "games_0293.npz",
+   "games_0294.npz",
+   "games_0295.npz",
+   "games_0296.npz",
+   "games_0297.npz",
+   "games_0298.npz",
+   "games_0299.npz"
+  ],
+  "games": 98581,
+  "plies": [
+   40,
+   70
+  ],
+  "per_ply": 500,
+  "max_nodes": 100000000,
+  "sims": 256,
+  "seed": 0,
+  "processes": 8,
+  "boot": 2000,
+  "device": "cuda:1",
+  "rule": "count",
+  "corpus_rule": "count",
+  "built": "2026-09-13 04:33",
+  "positions_npz": "J4_frontier_positions.npz",
+  "alive_at_ply": "the game's length exceeds the ply, so a position with a move to make exists there",
+  "complete_coverage": "the exact value of the position AND of every legal child was obtained within one shared budget of max_nodes nodes: complete legal-action value coverage within the budget. It is stricter than root solvability \u2014 the root's value alone can follow from a cutoff that never values the other children \u2014 and it is what grading a chosen move against its alternatives needs (M2, PLAN7 \u00a77e M2 row 16)",
+  "node_convention": "a node is one recursive entry of the budgeted kernel (uttt.solver._negamax_bounded); a child that is terminal after the move is decided directly in solve_children_bounded and costs zero counted nodes (uttt/solver.py:255-263). The budget bounds search work, not wall time",
+  "grading": "uttt.endgame.evaluate, the grader of tools/endgame.py eval: action regret against the exact child values and optimal-move rate, on the plain (not symmetry-averaged) evaluator",
+  "intervals": "the coverage fraction and the optimal-move rate carry 95 % Wilson intervals (boundary-safe, and not zero-width on an all-success sample the way a percentile bootstrap of [1,...,1] is); mean regret keeps the cluster bootstrap over source games, and reports no interval at all where the regret sample is degenerate rather than a zero-width one (M2 \u00a77e M2 row 4)",
+  "clusters": "within a ply every game contributes at most one position, so that cluster bootstrap is an ordinary one and Wilson applies to the two proportions directly; ACROSS plies the same game recurs, so the plies are not independent of each other and any across-ply comparison (a difference between plies, a fitted curve, a joint interval) needs game-linked resampling over the per-position table J4_frontier_positions.npz, which carries game_id for that purpose",
+  "positions_table": "every sampled position, complete or not: ply, file_index (into corpus_files), game_row, game_id (the cluster id), empties, complete, nodes, exact_root_value, child_values (81 int8: the exact value after each legal move, ILLEGAL=-2 where illegal, the whole row NULL=-3 where the position did not complete), move (the graded search's own choice, taken from the grader's per-position record, -1 where not graded), optimal (1/0, -1 where not graded), regret (NaN where not graded). move and regret come out of the SAME search: regret == exact_root_value - child_values[move] holds on every complete row by construction and is asserted. Saved so that later joint uncertainty calculations need no recomputation",
+  "warning": "the covered subset is the easy end of a ply and gets easier as the budget binds; every number below is conditional as its name says, and 'solved from ply N' does not follow from any of them",
+  "chosen_move_regret_mismatches": 0,
+  "chosen_move_regret_mismatches_note": "0 by construction, not by measurement: the recorded move IS the graded move (endgame.evaluate's _per[\"move\"]), so there is no second search to disagree with. Earlier files carry a counted value from when the move came from a second search of the same positions (M2 rebuttal (c))"
+ },
+ "plies": [
+  {
+   "ply": 40,
+   "games_alive_at_ply": 98181,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 0.282,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.2443364332272433,
+    0.32298777921399346
+   ],
+   "n_complete": 141,
+   "incomplete_count_conditional_on_alive": 359,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 5566524.0,
+   "p90_nodes_conditional_on_complete": 56056556.0,
+   "nodes_spent_total": 38389283105,
+   "search_optimal_move_rate_conditional_on_complete": 1.0,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9734781819240744,
+    1.0
+   ],
+   "search_mean_regret_conditional_on_complete": 0.0,
+   "search_mean_regret_ci_conditional_on_complete": null,
+   "search_mean_regret_ci_note": "every regret in the sample is 0: the percentile bootstrap of a degenerate sample is zero-width, which is an artifact of resampling identical values and not population certainty. No interval is reported; the optimal-move rate's Wilson interval is the uncertainty statement here.",
+   "median_empties_conditional_on_complete": 19.0,
+   "seconds": 386.9
+  },
+  {
+   "ply": 41,
+   "games_alive_at_ply": 97542,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 0.4,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.35797899079473766,
+    0.44354587729757294
+   ],
+   "n_complete": 200,
+   "incomplete_count_conditional_on_alive": 300,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 1510568.5,
+   "p90_nodes_conditional_on_complete": 61635210.49999999,
+   "nodes_spent_total": 33177463188,
+   "search_optimal_move_rate_conditional_on_complete": 1.0,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9811546736227335,
+    1.0
+   ],
+   "search_mean_regret_conditional_on_complete": 0.0,
+   "search_mean_regret_ci_conditional_on_complete": null,
+   "search_mean_regret_ci_note": "every regret in the sample is 0: the percentile bootstrap of a degenerate sample is zero-width, which is an artifact of resampling identical values and not population certainty. No interval is reported; the optimal-move rate's Wilson interval is the uncertainty statement here.",
+   "median_empties_conditional_on_complete": 19.0,
+   "seconds": 308.5
+  },
+  {
+   "ply": 42,
+   "games_alive_at_ply": 97285,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 0.5,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.4563412653024843,
+    0.5436587346975157
+   ],
+   "n_complete": 250,
+   "incomplete_count_conditional_on_alive": 250,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 2503148.5,
+   "p90_nodes_conditional_on_complete": 46821694.69999999,
+   "nodes_spent_total": 28528976326,
+   "search_optimal_move_rate_conditional_on_complete": 1.0,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9848667005045553,
+    0.9999999999999998
+   ],
+   "search_mean_regret_conditional_on_complete": 0.0,
+   "search_mean_regret_ci_conditional_on_complete": null,
+   "search_mean_regret_ci_note": "every regret in the sample is 0: the percentile bootstrap of a degenerate sample is zero-width, which is an artifact of resampling identical values and not population certainty. No interval is reported; the optimal-move rate's Wilson interval is the uncertainty statement here.",
+   "median_empties_conditional_on_complete": 19.0,
+   "seconds": 265.8
+  },
+  {
+   "ply": 43,
+   "games_alive_at_ply": 95768,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 0.628,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.5848089173303663,
+    0.6692392515114762
+   ],
+   "n_complete": 314,
+   "incomplete_count_conditional_on_alive": 186,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 975175.5,
+   "p90_nodes_conditional_on_complete": 40170969.199999996,
+   "nodes_spent_total": 21935919545,
+   "search_optimal_move_rate_conditional_on_complete": 1.0,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9879139152112274,
+    1.0000000000000002
+   ],
+   "search_mean_regret_conditional_on_complete": 0.0,
+   "search_mean_regret_ci_conditional_on_complete": null,
+   "search_mean_regret_ci_note": "every regret in the sample is 0: the percentile bootstrap of a degenerate sample is zero-width, which is an artifact of resampling identical values and not population certainty. No interval is reported; the optimal-move rate's Wilson interval is the uncertainty statement here.",
+   "median_empties_conditional_on_complete": 18.0,
+   "seconds": 209.6
+  },
+  {
+   "ply": 44,
+   "games_alive_at_ply": 95087,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 0.764,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.7248556437078593,
+    0.7991187045284411
+   ],
+   "n_complete": 382,
+   "incomplete_count_conditional_on_alive": 118,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 745648.5,
+   "p90_nodes_conditional_on_complete": 43471983.60000002,
+   "nodes_spent_total": 16021964028,
+   "search_optimal_move_rate_conditional_on_complete": 0.9973821989528796,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9853227244828087,
+    0.9995377442741047
+   ],
+   "search_mean_regret_conditional_on_complete": 0.002617801047120419,
+   "search_mean_regret_ci_conditional_on_complete": [
+    0.0,
+    0.007853403141361256
+   ],
+   "search_mean_regret_ci_note": null,
+   "median_empties_conditional_on_complete": 18.0,
+   "seconds": 155.9
+  },
+  {
+   "ply": 45,
+   "games_alive_at_ply": 91724,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 0.826,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.7903184021001322,
+    0.8567105279189358
+   ],
+   "n_complete": 413,
+   "incomplete_count_conditional_on_alive": 87,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 86447.0,
+   "p90_nodes_conditional_on_complete": 16683217.200000009,
+   "nodes_spent_total": 11236337227,
+   "search_optimal_move_rate_conditional_on_complete": 0.9975786924939467,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9864139257363926,
+    0.999572451824946
+   ],
+   "search_mean_regret_conditional_on_complete": 0.002421307506053269,
+   "search_mean_regret_ci_conditional_on_complete": [
+    0.0,
+    0.007263922518159807
+   ],
+   "search_mean_regret_ci_note": null,
+   "median_empties_conditional_on_complete": 16.0,
+   "seconds": 114.8
+  },
+  {
+   "ply": 46,
+   "games_alive_at_ply": 90214,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 0.876,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.8442125871122163,
+    0.9020539088606966
+   ],
+   "n_complete": 438,
+   "incomplete_count_conditional_on_alive": 62,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 110395.0,
+   "p90_nodes_conditional_on_complete": 21061660.80000001,
+   "nodes_spent_total": 9099634079,
+   "search_optimal_move_rate_conditional_on_complete": 0.997716894977169,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9871824255246422,
+    0.9995968621495264
+   ],
+   "search_mean_regret_conditional_on_complete": 0.00228310502283105,
+   "search_mean_regret_ci_conditional_on_complete": [
+    0.0,
+    0.00684931506849315
+   ],
+   "search_mean_regret_ci_note": null,
+   "median_empties_conditional_on_complete": 16.0,
+   "seconds": 94.8
+  },
+  {
+   "ply": 47,
+   "games_alive_at_ply": 84501,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 0.936,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.911047591162316,
+    0.9543039839552107
+   ],
+   "n_complete": 468,
+   "incomplete_count_conditional_on_alive": 32,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 31347.0,
+   "p90_nodes_conditional_on_complete": 14603042.500000002,
+   "nodes_spent_total": 5246589886,
+   "search_optimal_move_rate_conditional_on_complete": 0.9978632478632479,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9879971583839093,
+    0.9996227111474918
+   ],
+   "search_mean_regret_conditional_on_complete": 0.002136752136752137,
+   "search_mean_regret_ci_conditional_on_complete": [
+    0.0,
+    0.00641025641025641
+   ],
+   "search_mean_regret_ci_note": null,
+   "median_empties_conditional_on_complete": 15.0,
+   "seconds": 61.5
+  },
+  {
+   "ply": 48,
+   "games_alive_at_ply": 82079,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 0.948,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.9248988560621544,
+    0.9642697348842947
+   ],
+   "n_complete": 474,
+   "incomplete_count_conditional_on_alive": 26,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 16134.5,
+   "p90_nodes_conditional_on_complete": 4853799.6999999955,
+   "nodes_spent_total": 3815485155,
+   "search_optimal_move_rate_conditional_on_complete": 0.9978902953586498,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9881478320162818,
+    0.999627488201619
+   ],
+   "search_mean_regret_conditional_on_complete": 0.004219409282700422,
+   "search_mean_regret_ci_conditional_on_complete": [
+    0.0,
+    0.012658227848101266
+   ],
+   "search_mean_regret_ci_note": null,
+   "median_empties_conditional_on_complete": 13.0,
+   "seconds": 50.4
+  },
+  {
+   "ply": 49,
+   "games_alive_at_ply": 74259,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 0.98,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.9635798167531208,
+    0.9891008164037892
+   ],
+   "n_complete": 490,
+   "incomplete_count_conditional_on_alive": 10,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 3796.0,
+   "p90_nodes_conditional_on_complete": 1574209.0000000005,
+   "nodes_spent_total": 1771738965,
+   "search_optimal_move_rate_conditional_on_complete": 0.9979591836734694,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.988531733453399,
+    0.9996396549216398
+   ],
+   "search_mean_regret_conditional_on_complete": 0.0020408163265306124,
+   "search_mean_regret_ci_conditional_on_complete": [
+    0.0,
+    0.006122448979591836
+   ],
+   "search_mean_regret_ci_note": null,
+   "median_empties_conditional_on_complete": 12.0,
+   "seconds": 28.6
+  },
+  {
+   "ply": 50,
+   "games_alive_at_ply": 70386,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 0.99,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.9768069002442693,
+    0.9957212461034096
+   ],
+   "n_complete": 495,
+   "incomplete_count_conditional_on_alive": 5,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 2457.0,
+   "p90_nodes_conditional_on_complete": 1060232.4000000001,
+   "nodes_spent_total": 1329348487,
+   "search_optimal_move_rate_conditional_on_complete": 1.0,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9922992390612928,
+    1.0
+   ],
+   "search_mean_regret_conditional_on_complete": 0.0,
+   "search_mean_regret_ci_conditional_on_complete": null,
+   "search_mean_regret_ci_note": "every regret in the sample is 0: the percentile bootstrap of a degenerate sample is zero-width, which is an artifact of resampling identical values and not population certainty. No interval is reported; the optimal-move rate's Wilson interval is the uncertainty statement here.",
+   "median_empties_conditional_on_complete": 11.0,
+   "seconds": 27.2
+  },
+  {
+   "ply": 51,
+   "games_alive_at_ply": 60700,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 0.996,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.9855342847848231,
+    0.9989023694773173
+   ],
+   "n_complete": 498,
+   "incomplete_count_conditional_on_alive": 2,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 563.0,
+   "p90_nodes_conditional_on_complete": 368902.3000000008,
+   "nodes_spent_total": 641028126,
+   "search_optimal_move_rate_conditional_on_complete": 0.9979919678714859,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9887145066629879,
+    0.9996454450348624
+   ],
+   "search_mean_regret_conditional_on_complete": 0.002008032128514056,
+   "search_mean_regret_ci_conditional_on_complete": [
+    0.0,
+    0.006024096385542169
+   ],
+   "search_mean_regret_ci_note": null,
+   "median_empties_conditional_on_complete": 11.0,
+   "seconds": 21.2
+  },
+  {
+   "ply": 52,
+   "games_alive_at_ply": 55956,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 1.0,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.9923756595384479,
+    1.0
+   ],
+   "n_complete": 500,
+   "incomplete_count_conditional_on_alive": 0,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 583.0,
+   "p90_nodes_conditional_on_complete": 218451.60000000015,
+   "nodes_spent_total": 159739394,
+   "search_optimal_move_rate_conditional_on_complete": 0.998,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9887592932948532,
+    0.9996468636054407
+   ],
+   "search_mean_regret_conditional_on_complete": 0.002,
+   "search_mean_regret_ci_conditional_on_complete": [
+    0.0,
+    0.006
+   ],
+   "search_mean_regret_ci_note": null,
+   "median_empties_conditional_on_complete": 10.0,
+   "seconds": 13.6
+  },
+  {
+   "ply": 53,
+   "games_alive_at_ply": 46034,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 1.0,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.9923756595384479,
+    1.0
+   ],
+   "n_complete": 500,
+   "incomplete_count_conditional_on_alive": 0,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 225.5,
+   "p90_nodes_conditional_on_complete": 42738.500000000015,
+   "nodes_spent_total": 65333713,
+   "search_optimal_move_rate_conditional_on_complete": 1.0,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9923756595384479,
+    1.0
+   ],
+   "search_mean_regret_conditional_on_complete": 0.0,
+   "search_mean_regret_ci_conditional_on_complete": null,
+   "search_mean_regret_ci_note": "every regret in the sample is 0: the percentile bootstrap of a degenerate sample is zero-width, which is an artifact of resampling identical values and not population certainty. No interval is reported; the optimal-move rate's Wilson interval is the uncertainty statement here.",
+   "median_empties_conditional_on_complete": 9.0,
+   "seconds": 12.8
+  },
+  {
+   "ply": 54,
+   "games_alive_at_ply": 40577,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 1.0,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.9923756595384479,
+    1.0
+   ],
+   "n_complete": 500,
+   "incomplete_count_conditional_on_alive": 0,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 122.5,
+   "p90_nodes_conditional_on_complete": 69007.90000000023,
+   "nodes_spent_total": 35698820,
+   "search_optimal_move_rate_conditional_on_complete": 1.0,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9923756595384479,
+    1.0
+   ],
+   "search_mean_regret_conditional_on_complete": 0.0,
+   "search_mean_regret_ci_conditional_on_complete": null,
+   "search_mean_regret_ci_note": "every regret in the sample is 0: the percentile bootstrap of a degenerate sample is zero-width, which is an artifact of resampling identical values and not population certainty. No interval is reported; the optimal-move rate's Wilson interval is the uncertainty statement here.",
+   "median_empties_conditional_on_complete": 8.0,
+   "seconds": 12.0
+  },
+  {
+   "ply": 55,
+   "games_alive_at_ply": 31545,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 1.0,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.9923756595384479,
+    1.0
+   ],
+   "n_complete": 500,
+   "incomplete_count_conditional_on_alive": 0,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 47.5,
+   "p90_nodes_conditional_on_complete": 7198.300000000001,
+   "nodes_spent_total": 6029950,
+   "search_optimal_move_rate_conditional_on_complete": 1.0,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9923756595384479,
+    1.0
+   ],
+   "search_mean_regret_conditional_on_complete": 0.0,
+   "search_mean_regret_ci_conditional_on_complete": null,
+   "search_mean_regret_ci_note": "every regret in the sample is 0: the percentile bootstrap of a degenerate sample is zero-width, which is an artifact of resampling identical values and not population certainty. No interval is reported; the optimal-move rate's Wilson interval is the uncertainty statement here.",
+   "median_empties_conditional_on_complete": 7.0,
+   "seconds": 11.2
+  },
+  {
+   "ply": 56,
+   "games_alive_at_ply": 26515,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 1.0,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.9923756595384479,
+    1.0
+   ],
+   "n_complete": 500,
+   "incomplete_count_conditional_on_alive": 0,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 38.5,
+   "p90_nodes_conditional_on_complete": 4319.7000000000035,
+   "nodes_spent_total": 3798917,
+   "search_optimal_move_rate_conditional_on_complete": 1.0,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9923756595384479,
+    1.0
+   ],
+   "search_mean_regret_conditional_on_complete": 0.0,
+   "search_mean_regret_ci_conditional_on_complete": null,
+   "search_mean_regret_ci_note": "every regret in the sample is 0: the percentile bootstrap of a degenerate sample is zero-width, which is an artifact of resampling identical values and not population certainty. No interval is reported; the optimal-move rate's Wilson interval is the uncertainty statement here.",
+   "median_empties_conditional_on_complete": 6.0,
+   "seconds": 12.1
+  },
+  {
+   "ply": 57,
+   "games_alive_at_ply": 19352,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 1.0,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.9923756595384479,
+    1.0
+   ],
+   "n_complete": 500,
+   "incomplete_count_conditional_on_alive": 0,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 13.0,
+   "p90_nodes_conditional_on_complete": 2191.700000000002,
+   "nodes_spent_total": 1066128,
+   "search_optimal_move_rate_conditional_on_complete": 1.0,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9923756595384479,
+    1.0
+   ],
+   "search_mean_regret_conditional_on_complete": 0.0,
+   "search_mean_regret_ci_conditional_on_complete": null,
+   "search_mean_regret_ci_note": "every regret in the sample is 0: the percentile bootstrap of a degenerate sample is zero-width, which is an artifact of resampling identical values and not population certainty. No interval is reported; the optimal-move rate's Wilson interval is the uncertainty statement here.",
+   "median_empties_conditional_on_complete": 5.0,
+   "seconds": 12.5
+  },
+  {
+   "ply": 58,
+   "games_alive_at_ply": 15358,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 1.0,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.9923756595384479,
+    1.0
+   ],
+   "n_complete": 500,
+   "incomplete_count_conditional_on_alive": 0,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 20.5,
+   "p90_nodes_conditional_on_complete": 1812.1000000000026,
+   "nodes_spent_total": 1358838,
+   "search_optimal_move_rate_conditional_on_complete": 1.0,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9923756595384479,
+    1.0
+   ],
+   "search_mean_regret_conditional_on_complete": 0.0,
+   "search_mean_regret_ci_conditional_on_complete": null,
+   "search_mean_regret_ci_note": "every regret in the sample is 0: the percentile bootstrap of a degenerate sample is zero-width, which is an artifact of resampling identical values and not population certainty. No interval is reported; the optimal-move rate's Wilson interval is the uncertainty statement here.",
+   "median_empties_conditional_on_complete": 5.0,
+   "seconds": 12.8
+  },
+  {
+   "ply": 59,
+   "games_alive_at_ply": 10473,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 1.0,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.9923756595384479,
+    1.0
+   ],
+   "n_complete": 500,
+   "incomplete_count_conditional_on_alive": 0,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 12.0,
+   "p90_nodes_conditional_on_complete": 572.0000000000002,
+   "nodes_spent_total": 728676,
+   "search_optimal_move_rate_conditional_on_complete": 1.0,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9923756595384479,
+    1.0
+   ],
+   "search_mean_regret_conditional_on_complete": 0.0,
+   "search_mean_regret_ci_conditional_on_complete": null,
+   "search_mean_regret_ci_note": "every regret in the sample is 0: the percentile bootstrap of a degenerate sample is zero-width, which is an artifact of resampling identical values and not population certainty. No interval is reported; the optimal-move rate's Wilson interval is the uncertainty statement here.",
+   "median_empties_conditional_on_complete": 5.0,
+   "seconds": 11.9
+  },
+  {
+   "ply": 60,
+   "games_alive_at_ply": 7850,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 1.0,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.9923756595384479,
+    1.0
+   ],
+   "n_complete": 500,
+   "incomplete_count_conditional_on_alive": 0,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 14.0,
+   "p90_nodes_conditional_on_complete": 441.50000000000057,
+   "nodes_spent_total": 173759,
+   "search_optimal_move_rate_conditional_on_complete": 1.0,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9923756595384479,
+    1.0
+   ],
+   "search_mean_regret_conditional_on_complete": 0.0,
+   "search_mean_regret_ci_conditional_on_complete": null,
+   "search_mean_regret_ci_note": "every regret in the sample is 0: the percentile bootstrap of a degenerate sample is zero-width, which is an artifact of resampling identical values and not population certainty. No interval is reported; the optimal-move rate's Wilson interval is the uncertainty statement here.",
+   "median_empties_conditional_on_complete": 4.0,
+   "seconds": 12.2
+  },
+  {
+   "ply": 61,
+   "games_alive_at_ply": 5119,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 1.0,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.9923756595384479,
+    1.0
+   ],
+   "n_complete": 500,
+   "incomplete_count_conditional_on_alive": 0,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 7.5,
+   "p90_nodes_conditional_on_complete": 233.30000000000007,
+   "nodes_spent_total": 191402,
+   "search_optimal_move_rate_conditional_on_complete": 1.0,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9923756595384479,
+    1.0
+   ],
+   "search_mean_regret_conditional_on_complete": 0.0,
+   "search_mean_regret_ci_conditional_on_complete": null,
+   "search_mean_regret_ci_note": "every regret in the sample is 0: the percentile bootstrap of a degenerate sample is zero-width, which is an artifact of resampling identical values and not population certainty. No interval is reported; the optimal-move rate's Wilson interval is the uncertainty statement here.",
+   "median_empties_conditional_on_complete": 4.0,
+   "seconds": 12.5
+  },
+  {
+   "ply": 62,
+   "games_alive_at_ply": 3640,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 1.0,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.9923756595384479,
+    1.0
+   ],
+   "n_complete": 500,
+   "incomplete_count_conditional_on_alive": 0,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 6.0,
+   "p90_nodes_conditional_on_complete": 245.0,
+   "nodes_spent_total": 152396,
+   "search_optimal_move_rate_conditional_on_complete": 1.0,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9923756595384479,
+    1.0
+   ],
+   "search_mean_regret_conditional_on_complete": 0.0,
+   "search_mean_regret_ci_conditional_on_complete": null,
+   "search_mean_regret_ci_note": "every regret in the sample is 0: the percentile bootstrap of a degenerate sample is zero-width, which is an artifact of resampling identical values and not population certainty. No interval is reported; the optimal-move rate's Wilson interval is the uncertainty statement here.",
+   "median_empties_conditional_on_complete": 3.0,
+   "seconds": 12.8
+  },
+  {
+   "ply": 63,
+   "games_alive_at_ply": 2266,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 1.0,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.9923756595384479,
+    1.0
+   ],
+   "n_complete": 500,
+   "incomplete_count_conditional_on_alive": 0,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 4.5,
+   "p90_nodes_conditional_on_complete": 113.0,
+   "nodes_spent_total": 89791,
+   "search_optimal_move_rate_conditional_on_complete": 1.0,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9923756595384479,
+    1.0
+   ],
+   "search_mean_regret_conditional_on_complete": 0.0,
+   "search_mean_regret_ci_conditional_on_complete": null,
+   "search_mean_regret_ci_note": "every regret in the sample is 0: the percentile bootstrap of a degenerate sample is zero-width, which is an artifact of resampling identical values and not population certainty. No interval is reported; the optimal-move rate's Wilson interval is the uncertainty statement here.",
+   "median_empties_conditional_on_complete": 3.0,
+   "seconds": 12.5
+  },
+  {
+   "ply": 64,
+   "games_alive_at_ply": 1505,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 1.0,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.9923756595384479,
+    1.0
+   ],
+   "n_complete": 500,
+   "incomplete_count_conditional_on_alive": 0,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 3.0,
+   "p90_nodes_conditional_on_complete": 91.20000000000005,
+   "nodes_spent_total": 36715,
+   "search_optimal_move_rate_conditional_on_complete": 1.0,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9923756595384479,
+    1.0
+   ],
+   "search_mean_regret_conditional_on_complete": 0.0,
+   "search_mean_regret_ci_conditional_on_complete": null,
+   "search_mean_regret_ci_note": "every regret in the sample is 0: the percentile bootstrap of a degenerate sample is zero-width, which is an artifact of resampling identical values and not population certainty. No interval is reported; the optimal-move rate's Wilson interval is the uncertainty statement here.",
+   "median_empties_conditional_on_complete": 3.0,
+   "seconds": 12.6
+  },
+  {
+   "ply": 65,
+   "games_alive_at_ply": 810,
+   "positions_sampled_conditional_on_alive": 500,
+   "fraction_complete_coverage_conditional_on_alive": 1.0,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.9923756595384479,
+    1.0
+   ],
+   "n_complete": 500,
+   "incomplete_count_conditional_on_alive": 0,
+   "finite_population_note": null,
+   "median_nodes_conditional_on_complete": 2.0,
+   "p90_nodes_conditional_on_complete": 57.30000000000007,
+   "nodes_spent_total": 26162,
+   "search_optimal_move_rate_conditional_on_complete": 1.0,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9923756595384479,
+    1.0
+   ],
+   "search_mean_regret_conditional_on_complete": 0.0,
+   "search_mean_regret_ci_conditional_on_complete": null,
+   "search_mean_regret_ci_note": "every regret in the sample is 0: the percentile bootstrap of a degenerate sample is zero-width, which is an artifact of resampling identical values and not population certainty. No interval is reported; the optimal-move rate's Wilson interval is the uncertainty statement here.",
+   "median_empties_conditional_on_complete": 3.0,
+   "seconds": 11.8
+  },
+  {
+   "ply": 66,
+   "games_alive_at_ply": 492,
+   "positions_sampled_conditional_on_alive": 492,
+   "fraction_complete_coverage_conditional_on_alive": 1.0,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.9922526469855293,
+    1.0000000000000002
+   ],
+   "n_complete": 492,
+   "incomplete_count_conditional_on_alive": 0,
+   "finite_population_note": "positions_sampled == games_alive_at_ply: the whole alive set at this ply was measured, so the coverage fraction is a census of this corpus's alive games at this ply and carries no sampling error with respect to it. The Wilson interval beside it is the interval for the wider population of games this checkpoint's self-play could have generated \u2014 read it as that or not at all.",
+   "median_nodes_conditional_on_complete": 2.0,
+   "p90_nodes_conditional_on_complete": 51.900000000000034,
+   "nodes_spent_total": 15161,
+   "search_optimal_move_rate_conditional_on_complete": 1.0,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9922526469855293,
+    1.0000000000000002
+   ],
+   "search_mean_regret_conditional_on_complete": 0.0,
+   "search_mean_regret_ci_conditional_on_complete": null,
+   "search_mean_regret_ci_note": "every regret in the sample is 0: the percentile bootstrap of a degenerate sample is zero-width, which is an artifact of resampling identical values and not population certainty. No interval is reported; the optimal-move rate's Wilson interval is the uncertainty statement here.",
+   "median_empties_conditional_on_complete": 2.0,
+   "seconds": 11.7
+  },
+  {
+   "ply": 67,
+   "games_alive_at_ply": 253,
+   "positions_sampled_conditional_on_alive": 253,
+   "fraction_complete_coverage_conditional_on_alive": 1.0,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.9850434628492905,
+    0.9999999999999999
+   ],
+   "n_complete": 253,
+   "incomplete_count_conditional_on_alive": 0,
+   "finite_population_note": "positions_sampled == games_alive_at_ply: the whole alive set at this ply was measured, so the coverage fraction is a census of this corpus's alive games at this ply and carries no sampling error with respect to it. The Wilson interval beside it is the interval for the wider population of games this checkpoint's self-play could have generated \u2014 read it as that or not at all.",
+   "median_nodes_conditional_on_complete": 2.0,
+   "p90_nodes_conditional_on_complete": 30.0,
+   "nodes_spent_total": 5796,
+   "search_optimal_move_rate_conditional_on_complete": 1.0,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9850434628492905,
+    0.9999999999999999
+   ],
+   "search_mean_regret_conditional_on_complete": 0.0,
+   "search_mean_regret_ci_conditional_on_complete": null,
+   "search_mean_regret_ci_note": "every regret in the sample is 0: the percentile bootstrap of a degenerate sample is zero-width, which is an artifact of resampling identical values and not population certainty. No interval is reported; the optimal-move rate's Wilson interval is the uncertainty statement here.",
+   "median_empties_conditional_on_complete": 2.0,
+   "seconds": 9.8
+  },
+  {
+   "ply": 68,
+   "games_alive_at_ply": 142,
+   "positions_sampled_conditional_on_alive": 142,
+   "fraction_complete_coverage_conditional_on_alive": 1.0,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.9736600356869919,
+    0.9999999999999999
+   ],
+   "n_complete": 142,
+   "incomplete_count_conditional_on_alive": 0,
+   "finite_population_note": "positions_sampled == games_alive_at_ply: the whole alive set at this ply was measured, so the coverage fraction is a census of this corpus's alive games at this ply and carries no sampling error with respect to it. The Wilson interval beside it is the interval for the wider population of games this checkpoint's self-play could have generated \u2014 read it as that or not at all.",
+   "median_nodes_conditional_on_complete": 3.0,
+   "p90_nodes_conditional_on_complete": 27.0,
+   "nodes_spent_total": 2541,
+   "search_optimal_move_rate_conditional_on_complete": 1.0,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9736600356869919,
+    0.9999999999999999
+   ],
+   "search_mean_regret_conditional_on_complete": 0.0,
+   "search_mean_regret_ci_conditional_on_complete": null,
+   "search_mean_regret_ci_note": "every regret in the sample is 0: the percentile bootstrap of a degenerate sample is zero-width, which is an artifact of resampling identical values and not population certainty. No interval is reported; the optimal-move rate's Wilson interval is the uncertainty statement here.",
+   "median_empties_conditional_on_complete": 3.0,
+   "seconds": 8.6
+  },
+  {
+   "ply": 69,
+   "games_alive_at_ply": 73,
+   "positions_sampled_conditional_on_alive": 73,
+   "fraction_complete_coverage_conditional_on_alive": 1.0,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.9500079920442688,
+    0.9999999999999998
+   ],
+   "n_complete": 73,
+   "incomplete_count_conditional_on_alive": 0,
+   "finite_population_note": "positions_sampled == games_alive_at_ply: the whole alive set at this ply was measured, so the coverage fraction is a census of this corpus's alive games at this ply and carries no sampling error with respect to it. The Wilson interval beside it is the interval for the wider population of games this checkpoint's self-play could have generated \u2014 read it as that or not at all.",
+   "median_nodes_conditional_on_complete": 2.0,
+   "p90_nodes_conditional_on_complete": 12.599999999999994,
+   "nodes_spent_total": 618,
+   "search_optimal_move_rate_conditional_on_complete": 1.0,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9500079920442688,
+    0.9999999999999998
+   ],
+   "search_mean_regret_conditional_on_complete": 0.0,
+   "search_mean_regret_ci_conditional_on_complete": null,
+   "search_mean_regret_ci_note": "every regret in the sample is 0: the percentile bootstrap of a degenerate sample is zero-width, which is an artifact of resampling identical values and not population certainty. No interval is reported; the optimal-move rate's Wilson interval is the uncertainty statement here.",
+   "median_empties_conditional_on_complete": 2.0,
+   "seconds": 8.7
+  },
+  {
+   "ply": 70,
+   "games_alive_at_ply": 50,
+   "positions_sampled_conditional_on_alive": 50,
+   "fraction_complete_coverage_conditional_on_alive": 1.0,
+   "fraction_complete_coverage_ci_conditional_on_alive": [
+    0.9286524008666414,
+    1.0
+   ],
+   "n_complete": 50,
+   "incomplete_count_conditional_on_alive": 0,
+   "finite_population_note": "positions_sampled == games_alive_at_ply: the whole alive set at this ply was measured, so the coverage fraction is a census of this corpus's alive games at this ply and carries no sampling error with respect to it. The Wilson interval beside it is the interval for the wider population of games this checkpoint's self-play could have generated \u2014 read it as that or not at all.",
+   "median_nodes_conditional_on_complete": 2.0,
+   "p90_nodes_conditional_on_complete": 13.200000000000003,
+   "nodes_spent_total": 289,
+   "search_optimal_move_rate_conditional_on_complete": 1.0,
+   "search_optimal_move_rate_ci_conditional_on_complete": [
+    0.9286524008666414,
+    1.0
+   ],
+   "search_mean_regret_conditional_on_complete": 0.0,
+   "search_mean_regret_ci_conditional_on_complete": null,
+   "search_mean_regret_ci_note": "every regret in the sample is 0: the percentile bootstrap of a degenerate sample is zero-width, which is an artifact of resampling identical values and not population certainty. No interval is reported; the optimal-move rate's Wilson interval is the uncertainty statement here.",
+   "median_empties_conditional_on_complete": 2.0,
+   "seconds": 8.1
+  }
+ ]
+}

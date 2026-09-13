@@ -1,0 +1,38 @@
+runs/deep8_c1_300_e8/net_0300.pt on cuda:1; rule count (trained under count); arms (b)/(c) play with the plain FusedEvaluator (the agent that generated the run's corpus), arm (a) is 8-way symmetry-averaged (uttt.symmetry)
+exploration as trained from runs/deep8_c1_300_e8\config.json: sample_moves 8, temperature 1.0, sample_uniform 0.15, root_prior_floor 0.03, c_scale 1.0, gumbel_scale 1.0 <- MCTSConfig's default 1.0 (runs/deep8_c1_300_e8\config.json has no gumbel_scale key, so the run trained at it)
+exploration settings as trained; budget and depth cap are not: arms (b)/(c) play at 256 sims and depth_cap 24, against the run's trained depth_cap 12 and sims 32 (schedule '60:48,100:64')
+
+(a) empty board @16384 sims: value for X +0.5242; principal line [40, 36, 0, 8, 80, 77, 50, 48, 34, 66]  [50s]
+
+  (b) sampled 4 plies, floor off: 250/2000 games (133s)
+  (b) sampled 4 plies, floor off: 500/2000 games (456s)
+  (b) sampled 4 plies, floor off: 750/2000 games (826s)
+  (b) sampled 4 plies, floor off: 1000/2000 games (1144s)
+  (b) sampled 4 plies, floor off: 1250/2000 games (1282s)
+  (b) sampled 4 plies, floor off: 1500/2000 games (1410s)
+  (b) sampled 4 plies, floor off: 1750/2000 games (1539s)
+  (b) sampled 4 plies, floor off: 2000/2000 games (1671s)
+  (c) exploration as trained: 250/2000 games (154s)
+  (c) exploration as trained: 500/2000 games (322s)
+  (c) exploration as trained: 750/2000 games (478s)
+  (c) exploration as trained: 1000/2000 games (834s)
+  (c) exploration as trained: 1250/2000 games (1316s)
+  (c) exploration as trained: 1500/2000 games (1578s)
+  (c) exploration as trained: 1750/2000 games (1734s)
+  (c) exploration as trained: 2000/2000 games (1887s)
+
+  (b) sampled 4 plies, floor off      2000 games @  256 sims   X  99.7 % [ 99.3,  99.9]   O   0.1 % [  0.0,   0.4]   draw   0.2 % [  0.1,   0.5]
+                                     mean length  54.0   end reasons line   0.2 % / count  99.6 % / equal   0.2 %
+                                     policy concentration (not an interval correction): 9 distinct games, 9 4-ply openings (9 up to symmetry)   [1671s]
+  (c) exploration as trained          2000 games @  256 sims   X  70.9 % [ 68.8,  72.8]   O  12.6 % [ 11.2,  14.1]   draw  16.6 % [ 15.0,  18.2]
+                                     mean length  53.3   end reasons line  65.0 % / count  18.5 % / equal  16.6 %
+                                     policy concentration (not an interval correction): 1716 distinct games, 299 4-ply openings (219 up to symmetry)   [1887s]
+
+the run's own opening trajectory (timeline.json + log.jsonl). Two different statistics, neither a substitute for the other:
+  raw policy      = the checkpoint's first-move PROBABILITY on the empty board (timeline.json first_top_share = probs.max(), tools/timeline.py:129-130)
+  generated games = the share of that iteration's self-play games whose first move was the modal one (log.jsonl first_move_top_share)
+     iter 10:  raw policy     [44] 0.215   generated games     [42] 0.528
+    iter 160:  raw policy     [40] 0.976   generated games     [40] 0.832
+    iter 300:  raw policy     [40] 0.982   generated games     [40] 0.835
+
+wrote runs/plan7/J3_empty_board_e8.json

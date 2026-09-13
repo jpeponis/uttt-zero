@@ -1,0 +1,8 @@
+J3 / J4 started Sun Sep 13 02:43:35 EDT 2026
+=== J3 empty board, deep8_c1_300_e8 (02:43)
+    -> runs/plan7/J3_empty_board_e8.out (0)
+=== J3 empty board, deep8_c1_300_e4 (03:43)
+    -> runs/plan7/J3_empty_board_e4.out (0)
+=== J4 exact frontier, deep8_c1_300_e8 late games, plies 40-70 (04:33)
+    -> runs/plan7/J4_frontier.out (0)
+J3 / J4 DONE (05:05)
