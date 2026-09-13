@@ -22,7 +22,18 @@ adjudicated in this file before anything acts on it** (§7, as PLAN6 §1 did).
 
 ## Handover (2026-09-12, 23:32 — written for the next instance by the second instance of the day)
 
-**State.** **Two things are running.** **K1 itself** — `runs/deep8_c1_300_e8_draw`, launched at the owner's word
+**State at 02:44, 2026-09-13 (the latest; the paragraphs below it are the earlier states, kept).** Running: **K1**
+(iteration ≈ 40 of 300 at ≈ 213 s per iteration, `end_count` 0.0, draw share ≈ 39 %; ≈ 22:30 today); **J3 then J4** on
+the 3060 (`runs/plan7/J3J4_3060.sh`, started 02:43; log `runs/plan7/J3J4.out`; J3 on `_e8` and `_e4` ≈ 45 min each,
+J4 ≈ 3.5 h; outputs `runs/plan7/J3_empty_board_{e8,e4}.json|out`, `J4_frontier.json` + `_positions.npz` + `.out` —
+their readings become KNOWLEDGE lines in §4 J3 / J4's forms, then a log entry and a commit); **the `_e8` count
+pass's per-claim reading** by an opus worktree agent (KNOWLEDGE clauses, the map's `_e8` column,
+`runs/plan7/K1_parent_reading.md`; merge after a read, paste its draft log entry, commit; the pass itself finished
+02:40, every tool exit 0, outputs committed `573a1b9` / `de9091c`); and **a background waiter that launches M1's
+rebuttal at 03:08** (`docs/reviews/M1_account/launch_rebuttal.ps1`; watch `status_rebuttal.txt`; adjudicate into
+§7e M1 as R-rows). Not running: nothing else. Nothing pushed since `40b7864`.
+
+**State (00:20).** **Two things are running.** **K1 itself** — `runs/deep8_c1_300_e8_draw`, launched at the owner's word
 on 2026-09-13 at 00:20:02 (`wscript runs/launch_queue14_hidden.vbs` from `33ebd8a`; `config.json` records
 `rule draw`, `gumbel_scale 1.0` and the resolved search configuration; the E7 worker, pid 4451, under `draw` on
 the 3060; status `python tools/run_status.py runs/deep8_c1_300_e8_draw --ref runs/deep8_c1_300_e8`; ≈ 22 h, so
