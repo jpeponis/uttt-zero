@@ -1228,6 +1228,131 @@ and — read for the first time since deep10 — the tensor-edit overstatement (
     `runs/deep8_c1_300_e8/{analysis.out,eval_full.jsonl,timeline.json}`,
     `runs/plan6/H1c_timeline.out`, PLAN6 log 2026-09-10.
 
+## 9a. Two pre-registered readings: the empty board and the exact frontier
+
+*PLAN7 §4 J3 and J4. Both designs were fixed in the plan and reviewed by M2 and its rebuttal
+round (§7e M2 rows 3, 4, 7, 15, 16; M2-R R5–R7) before either was run; the runs are
+2026-09-13, 02:43–05:05 on the 3060 (`runs/plan7/J3J4_3060.sh`, every exit 0). The ledger —
+every number as read, the derivations, and 24's comparison written out — is
+`runs/plan7/J3J4_reading.md`.*
+
+52. **The empty board reads +0.52 for X on the strongest net, and removing self-play's
+    exploration package at a matched budget turns the corpus-generating agent's own 71 % X
+    share into 99.7 % over nine distinct games.** Three measurements on
+    `deep8_c1_300_e8/net_0300.pt` and `deep8_c1_300_e4/net_0300.pt`, count rule, 2026-09-13.
+    **(a) The root.** At 16 384 sims, 8-way symmetry-averaged, PUCT (`c_puct` 1.25,
+    `m_considered` 81, Gumbel scale 0, depth cap 40 — `tools/atlas.py deep_values`), the empty
+    board's value for X is **+0.5242** on `_e8`, principal line **[40, 36, 0, 8, 80, 77, 50, 48,
+    34, 66]**, and **+0.4950** on `_e4`, principal line **[40, 36, 0, 8, 80, 77, 48, 30, 32,
+    46]** — the same first six moves, diverging at X's fourth. It is the same search, and the
+    same number, that 3 already carries for [40] on each net (+0.524 / +0.495): a re-read with
+    the line written out, not a sixth point on that chain.
+    **(b) Near-greedy play.** 2 000 games at 256 sims played by the **plain** evaluator — the
+    agent that generated each run's corpus, not the symmetry-averaged one of (a) — with the
+    search policy sampled proportionally for the first 4 plies, **both** floors off
+    (`sample_uniform` 0, `root_prior_floor` 0), Gumbel scale 0, depth cap 24: `_e8` **X 99.7 %
+    [99.3, 99.9]**, O 0.1 % [0.0, 0.4], draw 0.2 % [0.1, 0.5], mean length 54.0, 99.6 % of them
+    ending on the board count; `_e4` **X 99.9 % [99.6, 100.0]**, O 0.0 % [0.0, 0.2], draw 0.1 %
+    [0.0, 0.4], mean length 51.0, 99.9 % ending on a macro line. **Beside those intervals, and
+    not correcting them, the concentration: 9 distinct games and 9 distinct 4-ply openings (9 up
+    to symmetry) on `_e8`, 7 / 7 (7) on `_e4`.** The games are independent draws from a
+    stochastic policy and identical games are duplicate *outcomes*, not dependent draws, so the
+    Wilson interval is the right interval **for that policy's outcome distribution** (M2 §7e M2
+    row 3). What the arm buys is an accurate estimate of one concentrated policy and **no
+    opening coverage at all**: 2 000 unanimous draws put the Wilson lower bound at 99.81 %
+    whatever the game is like (M2-R R7), and this arm's end-reason and length figures are
+    properties of a handful of lines, not population statistics.
+    **(c) The exploration package as trained, at the same budget.** The same 2 000 games, 256
+    sims, plain evaluator and depth cap 24, with `sample_moves` 8, temperature 1.0,
+    `sample_uniform` 0.15, `root_prior_floor` 0.03 and Gumbel scale 1.0 (`MCTSConfig`'s default
+    — neither run's `config.json` records that knob, so both trained at it): `_e8` **X 70.9 %
+    [68.8, 72.8]**, O 12.6 % [11.2, 14.1], draw 16.6 % [15.0, 18.2] over 1 716 distinct games
+    and 299 openings (219 up to symmetry); `_e4` **X 69.8 % [67.7, 71.7]**, O 13.5 % [12.1,
+    15.1], draw 16.8 % [15.2, 18.4] over 1 683 / 300 (209). This is **not play as trained**:
+    the exploration settings are as trained, the budget and the depth cap are not (256 sims and
+    cap 24 against the trained 32 → 48 → 64 and cap 12).
+    **(b) − (c) is the exploration package** at a matched budget — four knobs moving together
+    (sampled plies 4 vs 8, sampling floor 0 vs 0.15, root prior floor 0 vs 0.03, Gumbel scale 0
+    vs 1), with nothing attributed to any one of them: **X +28.9, O −12.5, draw −16.4** points
+    on `_e8`; **+30.2 / −13.5 / −16.7** on `_e4`.
+    **Compared with 24, and not a test of it.** 24's `_e8` figure is X 63.2 / O 20.2 / draw 16.6
+    over that net's own 98 581 games at 32 → 64 sims. Arm (c) reads **70.9 / 12.6 / 16.6**: X
+    7.7 points higher, O 7.6 lower, **the draw share unmoved** (16.55, with 24's 16.6 inside
+    (c)'s interval). Three things differ at once — the budget (256 against 32 → 64), the depth
+    cap (24 against 12), and the policy's identity, since 24 is a statistic of the last twenty
+    iterations' *changing* training policy and (c) of the final checkpoint alone — so this is a
+    comparison, and a disagreement would not have refuted 24 (M2-R R7).
+    **The two first-move statistics, which are not substitutes for one another** (M2 §7e M2 row
+    7): the **raw policy**'s first-move probability on the empty board (`timeline.json`
+    `first_top_share` = `probs.max()`, `tools/timeline.py:129–130`) against the share of that
+    iteration's **generated games** whose first move was the modal one (`log.jsonl`
+    `first_move_top_share`). `_e8` at iterations 10 / 160 / 300: raw [44] **0.215** / [40] 0.976
+    / [40] **0.982**, generated [42] **0.528** / [40] 0.832 / [40] **0.835**. `_e4`: raw [58]
+    0.050 / [40] 0.928 / [40] **0.990**, generated [80] 0.121 / [40] 0.839 / [40] **0.841**. The
+    raw head is near-deterministic on [40] and the games it generates are not, because the
+    sampled plies and both floors sit between them — the same gap 6 reports.
+    *Search-relative* — a root value at one budget on one net, and two outcome distributions of
+    named stochastic policies at 256 sims. `deep8_c1_300_e8` and `deep8_c1_300_e4`, 2026-09-13.
+    `tools/empty_board.py` → `runs/plan7/J3_empty_board_e8.{out,json}`,
+    `runs/plan7/J3_empty_board_e4.{out,json}`; ledger `runs/plan7/J3J4_reading.md`.
+53. **Complete legal-action value coverage within 10⁸ nodes is 28.2 % of the games alive at ply
+    40 and 100 % at every sampled ply from 52 on, and on the covered subset the 256-sim agent
+    played an exact-optimal move in 12 565 of 12 573 positions.** From `deep8_c1_300_e8`'s own
+    late corpus (98 581 games, `games_0280.npz`..`games_0299.npz`), 500 positions at each ply
+    from 40 to 70 — 14 010 in all, 12 573 covered — each given one shared budget of 100 000 000
+    counted nodes for the position *and its whole legal-child enumeration*
+    (`uttt/solver.py solve_children_bounded`); the agent graded on the covered ones by
+    `uttt.endgame.evaluate` at 256 sims with the plain evaluator, count rule; 32 min on 8 solver
+    processes, 1.71 × 10¹¹ nodes spent. **The ordinate is complete legal-action value coverage
+    within the budget** — every legal child's exact value obtained, stricter than proving the
+    root's value alone, and what grading a chosen move against its alternatives needs (M2 §7e M2
+    row 16).
+    **Coverage, conditional on games alive at the ply**, 95 % Wilson: ply 40 **28.2 % [24.4,
+    32.3]** (141 of 500; 98 181 alive), 42 **50.0 % [45.6, 54.4]**, 44 **76.4 % [72.5, 79.9]**,
+    46 **87.6 % [84.4, 90.2]**, 48 **94.8 % [92.5, 96.4]**, 50 **99.0 % [97.7, 99.6]**, 52
+    **100.0 % [99.2, 100.0]** (500 of 500; 55 956 alive), and 100 % at every sampled ply from 52
+    to 70.
+    **Optimal-move rate, conditional on complete**, 95 % Wilson: 100.0 % [97.3, 100.0] at ply 40
+    (141 positions), **99.7 % [98.5, 100.0]** at 44 (382), **99.8 % [98.8, 100.0]** at 48 (474),
+    **99.8 % [98.9, 100.0]** at 52 (500), 100.0 % [99.2, 100.0] at 60 (500). **Eight** of the
+    12 573 covered positions took a non-optimal move — one at each of plies 44, 45, 46, 47, 48,
+    49, 51 and 52, and none at any other ply. Four turned a drawn root into a lost one (44, 45,
+    46, 49), three a won root into a drawn one (47, 51, 52), and one — at ply 48, the only
+    regret of 2 exact points — a won root into a lost one. Mean regret conditional on complete
+    is 0.000 at every ply with no such move (**no interval** is printed there: a degenerate
+    sample's zero-width bootstrap is an artifact of resampling identical values, and the optimal
+    rate's Wilson interval is the uncertainty statement — M2 §7e M2 row 4) and 0.002–0.004 at
+    the eight.
+    **Node counts, conditional on complete** (median / p90): ply 40 **5 566 524 / 56 056 556**,
+    ply 45 **86 447 / 16 683 217**, ply 50 **2 457 / 1 060 232**, ply 60 **14 / 442**. A node is
+    one recursive entry of the budgeted kernel, and a child already terminal after the move is
+    decided at **zero** counted nodes: the budget bounds search work, not time.
+    **Plies 66–70 sampled the whole alive set** (492, 253, 142, 73 and 50 positions from 492,
+    253, 142, 73 and 50 alive), so the coverage figure there is a census of this corpus at those
+    plies and carries no sampling error with respect to it, while the Wilson interval beside it
+    belongs to the wider population of games this checkpoint's self-play could generate — read
+    as one or as the other, never as both.
+    **The supportable sentence, as §4 J4 fixed it before the run:** *among games in this
+    checkpoint's late corpus still alive at each sampled ply, the measured fraction admitted
+    complete action-value enumeration within 10⁸ counted nodes, and the 256-simulation agent
+    achieved the reported optimal-move rate on that subset.* **No monotonicity between plies is
+    claimed, there is no frontier, and "solved from ply N" follows from none of these numbers**,
+    the 100 % rows included. Three caveats travel with them: the covered subset is the **easy
+    end** of each ply and gets easier as the budget binds, so ply 40's 100 % optimal is a rate
+    on the cheapest 28 % of ply 40 and not on ply 40; **games recur across plies** (11 172
+    distinct games over the 14 010 rows, 1 727 of them at more than one ply and one at ten), so
+    the plies are not independent of one another and any across-ply comparison — a difference, a
+    fitted curve, a joint interval — needs game-linked resampling over the per-position table,
+    which carries `game_id` for exactly that; and the grader is the plain evaluator, where J3's
+    root is symmetry-averaged, each tool following its own precedent.
+    *Coverage **exact** — a solver fact about the sampled positions; the optimal-move rate
+    **search-relative against exact labels**.* `deep8_c1_300_e8` alone, 2026-09-13.
+    `tools/frontier.py` (on `uttt/solver.py`'s `solve_bounded` / `solve_children_bounded`) →
+    `runs/plan7/J4_frontier.{out,json}` and `runs/plan7/J4_frontier_positions.npz` — the
+    per-position table: ply, `game_id`, empties, completion, nodes, the exact root value, the 81
+    exact child values, the graded move, its optimality and its regret; ledger
+    `runs/plan7/J3J4_reading.md`.
+
 ## 10. Open, and not claimed
 
 - The dose–response of the optimizer-step lever is +100 → +64 → +40 and still positive (51),

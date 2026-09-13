@@ -11,7 +11,7 @@ nothing inside the repository was created, modified or deleted.*
 ***The `_e8` count-rule pass is now read (2026-09-13).*** PLAN7 §5 item 1 ran the I1 tool set on
 `deep8_c1_300_e8` under the **count** rule (`runs/plan7/K1_parent_*.out`, script
 `K1_parent_count_pass_3060.sh`, ledger `runs/plan7/K1_parent_reading.md`), so the `_e8` column and
-the drift cells below carry a reading for **39 of the 59 rows** — 37 KNOWLEDGE claims, three of them
+the drift cells below carry a reading for **39 of the 61 rows** — 37 KNOWLEDGE claims, three of them
 split across two rows. The verdicts are I1's three, and each names its **[CI] / [no CI]** basis:
 **27 held, 9 moved, 1 unresolved, 0 reversed**. Three rows leave "not measured" because
 `tools/probe_value.py` was added to the pass — **12, 18** and **35 (counterfactual)** — and 15's
@@ -22,10 +22,19 @@ validated by reproducing the `_e4` figures it replaces exactly. `_e8` is the *pl
 draw-rule run: every number here is under the count rule, and it is the baseline K1's draw readings
 are compared with (PLAN7 §5 item 2).
 
+***J3 and J4 are read (2026-09-13).*** The two pre-registered readings of PLAN7 §4 ran on the 3060
+the same night (`runs/plan7/J3J4_3060.sh`, ledger `runs/plan7/J3J4_reading.md`) and are **rows 52 and
+53** below — the empty board on `_e8` and `_e4` (KNOWLEDGE 52) and the exact frontier on `_e8`'s late
+games (KNOWLEDGE 53). Both carry **not measured** in the drift column: each is a *first* reading, so
+there is nothing for it to have drifted from. 52 is one reading taken on **two nets at once**, which
+is coverage, not drift; 53 is one net. Neither is a re-read of an existing claim, and 52's root value
+is the same search and the same number row 3 already carries for [40].
+
 ## Row count
 
-**59 rows = 56 claims + 3 split rows.** KNOWLEDGE carries 56 numbered entries (1–51, none skipped, plus
-7a, 31a, 38a, 41a, 41b), which is now §1's own count. Three are split because their halves have
+**61 rows = 58 claims + 3 split rows.** KNOWLEDGE carries 58 numbered entries (1–53, none skipped, plus
+7a, 31a, 38a, 41a, 41b); it carried 56 (1–51) when PLAN7 §1 counted them, before J3 and J4 added 52 and
+53. Three are split because their halves have
 **different levels and different coverage**, which one row cannot carry:
 
 | split | why |
@@ -130,6 +139,8 @@ needs to look up separately.
 | 49 | Doubling the optimizer steps again is worth another +64 Elo | **single run against a named parent** on the full suite at ±2.8, seed band ≈ 3 | one run (`deep8_c1_300_e4`, seed 0); parent `deep8_c1_300_e2` — **held at +291**; also read against four other references | **not measured** (read once); the successor doubling is **51 (+40)** | **89.0 % [87.4, 90.6], +363 [+337, +395]** (dev1 92.5 % [91.0, 94.0], +437) | **74.4 % [72.0, 76.7], +185 [+164, +207]** | **69.2 % [66.7, 71.6], +141 [+121, +160]** | **71.3 % [68.9, 73.6], +158 [+138, +178]** | **59.1 % [56.3, 61.8], +64 [+44, +83]** vs `_e2` ← the parent; distinct fraction **0.67 → 0.62** | — | `runs/deep8_c1_300_e4/{analysis.out,eval_full.jsonl,timeline.png}`, `runs/plan6/H1b_timeline.out` |
 | 50 | An exactly equivariant trunk at the same inference cost loses 220 Elo in self-play | **single run against a named parent** on the full suite at ±2.8, seed band ≈ 3 | one run (`gcnn8_c1_300_e4`, `--gcnn 16`, seed 0, resumed once from iteration 260 after a reboot); parent `deep8_c1_300_e4` — **held at +363**; one width only | **not measured** (read once, one width). Stated as *this equal-cost D4 implementation lost under this recipe* (M0 row 20); the mechanism evidence is *consistent with* capacity, not its proof | **71.7 % [69.2, 74.1], +162 [+141, +182]** (dev1 +260) | **42.8 % [40.2, 45.4], −50 [−69, −32]** | **37.1 %, −92** | **41.5 %, −59** | **22.0 % [19.9, 24.2], −220 [−242, −199]** vs its parent (`_e2`: 31.6 %, −134) | — | `runs/gcnn8_c1_300_e4/{analysis.out,eval_full.jsonl,timeline.json}`, `runs/plan6/H4_timeline.out`, `H4_lr*.json`, `H4_diag/` — D4 JS **0.000** at all 30 checkpoints; first drop **+30.7** points (+223 Elo), second **+6.5**; ‖g‖/‖w‖ 1.19× / 1.41×, top Hessian eigenvalue **2.3×**; t_selfplay **1.02×**, t_train 1.52× |
 | 51 | Doubling the optimizer steps a third time is worth another +40 Elo, and the v2b yardstick runs out | **single run against a named parent** on the full suite at ±2.8, seed band ≈ 3 | one run (`deep8_c1_300_e8`, seed 0, 21.96 h, 0 crashes); parent `deep8_c1_300_e4` — **held at +363**; the E7 worker's independent read agrees | **not measured** (read once); the adoption is **2.8 points over the line and within one seed band of it** — the narrowest in the chain | **89.0 % [87.2, 90.7], +363 [+333, +397]** — the same 89.0 % `_e4` read (dev1 95.3 % [94.2, 96.4], +523) | **77.1 % [74.8, 79.2], +211 [+189, +232]** | **74.5 % [72.1, 76.8], +186 [+165, +208]** | **76.1 % [73.9, 78.2], +201** | **55.8 % [53.3, 58.2], +40 [+23, +57]** vs `_e4` ← the parent (E7 worker **55.8 [53.4, 58.2]**); `_e2` +110 [+91, +130] | endgame_v1 WDL **91.3 % [90.3, 92.4]**, draws **81.0 %**, regret **0.022 [0.016, 0.028]**; v2_dev **91.7 [90.7, 92.7]**, draws 83.6, regret **0.020 [0.015, 0.026]**; 256-sim **100.0 %** at regret 0.000; distinct fraction **0.48 → 0.45**; D4 JS 0.025 | `runs/deep8_c1_300_e8/{analysis.out,eval_full.jsonl,timeline.json}`, `runs/plan6/H1c_timeline.out` |
+| 52 | The empty board reads +0.52 for X; without the exploration package the agent's own play is 99.7 % X | search-relative | `_e4` and `_e8` only, each on its own final checkpoint; the root at 16 384 sims, 8-way symmetry-averaged, PUCT depth cap 40; arms (b) and (c) 2 000 games each at 256 sims, depth cap 24, **plain** evaluator (the corpus-generating agent) | **not measured** — one reading, taken once on **two nets at the same time**; there is no earlier reading of either arm for it to drift from, and a second would be a re-run at another strength, not a re-read | — | — | — | — | **(a)** +0.4950, PV **[40, 36, 0, 8, 80, 77, 48, 30, 32, 46]**; **(b)** X **99.9 % [99.6, 100.0]** / O 0.0 / draw 0.1 over **7** distinct games, 7 openings (7 canonical), 99.9 % ending on a macro line; **(c)** X **69.8 % [67.7, 71.7]** / O 13.5 [12.1, 15.1] / draw 16.8 [15.2, 18.4] over 1 683 games, 300 openings (209); **(b) − (c)** X **+30.2**, O −13.5, draw −16.7; first move at 300 raw **0.990** vs generated **0.841** | **(a)** +0.5242, PV **[40, 36, 0, 8, 80, 77, 50, 48, 34, 66]** (the same search and number row 3 carries for [40]); **(b)** X **99.7 % [99.3, 99.9]** / O 0.1 / draw 0.2 over **9** distinct games, 9 openings (9 canonical), 99.6 % ending on the board count; **(c)** X **70.9 % [68.8, 72.8]** / O 12.6 [11.2, 14.1] / draw 16.6 [15.0, 18.2] over 1 716 games, 299 openings (219); **(b) − (c)** X **+28.9**, O −12.5, draw −16.4; against row 24's corpus split 63.2 / 20.2 / 16.6 — **compared, not tested** (budget, depth cap and policy identity all differ); first move at 300 raw **0.982** vs generated **0.835** | `tools/empty_board.py` → `runs/plan7/J3_empty_board_e8.{out,json}`, `runs/plan7/J3_empty_board_e4.{out,json}`; ledger `runs/plan7/J3J4_reading.md` |
+| 53 | Complete action-value coverage within 10⁸ nodes: 28 % of games alive at ply 40, 100 % from ply 52 | **exact** (the coverage — a solver fact about the sampled positions) / **search-relative against exact labels** (the optimal-move rate) | `_e8` only, on its own late corpus (98 581 games, `games_0280.npz`..`games_0299.npz`); 500 positions per ply at plies 40–70 — the **whole alive set** at 66–70 — 14 010 sampled, 12 573 covered; one shared budget of 10⁸ counted nodes per position and its full child enumeration; graded at 256 sims, plain evaluator | **not measured** — one reading, one net; no earlier frontier reading exists, and the bounded solver it needs was written for this run | — | — | — | — | — | **coverage** (conditional on alive, 95 % Wilson): 40 **28.2 % [24.4, 32.3]**, 42 **50.0 [45.6, 54.4]**, 44 **76.4 [72.5, 79.9]**, 46 **87.6 [84.4, 90.2]**, 48 **94.8 [92.5, 96.4]**, 50 **99.0 [97.7, 99.6]**, 52 **100.0 [99.2, 100.0]** and 100 % at every sampled ply to 70; **optimal** (conditional on complete): 100.0 [97.3, 100.0] at 40, **99.7 [98.5, 100.0]** at 44, **99.8 [98.8, 100.0]** at 48, **99.8 [98.9, 100.0]** at 52, 100.0 [99.2, 100.0] at 60 — **8 non-optimal moves in 12 573**, one each at plies 44–49, 51, 52; **nodes** med / p90: 40 **5 566 524 / 56 056 556**, 45 **86 447 / 16 683 217**, 50 **2 457 / 1 060 232**, 60 **14 / 442**; finite-population note at 66–70 | `tools/frontier.py` (on `uttt/solver.py`'s `solve_bounded` / `solve_children_bounded`) → `runs/plan7/J4_frontier.{out,json}`, `runs/plan7/J4_frontier_positions.npz`; ledger `runs/plan7/J3J4_reading.md` |
 
 *The dose–response, read across 46 / 49 / 51 and quoted as one line: **+100 → +64 → +40 [+23, +57]**,
 each doubling worth about two-thirds of the one before it — each of the three resolved and
@@ -146,14 +157,16 @@ They are three different populations, not three readings of one quantity:
 | **+0.02 … +0.08** (KNOWLEDGE 14's body) | the span over **all four strong nets and both models** — the claim's standing form, and the one the manuscript should quote |
 | **+0.02 … +0.05** (§10) | **`_e4`'s A4 fit alone** |
 
-### Drift tally over the 59 rows
+### Drift tally over the 61 rows
 
 One row, one bucket, by the strongest verdict its cell carries, with the precedence written out:
 **sign or order changed → magnitude changed → unresolved → compatible → not measured**.
 Regenerated from explicit per-row assignments after M1, whose count of the written cells this session
 reproduced: the earlier tally summed to **62** over 59 rows because "compound" was a sixth bucket and
 row 47 was missing from the unmeasured list. **Regenerated again 2026-09-13** for the `_e8`
-count-rule pass; three rows change bucket, all of them out of *not measured*.
+count-rule pass; three rows change bucket, all of them out of *not measured*. **Regenerated once more
+the same day** for J3 and J4: two rows are added, both *not measured*, and no existing row changes
+bucket.
 
 - **sign or order changed 4** — 7, 11, 32 (the motifs), 48. *(42's G-CNN half was counted here;
   the four ResNets' second drops are +2.6 / +4.1 / −0.4 / −0.3, unresolved at ± 2.8, so
@@ -175,9 +188,12 @@ count-rule pass; three rows change bucket, all of them out of *not measured*.
   estimate outside its predecessor's interval, so the row's *compatible* is the qualitative
   deployment conclusion — M1 rebuttal, 2026-09-13. 13's [CI] came with the `_e8` pass and was
   missing from this list.)*
-- **not measured 8** — 38a, 41b, 41a, 46, 47, 49, 50, 51. **38a is now the only game claim with no
-  reading above deep10**; the other seven are training rows read once against a named parent by
-  design, or comparisons that would need a new match or a refit.
+- **not measured 10** — 38a, 41b, 41a, 46, 47, 49, 50, 51, **52**, **53**. **38a is now the only game
+  claim with no reading above deep10**; the other seven of the original eight are training rows read
+  once against a named parent by design, or comparisons that would need a new match or a refit.
+  *(52 and 53 arrive as the two new rows: each is a first reading, pre-registered in PLAN7 §4 and run
+  once, so "not measured" records that nothing precedes it — not that a reading is owed. 52's two
+  nets are coverage, not drift.)*
 
 **Compound is an annotation, not a bucket.** Nine cells carry two verdicts: 11, 14, 15, 21, 23, 32, 37,
 41, 42. (30 stopped being compound when J1a gave its sealed half a reading; 12, 18 and 35
@@ -345,6 +361,7 @@ read as one.
 | 41b | the canonical evaluator above `_e2` | a paired `canon_vs_plain` match | `paired_canon_vs_plain_64.json` exists for deep10 and `_e2` only. GPU. |
 | 41a | the surrogate refitted to `_e8` | `tools/distill.py` + three paired matches | The dearest of these: a refit plus three matches, not a re-read. |
 | 46, 49, 50, 51 | nothing missing by design | — | Each is one run read once against its named parent. "Not measured" records that there is no second reading of the same run, not that a reading is owed. |
+| 52, 53 | nothing missing by design | `tools/empty_board.py`, `tools/frontier.py` | Pre-registered in PLAN7 §4, reviewed by M2, run once on 2026-09-13. 52 covers two nets in that one reading (`_e4` and `_e8`), 53 one; a second reading would be a re-run at another strength — ≈ 1.5 h on the 3060 for J3 per net, ≈ 30 min of CPU for J4 — not a re-read of anything on disk. |
 
 ### 4b. Named output files that could not be found
 
