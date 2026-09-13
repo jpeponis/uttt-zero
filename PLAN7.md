@@ -181,8 +181,10 @@ manuscript (J5) and the file updates (§10) follow the readings; M3 and M4 revie
   one design — `_negamax_bounded` takes the same `draw_rule` flag as `_negamax`, `solve_bounded` and
   `solve_children_bounded` take `rule` — and `tests/test_solver_bounded.py` now asserts equality under
   `draw` too (90 of 500 values differ from `count`: the flag reaches the kernel). `test_solver`,
-  `test_exact`, `test_endgame`, `test_tablebase` pass on the merged tree; `test_rules.py` is re-running
-  (≈ 10 min). Its report also found `tests/test_symmetry.py` failing — characterised here as
+  `test_exact`, `test_endgame`, `test_tablebase` pass on the merged tree; **`test_rules.py` passed on
+  it at 21:23** (exit 0, 603 s — the 2 000-game fixture bit for bit, 43 of 200 solver values
+  differing by rule, 100 000 cross-engine games per rule with the same 77 913 line endings: every
+  line identical to the agent's run in its worktree). Its report also found `tests/test_symmetry.py` failing — characterised here as
   device-specific, `cuda:1` only, the process-global capture stream (§11). §5 records what is not yet
   threaded and must be before K1's readings (five I1 tools). `docs/reviews/M2_designs/brief.md` and
   `launch.ps1` are written; M2 launches in the Codex window after the rebuttal.
