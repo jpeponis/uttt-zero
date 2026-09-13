@@ -46,7 +46,9 @@ and any analysis of the game. The compute gap is ≈ 53× the self-play games (1
 flat 100), ≈ 22 h on each of two GPUs of different classes — ratios of games and of search work; no
 total-compute ratio is established by either repository's records. The
 academic tail is thin and nothing peer-reviewed touches CLOSED-COUNT; the one result bearing on our
-claims is D'Alberton's best-response study *(thesis; variant to verify)*, finding "significant
+claims is D'Alberton's best-response study *(thesis; **CLOSED** by §3.0.1 p. 28 and §6.1, terminal
+tiebreak unverified — the repository PDF was recovered 2026-09-13 and states no adjudication for a
+finished game with no line of won boards)*, finding "significant
 vulnerabilities in self-play agents" — agreement among our four *related* nets is not
 adversarial validation, and our limitations say so. The field has **no shared benchmark**: each
 reports against a private ladder and no two have played each other. We state strength on our own
@@ -74,8 +76,11 @@ ours is the one recorded ordering reversal — the strongest net puts 0.71 of it
 the corner reply orbit where both weaker strong nets preferred the edge [7] — so the outside engine
 sits on the stronger net's side. The free move has no published quantification: prose from
 uttt.ai and gPress *(blog)*, and one integer — weight 2 against 5 for a board, 10 for the centre board and 3 for a corner
-board, in Lifshitz and Tsurel's 2016 heuristic *(course report, HUJI; relayed on BGG/SE, its own link
-dead, so its rule variant and whether the weights are additive are unverified)*. Ours is an adjusted association:
+board, in Lifshitz and Tsurel's heuristic *(course report, HUJI; relayed on BGG/SE, its own link dead
+but the report [recovered from the Internet Archive](https://web.archive.org/web/20230503105450id_/https://www.cs.huji.ac.il/w~ai/projects/2013/UlitmateTic-Tac-Toe/files/report.pdf)
+2026-09-13 — **CLOSED-DRAW** by §II ("in a tie if all squares have been exhausted"; free choice "if the
+board has already been won"), the 2 and the 5 confirmed in §V, and the weights there "chosen somewhat
+arbitrarily"; whether they are additive is still unstated)*. Ours is an adjusted association:
 **+0.195 utility** against the 256-simulation search estimate on 30 000 natural positions,
 game-clustered 95 % interval ≈ ± 0.028 (deep10 +0.196 ± 0.028; `_e4` +0.1953 ± 0.0278), falling to
 ≈ +0.08 … +0.12 with the immediate macro win in the model [8, 9]. It is not a price: in the same
@@ -189,10 +194,12 @@ UTTT solving attempt: a Rust PN / DFPN hybrid under CLOSED-DRAW, solving positio
 ply … in a few hours" on a Ryzen 3900X and estimating the full game at **a few hundred million
 CPU-hours** ($2M–$10M), with the note that he sees "no clear way to build endgame databases". Scale
 places that: the largest game weakly solved is Othello at ≈ 10²⁸, with exact databases at 36 and 50
-empties *(arXiv)*; checkers is ≈ 5 × 10²⁰ *(journal, Science 2007)* — against CLOSED UTTT's
-10³³–10³⁸ [unverified: this project's **heuristic** estimate, knowledge/06 §2] — five
-to ten orders above Othello's *if that estimate holds*, which is the only sense in which the
-comparison is offered. PN search aims "to produce a single boolean value"
+empties *(arXiv)*; checkers is ≈ 5 × 10²⁰ *(journal, Science 2007)*. No comparable count exists for
+CLOSED UTTT, and none is offered here: this project's own 10³³–10³⁸ (`knowledge/06` §2) multiplies
+independent per-board possibilities without inter-board reachability constraints, and §2 itself calls
+its lower end a heuristic per-board reduction and **not a bound** — so it cannot place UTTT on this
+scale, and the comparison with Othello is withdrawn from the manuscript (M1 rebuttal, 2026-09-13).
+PN search aims "to produce a single boolean value"
 *(docs)*, but from the mover's side the count tiebreak is still win / draw / loss (`uttt/solver.py
 solve()` returns −1 / 0 / +1), so draw-aware PNS suffices; Saffidine and Cazenave's MOPNS
 [no source type in the survey] and the 2025 generalised PN-MCTS of Kowalski et al.
@@ -212,10 +219,10 @@ optimal in 100 % — conditional on solved, a sampled measurement, not a milesto
 | First-player edge | CLOSED-COUNT | forum | 60 % for P1, in a bot arena's population | 62.7/20.7/16.6 %, `_e4` self-play, exploration on [24] | same order; different opponent population and an exploration floor |
 | Draws, tiebreak | CLOSED-DRAW | repo | 96 of 200 drawn (48 %) | a third *reach* the no-line terminal; the count **decides 16.5 %**, 16.6 % equal [25] | incomparable; ours new |
 | Game length | CLOSED-DRAW (uttt.ai) / unstated (FLAIRS-35) / CLOSED-COUNT (CG folk) | conf, blog, forum | 40–50 / ≥ 30 / 50–60 plies | 52.8 plies, p10 47, p90 59 [27] | adds the distribution and its drift |
-| Free move | unverified (course report) | course report, blog | one integer (2, against 5 for a board) | +0.195 ± 0.028, adjusted association [8] | new; not a price |
+| Free move | CLOSED-DRAW (course report, verified from the archived PDF) | course report, blog | one integer (2, against 5 for a board), weights "chosen somewhat arbitrarily" | +0.195 ± 0.028, adjusted association [8] | new; not a price |
 | Never send to a winnable board | CLOSED-DRAW | folk + docs | universal folk rule; nelhage's narrow theorem | the agent 24.6 % on unsolved positions, the optimal move 70.2 % on 4 791 solved ones [33] | the folk form is false; nelhage's holds. Two populations, not a paired contrast |
-| Centre board | unverified (course report) | course report, blog | centre board 10, any board 5, **corner** board 3; additivity unstated | deep10 +0.01 ± 0.04, `_e4` +0.032 ± 0.044 [35] | no resolved residual, lines controlled |
-| Exploitability | unverified (page unreachable) | thesis | self-play agents exploitable | not measured | related nets ≠ adversarial |
+| Centre board | CLOSED-DRAW (the same course report, verified from the archived PDF) | course report, blog | centre board 10, any board 5, **corner** board 3; additivity unstated | deep10 +0.01 ± 0.04, `_e4` +0.032 ± 0.044 [35] | no resolved residual, lines controlled |
+| Exploitability | CLOSED; terminal tiebreak unverified (thesis PDF recovered) | thesis | self-play agents exploitable | not measured | related nets ≠ adversarial |
 | Solved status | OPEN | arXiv | X wins ≤ 43 | exact ≤ 14–16 empties on **sampled** positions, optimal given solved [28] | not a solution, and not an established frontier |
 | Sample reuse | — (6×6 Othello for the sweep) | docs, conf | ≈ 1 (Lc0, KataGo published; the rest converted at ± 30 %); one sweep at a nominal 100–300 | +100, +64, +40; +211 [46, 51] | above practice; the prior sweep is a different game and a higher regime |
 | Scaling | — (Hex; Connect Four, Pentago) | arXiv, conf | 500 Elo/decade; models under-sized | update-limited at 2.46 M [44] | regime, not conflict; a parameter limit is not excluded |

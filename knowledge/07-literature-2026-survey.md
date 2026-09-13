@@ -252,7 +252,17 @@ least 30 moves, the MCTS cannot reach a depth that vastly outperforms random mov
 Toe"](https://thesis.unipd.it/handle/20.500.12608/86899) (MSc, Padua 2024/25) — DQN/DDQN/A2C/PPO,
 Elo and round-robins, **best-response training to measure exploitability**, finding "significant
 vulnerabilities in self-play agents", best residual DDQN 85 % against the other trained agents,
-no MCTS, no external baseline. Nothing peer-reviewed trains a serious AlphaZero for UTTT, and
+no MCTS, no external baseline. Its variant, from the
+[repository PDF](https://thesis.unipd.it/bitstream/20.500.12608/86899/1/D%27Alberton_Enrico.pdf)
+fetched 2026-09-13, is **CLOSED; terminal tiebreak unverified**. §3.0.1, p. 28: "if the required
+local board is already full or has been won, the next player can choose to play in any open cell on
+any available local board that has not been won or drawn" — won *and drawn* boards are closed to
+play; §6.1 repeats it ("any available position on any unfinished sub-board"). The stated global
+condition is a line of won boards, and no adjudication is given for a finished game with no such
+line; §6.1's reward is "1 for winning the global game, −1 for losing it, and 0 otherwise", so draws
+exist but their rule is not stated. Not CLOSED-COUNT on the evidence, and not CLOSED-DRAW either:
+only the executable terminal rule would settle it (M1 rebuttal, 2026-09-13).
+Nothing peer-reviewed trains a serious AlphaZero for UTTT, and
 nothing academic touches CLOSED/COUNT.
 
 **Bearing on this project.** The field has no shared benchmark. uttt.ai, SaltZero, tacult,
@@ -310,8 +320,22 @@ caveat that it is a different tiebreak and an uncalibrated scale.
   search pruning — not a soft heuristic.
 - **Heuristic weights as the only quantification** *(course reports, relayed on
   [BGG/SE](https://boardgames.stackexchange.com/questions/49291/strategy-for-ultimate-tic-tac-toe))*:
-  Lifshitz & Tsurel (HUJI 2016) weight winning the centre board 10, any board 5, a corner board
-  3, the centre square of a small board 3, and **being granted a free move 2**. Powell & Merrill
+  Lifshitz & Tsurel (HUJI) weight winning the centre board 10, any board 5, a corner board
+  3, the centre square of a small board 3, and **being granted a free move 2**. The report itself
+  was recovered from the Internet Archive on 2026-09-13
+  ([PDF](https://web.archive.org/web/20230503105450id_/https://www.cs.huji.ac.il/w~ai/projects/2013/UlitmateTic-Tac-Toe/files/report.pdf)),
+  so its variant is no longer unverified: **CLOSED-DRAW**. §II: "The game ends when one of the
+  players gets three symbols in a row in the large board, or in a tie if all squares have been
+  exhausted", and "If all squares in the small board have been exhausted, or if the board has
+  already been won, the player may choose to make his move anywhere on the board" — a draw terminal,
+  no count tiebreak. §V puts the 5 and the 10 and the 3 in *heur2* and the free move's 2 in *heur4*
+  ("if you are sent to a small board that is full or won you can play anywhere, so that add 2 points
+  to the heuristic"), which builds on *heur3*, heur2 memoised — so the 2-against-5 comparison is
+  internal to one evaluator — and states outright that "The weights of different features of these
+  heuristics were chosen somewhat arbitrarily". It remains a **course report** ("submitted as a final
+  requirement for the Artificial Intelligence course"), undated in its own text; the archive path
+  reads `projects/2013/`, so the "2016" this survey carried is unconfirmed (M1 rebuttal, 2026-09-13).
+  Powell & Merrill
   (2021) use a different scale (board 100, double threat +200, blocking win 150). These are
   hand-tuned integers in a static evaluator, not measured values.
 - **gPress** *(blog)*: "Never underestimate the power of a free move … Don't give up free moves
