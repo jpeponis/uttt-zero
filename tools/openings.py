@@ -48,6 +48,12 @@ def player(spec, sims, n, device, mode="gumbel", graph=True, c_scale=0.1, sym=Fa
     "0:32,24:96" (sims from ply). sym: evaluate all 8 D4 images and average (uttt.symmetry; 8x the inference cost).
     canon: one-call canonical evaluator (exactly equivariant at ~1.03x the cost; PLAN6 F1).
     tb: wrap the evaluator in the one-open-board tablebase (exact value and move where one board is open)."""
+    if spec.startswith("surrogate:") and rule != "count":
+        # uttt.surrogate is a learned model OF THE COUNT-RULE GAME, distilled from count-rule search; it has
+        # no terminal logic of its own to re-rule and would answer count-rule questions inside a draw-rule
+        # game. Refused rather than silently mixed (M2 row 6).
+        raise ValueError(f"a surrogate player is a learned model of the count-rule game and cannot be played under "
+                         f"rule {rule!r}: distil a {rule}-rule surrogate first, or play it under --rule count")
     if spec == "random":
         return RandomPlayer(device)
 

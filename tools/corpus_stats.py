@@ -12,7 +12,13 @@ decided the result. Games are replayed on the reference engine for the free-move
 mechanically — a game ends at the same ply under either rule (all boards closed, or a macro line),
 so every count-decided game (reason 2) becomes a draw (reason 3, winner 0) and nothing else moves.
 That is PLAN7 §5 K1's no-training control, and it claims nothing about how a draw-trained agent
-would have played. The reverse direction is not derivable from the stored records and is refused.
+would have played. The reverse direction is not derivable from the stored *outcome fields* and is refused;
+it is not impossible in principle, since every move is stored, but it requires replaying the saved moves
+(not implemented).
+
+The rule a corpus was generated under is read, never guessed: from a `rule` tag inside the game files
+(written from K1 on), else from the run's config.json (no `rule` key there = a pre-K1 count run). A
+directory with neither is refused unless --corpus_rule names its rule.
 """
 from __future__ import annotations
 
@@ -30,13 +36,49 @@ from uttt.game import UTTT  # noqa: E402
 from uttt.rules import RULES  # noqa: E402
 
 
-def corpus_rule(run: str) -> str:
-    """The rule the corpus was GENERATED under, from the run's config.json (pre-K1 runs: count)."""
+def games_rule(run: str) -> str | None:
+    """The rule recorded IN the game files themselves (uttt.train2 writes a 0-d `rule` array into every
+    games_NNNN.npz from K1 on), or None when no file carries one. np.load reads only the archive's
+    directory here, so this costs one open per file and no decompression."""
+    tags = set()
+    for f in sorted(glob.glob(os.path.join(run, "games", "games_*.npz"))):
+        with np.load(f) as z:
+            if "rule" in z.files:
+                tags.add(str(z["rule"]))
+    if not tags:
+        return None
+    if len(tags) > 1:
+        sys.exit(f"{run}/games holds files tagged with more than one rule {sorted(tags)}: it is not one corpus")
+    return tags.pop()
+
+
+def corpus_rule(run: str, override: str = "") -> str:
+    """The rule the corpus was GENERATED under.
+
+    Order: the tag inside the game files (authoritative — it travels with the data), then the run's
+    config.json (a missing `rule` key there means count, true of every pre-K1 run). A directory with
+    neither is NOT assumed to be count — an orphaned draw corpus would then be silently misread — and
+    the caller must name its rule with --corpus_rule (M2 row 6: the legacy fallback is restricted to
+    positively identified legacy artifacts, which is what a config.json is)."""
+    tag = games_rule(run)
     path = os.path.join(run, "config.json")
-    if not os.path.exists(path):
-        return "count"
-    with open(path) as f:
-        return json.load(f).get("rule", "count")
+    cfg_rule = None
+    if os.path.exists(path):
+        with open(path) as f:
+            cfg_rule = json.load(f).get("rule", "count")
+    if tag is not None:
+        if cfg_rule is not None and cfg_rule != tag:
+            sys.exit(f"{run}: config.json says rule {cfg_rule!r} but its game files are tagged {tag!r}")
+        return tag
+    if cfg_rule is not None:
+        return cfg_rule
+    if override:
+        if override not in RULES:
+            sys.exit(f"--corpus_rule must be one of {RULES}, got {override!r}")
+        return override
+    sys.exit(f"{run} has no config.json and none of its game files carries a rule tag, so the rule it was "
+             f"generated under cannot be established: pass --corpus_rule count|draw to say what it is "
+             f"(pre-K1 corpora are count, but an orphaned directory is not evidence of that)")
 
 
 def relabel(win: np.ndarray, reason: np.ndarray, src: str, dst: str):
@@ -44,8 +86,10 @@ def relabel(win: np.ndarray, reason: np.ndarray, src: str, dst: str):
     if src == dst:
         return win, reason, 0
     if not (src == "count" and dst == "draw"):
-        sys.exit(f"cannot read a {src}-rule corpus under {dst}: the stored records do not carry the board count "
-                 "(rebuild the corpus, or read it under its own rule)")
+        sys.exit(f"cannot read a {src}-rule corpus under {dst}: the stored outcome fields do not carry the board "
+                 "count, so the count-decided games cannot be picked out of the draws. The information is not lost "
+                 "— every move is stored — but recovering it requires replaying the saved moves (not implemented); "
+                 "read the corpus under its own rule instead")
     flip = reason == 2
     return np.where(flip, 0, win).astype(win.dtype), np.where(flip, 3, reason).astype(reason.dtype), int(flip.sum())
 
@@ -67,6 +111,8 @@ def main() -> None:
     ap.add_argument("--last", type=int, default=0, help="use only the last N game files")
     ap.add_argument("--replay", type=int, default=20000, help="max games to replay for free-move statistics")
     ap.add_argument("--rule", choices=RULES, default="count", help="terminal rule the corpus is READ under (see the module docstring)")
+    ap.add_argument("--corpus_rule", choices=RULES, default="", help="the rule the corpus was GENERATED under, for a "
+                    "directory with no config.json and no rule tag in its game files; otherwise it is read, not guessed")
     a = ap.parse_args()
     files = sorted(glob.glob(os.path.join(a.run, "games", "games_*.npz")))
     if a.last:
@@ -77,7 +123,7 @@ def main() -> None:
         moves.append(z["moves"]); rv.append(z["root_values"]); win.append(z["winners"]); reason.append(z["reasons"]); length.append(z["lengths"])
     moves, rv, win, reason, length = map(np.concatenate, (moves, rv, win, reason, length))
     G = len(win)
-    src = corpus_rule(a.run)
+    src = corpus_rule(a.run, a.corpus_rule)
     print(f"{G} games from {len(files)} files; generated under rule {src}, read under rule {a.rule}")
     if G == 0:
         return

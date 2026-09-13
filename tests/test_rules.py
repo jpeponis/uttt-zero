@@ -6,9 +6,12 @@ Wikipedia / uttt.ai / SaltZero / OpenSpiel variant, and the engines must agree o
 1. Regression. The batch engine reproduces tests/fixtures/count_engine_2000.npz — winners, end reasons,
    final macro and lengths of 2 000 seeded random games, recorded from the pre-K1 code — bit for bit
    under rule="count". Nothing below can pass by quietly changing what "count" means.
-2. Cross-engine. Reference and batch engines agree on the legal mask, the winner, the end reason and the
-   final macro over 100 000 random games under each rule. The same seed gives the same moves under both
-   rules — a game ends at the same ply either way — so the two runs differ only in the verdict.
+2. Cross-engine. Reference and batch engines agree over 100 000 random games under each rule: the legal mask
+   of every live game before every move, and — after EVERY ply, for every row including the ones already
+   finished — done, next_board, player and move_count; cells and macro every 8 plies and again at the end
+   (M2 row 18: terminal agreement alone can miss a divergence that a later move erases, and a finished row
+   whose state kept moving would be a real fault). The same seed gives the same moves under both rules — a
+   game ends at the same ply either way — so the two runs differ only in the verdict.
 3. Hand-made terminals. A 4-4 board count with one drawn board is a draw under both rules; a 5-3 count
    with no macro line is an X win under "count" and a draw under "draw"; a macro line wins under both,
    even when the line's owner is 2-5 down on boards.
@@ -74,7 +77,25 @@ def test_draw_relabels_exactly_the_count_endings():
 
 
 # ---- 2. the two engines agree, under each rule ----------------------------------------------------
-def cross_check(rule, games, seeds, device="cpu"):
+def compare_states(b, refs, rule, seed, ply, with_cells):
+    """Every row of the batch engine against the reference games after one ply, FINISHED ROWS INCLUDED: a
+    finished game whose state kept moving on one engine and not the other is a fault the end-of-game
+    comparison cannot see (M2 row 18). cells and macro only on the sampled plies, to bound the cost."""
+    n = len(refs)
+    fields = [("done", b.done.cpu().numpy(), np.fromiter((g.done for g in refs), bool, n)),
+              ("next_board", b.next_board.cpu().numpy(), np.fromiter((g.next_board for g in refs), np.int64, n)),
+              ("player", b.player.cpu().numpy(), np.fromiter((g.player for g in refs), np.int64, n)),
+              ("move_count", b.move_count.cpu().numpy(), np.fromiter((g.move_count for g in refs), np.int64, n))]
+    if with_cells:
+        fields += [("cells", b.cells.cpu().numpy(), np.stack([g.cells for g in refs])),
+                   ("macro", b.macro.cpu().numpy(), np.stack([g.macro for g in refs]))]
+    for name, got, want in fields:
+        bad = np.flatnonzero((got != want).reshape(n, -1).any(1))
+        assert bad.size == 0, (f"{name} mismatch ({rule}, seed {seed}, ply {ply}, {bad.size} games, first {int(bad[0])}: "
+                               f"batch {got[int(bad[0])]} vs reference {want[int(bad[0])]})\n{refs[int(bad[0])]}")
+
+
+def cross_check(rule, games, seeds, device="cpu", state_every=8):
     """games x seeds random games: batch engine against the reference engine, move by move."""
     t0 = time.perf_counter()
     counts = {1: 0, 2: 0, 3: 0}
@@ -82,8 +103,11 @@ def cross_check(rule, games, seeds, device="cpu"):
         rng = np.random.default_rng(1000 + seed)
         b = BatchUTTT(games, device, rule)
         refs = [UTTT(rule) for _ in range(games)]
+        ply = 0
         while not bool(b.done.all()):
             legal = b.legal_mask().cpu().numpy()
+            done_b = b.done.cpu().numpy()
+            assert not legal[done_b].any(), f"the batch engine offers legal moves in a finished game ({rule}, seed {seed}, ply {ply})"
             u = rng.random((games, 81))
             moves = np.where(legal, u, -1.0).argmax(1)
             for i, g in enumerate(refs):
@@ -91,6 +115,9 @@ def cross_check(rule, games, seeds, device="cpu"):
                     assert np.array_equal(legal[i], g.legal_mask()), f"legal mask mismatch ({rule}, seed {seed}, game {i})"
                     g.play(int(moves[i]))
             b.step(torch.from_numpy(moves).to(device))
+            ply += 1
+            finished = bool(b.done.all())
+            compare_states(b, refs, rule, seed, ply, with_cells=finished or ply % state_every == 0)
         win, reason, macro = b.winner.cpu().numpy(), b.end_reason.cpu().numpy(), b.macro.cpu().numpy()
         for i, g in enumerate(refs):
             assert g.done and bool(b.done[i])
@@ -99,8 +126,9 @@ def cross_check(rule, games, seeds, device="cpu"):
             assert np.array_equal(macro[i], g.macro)
             counts[int(reason[i])] += 1
     assert (counts[2] == 0) == (rule == "draw"), f"rule {rule} produced {counts[2]} count endings"
-    print(f"  {rule:5s}: {games * seeds} random games, both engines agree on the legal mask, winner, end reason "
-          f"and final macro (line {counts[1]}, count {counts[2]}, draw {counts[3]})  [{time.perf_counter() - t0:.0f}s]")
+    print(f"  {rule:5s}: {games * seeds} random games, both engines agree on the legal mask and, after every ply, on "
+          f"done / next_board / player / move_count (cells and macro every {state_every} plies and at the end), plus "
+          f"winner and end reason (line {counts[1]}, count {counts[2]}, draw {counts[3]})  [{time.perf_counter() - t0:.0f}s]")
     return counts
 
 

@@ -30,7 +30,7 @@ from uttt.infer import FusedEvaluator  # noqa: E402
 from uttt.model import load_checkpoint  # noqa: E402
 from uttt.game import UTTT  # noqa: E402
 from uttt.openings import canonical, compose, inverse, orbit_representatives, reply_orbits, transform_move  # noqa: E402
-from uttt.rules import RULES, tag_path  # noqa: E402
+from uttt.rules import RULES, check_rule, tag_path  # noqa: E402
 from uttt.search import BatchedSearch, SearchConfig  # noqa: E402
 from uttt.symmetry import SymmetryAveragedEvaluator  # noqa: E402
 
@@ -148,9 +148,18 @@ def audit(nodes: dict) -> dict:
             "clean": not any(bad.values())}
 
 
-def paired_stats(path: str) -> dict:
-    """Per first-move orbit representative: X's mean score and draw share over the paired games that start with it."""
+def paired_stats(path: str, rule: str = "count") -> dict:
+    """Per first-move orbit representative: X's mean score and draw share over the paired games that start with it.
+
+    The paired file records the rule its games were PLAYED under (tools/openings.py match). A draw-rule match's
+    scores and draw shares cannot be attached to a count-rule book: the refusal is here rather than at reading
+    time, because nothing downstream of this function can tell the two apart (M2 row 6). A file with no "rule"
+    key predates K1 and is count."""
     d = json.load(open(path))
+    paired_rule = d.get("rule", "count")
+    if paired_rule != check_rule(rule):
+        sys.exit(f"{path} holds games played under rule {paired_rule!r} and this book is built under {rule!r}: "
+                 f"rerun tools/openings.py match --rule {rule}, or build the book under {paired_rule}")
     acc = {}
     for o in d["openings"]:
         if not o["moves"]:
@@ -224,6 +233,7 @@ def main() -> None:
     ap.add_argument("--device", default="cuda:0")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
+    paired = paired_stats(a.paired, a.rule) if a.paired else None  # its rule is checked before the hours of search
     device = torch.device(a.device)
     t0 = time.perf_counter()
     fe = FusedEvaluator(load_checkpoint(a.net, device), device)
@@ -237,7 +247,6 @@ def main() -> None:
     out = tag_path(a.out, a.rule)
     with open(out, "w") as f:
         json.dump({"meta": meta, "nodes": nodes}, f, indent=1)
-    paired = paired_stats(a.paired) if a.paired else None
     other = json.load(open(a.compare)) if a.compare else None
     md = markdown(nodes, meta, paired, other)
     md_path = os.path.splitext(out)[0] + ".md"

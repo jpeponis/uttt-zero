@@ -10,6 +10,15 @@ divergence of the policy across the 8 orientations, mean std of the value). Writ
 <run>/timeline.png with the LR drops marked. Held-out positions come from another run's games (PLAN5 §8).
 When <run>/eval_full.jsonl exists (tools/eval_worker.py, PLAN6 E7), the full-suite scores and CIs of every
 evaluated checkpoint are carried as full_<anchor> / full_ci_<anchor> and drawn with error bars on the score panel.
+
+--rule count|draw is the rule the checkpoints are READ under: the endgame set must have been solved under it
+and the held-out corpus generated under it, and neither is inferred. The run's own training rule is printed
+beside it and never substituted for it. The outputs take the rule tag (timeline_draw.json / .png) and the
+eval_full ledger read is that rule's, so two readings of one run cannot overwrite each other (PLAN7 §5 K1).
+
+first_top_share / first_top_move / first_entropy_bits are the RAW policy on the empty board, not the agent's
+generated self-play top-move share at its training budget; the two differ (M2 row 7, whose remedy is in
+tools/empty_board.py, which prints the log's generated share beside this one).
 """
 from __future__ import annotations
 
@@ -25,11 +34,13 @@ import torch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.dirname(__file__))
+from corpus_stats import corpus_rule  # noqa: E402
 from freemove import sample_positions  # noqa: E402
 from uttt.batch import SYM_CELL, BatchUTTT, apply_symmetry  # noqa: E402
 from uttt.endgame import EndgameSet, breakdown, evaluate  # noqa: E402
 from uttt.infer import FusedEvaluator  # noqa: E402
 from uttt.model import load_checkpoint  # noqa: E402
+from uttt.rules import RULES, tag_path  # noqa: E402
 
 PLY_BUCKETS = ((0, 7), (8, 19), (20, 31), (32, 43), (44, 80))
 
@@ -87,6 +98,8 @@ def main() -> None:
     ap.add_argument("--n", type=int, default=20000)
     ap.add_argument("--n_sym", type=int, default=4096, help="positions for the D4-consistency measure")
     ap.add_argument("--set", default="suites/endgame_v1.npz")
+    ap.add_argument("--rule", choices=RULES, default="count", help="terminal rule the checkpoints are read under (the set must be solved under it)")
+    ap.add_argument("--corpus_rule", choices=RULES, default="", help="the held-out corpus's rule, when its directory records none")
     ap.add_argument("--device", default="cuda:1")
     ap.add_argument("--only", default="", help="comma-separated iterations to restrict to, e.g. 20,300")
     ap.add_argument("--no_fig", action="store_true")
@@ -101,17 +114,26 @@ def main() -> None:
         sys.exit(f"no checkpoints net_NNNN.pt in {a.run}")
     log = {r["iter"] + 1: r for r in map(json.loads, open(os.path.join(a.run, "log.jsonl")))}  # net_NNNN is saved after log iter NNNN-1
     cfg = json.load(open(os.path.join(a.run, "config.json")))
+    run_rule = cfg.get("rule", "count")  # the run's TRAINING rule: printed beside --rule, never substituted for it
     anchors = sorted({k[3:] for r in log.values() for k in r if k.startswith("vs_")})
-    full_path = os.path.join(a.run, "eval_full.jsonl")
+    full_path = tag_path(os.path.join(a.run, "eval_full.jsonl"), a.rule)
     full = {r["iter"]: r for r in map(json.loads, open(full_path))} if os.path.exists(full_path) else {}
     full_anchors = sorted({k for r in full.values() for k in r["anchors"]})
+    corpus_src = corpus_rule(a.corpus, a.corpus_rule)
+    if corpus_src != a.rule:
+        sys.exit(f"{a.corpus} was generated under rule {corpus_src!r} and --rule is {a.rule!r}: the held-out policy "
+                 f"statistics would then be read off another rule's positions. Point --corpus at a {a.rule}-rule run.")
     files = sorted(glob.glob(os.path.join(a.corpus, "games", "games_*.npz")))[-a.last :]
-    rows = sample_positions(files, 4, 0, 80, a.n, np.random.default_rng(0))
+    rows = sample_positions(files, 4, 0, 80, a.n, np.random.default_rng(0), a.rule)
     ply = np.array([r[1] for r in rows])
     cells, macro, nb, player = state_tensors(rows, device)
     es = EndgameSet.load(a.set)
-    empty = BatchUTTT(1, device)
-    print(f"{a.run}: {len(ckpts)} checkpoints; {len(rows)} held-out positions from {len(files)} files of {a.corpus}; endgame set {es.meta['name']} ({es.n})")
+    if es.rule != a.rule:  # up front, not on the first checkpoint's evaluate() call
+        sys.exit(f"endgame set {a.set} was solved under rule {es.rule!r} and --rule is {a.rule!r}: build a "
+                 f"{a.rule}-rule set with tools/endgame.py build --rule {a.rule}.")
+    empty = BatchUTTT(1, device, a.rule)
+    print(f"{a.run}: {len(ckpts)} checkpoints; {len(rows)} held-out positions from {len(files)} files of {a.corpus}; "
+          f"endgame set {es.meta['name']} ({es.n}); read under rule {a.rule} (the run trained under {run_rule})")
     out = []
     for p in ckpts:
         it = int(os.path.basename(p)[4:8])
@@ -124,9 +146,10 @@ def main() -> None:
         for k, v in full.get(it, {}).get("anchors", {}).items():
             rec["full_" + k], rec["full_ci_" + k] = v["score"], v["ci"]
         rec["lr"] = lr.get("lr")
-        r0 = evaluate(fe, es, device, sims=(), n_boot=100, symmetrise=False)["rows"][0]
+        r0 = evaluate(fe, es, device, sims=(), n_boot=100, symmetrise=False, rule=a.rule)["rows"][0]
         rec.update(eg_wdl_acc=r0["wdl_acc"], eg_draw_recognition=breakdown(es, r0, "wdl_acc")["draw"][0], eg_regret=r0["regret"], eg_optimal=r0["optimal"])
         probs, _ = fe(empty.cells, empty.macro, empty.next_board, empty.player, empty.done)
+        # the RAW policy on the empty board, not the generated self-play top-move share (M2 row 7)
         rec.update(first_entropy_bits=float(entropy_bits(probs)[0]), first_top_share=float(probs.max()), first_top_move=int(probs.argmax()))
         ent, val = policy_stats(fe, cells, macro, nb, player)
         rec["entropy_by_ply"] = {f"{lo}-{hi}": float(ent[(ply >= lo) & (ply <= hi)].mean()) for lo, hi in PLY_BUCKETS}
@@ -142,15 +165,18 @@ def main() -> None:
               f"| first move [{rec['first_top_move']}] top1 {rec['first_top_share']:.2f} H {rec['first_entropy_bits']:.2f}b "
               f"| H by ply " + " ".join(f"{v:.2f}" for v in rec["entropy_by_ply"].values())
               + f" | D4 JS {rec['d4_policy_js_bits']:.3f}b vstd {rec['d4_value_std']:.3f}  ({time.perf_counter() - t0:.0f}s)", flush=True)
-    meta = {"run": a.run, "corpus": a.corpus, "corpus_files": [os.path.basename(f) for f in files], "n_positions": len(rows), "n_sym": a.n_sym,
+    meta = {"run": a.run, "rule": a.rule, "run_rule": run_rule, "corpus": a.corpus, "corpus_rule": corpus_src,
+            "corpus_files": [os.path.basename(f) for f in files], "n_positions": len(rows), "n_sym": a.n_sym,
             "endgame_set": a.set, "lr_drops": cfg.get("lr_drops", ""), "anchors": anchors, "full_anchors": full_anchors,
-            "ply_buckets": [list(b) for b in PLY_BUCKETS]}
-    path = os.path.join(a.run, "timeline.json")
+            "ply_buckets": [list(b) for b in PLY_BUCKETS],
+            "first_move_note": "first_top_share / first_top_move / first_entropy_bits are the raw policy on the "
+                               "empty board, not the generated self-play top-move share (M2 row 7)"}
+    path = tag_path(os.path.join(a.run, "timeline.json"), a.rule)
     with open(path, "w") as f:
         json.dump({"meta": meta, "rows": out}, f, indent=1)
     print(f"wrote {path}  [{time.perf_counter() - t0:.0f}s]")
     if not a.no_fig:
-        plot(out, meta, os.path.join(a.run, "timeline.png"))
+        plot(out, meta, tag_path(os.path.join(a.run, "timeline.png"), a.rule))
 
 
 def plot(rows, meta, path) -> None:

@@ -268,8 +268,10 @@ def evaluate(fe, es: EndgameSet, device, sims=(32, 64, 256), n_boot: int = 2000,
              graph: bool = True, search_cache: dict | None = None, rule: str = "count") -> dict:
     """Score a FusedEvaluator (raw heads) and the v2 search at the given budgets on the set.
 
-    search_cache: optional {sims: BatchedSearch} dict a repeated caller (train2.EvalKit) owns, so the
-    search objects and their CUDA graphs are built once and reused instead of churned per call."""
+    search_cache: optional {(sims, rule): BatchedSearch} dict a repeated caller (train2.EvalKit) owns, so the
+    search objects and their CUDA graphs are built once and reused instead of churned per call. The rule is
+    part of the key: keyed by sims alone, one process that graded a count set and then a draw set would have
+    reused the count-rule trees for both (M2 row 1)."""
     from .search import BatchedSearch, SearchConfig
 
     if check_rule(rule) != es.rule:
@@ -286,22 +288,29 @@ def evaluate(fe, es: EndgameSet, device, sims=(32, 64, 256), n_boot: int = 2000,
         wdl_s = wdl_probs(fe, cells, macro, nb, player, symmetrise=True).cpu().numpy()
         rows.append(_row(es, "raw net, symmetry-averaged WDL", wdl_s, None, None, n_boot))
     for s in sims:
-        bs = search_cache.get(s) if search_cache is not None else None
+        bs = search_cache.get((s, rule)) if search_cache is not None else None
         if bs is None:
             scfg = SearchConfig(n_sims=s, mode="gumbel", gumbel_scale=0.0, cuda_graph=graph and device.type == "cuda", depth_cap=min(s, 24))
             bs = BatchedSearch(fe, n, scfg, device, rule=rule)
             if search_cache is not None:
-                search_cache[s] = bs
+                search_cache[(s, rule)] = bs
+        assert bs.rule == rule, f"cached search expands under rule {bs.rule!r}, asked for {rule!r}"
         r = bs.search(cells, macro, nb, player, done, winner, selfplay=False)
         rows.append(_row(es, f"search {s} sims", None, r.root_value.cpu().numpy(), r.action.cpu().numpy(), n_boot))
     return {"rows": rows, "n": n, "rule": rule}
 
 
-def evaluate_rollout(player_fn, es: EndgameSet, n_boot: int = 2000) -> dict:
-    """Score an arbitrary batch player (e.g. RolloutPlayer) on action regret; player_fn(BatchUTTT) -> moves."""
+def evaluate_rollout(player_fn, es: EndgameSet, n_boot: int = 2000, rule: str = "count") -> dict:
+    """Score an arbitrary batch player (e.g. RolloutPlayer) on action regret; player_fn(BatchUTTT) -> moves.
+
+    The evaluation rule is an explicit argument, checked against the set's, exactly as evaluate() does — it
+    used to be inferred from es.rule, the one place in this module that read a rule instead of being told
+    one (M2 row 9). The caller must also build player_fn under `rule`; nothing here can check that."""
     from .batch import BatchUTTT
 
-    g = BatchUTTT(es.n, "cpu", es.rule)
+    if check_rule(rule) != es.rule:
+        raise ValueError(f"endgame set {es.meta.get('name')} was solved under rule {es.rule!r}; cannot evaluate under {rule!r}")
+    g = BatchUTTT(es.n, "cpu", rule)
     g.cells[:] = torch.from_numpy(es.cells)
     g.macro[:] = torch.from_numpy(es.macro)
     g.next_board[:] = torch.from_numpy(es.next_board)

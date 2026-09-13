@@ -11,6 +11,11 @@ the test slice is sealed until the end of Phase G: G tools take --split dev). Te
 value and the uniform-over-optimal-moves policy where the position has <= --max_exact empties in open boards
 (uttt.solver). Reports the canonical-position overlap between the splits (64-bit symmetric hash; collisions
 negligible at this size). Everything is stored from the side to move's perspective, as the replay buffer does.
+
+--rule count|draw is the rule the games are replayed under, the teacher's trees expand under and the exact
+labels are solved under; the corpus must have been generated under it, the dataset records it and a non-count
+rule tags the output name. Three of the four label kinds here decide a terminal value, so a rule mismatch
+would be a silent mixture rather than a cosmetic one (PLAN7 §5 K1).
 """
 from __future__ import annotations
 
@@ -20,16 +25,20 @@ import json
 import os
 import sys
 import time
+from functools import partial
 from multiprocessing import Pool
 
 import numpy as np
 import torch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.dirname(__file__))
+from corpus_stats import corpus_rule  # noqa: E402
 from uttt.batch import BatchUTTT  # noqa: E402
 from uttt.exact import empties_in_open_boards_t  # noqa: E402
 from uttt.infer import FusedEvaluator  # noqa: E402
 from uttt.model import load_checkpoint  # noqa: E402
+from uttt.rules import RULES, tag_path  # noqa: E402
 from uttt.search import BatchedSearch, SearchConfig  # noqa: E402
 from uttt.selfplay_cont import position_hash_sym  # noqa: E402
 from uttt.solver import solve_batch  # noqa: E402
@@ -54,7 +63,7 @@ def sample_pairs(lengths: np.ndarray, n: int, rng: np.random.Generator) -> np.nd
 
 
 @torch.no_grad()
-def replay_positions(moves: np.ndarray, pairs: np.ndarray, device, chunk: int = 20000):
+def replay_positions(moves: np.ndarray, pairs: np.ndarray, device, chunk: int = 20000, rule: str = "count"):
     """Reconstruct the sampled positions by stepping the games in lockstep on the batched engine."""
     out = {k: [] for k in ("cells", "macro", "next_board", "player")}
     order = []
@@ -64,7 +73,7 @@ def replay_positions(moves: np.ndarray, pairs: np.ndarray, device, chunk: int = 
         sel = pairs[(pairs[:, 0] >= g0) & (pairs[:, 0] < g0 + n)]
         want = torch.zeros(n, 82, dtype=torch.bool, device=device)
         want[torch.from_numpy(sel[:, 0] - g0).to(device), torch.from_numpy(sel[:, 1]).to(device)] = True
-        g = BatchUTTT(n, device)
+        g = BatchUTTT(n, device, rule)
         for t in range(82):
             m = want[:, t]
             if bool(m.any()):
@@ -81,11 +90,11 @@ def replay_positions(moves: np.ndarray, pairs: np.ndarray, device, chunk: int = 
 
 
 @torch.no_grad()
-def teach(ev, pos: dict, sims: int, device, batch: int = 4096, log=print):
+def teach(ev, pos: dict, sims: int, device, batch: int = 4096, log=print, rule: str = "count"):
     """Search policy / value and raw policy / value for every position, in fixed-shape batches (graphs captured once)."""
     N = pos["cells"].shape[0]
     cfg = SearchConfig(n_sims=sims, mode="gumbel", gumbel_scale=0.0, cuda_graph=device.type == "cuda", depth_cap=min(sims, 24))
-    s = BatchedSearch(ev, batch, cfg, device)
+    s = BatchedSearch(ev, batch, cfg, device, rule=rule)
     pol = torch.zeros(N, 81, dtype=torch.float16, device=device)
     val = torch.zeros(N, device=device)
     raw_p = torch.zeros(N, 81, dtype=torch.float16, device=device)
@@ -94,7 +103,7 @@ def teach(ev, pos: dict, sims: int, device, batch: int = 4096, log=print):
     for i in range(0, N, batch):
         sl = slice(i, min(i + batch, N))
         n = sl.stop - sl.start
-        g = BatchUTTT(batch, device)
+        g = BatchUTTT(batch, device, rule)
         for k in ("cells", "macro", "next_board", "player"):
             getattr(g, k)[:n] = pos[k][sl]
         rp, rv = ev(g.cells, g.macro, g.next_board, g.player, g.done)
@@ -120,11 +129,18 @@ def main() -> None:
     ap.add_argument("--processes", type=int, default=8)
     ap.add_argument("--batch", type=int, default=4096)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--rule", choices=RULES, default="count", help="terminal rule the replay, the teacher search and the exact labels use")
+    ap.add_argument("--corpus_rule", choices=RULES, default="", help="the corpus rule, when its directory records none")
     ap.add_argument("--device", default="cuda:0")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
-    if os.path.exists(a.out):
-        sys.exit(f"refusing to overwrite {a.out}: a rebuilt dataset is a different one; pick a new name")
+    out_path = tag_path(a.out, a.rule)  # a second rule writes beside the first, never over it
+    if os.path.exists(out_path):
+        sys.exit(f"refusing to overwrite {out_path}: a rebuilt dataset is a different one; pick a new name")
+    corpus_src = corpus_rule(a.corpus, a.corpus_rule)
+    if corpus_src != a.rule:
+        sys.exit(f"{a.corpus} was generated under rule {corpus_src!r} and --rule is {a.rule!r}: the teacher would "
+                 f"label another rule's positions. Point --corpus at a {a.rule}-rule run.")
     device = torch.device(a.device)
     torch.manual_seed(a.seed)
     rng = np.random.default_rng(a.seed)
@@ -134,7 +150,7 @@ def main() -> None:
     lengths = np.concatenate([np.load(f)["lengths"] for f in files]).astype(np.int64)
     pairs = sample_pairs(lengths, a.n, rng)
     print(f"{len(lengths)} games in {len(files)} files of {a.corpus}; {len(pairs)} positions sampled by the ply mixture {MIXTURE}", flush=True)
-    pos, order = replay_positions(moves, pairs, device)
+    pos, order = replay_positions(moves, pairs, device, rule=a.rule)
     N = pos["cells"].shape[0]
     game_id, ply = order[:, 0], order[:, 1]
     # split by game, 80 / 10 / 10
@@ -153,7 +169,7 @@ def main() -> None:
     # teacher
     fe = FusedEvaluator(load_checkpoint(a.teacher, device), device)
     ev = fe if a.no_sym else SymmetryAveragedEvaluator(fe)
-    pol, val, raw_p, raw_v = teach(ev, pos, a.sims, device, a.batch)
+    pol, val, raw_p, raw_v = teach(ev, pos, a.sims, device, a.batch, rule=a.rule)
     print(f"teacher labels done ({time.perf_counter() - t0:.0f}s)", flush=True)
     # exact labels
     empt = empties_in_open_boards_t(pos["cells"], pos["macro"]).cpu().numpy()
@@ -164,20 +180,20 @@ def main() -> None:
         c, m, nb, p = (pos[k].cpu().numpy() for k in ("cells", "macro", "next_board", "player"))
         chunks = [(c[ex[i : i + 64]], m[ex[i : i + 64]], nb[ex[i : i + 64]], p[ex[i : i + 64]]) for i in range(0, len(ex), 64)]
         with Pool(a.processes) as pool:
-            for j, (v, pp) in enumerate(pool.imap(solve_batch, chunks, chunksize=4)):
+            for j, (v, pp) in enumerate(pool.imap(partial(solve_batch, rule=a.rule), chunks, chunksize=4)):
                 sl = ex[j * 64 : j * 64 + len(v)]
                 exact_v[sl], exact_p[sl] = v, pp
     print(f"exact labels for {len(ex)} positions with <= {a.max_exact} empties ({time.perf_counter() - t0:.0f}s)", flush=True)
-    meta = {"corpus": a.corpus, "files": [os.path.basename(f) for f in files], "n": N, "mixture": MIXTURE, "ply_buckets": PLY_BUCKETS,
+    meta = {"rule": a.rule, "corpus": a.corpus, "corpus_rule": corpus_src, "files": [os.path.basename(f) for f in files], "n": N, "mixture": MIXTURE, "ply_buckets": PLY_BUCKETS,
             "teacher": a.teacher, "sims": a.sims, "symmetry_averaged": not a.no_sym, "max_exact": a.max_exact, "seed": a.seed,
             "split": "0 train / 1 dev / 2 test (by source game; test sealed until the end of PLAN6 Phase G)",
             "overlap": overlap, "built": time.strftime("%Y-%m-%d %H:%M"), "seconds": round(time.perf_counter() - t0)}
-    np.savez_compressed(a.out, cells=pos["cells"].cpu().numpy(), macro=pos["macro"].cpu().numpy(), next_board=pos["next_board"].cpu().numpy(),
+    np.savez_compressed(out_path, cells=pos["cells"].cpu().numpy(), macro=pos["macro"].cpu().numpy(), next_board=pos["next_board"].cpu().numpy(),
                         player=pos["player"].cpu().numpy(), ply=ply.astype(np.int16), game_id=game_id.astype(np.int64), split=split,
                         empties=empt.astype(np.int16), teacher_policy=pol.cpu().numpy(), teacher_value=val.cpu().numpy(),
                         raw_policy=raw_p.cpu().numpy(), raw_value=raw_v.cpu().numpy(), exact_value=exact_v, exact_policy=exact_p,
                         meta=np.array(json.dumps(meta)))
-    print(f"wrote {a.out}: {N} positions  [{time.perf_counter() - t0:.0f}s]")
+    print(f"wrote {out_path}: {N} positions  [{time.perf_counter() - t0:.0f}s]")
 
 
 if __name__ == "__main__":

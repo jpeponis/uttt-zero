@@ -54,6 +54,10 @@ class TrainConfig:
     sample_moves: int = 8  # plies sampled from the improved policy (opening diversity)
     sample_uniform: float = 0.0  # exploration floor mixed into the sampling distribution during those plies
     temperature: float = 1.0
+    # Gumbel noise scale at the root of a self-play search. Every run so far trained at SearchConfig's own
+    # default of 1.0, which train2 never set and so never recorded; this field records it and passes it
+    # explicitly. 1.0 is therefore documentation of the recipe, not an intervention (PLAN7 §7e M2 row 5).
+    gumbel_scale: float = 1.0
     sims_schedule: str = ""  # e.g. "60:64,110:96": simulations per move from the given iteration on
     root_prior_floor: float = 0.03
     c_scale: float = 0.1
@@ -248,17 +252,35 @@ def main(cfg: TrainConfig) -> None:
     torch.manual_seed(cfg.seed)
     torch.backends.cudnn.benchmark = True
     device = torch.device(cfg.device)
-    os.makedirs(os.path.join(cfg.run, "games"), exist_ok=True)
-    attempt = len([f for f in os.listdir(cfg.run) if f.startswith("config_resume_")])  # 0 = the original launch
     cfg_path = os.path.join(cfg.run, "config.json")
+    old = None
     if os.path.exists(cfg_path):
-        attempt += 1
-    info = dict(asdict(cfg), _provenance={"argv": sys.argv[1:], "torch": torch.__version__, "git": _git_rev(),
-                                          "started": time.strftime("%Y-%m-%d %H:%M:%S"), "attempt": attempt, "rule": cfg.rule,
-                                          "device_name": torch.cuda.get_device_name(device) if device.type == "cuda" else "cpu"})
-    if os.path.exists(cfg_path):  # never clobber the original run config; record every (re)invocation beside it
         with open(cfg_path) as f:
             old = json.load(f)
+        # A cross-rule resume is refused HERE: before config_resume_*.json is written and before any
+        # checkpoint, optimizer state or replay buffer is loaded. The buffer's values, the exact labels
+        # and the trees behind them were decided under the run's own rule; continuing under another one
+        # mixes incompatible labels while config.json still describes the original corpus (M2 row 1).
+        # A config.json with no "rule" key is a pre-K1 run, which is count by construction.
+        if old.get("rule", "count") != cfg.rule:
+            raise ValueError(f"{cfg_path} records rule {old.get('rule', 'count')!r} and this invocation asks for "
+                             f"{cfg.rule!r}: a run cannot change its terminal rule mid-flight (its buffer, exact labels "
+                             f"and checkpoints were made under the recorded rule). Resume with --rule "
+                             f"{old.get('rule', 'count')}, or start a new run directory for {cfg.rule!r}.")
+    os.makedirs(os.path.join(cfg.run, "games"), exist_ok=True)
+    attempt = len([f for f in os.listdir(cfg.run) if f.startswith("config_resume_")])  # 0 = the original launch
+    if old is not None:
+        attempt += 1
+    # the self-play search configuration, resolved (inherited defaults included), before info is written
+    scfg = SearchConfig(n_sims=cfg.sims, mode=cfg.mode, sample_moves=cfg.sample_moves, temperature=cfg.temperature,
+                        sample_uniform=cfg.sample_uniform, root_prior_floor=cfg.root_prior_floor, c_scale=cfg.c_scale,
+                        gumbel_scale=cfg.gumbel_scale,
+                        cuda_graph=bool(cfg.cuda_graph), depth_cap=cfg.depth_cap if cfg.cuda_graph else 32)
+    info = dict(asdict(cfg), _provenance={"argv": sys.argv[1:], "torch": torch.__version__, "git": _git_rev(),
+                                          "started": time.strftime("%Y-%m-%d %H:%M:%S"), "attempt": attempt, "rule": cfg.rule,
+                                          "search_config": asdict(scfg),  # every exploration knob, defaults included (M2 row 5)
+                                          "device_name": torch.cuda.get_device_name(device) if device.type == "cuda" else "cpu"})
+    if old is not None:  # never clobber the original run config; record every (re)invocation beside it
         if {k: v for k, v in old.items() if not k.startswith("_")} != asdict(cfg):
             print(f"WARNING: this invocation's config differs from {cfg_path}; the original is kept, "
                   "this one is recorded as config_resume_*.json", flush=True)
@@ -274,9 +296,6 @@ def main(cfg: TrainConfig) -> None:
     opt = torch.optim.SGD(net.parameters(), lr=cfg.lr, momentum=cfg.momentum, weight_decay=cfg.wd, nesterov=True)
     scaler = torch.amp.GradScaler("cuda")
     buf = GPUReplayBuffer(cfg.buffer, device, generator=gens["buffer"])
-    scfg = SearchConfig(n_sims=cfg.sims, mode=cfg.mode, sample_moves=cfg.sample_moves, temperature=cfg.temperature,
-                        sample_uniform=cfg.sample_uniform, root_prior_floor=cfg.root_prior_floor, c_scale=cfg.c_scale,
-                        cuda_graph=bool(cfg.cuda_graph), depth_cap=cfg.depth_cap if cfg.cuda_graph else 32)
     fe = FusedEvaluator(net, device)
     sp = ContinuousSelfPlay(fe, cfg.games, scfg, device, sym_hash=bool(cfg.dedup_sym), generator=gens["selfplay"], rule=cfg.rule)
     def anchor_name(p):  # runs/dev1/net_0200.pt -> dev1_net_0200 (two runs may share a checkpoint name)
@@ -356,7 +375,9 @@ def main(cfg: TrainConfig) -> None:
         teacher_step = global_step  # the weights that generated this iteration's games (E8)
         pos, games, stats = sp.run(cfg.steps)
         t_sp = time.perf_counter() - t0
-        np.savez_compressed(os.path.join(cfg.run, "games", f"games_{it:04d}.npz"), **games)
+        # rule: a 0-d string array, so a corpus identifies itself without its run directory (M2 row 6).
+        # Pre-K1 files carry no such entry and are read as count through config.json (tools/corpus_stats.corpus_rule).
+        np.savez_compressed(os.path.join(cfg.run, "games", f"games_{it:04d}.npz"), rule=np.array(cfg.rule), **games)
         n_new = buf.add(pos) if pos["cells"] is not None else 0
         n_submitted = labeler.submit(pos, buf.last_slots) if (labeler and n_new) else 0
         dup = buf.update_weights(cfg.dedup_alpha, cfg.exact_weight, cfg.dedup_alpha_early)
