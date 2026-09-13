@@ -19,12 +19,15 @@ Read in this order:
 
 1. **This file** — what the project is, its current state, where things live, how to
    run it.
-2. **`PLAN6.md`** — the live plan: the outside review adjudicated finding by finding (§1),
-   then the work in order — repair the analysis instrument (Phase E), cheap measurements
-   (F), the frozen-teacher architecture study (G) and the training runs to propose (H). Its
+2. **`PLAN7.md`** — the live plan: the write-up. What the paper is (one paper, working title
+   *"A strength-audited self-play analysis of closed-board, most-boards Ultimate
+   Tic-Tac-Toe"*, assembled from `KNOWLEDGE.md` and nothing else), the claims audited by
+   level, coverage and drift (§1), the literature and where the project sits in it (§2), the
+   one run it proposes (§5, K1 — the most-boards tiebreak as a controlled variable), and the
+   staged outside review, each stage adjudicated finding by finding in §7e. Its
    **Handover** section says what is running and what to do next. The project's glossary
    (Elo, the paired suite, sims, iterations, checkpoints, the ±3-point rule and so on) is
-   `docs/history/PLAN5.md`'s opening section; PLAN6 refers to it rather than repeating it.
+   `docs/history/PLAN5.md`'s opening section; PLAN7 refers to it rather than repeating it.
 3. **`KNOWLEDGE.md`** — what the agent believes about the game: one claim per line with
    its level, effect size, confidence interval, the nets it held across, and the tool and
    file that produced it. This is where a claim lives; the other files hold the working
@@ -32,14 +35,24 @@ Read in this order:
 4. **`RETROSPECTIVE.md`** — what was learned over the four days of work: the strength
    ladder, which training changes worked and which did nothing, engineering and
    measurement lessons, and the earlier form of the game beliefs.
-5. **`docs/explainer.html`** — the public explainer (a 3Blue1Brown-style page for a
+5. **`docs/paper/`** — the manuscript in progress, assembled from the claims file:
+   `01_claims_map.md` (every claim in `KNOWLEDGE.md` with its level, its coverage and how it
+   moved with strength) and `02_literature.md` (the comparators and what is new here). Drafts
+   for review, not adopted findings.
+6. **`docs/reviews/`** — the outside reviews of this phase, verbatim, with the briefs that
+   produced them and their launchers: `M0_plan/` (the review of PLAN7 itself, adjudicated in
+   PLAN7 §7e) and `M2_designs/` (the K1 diff and the J3 / J4 designs). The earlier reviews are
+   in `docs/history/`.
+7. **`docs/explainer.html`** — the public explainer (a 3Blue1Brown-style page for a
    reader with no background), also published at
    https://claude.ai/code/artifact/d3d1bef5-2140-48ee-b55b-ed09d2982791. Opens from
    disk. Its Part 8 is the plain-language version of the game beliefs in `KNOWLEDGE.md`.
-6. History, only as needed, all under `docs/history/` (index in its README): `PLAN5.md`
-   (the analysis programme, the D1/D3 training decisions and the glossary; superseded by
-   PLAN6), `REVIEW-astra.md` with `review_astra/` (the outside review PLAN6 adjudicates, and
-   its reproduction scripts), `PLAN4.md`
+8. History, only as needed, all under `docs/history/` (index in its README): `PLAN6.md`
+   (the review adjudication, Phases E–H and the closing programme — the update lever measured
+   three doublings deep, the equivariant line closed, the second analysis pass; superseded by
+   PLAN7), `PLAN5.md` (the analysis programme, the D1/D3 training decisions and the glossary;
+   superseded by PLAN6), `REVIEW-astra.md` with `review_astra/` (the outside review PLAN6
+   adjudicates, and its reproduction scripts), `PLAN4.md`
    (hand-off and review adjudication, superseded by PLAN5), `PLAN3.md` (measurement kit,
    strength ladder, game beliefs; corrections in PLAN4), `PLAN2.md` (detailed result
    sections 2b-2k), `PLAN.md` and `NOTES-v2.md` (original plan and notes),
@@ -148,6 +161,35 @@ Read in this order:
   checkpoints — 5.23 GB of payload (`games/` 2.40 GB, `net_*.pt` 2.81 GB), deferred by the owner for
   want of any destination on this machine, so **the self-play corpora remain single-copy**. `runs/`
   is 17.02 GB in 5 328 files.
+- **PLAN7 (2026-09-12), the write-up: the systematic account, the literature, one new question and a
+  second outside review.** Written and adopted as the live plan — one paper, working title *"A
+  strength-audited self-play analysis of closed-board, most-boards Ultimate Tic-Tac-Toe"*, assembled
+  from `KNOWLEDGE.md` and nothing else. **M0, the outside review of the plan itself** — `gpt-6-astra`
+  through `codex-sp`, read-only, 564 s, ≈ 4.15 M input tokens — returned **36 findings, all accepted,
+  two with a change of reading**, each adjudicated in PLAN7 §7e against the code or the logs here.
+  They corrected **KNOWLEDGE 14** ("every one below deep10's interval" was false by its own numbers:
+  only the corner leaves it), **31a** (the `_e4` tablebase read was on deep10's corpus), **33** (the
+  solver column is one optimal policy's rate, not a property of necessity) and the **§1 note**; and
+  **knowledge/06** (Elhage's solver is closed-board / draw; the count tiebreak is win / draw / loss
+  for the mover) and **knowledge/07**. **The novelty correction:** `pc29277/AlphaZero_UTTT`
+  (2026-08-19) is a public AlphaZero on these exact rules, so the paper claims first *calibrated*,
+  first *replicated*, first *used to produce game knowledge* — not "first". **The literature survey**
+  `knowledge/07` (885 lines) places the update lever: `--epochs` is Lc0's sampling ratio exactly,
+  published practice clusters at ≈ 1, and Wang et al. 2020 is the one prior sweep, in a higher regime.
+  **J1a:** the last sealed endgame set, `endgame_v3_test`, read once on `deep8_c1_300_e8` — raw WDL
+  **92.7 % [91.8, 93.6]** against its own dev half's **91.6 [90.6, 92.6]**, the sealed half higher:
+  claim 30's structure holding at the top of the ladder. No sealed endgame set remains. **The drafts:**
+  `docs/paper/01_claims_map.md` (56 claims in 59 rows) and `02_literature.md`. **The engineering
+  merged:** the `--rule count|draw` switch through both engines, the solver, exact labels, the
+  tablebase, search, the rollout anchor, the trainer and twelve tools, with a regression fixture in
+  which `count` reproduces 2 000 pre-edit games bit for bit (K1's prerequisite); `solve_bounded`,
+  `tools/frontier.py`, `tools/empty_board.py`, `tools/review_events.py`. **One provenance finding:**
+  `gumbel_scale` was never written to `config.json` and every run trained at the default 1.0 —
+  constant across runs, so no result moves; it enters the methods section and K1's provenance.
+  **Open:** the rebuttal round (deferred by the owner's Codex usage limit to 00:30, armed from this
+  session), **M2** (the review of K1's diff and the J3 / J4 designs, armed behind it), **K1** itself
+  (≈ 22 h on the 3090; the owner's approval after M2), J3 / J4 after M2, E11's off-machine copy
+  (5.23 GB, still owed) and the push (12 commits local). The play agent is unchanged.
 - **I1, the analysis second pass, done 2026-09-10 (PLAN6 §9c):** PLAN5 Phase A's tools re-run on
   `deep8_c1_300_e4` at the deep10 pass's settings — of 34 game claims re-read, **15 held, 18 moved and 1
   reversed** (after [40] that net prefers the corner reply orbit where both earlier strong
@@ -285,7 +327,7 @@ This repository is two artifacts under one roof, and they are licensed separatel
 
 - **The software** — `uttt/`, `tools/`, `tests/`, `web/`, `play.py` — is under the
   **MIT license** (`LICENSE`).
-- **The written work and the data** — `README.md`, `KNOWLEDGE.md`, `PLAN6.md`,
+- **The written work and the data** — `README.md`, `KNOWLEDGE.md`, `PLAN7.md`,
   `RETROSPECTIVE.md`, `knowledge/`, `docs/`, and the released `suites/`, run logs and
   network checkpoints — is under **CC BY 4.0** (`LICENSE-CC-BY-4.0.txt`).
 

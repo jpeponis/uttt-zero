@@ -398,7 +398,34 @@ where noted:
   and a 249.27 MiB pack on `main`, MIT for the code and CC BY 4.0 for the written work and the
   data — and **the off-machine copy is not made**, deferred by the owner for want of any
   destination on this machine (PLAN6's 2026-09-12 log entry and Handover). The open list is the
-  write-up and that copy.
+  write-up — **PLAN7**, the next bullet — and that copy.
+- **PLAN7 (2026-09-12) is the live plan, and it is the write-up.** One paper, working title *"A
+  strength-audited self-play analysis of closed-board, most-boards Ultimate Tic-Tac-Toe"*, assembled
+  from `KNOWLEDGE.md` and nothing else, with the second outside review woven through it rather than
+  bolted on at the end. **M0 reviewed the plan itself** (`gpt-6-astra` through `codex-sp`, read-only,
+  564 s, ≈ 4.15 M input tokens): 36 findings, **all accepted, two with a change of reading**,
+  adjudicated in PLAN7 §7e. What it changed: the five tiers are not a partition — claims sat in two
+  of them and compound claims hid changed components — so they are restated as **level / coverage /
+  drift**; a regression coefficient is an **adjusted association** on a named corpus with a named
+  estimator, so the free move is "+0.195 utility on 30 000 natural positions against the
+  256-simulation search estimate, game-clustered 95 % interval ≈ ± 0.028", never a price with
+  everything else controlled; the working title (the first form's "knows" invited agreement with
+  truth, and the bare game name hid the variant); and the **novelty** — `pc29277/AlphaZero_UTTT`
+  (2026-08-19) is a public AlphaZero on these exact rules, so what is claimed is first *calibrated*,
+  first *replicated*, first *used to produce game knowledge*. Corrections landed in KNOWLEDGE 14,
+  31a, 33 and the §1 note, in knowledge/06 and in knowledge/07. **J1a read the last sealed set**:
+  `endgame_v3_test` on `deep8_c1_300_e8`, raw WDL **92.7 [91.8, 93.6]** against its own dev half's
+  **91.6 [90.6, 92.6]** — the two halves of one corpus agreeing to 1.1 points with the sealed half
+  *higher*, claim 30's structure at the top of the ladder and the opposite of what a flattered
+  development set gives; no sealed endgame set remains. **Merged:** the `--rule count|draw` switch
+  through both engines, the solver, exact labels, the tablebase, search, the rollout anchor, the
+  trainer and twelve tools, with `count` reproducing 2 000 pre-edit games bit for bit — K1's
+  prerequisite; `solve_bounded`, `tools/frontier.py`, `tools/empty_board.py`,
+  `tools/review_events.py`; and one provenance gap closed — `gumbel_scale` was never written to
+  `config.json`, so every run trained at the default 1.0 (constant across runs, so no result moves;
+  it enters the methods section and K1's provenance). **Open:** the rebuttal round (deferred to 00:30
+  by the owner's Codex usage limit), M2 behind it (K1's diff and the J3 / J4 designs), **K1** itself
+  on the owner's approval after M2 (≈ 22 h on the 3090), J3 / J4, E11's copy and the push.
 - **Neither depth nor duration is exhausted** — 12-block and 600-iteration runs are the
   obvious continuations, each a committed GPU-day, both on hold per the pause. *(2026-09-06:
   depth 8 → 10 is inside the seed band and an earlier LR drop hurts, so the continuation the

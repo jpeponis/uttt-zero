@@ -53,7 +53,10 @@ the plan amended. The **rebuttal round** (`codex exec resume`, the four question
 off by the owner's Codex five-hour usage limit at 20:28 and **relaunches itself at 00:30** from a
 background job in this session (the log's 20:29 entry; by hand: `pwsh -NoProfile -ExecutionPolicy
 Bypass -File docs/reviews/M0_plan/launch_rebuttal.ps1`); its reply is recorded under §7e's table
-when it lands. (3) Phase J (§4) on the desk and
+when it lands. **M2 is armed behind it**: a second background job launches
+`docs/reviews/M2_designs/launch.ps1` in the same window once `REBUTTAL.md` exists (by hand: the same
+`pwsh … -File` form); M2's brief is scoped to the K1 diff and the J3 / J4 designs, and its
+adjudication in §7e gates J3, J4 and K1's proposal to the owner. (3) Phase J (§4) on the desk and
 the 3060 — J1–J4 need no approval. (4) Put **K1** (§5) to the owner with M2's pre-registration review
 attached; launch only on approval, and only if the instance is under the 50 % line (PLAN6 Handover's
 rule, unchanged). (5) Phase L (§6) is the owner's call; §3 says why it is recommended. (6) The
@@ -876,9 +879,10 @@ applies to every launch (above it, update this file first and hand over).
 
 ## 10. Files this plan changes
 
-- **This file** — the live plan; PLAN6 moves to `docs/history/PLAN6.md` when M0 is adjudicated and
-  the owner adopts PLAN7 (`docs/history/README.md` gains its row; README's "Start here" points here;
-  PLAN6's open item — E11's copy — is carried in this Handover).
+- **This file** — the live plan. *Done 2026-09-12 (J6, after M0's adjudication):* PLAN6 moved to
+  `docs/history/PLAN6.md` (`docs/history/README.md` gained its row; README's "Start here" points here;
+  PLAN6's open item — E11's copy — is carried in this Handover). Live files still cite it as "PLAN6
+  §…", the convention for every superseded plan.
 - **`README.md`** — "Start here" (PLAN7 second, PLAN6 to history), "Current state" (the paper as the
   open item; K1 if it runs), the ladder table unchanged.
 - **`knowledge/03-prior-art-uttt-ai.md`** — *done 2026-09-12:* a dated addendum to judgment (a)

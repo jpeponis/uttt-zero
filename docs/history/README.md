@@ -1,7 +1,7 @@
 # docs/history — process files, superseded
 
-Moved here by PLAN5 §6 (2026-09-03) and PLAN6 (2026-09-06). Nothing in this directory is maintained; the live
-documents are `README.md`, `PLAN6.md`, `KNOWLEDGE.md` and `RETROSPECTIVE.md` at the top level.
+Moved here by PLAN5 §6 (2026-09-03), PLAN6 (2026-09-06) and PLAN7 §10 (2026-09-12). Nothing in this directory is maintained; the live
+documents are `README.md`, `PLAN7.md`, `KNOWLEDGE.md` and `RETROSPECTIVE.md` at the top level.
 Cross-references in the live files ("PLAN4 §3c", "PLAN2 §2e") point at these files by their old names.
 
 | file | what it was |
@@ -19,3 +19,4 @@ Cross-references in the live files ("PLAN4 §3c", "PLAN2 §2e") point at these f
 | `PLAN5.md` | the analysis programme (Phases A–C, results in §2–§4), the training decisions D1/D3 (§5) and the **glossary** the live files still refer to; superseded by PLAN6 |
 | `REVIEW-astra.md` | outside review at commit `e386baa` (astra): symmetry, the opening-book bugs, RNG hygiene, the data/update budget; adjudicated in PLAN6 §1 |
 | `review_astra/` | that review's reproduction scripts and their outputs (run from the repo root: `.venv/Scripts/python.exe -B docs/history/review_astra/<script>.py`) |
+| `PLAN6.md` | the review adjudication (§1), Phases E–H, the closing programme (§9: the update lever measured three doublings deep, the equivariant line closed, the second analysis pass), E11; superseded by PLAN7 |
