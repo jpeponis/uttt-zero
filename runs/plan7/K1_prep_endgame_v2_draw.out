@@ -1,0 +1,24 @@
+156312 candidate positions from 20 files (226s); 78307 in the dev half of the source games
+  solved 1000: 1000/3000 slots filled (8s)
+  solved 2000: 1953/3000 slots filled (17s)
+  solved 3000: 2425/3000 slots filled (24s)
+  solved 4000: 2756/3000 slots filled (50s)
+  solved 5000: 2972/3000 slots filled (59s)
+  solved 6000: 3000/3000 slots filled (80s)
+wrote suites/endgame_v2_dev_draw.npz: 3000 positions solved under rule draw; exact W/D/L for the mover 0.333/0.333/0.333; 2947 source games
+  empties 6-9: [125, 125, 125, 125, 125, 125]
+  empties 10-12: [125, 125, 125, 125, 125, 125]
+  empties 13-14: [125, 125, 125, 125, 125, 125]
+  empties 15-16: [125, 125, 125, 125, 125, 125]
+156312 candidate positions from 20 files (245s); 78005 in the test half of the source games
+  solved 1000: 1000/3000 slots filled (10s)
+  solved 2000: 1956/3000 slots filled (30s)
+  solved 3000: 2441/3000 slots filled (71s)
+  solved 4000: 2740/3000 slots filled (106s)
+  solved 5000: 2925/3000 slots filled (127s)
+  solved 6000: 3000/3000 slots filled (142s)
+wrote suites/endgame_v2_test_draw.npz: 3000 positions solved under rule draw; exact W/D/L for the mover 0.333/0.333/0.333; 2932 source games
+  empties 6-9: [125, 125, 125, 125, 125, 125]
+  empties 10-12: [125, 125, 125, 125, 125, 125]
+  empties 13-14: [125, 125, 125, 125, 125, 125]
+  empties 15-16: [125, 125, 125, 125, 125, 125]
