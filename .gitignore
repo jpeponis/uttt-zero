@@ -39,3 +39,6 @@ docs/history/review_astra/numba_cache/
 docs/reviews/*/events*.jsonl
 docs/reviews/*/launcher_*.txt
 docs/reviews/*/empty_stdin.txt
+
+# agent worktrees (Claude Code isolation: full copies of the tree under .claude/worktrees/<agent>)
+.claude/worktrees/
