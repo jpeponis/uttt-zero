@@ -259,6 +259,12 @@ def _row(es: EndgameSet, name: str, wdl: np.ndarray | None, scalar: np.ndarray |
     for k, v in per.items():
         d[k] = float(v.mean())
         d[k + "_ci"] = cluster_bootstrap(v, es.game_id, n_boot)
+    if moves is not None:
+        # The graded moves themselves, added AFTER the aggregation loop: they are a record, not a metric
+        # (a mean move index means nothing and must not be bootstrapped). A caller that wants the move
+        # behind a regret reads it here instead of searching a second time and hoping the two searches
+        # agree — tools/frontier.py's per-position table did exactly that (M2 rebuttal (c), J4).
+        per["move"] = np.asarray(moves)
     d["_per"] = per
     return d
 
@@ -271,11 +277,21 @@ def evaluate(fe, es: EndgameSet, device, sims=(32, 64, 256), n_boot: int = 2000,
     search_cache: optional {(sims, rule): BatchedSearch} dict a repeated caller (train2.EvalKit) owns, so the
     search objects and their CUDA graphs are built once and reused instead of churned per call. The rule is
     part of the key: keyed by sims alone, one process that graded a count set and then a draw set would have
-    reused the count-rule trees for both (M2 row 1)."""
+    reused the count-rule trees for both (M2 row 1). A cache carrying the OLD integer keys is refused, not
+    ignored: ignoring it looks like a cache miss, so the wrong-rule searches sit there unexamined and the
+    caller silently loses the reuse the cache exists for (M2 rebuttal (c))."""
     from .search import BatchedSearch, SearchConfig
 
     if check_rule(rule) != es.rule:
         raise ValueError(f"endgame set {es.meta.get('name')} was solved under rule {es.rule!r}; cannot evaluate under {rule!r}")
+    if search_cache:
+        bad = [k for k in search_cache if not (isinstance(k, tuple) and len(k) == 2
+                                               and isinstance(k[0], (int, np.integer)) and isinstance(k[1], str))]
+        if bad:
+            raise ValueError(f"search_cache keys must be (sims, rule) tuples; got {bad[:3]!r}"
+                             f"{' and %d more' % (len(bad) - 3) if len(bad) > 3 else ''}. A cache keyed by sims alone "
+                             f"predates the rule switch and its searches expand under whichever rule built them: "
+                             f"discard it (the caller owns the dict) rather than passing it here.")
     cells, macro, nb, player = _tensors(es, device)
     n = es.n
     done = torch.zeros(n, dtype=torch.bool, device=device)

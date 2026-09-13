@@ -18,7 +18,9 @@ it is not impossible in principle, since every move is stored, but it requires r
 
 The rule a corpus was generated under is read, never guessed: from a `rule` tag inside the game files
 (written from K1 on), else from the run's config.json (no `rule` key there = a pre-K1 count run). A
-directory with neither is refused unless --corpus_rule names its rule.
+directory with neither is refused unless --corpus_rule names its rule. A tag speaks only for the file
+that carries it: since a run's files are all tagged or all untagged, a directory holding both was
+assembled from two corpora and is refused unless its config.json vouches for the untagged ones.
 """
 from __future__ import annotations
 
@@ -36,20 +38,49 @@ from uttt.game import UTTT  # noqa: E402
 from uttt.rules import RULES  # noqa: E402
 
 
+def _config_rule(run: str) -> str | None:
+    """The rule the run's config.json records, or None when there is no config.json. A config.json with
+    no `rule` key is a pre-K1 run, which is count by construction."""
+    path = os.path.join(run, "config.json")
+    if not os.path.exists(path):
+        return None
+    with open(path) as f:
+        return json.load(f).get("rule", "count")
+
+
 def games_rule(run: str) -> str | None:
     """The rule recorded IN the game files themselves (uttt.train2 writes a 0-d `rule` array into every
     games_NNNN.npz from K1 on), or None when no file carries one. np.load reads only the archive's
-    directory here, so this costs one open per file and no decompression."""
-    tags = set()
+    directory here, so this costs one open per file and no decompression.
+
+    A tag vouches for the file that carries it and for nothing else. Every run is uniformly tagged or
+    uniformly untagged by construction — the self-play tag lands in every file a K1-era run writes, and
+    no file of a pre-K1 run has one — so a directory holding both was assembled from two corpora, and is
+    refused unless config.json is there to vouch for the untagged files and agrees with the tag. Ignoring
+    the untagged files, as this did, let one tagged file speak for a directory of them (M2 rebuttal (e))."""
+    tagged, untagged = {}, []
     for f in sorted(glob.glob(os.path.join(run, "games", "games_*.npz"))):
         with np.load(f) as z:
             if "rule" in z.files:
-                tags.add(str(z["rule"]))
-    if not tags:
-        return None
+                tagged[os.path.basename(f)] = str(z["rule"])
+            else:
+                untagged.append(os.path.basename(f))
+    tags = set(tagged.values())
     if len(tags) > 1:
         sys.exit(f"{run}/games holds files tagged with more than one rule {sorted(tags)}: it is not one corpus")
-    return tags.pop()
+    if not tags:
+        return None
+    tag = tags.pop()
+    cfg_rule = _config_rule(run)
+    if untagged and cfg_rule != tag:
+        shown = ", ".join(untagged[:5]) + (f", ... ({len(untagged)} in all)" if len(untagged) > 5 else "")
+        because = (f"config.json records rule {cfg_rule!r}" if cfg_rule is not None else "there is no config.json")
+        sys.exit(f"{run}/games mixes tagged and untagged game files: {len(tagged)} tagged {tag!r} and {len(untagged)} "
+                 f"carrying no tag ({shown}). A tag vouches only for its own file, and {because}, so the untagged "
+                 f"files' rule is not established — one corpus does not hold both, so this directory was assembled "
+                 f"from two. Separate them, or give the directory a config.json recording rule {tag!r} if every file "
+                 f"in it really was generated under that rule.")
+    return tag
 
 
 def corpus_rule(run: str, override: str = "") -> str:
@@ -60,12 +91,8 @@ def corpus_rule(run: str, override: str = "") -> str:
     neither is NOT assumed to be count — an orphaned draw corpus would then be silently misread — and
     the caller must name its rule with --corpus_rule (M2 row 6: the legacy fallback is restricted to
     positively identified legacy artifacts, which is what a config.json is)."""
-    tag = games_rule(run)
-    path = os.path.join(run, "config.json")
-    cfg_rule = None
-    if os.path.exists(path):
-        with open(path) as f:
-            cfg_rule = json.load(f).get("rule", "count")
+    tag = games_rule(run)  # refuses a directory that mixes tagged and untagged files without a config.json to vouch
+    cfg_rule = _config_rule(run)
     if tag is not None:
         if cfg_rule is not None and cfg_rule != tag:
             sys.exit(f"{run}: config.json says rule {cfg_rule!r} but its game files are tagged {tag!r}")

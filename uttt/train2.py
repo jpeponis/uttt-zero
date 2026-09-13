@@ -242,6 +242,14 @@ def make_generators(seed: int, device) -> dict:
     return gens
 
 
+def _checkpoint_rule(path: str) -> str:
+    """The rule a checkpoint was written under, read from the TrainConfig it carries (train2 saves that
+    as "cfg"). A pre-K1 checkpoint's cfg has no `rule` key and was count by construction, exactly as a
+    config.json without one is."""
+    ck = torch.load(path, map_location="cpu", weights_only=False)
+    return ck.get("cfg", {}).get("rule", "count")
+
+
 def _atomic_save(obj, path: str) -> None:
     torch.save(obj, path + ".tmp")  # a crash mid-save must not destroy the file; readers only ever see a complete file
     os.replace(path + ".tmp", path)
@@ -267,6 +275,31 @@ def main(cfg: TrainConfig) -> None:
                              f"{cfg.rule!r}: a run cannot change its terminal rule mid-flight (its buffer, exact labels "
                              f"and checkpoints were made under the recorded rule). Resume with --rule "
                              f"{old.get('rule', 'count')}, or start a new run directory for {cfg.rule!r}.")
+    # The same refusal keyed on the CHECKPOINT instead of on config.json. A run directory holding
+    # latest_full.pt / latest.pt but no config.json bypassed the check above entirely and would have
+    # resumed one rule's weights, optimizer state and buffer under the other (M2 rebuttal (c)). Both
+    # refusals land HERE, before os.makedirs and before config.json or config_resume_*.json is written.
+    ckpts = [p for p in (os.path.join(cfg.run, "latest.pt"), os.path.join(cfg.run, "latest_full.pt"))
+             if os.path.exists(p)]
+    if ckpts:
+        if old is None:
+            raise ValueError(f"{cfg.run} holds {', '.join(os.path.basename(p) for p in ckpts)} but no config.json, so "
+                             f"nothing in the directory records the rule its weights, optimizer state, replay buffer "
+                             f"and games were made under. This trainer writes config.json before the first checkpoint, "
+                             f"so a directory in this state was assembled by hand or lost its config, and resuming it "
+                             f"as a {cfg.rule!r} run would be a guess. Restore the run's original config.json, or move "
+                             f"the checkpoint(s) aside to start a fresh {cfg.rule!r} run here, or point --run at a new "
+                             f"directory.")
+        # latest.pt first: it carries the same cfg as latest_full.pt, is written every iteration (so it is
+        # the more recent record) and is ~20 MB against ~570 MB. The file actually restored is re-checked
+        # at the restore site below, where it is already in memory and the check costs nothing.
+        ck_rule = _checkpoint_rule(ckpts[0])
+        if ck_rule != cfg.rule:
+            raise ValueError(f"{ckpts[0]} was written by a run under rule {ck_rule!r} and this invocation asks for "
+                             f"{cfg.rule!r}: its weights, optimizer state and buffer were made under the rule it "
+                             f"records and cannot be continued under another. The config.json beside it says "
+                             f"{old.get('rule', 'count')!r}, so the checkpoint does not belong to this run. Resume "
+                             f"with --rule {ck_rule}, or move the checkpoint aside and start a fresh {cfg.rule!r} run.")
     os.makedirs(os.path.join(cfg.run, "games"), exist_ok=True)
     attempt = len([f for f in os.listdir(cfg.run) if f.startswith("config_resume_")])  # 0 = the original launch
     if old is not None:
@@ -338,6 +371,11 @@ def main(cfg: TrainConfig) -> None:
     resume_path = full_path if os.path.exists(full_path) else ckpt_path  # prefer full state: replaying a few
     if os.path.exists(resume_path):  # iterations beats resuming with an empty buffer (bit us 2026-08-30)
         ck = torch.load(resume_path, map_location=device, weights_only=False)
+        ck_rule = ck.get("cfg", {}).get("rule", "count")
+        if ck_rule != cfg.rule:  # the gate above probed latest.pt; this is the file actually being restored
+            raise ValueError(f"{resume_path} was written under rule {ck_rule!r}, not {cfg.rule!r}: refusing to restore "
+                             f"it. latest.pt and latest_full.pt disagree about the rule, which means one of them was "
+                             f"copied in from another run.")
         net.load_state_dict(ck["net"])
         opt.load_state_dict(ck["opt"])
         if "buffer" in ck:
