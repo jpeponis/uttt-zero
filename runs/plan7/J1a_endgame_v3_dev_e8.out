@@ -1,0 +1,51 @@
+# J1a companion — endgame_v3_dev (the development half of the same s1-derived split; not sealed) on deep8_c1_300_e8/net_0300.pt, so the dev/sealed comparison of KNOWLEDGE 30 is like-for-like. 2026-09-12.
+# started 20:35:43
+suites/endgame_v3_dev.npz: 3000 positions, 2924 source games, W/D/L 0.333/0.333/0.333; free-move positions 0.411
+
+runs/deep8_c1_300_e8/net_0300.pt on endgame_v3_dev  [83s]
+evaluator                                       WDL acc %    Brier  logloss            3-way %  |err|             regret          optimal %
+raw net (value head + policy argmax)     91.6 [90.6,92.6]    0.120    0.206   89.4 [88.3,90.5]  0.122 0.024 [0.018,0.030]   97.8 [97.3,98.3]
+raw net, symmetry-averaged WDL           92.5 [91.5,93.4]    0.108    0.185   90.1 [89.0,91.1]  0.116                                      
+search 32 sims                                                                71.9 [70.2,73.4]  0.305 0.002 [0.000,0.003]  99.8 [99.7,100.0]
+search 64 sims                                                                75.1 [73.6,76.7]  0.278 0.000 [0.000,0.001] 100.0 [99.9,100.0]
+search 256 sims                                                               74.6 [73.1,76.2]  0.292 0.000 [0.000,0.000] 100.0 [100.0,100.0]
+
+WDL accuracy % by stratum: raw net (value head + policy argmax) | raw net, symmetry-averaged WDL
+  empties 6-9      (n= 750):  97.3   98.3
+  empties 10-12    (n= 750):  93.5   93.6
+  empties 13-14    (n= 750):  89.5   91.5
+  empties 15-16    (n= 750):  86.0   86.5
+  mover wins       (n=1000):  94.8   95.9
+  draw             (n=1000):  83.6   84.6
+  mover loses      (n=1000):  96.3   96.9
+  X to move        (n=1500):  92.2   93.0
+  O to move        (n=1500):  90.9   91.9
+  free move        (n=1232):  93.1   93.8
+  sent to a board  (n=1768):  90.5   91.5
+
+action regret by stratum: raw net (value head + policy argmax) | search 256 sims
+  empties 6-9      (n= 750): 0.003  0.000
+  empties 10-12    (n= 750): 0.021  0.000
+  empties 13-14    (n= 750): 0.037  0.000
+  empties 15-16    (n= 750): 0.036  0.000
+  mover wins       (n=1000): 0.029  0.000
+  draw             (n=1000): 0.044  0.000
+  mover loses      (n=1000): 0.000  0.000
+  X to move        (n=1500): 0.024  0.000
+  O to move        (n=1500): 0.025  0.000
+  free move        (n=1232): 0.029  0.000
+  sent to a board  (n=1768): 0.021  0.000
+
+optimal-move % by stratum: raw net (value head + policy argmax) | search 256 sims
+  empties 6-9      (n= 750):  99.9  100.0
+  empties 10-12    (n= 750):  97.9  100.0
+  empties 13-14    (n= 750):  96.5  100.0
+  empties 15-16    (n= 750):  96.8  100.0
+  mover wins       (n=1000):  97.7  100.0
+  draw             (n=1000):  95.6  100.0
+  mover loses      (n=1000): 100.0  100.0
+  X to move        (n=1500):  97.7  100.0
+  O to move        (n=1500):  97.8  100.0
+  free move        (n=1232):  97.3  100.0
+  sent to a board  (n=1768):  98.1  100.0
+# exit=0 finished 20:37:09

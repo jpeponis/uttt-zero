@@ -378,7 +378,17 @@ review, 2026-09-12.)*
     **`endgame_v2_test`, read once (2026-09-05):** deep10 85.0 [83.7, 86.3] (draws 72.3,
     regret 0.047), deep8_300 84.8 [83.5, 86.0], the seed replicate 85.1 [83.8, 86.3] —
     within 0.3 / 1.3 points of the dev half and within 0.3 of each other. It is a
-    development set from here on. `plan5_A9_test_*.out`.
+    development set from here on. `plan5_A9_test_*.out`. **The v3 split, read on the strongest
+    net (2026-09-12, PLAN7 J1a — `endgame_v3_test` read once, as pre-registered):**
+    `deep8_c1_300_e8` scores **92.7 [91.8, 93.6]** on the sealed `endgame_v3_test` (draws 85.3 %,
+    regret 0.027 [0.021, 0.034], 256-sim search 99.9 % [99.8, 100.0] optimal) and **91.6 [90.6,
+    92.6]** on its development half `endgame_v3_dev` (draws 83.6 %, regret 0.024 [0.018, 0.030],
+    search 100.0 %) — the sealed half reads **1.1 points higher** than the dev half, intervals
+    overlapping: on one source corpus the pair agrees to about a point, in the direction a
+    flattered development set would not produce. Against `endgame_v2_dev`'s 91.7 the sealed read is
+    +1.0, at the edge of the pre-registered band, the two sets being from different corpora.
+    `endgame_v3_test` is a development set from here on.
+    `runs/plan7/J1a_endgame_v3_test_e8.out`, `runs/plan7/J1a_endgame_v3_dev_e8.out`.
 31. **"Draw blindness" was never a capacity limit.** The 150-iteration nets recognised
     ~55 % of exact draws at every width and depth; the annealed 300-iteration nets
     recognise 67–72 % with the same architecture, loss and labels. The step happens at
@@ -924,7 +934,9 @@ review, 2026-09-12.)*
   3000 solved positions from `deep10_c1_300_s1`'s iterations 280–299, split from `endgame_v3_dev` by source
   game before solving, 0 canonical positions shared between the halves and none duplicated within them
   (`tools/suite_overlap.py`). Held out for deep10, deep8_300 and any Phase G student — not for the seed
-  replicate, whose games it comes from. To be read once, at the end of Phase G, and logged in PLAN6.
+  replicate, whose games it comes from. **Read once, on `deep8_c1_300_e8`, 2026-09-12 (PLAN7 J1a):
+  92.7 [91.8, 93.6] against the dev half's 91.6 [90.6, 92.6] — the sealed half higher by 1.1 (30). A
+  development set from here on; no sealed endgame set remains.**
 - An exactly equivariant net at a full run's step budget is measured in self-play at one width
   only, 16 base filters × 8 orientations (50). **On frozen data the ResNet-capacity question is
   now answered, and the answer is no** (PLAN6 §9b arm (g), 2026-09-09, read 2026-09-10):

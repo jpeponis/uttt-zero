@@ -150,6 +150,16 @@ manuscript (J5) and the file updates (§10) follow the readings; M3 and M4 revie
   ordering changed" against 32's motif swap — corrected now (with 5's reply move after [2] noted
   beside it). The map is adopted into `docs/paper/01_claims_map.md` after a read, as the draft M1
   reviews; its judgement cells are M1's first question.
+- **2026-09-12, 20:37 — J1a done: `endgame_v3_test` read once on `_e8`, as pre-registered.** Sealed
+  half: raw WDL **92.7 [91.8, 93.6]**, draws 85.3 %, regret **0.027 [0.021, 0.034]**, 256-sim search
+  **99.9 [99.8, 100.0]** optimal (48 s on the 3060). The dev half of the same s1-derived split,
+  `endgame_v3_dev`, read beside it for a like-for-like pair: **91.6 [90.6, 92.6]**, draws 83.6 %,
+  regret 0.024, search 100.0 % (83 s). Against the pre-registration: regret and search inside their
+  bands; WDL +1.0 over `endgame_v2_dev`'s 91.7 — at the band's edge, on the high side, and the two
+  sets are different corpora. The reading that matters is the pair: **dev and sealed agree to 1.1
+  points on one corpus, the sealed half higher** — claim 30's structure at the top of the ladder,
+  and the opposite of what a flattered development set gives. KNOWLEDGE 30 and §10 carry it; no
+  sealed endgame set remains. `runs/plan7/J1a_endgame_v3_{test,dev}_e8.out`.
 
 ## 0. The decision in front of the project
 
@@ -467,7 +477,13 @@ single new experiment. C6 is recommended and priced in §6.
   eval` at the standard settings (raw head; 64- and 256-sim search), logged in KNOWLEDGE 30 and §10 and
   in this log, and is a development set thereafter. Pre-registered: raw WDL within 1.0 point of
   `endgame_v2_dev`'s 91.7 %, regret within 0.010 of 0.020, the 256-sim search ≥ 99.9 % optimal; a
-  miss beyond any of those is the finding, not a nuisance. ≈ 5 min on the 3060. *Output also:* the list of every claim that the manuscript will quote, in order,
+  miss beyond any of those is the finding, not a nuisance. ≈ 5 min on the 3060. *Done 20:34–20:37
+  (`runs/plan7/J1a_endgame_v3_test_e8.out`, `…_v3_dev_e8.out`):* sealed **92.7 [91.8, 93.6]**, regret
+  **0.027 [0.021, 0.034]**, 256-sim search **99.9 [99.8, 100.0]** — regret and search inside their
+  bands, WDL at the band's edge and on the high side (+1.0 over v2_dev's 91.7, a different corpus);
+  the like-for-like dev half of the same split reads **91.6 [90.6, 92.6]**, so dev and sealed agree
+  to 1.1 points on one corpus, the sealed half higher. Claim 30's structure holds on the strongest
+  net; KNOWLEDGE 30 and §10 carry it. No sealed endgame set remains. *Output also:* the list of every claim that the manuscript will quote, in order,
   which is the manuscript's outline.
 - **J2. The literature table, final.** `knowledge/07` merged into §2; `docs/paper/02_literature.md`
   as the paper's related-work section with every comparator's variant stated. Any comparator the
