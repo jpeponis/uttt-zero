@@ -50,9 +50,9 @@ and merged (`5fa73e6`); the `_e8` count pass launched with `probe_value` added; 
 
 1. **K1 is running** (State, above). Its reading instruments — `runs/plan7/K1_readings_3060.sh` (§5 item 2),
    `tools/common_positions.py` (item 3 and the paired Δ of item 2, 15 000 positions per corpus) and
-   `tools/paired_contrast.py` (item 4) — are being built and smoke-tested on the two count nets by a worktree agent
-   (`git worktree list` shows it) so they are frozen before `net_0300.pt` exists (R9); merge its branch after a
-   read, run its test, and do not touch the instruments afterwards. When K1 lands (≈ 22:30): read `analysis.out`
+   `tools/paired_contrast.py` (item 4) — are **built, tested and merged** (`bd86052`), frozen before `net_0300.pt` exists (R9); do not touch them
+   (§5 item 2 was amended to the difference-in-differences form on their control finding — the log's 00:53
+   entry). When K1 lands (≈ 22:30): read `analysis.out`
    (the in-run table, the two cross-play matches, the 2 × 2 endgame reads), then run the readings script on the
    3060, `common_positions.py` on `_e8` vs the draw net (both corpora, both rules) and `paired_contrast.py` on the
    two cross-play files; every claim marked rule-invariant / rule-dependent / unresolved by §5 item 2's rules, one
@@ -406,6 +406,27 @@ compute — delegate anything that reads more than a few files.
   100 %: the 3090 training, the 3060 shared by the worker and the count pass's `value_decomp`. The one change
   from the parent is the rule; §5's readings are frozen and their instruments are being built beside it (R9).
   ≈ 22 h; `eval_run_k1.sh` follows by itself.
+
+- **2026-09-13, 00:53 — K1's reading instruments built, frozen and merged (`bd86052`); §5 item 2 amended to a
+  difference in differences on the control's evidence.** An opus worktree agent wrote `runs/plan7/K1_readings_3060.sh`
+  (the I1 tool set on the draw net under `draw`, the count pass's corpora — count-play positions read under draw,
+  the choice M3 should judge; the draw net's own games only for the descriptive claims; `surprise` and
+  `probe_value` read the draw run's own buffer because no other draw buffer exists, stated in the header),
+  `tools/common_positions.py` (15 000 positions per corpus, the 2 × 2 nets × rules matrix of raw and 256-sim
+  values, `freemove`'s regressions per cell, the paired Δ per net, the difference in differences, the ≤ 14-empty
+  subset solved under both rules with no net) and `tools/paired_contrast.py` (1 − s_D − s_C with a joint pair
+  bootstrap over opening IDs), with `tests/test_common_positions.py` (a known Δ recovered; the joint resample
+  shown to be joint). **The smoke on the two count nets found the pre-registration's flaw before any outcome
+  existed:** a count-trained net's own Δ across the two *evaluation* rules is −0.0196 [−0.0271, −0.0122] — the
+  mechanical effect of a count-decided terminal backing up 0 instead of ± 1 — so the registered "established
+  decrease" of the within-net Δ would have been met by the control by a factor of four; the two count nets'
+  DiD is 0.0000 [−0.0011, +0.0010]. §5 item 2 now reads the DiD against the parent for 16, 8 and 13, with the
+  parent's own Δ printed as the control, and the raw head's reading of 16 across nets (its within-net Δ is
+  identically zero). This is an amendment of a pre-registration on control evidence, made while
+  `net_0300.pt` does not exist, recorded here and in the tool's docstring; the owner may veto it. **K1's
+  health at 00:50:** seven iterations, `end_count` 0.0, draw share 25–27 % at iterations 4–6 against the
+  parent's 3–5 %, [40] the modal first move; iterations 4–6 ran 281–332 s against the parent's 208 while the
+  instruments' smoke shared `cuda:0` with the trainer, and iteration 7 returned to 209.6 s.
 
 ## 0. The decision in front of the project
 
@@ -888,20 +909,31 @@ plus ≈ 6 h on the 3060 for the readings. Inside the Windows Update pause (to 2
    means adaptation towards draws, below it by ≥ 2 away from them, between unresolved; ≥ 30 % against
    16.6 % under `count` is only the floor, satisfied by relabelling alone (SaltZero's 48 % under `draw`
    is the only datum; M2 row 11); 25 not applicable (no count endings); 16 — **primary:**
-   the paired difference Δ = β_draw − β_count of the count-margin coefficient, raw head and search value
-   each, on the common position set (item 3) with the same design matrix and game-clustered paired
-   inference; prediction an *established* decrease — the paired 95 % interval's upper endpoint ≤ −0.005; *contradicted*
-   if the interval lies wholly above −0.005; *unresolved* otherwise (0.005 is a pre-declared practical margin,
-   not a derived constant; the estimator is frozen and the paired precision assessed before any outcome is
-   read — M2 rebuttal R1). **Secondary**, the draw net's own coefficient with interval I: *supported* if
+   the *difference in differences* of the count-margin coefficient on the search value, on the common
+   position set (item 3): DiD = Δ_draw-net − Δ_parent, where each net's Δ = β_draw − β_count is its paired
+   difference across the two *evaluation* rules on the same positions and design matrix, game-clustered
+   inference; prediction an *established* decrease — the DiD's 95 % interval's upper endpoint ≤ −0.005;
+   *contradicted* if the interval lies wholly above −0.005; *unresolved* otherwise. **Amended 2026-09-13
+   00:53, before K1's final checkpoint exists, on the control's evidence:** a net's own Δ measures the
+   *evaluation* rule's mechanical effect on the search value (a count-decided terminal backs up 0 under
+   draw instead of ± 1) — on two count-trained nets it reads −0.0196 [−0.0271, −0.0122] for each, which
+   would have met the previous form (the within-net Δ) by a factor of four, while their DiD reads 0.0000
+   [−0.0011, +0.0010] (`tools/common_positions.py`'s smoke on `_e8` vs `_e4`, 4 000 positions, 64 sims;
+   `docs/reviews/M2_designs/K1_instruments_notes.md`). The parent's own Δ is printed beside the DiD as the
+   control. The raw head never sees the evaluation rule, so its within-net Δ is identically zero and its
+   reading of 16 is *across nets* — β_draw-net − β_parent under each rule on the same positions, prediction
+   negative with the interval excluding 0 (0.005 is a pre-declared practical margin, not a derived
+   constant; the estimator is frozen — M2 rebuttal R1, amended here). **Secondary**, the draw net's own coefficient with interval I: *supported* if
    I ⊆ [−0.015, +0.015], *contradicted* if I lies wholly outside it, *unresolved* otherwise — unresolved
    means insufficient precision, never an inconvenient result. Restated this way because the
    count-trained parent already satisfies the first form's band (`_e4`'s search coefficient is +0.014,
    KNOWLEDGE 16; M2 row 2); the margin and ownership auxiliaries stay count-flavoured
-   (`uttt/selfplay_cont.py:159–169`) and give no ground for relaxing it; 8 and 13 — read as paired
-   *differences* on the common set: *invariant* if the whole paired 95 % interval lies within (−0.03, +0.03),
-   *dependent* if it lies wholly beyond either bound, *unresolved* otherwise — a point difference below 0.03
-   is not equivalence ("inside the count reading's interval" is compatibility; M2 row 12, rebuttal R1 / R13); 7's reply after [40] — no prediction, a tie tolerance of
+   (`uttt/selfplay_cont.py:159–169`) and give no ground for relaxing it; 8 and 13 — read as the same
+   difference in differences against the parent on the common set: *invariant* if the whole DiD 95 % interval
+   lies within (−0.03, +0.03), *dependent* if it lies wholly beyond either bound, *unresolved* otherwise — a
+   point difference below 0.03 is not equivalence ("inside the count reading's interval" is compatibility;
+   M2 row 12, rebuttal R1 / R13; on the two count nets the DiD reads +0.0054 [+0.0010, +0.0098] for the free
+   move and ≈ 0 for the threats — the control's scale); 7's reply after [40] — no prediction, a tie tolerance of
    0.02 on the aggregated reply-orbit *visit share* at the book's 16 384 sims (not a value tolerance),
    visits and Q both saved; 33–34 invariant (a line rule; 33's counterexample can survive while its
    percentages change, and 34's immediate-loss avoidance is read apart from them).
