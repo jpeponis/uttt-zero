@@ -172,6 +172,17 @@ manuscript (J5) and the file updates (§10) follow the readings; M3 and M4 revie
   nine §7e changes made and funded by cuts that drop no claim; adopted as
   `docs/paper/02_literature.md` (2 603 words), the draft M1 reviews. Still in flight: K1's `--rule`
   worktree and the 00:30 rebuttal.
+- **2026-09-12, 21:20 — K1 engineering merged (`781dfca`); the bounded solver given the rule; M2's brief
+  written.** The K1 agent's worktree (fast-forwarded by it to `417e105`, 30 files, 45 minutes of tests)
+  committed and merged; the one conflict, `uttt/solver.py`, resolved by making the two agents' changes
+  one design — `_negamax_bounded` takes the same `draw_rule` flag as `_negamax`, `solve_bounded` and
+  `solve_children_bounded` take `rule` — and `tests/test_solver_bounded.py` now asserts equality under
+  `draw` too (90 of 500 values differ from `count`: the flag reaches the kernel). `test_solver`,
+  `test_exact`, `test_endgame`, `test_tablebase` pass on the merged tree; `test_rules.py` is re-running
+  (≈ 10 min). Its report also found `tests/test_symmetry.py` failing — characterised here as
+  device-specific, `cuda:1` only, the process-global capture stream (§11). §5 records what is not yet
+  threaded and must be before K1's readings (five I1 tools). `docs/reviews/M2_designs/brief.md` and
+  `launch.ps1` are written; M2 launches in the Codex window after the rebuttal.
 
 ## 0. The decision in front of the project
 
@@ -569,7 +580,22 @@ an explicit argument everywhere, and the two are never conflated. And — found 
 **`gumbel_scale` is not recorded in `config.json`** (`train2.py` never sets it; every run so far
 trained at `MCTSConfig`'s default 1.0): K1's provenance records every exploration knob explicitly
 (`gumbel_scale`, `sample_moves`, `temperature`, `sample_uniform`, `root_prior_floor`), and the
-count-rule parent's re-read states the same values. Tests: the two engines
+count-rule parent's re-read states the same values.
+
+*Engineering done 2026-09-12 (merged as `781dfca`; the implementer's eight design choices and its
+list of what was deliberately not threaded are `docs/reviews/M2_designs/K1_design_notes.md`, M2's
+material).* `uttt/rules.py`; the rule through both engines, the solver (one Numba specialisation per
+rule — the bounded kernel too), exact labels, the tablebase's outcome map, search, arena, openings,
+self-play, **the rollout anchor** (unasked: without it `--rule draw --b rollout` would pit a count bot
+in a draw game), `train2.py` (`--rule`, `config.json`, `_provenance`), and twelve tools with `--rule`,
+a `"rule"` field in every output and a `_draw` tag on cached datasets; mismatches are refused, never
+inferred. `tests/test_rules.py`: `count` reproduces 2 000 pre-edit games bit for bit; `draw` turns
+exactly the 280 count endings into draws; hand-made terminals; solver vs brute force under both rules
+(43 of 200 positions differ); 100 000 cross-engine games per rule with the same 77 913 line endings.
+**Before item 2's readings — not before the launch:** `decision.py`, `surprise.py`,
+`ownership_grade.py`, `timeline.py` and `probe_value.py` are I1 tools that are not yet threaded and
+would search under `count` on a draw net; they get the same two-line treatment first (`gdata.py`,
+`annotate.py`, `endgame_accuracy.py` likewise if used). The K1 diff is M2's first object. Tests: the two engines
 cross-checked under both rules on 10⁶ random games; a hand-made 4–4 final position that is a count
 draw under both rules and a 5–3 one that is a win under `count` and a draw under `draw`; the solver
 against brute force on tiny positions under both. The paired suite is opening positions and needs no
@@ -838,7 +864,7 @@ generation project; J4's curve is the cheaper form of the same statement). A thi
 | when | desk / this session | 3090 | 3060 |
 |---|---|---|---|
 | Day 0 (today) | PLAN7 committed; **M0 launched, returned in 9.4 min, adjudicated (§7e)**; the rebuttal round | idle | idle |
-| Day 1 | J1 (three columns) and J2 adopted from the drafts; K1's rule flag and tests, J3's protocol and J4's bounded solver written; **M2 launched** on the K1 diff and the J3 / J4 designs | idle | **J1a, the sealed read** (5 min); **J1's cheap re-reads**; the `_e8` count-rule pass (K1 item 1, ≈ 5 h) |
+| Day 1 (done 2026-09-12, evening) | J1 and J2 adopted; K1's rule switch (`781dfca`), J3's script and J4's bounded solver (`934113a`) merged with their tests; M2's brief and launcher written — **M2 launches in the Codex window after the rebuttal** (§7a's one-review-per-window rule) | idle | **J1a, the sealed read** (5 min); **J1's cheap re-reads**; the `_e8` count-rule pass (K1 item 1, ≈ 5 h) |
 | Day 1–2 | M2 adjudicated; **K1 put to the owner** | — | **J3** after M2 (≈ 1.5 h); **J4** on the CPU after M2 |
 | Day 2 → 3 | J5 skeleton; **M1 launched** | **K1** (≈ 22 h) if approved | the E7 worker (≈ 6 min per checkpoint) |
 | Day 3 | M1 adjudicated; K1 done and read by §5's rules | idle | **K1's readings** (≈ 6 h: the I1 tool set under `draw`, the 2 × 2 cross-play) |
@@ -900,6 +926,18 @@ applies to every launch (above it, update this file first and hand over).
   reviewer inherits `~/.codex/AGENTS.md` (the generated one) — its brief should say that the
   repository's own documents override any general instruction there about how to work.
 - The 3090 is the display adapter: ≈ 830 MiB and ≈ 10 % utilisation is its idle state, not a job.
+- `tests/test_symmetry.py` **passes on `cuda:0` and fails on `cuda:1`** with
+  `cudaErrorStreamCaptureInvalidated` in the canonical evaluator's fp16 graph capture (2026-09-12;
+  torch 2.13.0+cu126, driver 616.56, identical on pristine `HEAD`): the test captures with the
+  process-global default capture stream, which lives on device 0 — REVIEW-astra §7.6 / PLAN6 §1 item
+  20 exactly. Run it on `cuda:0`, or give the capture an explicit stream on its device. Not a K1
+  regression; every other suite passes on `cuda:1`.
+- Agent worktrees (`isolation: worktree`) live under `.claude/worktrees/<agent>/` inside the repo —
+  ≈ 300 MB each, ignored since `a7c6136`; they lack `.venv` and `runs/*/games` (use the main
+  checkout's by absolute path), start from whatever commit was current when the agent launched, and
+  are merged with `--no-ff` after a read, then removed. Two agents editing one file (here
+  `uttt/solver.py`) conflict at merge; resolve by making the two changes one design, not by picking a
+  side.
 - `runs/probe_gcnn_smoke/` stays untracked. E11's copy stays open until a destination exists.
 
 ## Appendix A — the M0 brief (saved as `docs/reviews/M0_plan/brief.md` at launch)
