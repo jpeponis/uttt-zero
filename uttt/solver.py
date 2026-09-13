@@ -98,6 +98,100 @@ def solve(cells, macro, next_board, player):
     return int(v), int(nodes[0])
 
 
+ABORT = -3  # _negamax_bounded's "budget exhausted" return: outside {-1, 0, +1} and distinct from the -2 "no move yet" sentinel
+
+
+@njit(cache=True)
+def _negamax_bounded(cells, macro, next_board, player, alpha, beta, nodes, max_nodes):
+    """_negamax with a node budget. A node that would be the (max_nodes + 1)-th returns ABORT and every
+    frame above it returns ABORT at once, undoing its move first: the whole search is abandoned, so an
+    unresolved child never reaches the best/alpha/beta logic and no partial result is ever reported as a
+    value. Deliberately a copy of _negamax rather than a parameterisation of it, so solve() keeps the
+    exact code (and node counts) it was verified with; tests/test_solver_bounded.py pins the two together."""
+    if nodes[0] >= max_nodes:
+        return ABORT
+    nodes[0] += 1
+    best = -2
+    target_open = next_board >= 0 and macro[next_board] == 0
+    for b in range(9):
+        if macro[b] != 0:
+            continue
+        if target_open and b != next_board:
+            continue
+        for c in range(9):
+            m = 9 * b + c
+            if cells[m] != 0:
+                continue
+            # apply
+            cells[m] = player
+            old_macro = macro[b]
+            won = _line_winner(cells, 9 * b) == player
+            full = True
+            if not won:
+                for k in range(9):
+                    if cells[9 * b + k] == 0:
+                        full = False
+                        break
+            if won:
+                macro[b] = player
+            elif full:
+                macro[b] = FULL
+            # terminal?
+            v = -2
+            if won and _line_winner(macro, 0) == player:
+                v = 1
+            else:
+                all_closed = True
+                for k in range(9):
+                    if macro[k] == 0:
+                        all_closed = False
+                        break
+                if all_closed:
+                    x = 0
+                    o = 0
+                    for k in range(9):
+                        if macro[k] == 1:
+                            x += 1
+                        elif macro[k] == -1:
+                            o += 1
+                    diff = (x - o) * player
+                    v = 1 if diff > 0 else (-1 if diff < 0 else 0)
+            if v == -2:
+                nb = c if macro[c] == 0 else -1
+                cv = _negamax_bounded(cells, macro, nb, -player, -beta, -alpha, nodes, max_nodes)
+                if cv == ABORT:  # undo, then unwind: this frame proved nothing
+                    cells[m] = 0
+                    macro[b] = old_macro
+                    return ABORT
+                v = -cv
+            # undo
+            cells[m] = 0
+            macro[b] = old_macro
+            if v > best:
+                best = v
+            if best > alpha:
+                alpha = best
+            if alpha >= beta or best == 1:
+                return best
+    return best
+
+
+def solve_bounded(cells, macro, next_board, player, max_nodes):
+    """solve() under a node budget. Returns (value, nodes, complete).
+
+    complete=False means the budget ran out and nothing was proved: value is then None — never a game
+    value, and never a sentinel a caller could read as one. With a budget the search does not need, the
+    tree visited, the value and the node count are identical to solve()'s (tests/test_solver_bounded.py),
+    so the budget only ever removes results, never changes them."""
+    c = np.array(cells, dtype=np.int8).copy()
+    m = np.array(macro, dtype=np.int8).copy()
+    nodes = np.zeros(1, dtype=np.int64)
+    v = _negamax_bounded(c, m, int(next_board), int(player), -1, 1, nodes, int(max_nodes))
+    if v == ABORT:
+        return None, int(nodes[0]), False
+    return int(v), int(nodes[0]), True
+
+
 def empties_in_open_boards(cells, macro) -> int:
     c = np.asarray(cells).reshape(9, 9)
     m = np.asarray(macro)
@@ -128,6 +222,38 @@ def solve_children(args):
         else:
             child[m] = -solve(h.cells, h.macro, h.next_board, h.player)[0]
     return int(child.max()), child
+
+
+def solve_children_bounded(args):
+    """(cells, macro, next_board, player, max_nodes) -> (root value, (81,) child values, nodes, complete).
+
+    solve_children() under one node budget shared by the whole enumeration. Every legal child is solved
+    with whatever is left of the budget; the first one that does not resolve ends the job, because the
+    root value is the max over children and the search move is graded against all of them, so one unknown
+    child leaves the position unsolved. Incomplete: (None, None, nodes spent, False). Lives here rather
+    than in the caller so worker processes can import it by name (tools/frontier.py, like solve_children)."""
+    from .game import UTTT
+
+    cells, macro, nb, player, max_nodes = args
+    g = UTTT()
+    g.cells[:] = cells
+    g.macro[:] = macro
+    g.next_board, g.player = int(nb), int(player)
+    g.move_count = int((g.cells != 0).sum())
+    child = np.full(81, ILLEGAL, dtype=np.int8)
+    used = 0
+    for m in g.legal_moves():
+        h = g.clone()
+        h.play(m)
+        if h.done:
+            child[m] = 0 if h.winner == 0 else (1 if h.winner == g.player else -1)
+            continue
+        v, n, ok = solve_bounded(h.cells, h.macro, h.next_board, h.player, max_nodes - used)
+        used += n
+        if not ok:
+            return None, None, used, False
+        child[m] = -v
+    return int(child.max()), child, used, True
 
 
 def solve_batch(args):
