@@ -20,112 +20,90 @@ game carries its level, CI, the nets it held on, and the file that produced it. 
 assembled from the claims file, not written beside it), and **every outside-review finding is
 adjudicated in this file before anything acts on it** (§7, as PLAN6 §1 did).
 
-## Handover (2026-09-12, 21:50 — written for the next instance; this one stopped at ≈ 77 % of its context)
+## Handover (2026-09-12, 23:32 — written for the next instance by the second instance of the day)
 
-**Update (2026-09-12, 22:19, the next instance).** Step 1 is done: the rebuttal returned in 123 s and is
-adjudicated (§7e R1–R8; the log's 22:10 entry). The count-pass half of step 3 is **running**: K1 item 1 on the
-3060 (`runs/plan7/K1_parent_pass.out`, ≈ 5 h from 22:19). **M2 returned at 22:24** (267 s, medium, 0.94 M tokens) and is adjudicated (§7e M2, 18 rows; the
-log's 22:31 entry). Its engineering — rows 1, 4–9, 15–16, 18 — and the five I1 tools are with two
-worktree agents (the log entry names them); when they merge: run J3 and J4 as amended (§4), then put K1
-to the owner with §7e M2 attached. The rest of the list stands.
+**State.** **One thing is running:** K1 item 1, the `_e8` count-rule pass on the 3060
+(`runs/plan7/K1_parent_pass.out`, started 22:13, on `value_decomp` since 22:55; then `book`, `book_stats`, the
+16-checkpoint probe fit, `probe_report`, `ownership_grade`; done ≈ 03:00 — it is a background job of a session that
+may have ended; read its log, do not look for the job). The 3090 idle. Play agent `runs/deep8_c1_300_e8/net_0300.pt`,
+unchanged. `main` is at the commit after `5fa73e6`; **nothing pushed since `40b7864`** — the standing instruction:
+push only when told. No worktrees. Tree clean apart from `runs/probe_gcnn_smoke/` (deliberately untracked) and the
+pass's outputs (`runs/plan7/K1_parent_*`, `suites/puzzles_v4_dev.*`), which are committed with its reading. E11's
+off-machine copy is still owed. The Codex window that opened ≈ 21:50 closes ≈ 02:50; the rebuttal, M2 and M1 all
+ran in it at medium (the log's 23:32 entry has the costs) — M1's and M2's rebuttal rounds go in the *next* window.
 
-**22:45:** **M1 launched at 22:34 in the same window and returned at 22:42** (498 s, medium, 2.9 M tokens, 2.68 M
-cached; `4235f00` holds the review verbatim); its adjudication is delegated to a third worktree agent (opus
-`directed`) that writes §7e M1, a log entry and the accepted amendments to `docs/paper/*`, the named KNOWLEDGE
-claims and `knowledge/07` — read its table before merging. So **three worktree agents run under
-`.claude/worktrees/`**, on disjoint files: the K1-plumbing / five-I1-tools / tests agent, the J3 / J4 tools
-agent, the M1 adjudicator. Merge order as they return: the two engineering agents first (`--no-ff` after a
-read; re-run `tests/test_rules.py` and `tests/test_solver_bounded.py` on `main`, `UTTT_DEV=cuda:0` while the
-pass holds the 3060), then the adjudicator; retire each worktree and branch. Then, once the pass frees the
-3060 (≈ 03:00): **J3** — `tools/empty_board.py --net runs/deep8_c1_300_e8/net_0300.pt --games 2000 --sims 256
---root_sims 16384 --device cuda:1 --out runs/plan7/J3_empty_board_e8.json` and the same on `_e4` (≈ 1.5 h);
-**J4** — `tools/frontier.py --run runs/deep8_c1_300_e8 --net runs/deep8_c1_300_e8/net_0300.pt --plies 40 70
---per_ply 500 --max_nodes 1e8 --sims 256 --device cuda:1 --out runs/plan7/J4_frontier.json` (CPU-bound, ≈ 3.5 h;
-check the merged tools' exact flags first) — their readings become KNOWLEDGE lines. **The pass's per-claim
-reading is owed** (`runs/plan7/K1_parent_*.out` against `runs/plan6/I1_*.out`, HELD / MOVED / REVERSED by the
-I1 rule, one KNOWLEDGE clause per claim, a log entry) — delegate it to an opus agent with the outputs; read so
-far in this session: 8, 10–14, 20–23 (both corpora), 24, 27 held, 12 / 15 / 18 / 35's counterfactual shapes
-held (free move +0.467 vs deep10's +0.413, ownership 1.050 / 0.954 / 0.848, dead-board nulls), 25's by-count
-share 16.5 → 15.7 % and 32's motif tail (denies_free_move fell below local_win; 52 puzzles, 1 hard) to judge
-against the claims' wording. **K1 goes to the owner** after the engineering merges, with §7e M2 attached; M1's
-and M2's rebuttal rounds in the next Codex window (M1's session id is in `docs/reviews/M1_account/events.jsonl`'s
-first line, M2's in `M2_designs/events.jsonl`).
-
-**State.** **Nothing is running**: no training, no review, no background job — the two watchers that
-would have relaunched the rebuttal at 00:30 and chained M2 behind it were stopped at the owner's
-request. **The owner has redeemed a Codex usage reset, so the window is live now**, and has set
-`gpt-6-astra`'s reasoning effort to **`medium`** in `~/.codex/personal.config.toml` (M0 ran at xhigh
-and cost 4.15 M input tokens; the owner suspects xhigh drove it — expect less, and note the effort in
-each review's log entry). Both cards idle (the 3090's ≈ 830 MiB is the desktop). Play agent
-`runs/deep8_c1_300_e8/net_0300.pt`, unchanged. `main` **pushed to `origin/main` at the owner's word, 2026-09-12 22:00** — the handoff commit and
-the fifteen before it, everything since `cfc290e`; the standing instruction stands: push further
-commits only when told. Tree clean apart from the deliberately untracked
-`runs/probe_gcnn_smoke/`. E11's off-machine copy is still owed (5.23 GB, no destination here);
-`runs/` is 17.02 GB. The repository is public at `https://github.com/jpeponis/uttt-zero`.
-
-**Done today (the log has every number):** PLAN7 written; `knowledge/07` merged (novelty corrected:
-`pc29277/AlphaZero_UTTT`); **M0** — the review of this plan, 36 rows adjudicated in §7e, all accepted,
-the plan amended throughout; KNOWLEDGE 14 / 31a / 33 / the §1 note and knowledge/06 / 07 corrected;
-J1's claims map and J2's related-work section adopted into `docs/paper/` (drafts for M1); **J1a** —
-the last sealed endgame set read once on `_e8`, 92.7 [91.8, 93.6] against its dev half's 91.6 [90.6,
-92.6]; **K1's engineering** (`781dfca`, the `--rule count|draw` switch with a bit-for-bit `count`
-fixture, `test_rules.py` passing on the merged tree) and **J3 / J4's** (`934113a`, `solve_bounded`,
-`tools/empty_board.py`, `tools/frontier.py`) merged; `docs/reviews/M2_designs/` holds M2's brief,
-launcher and the two implementers' design notes; README / RETROSPECTIVE / history updated and PLAN6
-moved to `docs/history/` (J6, `f289c0a`).
+**Done tonight (the log has every number):** the rebuttal launched by hand and adjudicated (§7e R1–R8); M2 launched,
+adjudicated (§7e M2, 18 rows) and its engineering merged by two worktree agents (`3fe4190`, `7762e84`;
+`test_rules.py` green on `main`); M1's brief written, M1 launched, adjudicated by a third agent (§7e M1, 67 rows)
+and merged (`5fa73e6`); the `_e8` count pass launched with `probe_value` added; K1's launcher drafted
+(`runs/queue14.sh`, `runs/eval_run_k1.sh`, the hidden pair) and its draw-rule endgame sets built
+(`suites/endgame_v2_{dev,test}_draw.npz`).
 
 **What the next instance does, in order.**
 
-1. **Launch the rebuttal round now** — the window is live. From the repo root, in PowerShell:
-   `pwsh -NoProfile -ExecutionPolicy Bypass -File docs/reviews/M0_plan/launch_rebuttal.ps1`
-   (or detached through `Start-Process`, §7a's form). The script resumes session
-   `01a0980a-d906-7c61-a884-52d315a082d8` with the brief `docs/reviews/M0_plan/rebuttal_brief.md` and
-   writes `status_rebuttal.txt`, `events_rebuttal.jsonl`, `REBUTTAL.md`. Watch it with
-   `python tools/review_events.py docs/reviews/M0_plan/events_rebuttal.jsonl`; wait with a background
-   `until [ -s docs/reviews/M0_plan/REBUTTAL.md ] || grep -q '^EXIT' docs/reviews/M0_plan/status_rebuttal.txt; do sleep 60; done`.
-   If it dies with the usage-limit message again, the window is spent — wait for the reset. When it
-   lands: record its answers under §7e's table (the four questions: (a) Wang et al.'s reuse conversion,
-   (b) pc29277's compute ratio, (c) the two relabel figures' source lines, (d) disputed rows); amend
-   §2b, §5 item 0 and §0 if it corrects a number; commit `REBUTTAL.md` with the entry.
-2. **Launch M2** in the same window (M2 is scoped; the one-per-window rule is for whole-repository
-   reviews): `pwsh -NoProfile -ExecutionPolicy Bypass -File docs/reviews/M2_designs/launch.ps1` — a
-   fresh `exec` on `docs/reviews/M2_designs/brief.md`, scoped to the K1 diff (`git diff 417e105 781dfca`),
-   the J3 / J4 designs and the two design-notes files. Adjudicate into §7e as M0 was — a new table,
-   PLAN6 §1's columns, **every evidence cell re-derived from the code or the logs before its verdict**;
-   amend §4 J3 / J4 and §5 as required. The J3 questions it must settle: the two floors, `gumbel_scale`,
-   arm (b)'s duplication (`J3J4_design_notes.md` items 1, 2, 6).
-3. **After M2:** run J3 (`tools/empty_board.py`, 3060, ≈ 1.5 h) and J4 (`tools/frontier.py`, CPU,
-   ≈ 3.5 h) as amended; their readings become KNOWLEDGE lines (and §10) and log entries. Thread
-   `--rule` through the five I1 tools K1's readings need — `decision.py`, `surprise.py`,
-   `ownership_grade.py`, `timeline.py`, `probe_value.py` (§5) — by a worktree agent on K1's pattern.
-   Run K1 item 1, the `_e8` count-rule pass (the I1 tool set on `_e8`, ≈ 5 h on the 3060;
-   `runs/plan6/I1_second_pass_3060.sh` is the template; outputs `runs/plan7/K1_parent_*.out`), and
-   item 0, the relabel control (minutes).
-4. **Put K1 to the owner** (§5) with M2's adjudication attached; launch only on approval and under
-   the 50 % line; ≈ 22 h on the 3090. `runs/queue13.sh` is the launcher template
-   (`R=deep8_c1_300_e8_draw`, `PARENT=deep8_c1_300_e8`, add `--rule draw` to the trainer and the E7
-   worker, anchors as before).
-5. **M1** — the review of the account (`docs/paper/01_claims_map.md`, `02_literature.md`) in a later
-   window; the claims map's judgement cells (the log's 20:40 entry lists them) are its first question.
-   Then **J5**, the manuscript skeleton, and §10's remaining file updates (the explainer's Part 8).
-6. Phase L (§6) is the owner's call. E11's copy when a destination exists. Everything in §8 stays
-   unproposed.
+1. **K1 is with the owner** (§5; the approval was asked for at ≈ 23:30 with the pre-registered readings and what the
+   run cannot say). If approved: `wscript runs/launch_queue14_hidden.vbs` from the repo root — every prerequisite is
+   green (the rule switch and M2's plumbing merged, `test_rules` green, the draw-solved dev set, the launcher
+   syntax-checked). It may be launched while the pass still holds the 3060: the trainer takes the 3090 and the E7
+   worker shares the 3060 until ≈ 03:00, as the I1 pass shared it with H1c's worker. Status:
+   `python tools/run_status.py runs/deep8_c1_300_e8_draw --ref runs/deep8_c1_300_e8`. ≈ 22 h.
+2. **When the pass finishes (≈ 03:00): its per-claim reading is owed.** `runs/plan7/K1_parent_*.out` against
+   `runs/plan6/I1_*.out` (the `_e4` pass) by the I1 rule (HELD / MOVED / REVERSED; the template's header,
+   `runs/plan6/I1_second_pass_3060.sh`, states it), one KNOWLEDGE clause per claim, a log entry, the outputs and
+   `suites/puzzles_v4_dev.*` committed. Delegate it to an opus `directed` agent with the two output sets; readings
+   already made in this session, to be checked and folded in: 8, 10–14, 20–23 (both corpora), 24, 27 **held**
+   (free move +0.1959 ± 0.0283 vs +0.1953; settling plies 38 / 45 / 36 vs 39 / 45 / 36; surprise 30.7 % vs
+   30.8 %); 12 / 15 / 18 / 35's counterfactual shapes held against deep10's read (free move +0.467 vs +0.413,
+   ownership 1.050 / 0.954 / 0.848 vs 1.052 / 0.941 / 0.827, dead-board nulls ≤ 0.016); **to judge against the
+   claims' wording:** 25 (by-count share 16.5 → 15.7 %, equal 16.6 → 16.6) and 32 (52 puzzles, 1 hard; the motif
+   tail reordered, `denies_free_move` below `local_win`, no `macro_win`; regret-2 share 16.4 → 7.7 %). The pass's
+   `principles` output carries the *old* key names (`draws`, `mean boards each side`): the merged tool renamed them
+   (`draws total` / `draws sampled`, `mean boards X` / `O`) and its numbers are unchanged (16 369 draws, under the
+   cap). These readings are also the count-rule baseline every K1 draw reading is compared with (§5 item 2).
+3. **J3 and J4 on the freed 3060** (both tools as amended by M2; check `--help` for the exact flags first):
+   `tools/empty_board.py --net runs/deep8_c1_300_e8/net_0300.pt --games 2000 --sims 256 --root_sims 16384 --device cuda:1 --out runs/plan7/J3_empty_board_e8.json`
+   and the same on `_e4` (≈ 1.5 h); `tools/frontier.py --run runs/deep8_c1_300_e8 --net runs/deep8_c1_300_e8/net_0300.pt --plies 40 70 --per_ply 500 --max_nodes 1e8 --sims 256 --device cuda:1 --out runs/plan7/J4_frontier.json`
+   (CPU-bound, ≈ 3.5 h, 8 solver processes). Readings → KNOWLEDGE lines in the forms §4 J3 / J4 and §7e M2 rows 3,
+   15, 16 fix (the J4 sentence is written out there); a log entry each.
+4. **M1's and M2's rebuttal rounds, next Codex window.** Briefs on `docs/reviews/M0_plan/rebuttal_brief.md`'s
+   pattern: M2's questions are the "Open for M2's rebuttal round" list at the end of §7e M2, M1's the six at the end
+   of §7e M1. Launchers on `launch_rebuttal.ps1`'s form, `resume <thread id>` — the id is the `thread_id` on the
+   first line of `docs/reviews/M2_designs/events.jsonl` and `docs/reviews/M1_account/events.jsonl`. One review per
+   window still holds for whole-repository reads; these are resumes. Adjudicate each into its §7e table.
+5. **Then J5** (the manuscript skeleton, after M1's amendments: the map's §3 now carries the surviving sentences and
+   a setup-and-limits head), **§10's file updates** (README's "Current state" PLAN7 bullet still says the rebuttal
+   is deferred to 00:30 and M2 is armed — stale; the explainer's Part 8), and **K1's readings when it lands** (§5
+   item 2: the I1 tool set on the draw net under `draw` — every tool is threaded now; write
+   `runs/plan7/K1_readings_3060.sh` from `K1_parent_count_pass_3060.sh` with `--rule draw`, the draw net, the draw
+   endgame set and `--corpus_rule` where a tool reads the draw corpus; the common position set of §5 item 3 needs a
+   small tool of its own).
+6. Phase L (§6) is the owner's call; E11's copy when a destination exists; §8 stays unproposed.
 
-**Traps — each cost time today.** Never pipe a brief into `codex-sp`: it is a PowerShell *function*,
-stdin does not reach the binary inside it, and `exec … -` hangs on the console's stdin (0 CPU, 0
-bytes); the launchers pass a one-line prompt naming the brief file and redirect the child's stdin from
-`empty_stdin.txt`. `Start-Process -ArgumentList` takes one quoted string, not an array — the array
-splits at the space in the user name and the child exits at once having run nothing. One
-whole-repository review per five-hour Codex window; rebuttals in the next. `tests/test_symmetry.py`
-passes on `cuda:0` only (§11). Agent worktrees live under `.claude/worktrees/` (ignored), start from
-the commit current at launch, lack `.venv` and `runs/*/games`, and two agents on one file conflict at
-merge — resolve into one design, then remove the worktree and its branch. `gumbel_scale` is in no
-`config.json`; every run trained at 1.0. The Monitor tool delivers nothing from files on this machine —
-use a background `until` loop. The PowerShell tool refuses any command containing `Remove-Item` on a
-variable path (a static check) — clean up from bash. Delegate write-ups and file-heavy work to
-`directed` (opus) agents, scratchpad drafts first, adopt after a read; keep the reviewed files frozen
+**Traps — each cost time today.** Never pipe a brief into `codex-sp`: it is a PowerShell *function*,
+stdin does not reach the binary inside it, and `exec … -` hangs on the console's stdin (0 CPU, 0
+bytes); the launchers pass a one-line prompt naming the brief file and redirect the child's stdin from
+`empty_stdin.txt`. `Start-Process -ArgumentList` takes one quoted string, not an array — the array
+splits at the space in the user name and the child exits at once having run nothing. One
+whole-repository review per five-hour Codex window; rebuttals in the next. `tests/test_symmetry.py`
+passes on `cuda:0` only (§11). Agent worktrees live under `.claude/worktrees/` (ignored), start from
+the commit current at launch, lack `.venv` and `runs/*/games`, and two agents on one file conflict at
+merge — resolve into one design, then remove the worktree and its branch. `gumbel_scale` is in no
+`config.json`; every run trained at 1.0. The Monitor tool delivers nothing from files on this machine —
+use a background `until` loop. The PowerShell tool refuses any command containing `Remove-Item` on a
+variable path (a static check) — clean up from bash. Delegate write-ups and file-heavy work to
+`directed` (opus) agents, scratchpad drafts first, adopt after a read; keep the reviewed files frozen
 while a reviewer is running.
 
+**Traps added tonight.** Agent worktrees can start from a commit *older* than HEAD (two of three tonight started at
+`40b7864` though launched after `09c687c`): tell every agent to `git merge --ff-only main` before it edits, and
+check `git worktree list`. The Bash tool's quoted heredoc fails with "unexpected EOF while looking for matching `'`"
+when the body has unbalanced apostrophes — write files with the Write tool and run them. Python 3.10's
+`Path.read_text` has no `newline=` argument (use `open(..., newline="")`; the files are LF, Git's CRLF warnings are
+noise). Codex at medium: a scoped review costs ≈ 1 M tokens and 4–8 minutes; a resumed rebuttal ≈ 2 minutes and
+mostly cache. The pass's outputs were produced by the pre-merge tools — their numbers are what the merged tools
+would give (the count path is bit-identical), but the field names of `principles` differ. Three background agents
+plus a GPU pass plus two Codex reviews ran concurrently without incident; the constraint that bit was context, not
+compute — delegate anything that reads more than a few files.
 ## Log
 
 - **2026-09-12, evening — PLAN7 written.** After E11's push (PLAN6 log 19:05). Inputs read in full:
@@ -339,6 +317,39 @@ while a reviewer is running.
   list). Every number written was re-derived here from the file or the source it cites; the `_e8` count-rule
   pass was in flight throughout and none of its readings was used.
 
+- **2026-09-12, 23:32 — the M2 engineering merged, K1's launcher drafted, its endgame sets built, M1 adjudicated and
+  merged.** In order: the J3 / J4 tools after M2 (`3fe4190`; `tools/empty_board.py`, `tools/frontier.py`,
+  `tests/test_solver_bounded.py` under both rules and for the bounded child enumeration — with the plain evaluator
+  arm (b) at 16 games / 32 sims collapses to **one** distinct line, an O win, where the symmetry-averaged form
+  reproduced the earlier smoke exactly; the 2 000-game run decides); the K1 plumbing after M2 (`7762e84`: rows 1,
+  5, 6, 8, 9, 18, the five I1 tools and `gdata` / `annotate` / `endgame_accuracy` threaded, `tests/test_rules.py`
+  comparing `done` / `next_board` / `player` / `move_count` after every ply, `tests/test_tablebase.py` under both
+  rules, the new `tests/test_rules_boundaries.py`; the implementers' notes in `docs/reviews/M2_designs/*_M2_implementation_notes.md`);
+  **`test_rules.py` green on the merged `main`** (`2969812`: 320 s + 318 s, the same 77 913 / 14 800 → 0 / 7 287 →
+  22 087 counts). **K1's launcher drafted, not launched** (`8f83bba`: `runs/queue14.sh` — the `_e8` recipe verbatim
+  plus `--rule draw`, `--gumbel_scale 1.0` explicit, `--endgame_set suites/endgame_v2_dev_draw.npz`, the E7 worker
+  under `draw` against the standing count anchors for shape; `runs/eval_run_k1.sh` — the cross-play pair against
+  `_e8` under each rule, v2b under both, the 2 × 2 endgame reads; the hidden `.cmd` / `.vbs`). **The draw-rule twins
+  of `endgame_v2` built** (`9930e0d`: `suites/endgame_v2_dev_draw.npz`, `_test_draw.npz`, 3 000 each, the same
+  corpus / split / seed as the count sets, the test half sealed by construction; 8 processes, ≈ 10 min). **M1
+  adjudicated by a worktree agent and merged** (`5fa73e6`; §7e M1: 67 rows — 55 accept, 8 accept with change, 1
+  reject, 3 noted — every evidence cell re-derived from the files or the sources, six questions for its rebuttal;
+  three of its re-derivations spot-checked here before the merge and exact: B3's own-local-win coefficients
+  −0.0259 ± 0.0168 / −0.0367 ± 0.0175, the identical solver value 0.7021498643 in `principles_deep8.json` and
+  `I1_principles_deep8e4.json`, the `_e8` vs `_e4` score 55.7655 % / 40.2418 Elo). What M1 changed: the Wang
+  correction carried into the literature draft; Lovering et al. narrowed to one agent in the main body with three
+  further *architectures* in an appendix (so the four-net replication claim is cross-seed, not cross-net —
+  `knowledge/07`, §2b); the map's row 30 and §2 brought up to committed KNOWLEDGE; the drift tally regenerated as
+  a partition (4 / 25 / 1 / 18 / 11 = 59) with **[CI] / [no CI]** on every *compatible* cell; five over-claiming
+  outline sentences replaced by their surviving forms; KNOWLEDGE 2, 3, 14, 15, 17, 18, 19, 31, 31a, 32, 33, 35,
+  41a, 48, 50, 51 restated (33's agent and solver columns were never a paired comparison; 32's two puzzle samples
+  come from different corpora; 41a gains its intervals; 15's "unchanged to the second decimal since v2a" was
+  false). Two phrases outside the agent's remit fixed here: §1a's "within 0.02" (0.022 on `_e4`) and KNOWLEDGE
+  46's "none of them the plateau" (K6). Codex this window, all at medium: rebuttal 123 s / 6.2 M tokens (5.8 M
+  cached), M2 267 s / 0.94 M, M1 498 s / 2.9 M (2.7 M cached); three review stages in one window at medium cost
+  less than M0 alone at xhigh. **Running:** the `_e8` count pass (on `value_decomp` since 22:55; `book`, the probe
+  fit and `ownership_grade` follow; ≈ 03:00). **Awaiting the owner:** K1.
+
 ## 0. The decision in front of the project
 
 **What the paper is.** Three papers could be written from this repository, and they want different
@@ -437,7 +448,7 @@ every claim in it also carries a drift verdict** — with the corrections M0 and
 | **E — exact** | checked against the solver or the one-open-board tablebase | 28 (search 99.7–100 % optimal on solved samples), 29–30 (raw head names the exact result: 84.6 → 91.3 % across the ladder; the sealed half agreed within 0.3), 31 (draw recognition was optimisation, not capacity), 31a (the one-open-board phase: 100 / 100 / 100 on every net), 32 (what the raw policy still gets wrong late: the count rule and tempo, 2.1 → 1.0 %), 33–34's solver columns (the optimal move sends the opponent to a winnable board 69–70 % of the time; never to an immediate macro win when not already lost) | stated as facts about positions sampled from strong play, with the sampling stated; never as "solved" |
 | **S — stable** | sign and ordering held on all four strong nets *and* the last re-read's magnitude sat inside the earlier CI (I1's "held") | 1 ([40] best, [13] worst, 12 of 12 columns), 8 (a free move +0.195 ± 0.028 — deep10's number to the third decimal), 11 (the raw head over-credits it by ≈ 0.09, three nets), 13 (a macro threat ≈ +0.15 / −0.14, four strengths), 17 (line counting learned by iteration 10–20 and never moves), 19 (an opponent's local threat ≈ −0.09), 21 (X wins settle at 32, O wins and draws at 39–41), 26 (96 % of draws are 4–4 with one full board), 31a, 33–34 (the folk rule is false as a rule; the true rule is macro-immediate), 35 (conceding the centre is a null once lines are controlled), 36 (the encoding exposes the obvious concepts; a random net reads them at 98–100 %), 38 (tactics shallow and early, value deep and late), 40 (the ownership head learns late ownership, 68–71 % vs 50 % baselines; switching it off was a strength null) | the core of the game section; each quoted with all four nets' numbers |
 | **M — moved** | sign and ordering held; the magnitude on the +363 net fell outside the earlier CI, in the direction strength has always pushed it (I1's "moved") | 2 (τ vs v2b 0.96 → 0.85: the opening sharpens), 3 (X's edge after [40] +0.28 → +0.354 → +0.447 → +0.495 and still rising), 4–5 (fewer flat replies, wider best-to-worst range, a new non-[40] sharp reply after [2]), 7a (the self-send 55 / 58 → 48 % — still the most common reply, no longer a majority), 9 (the conditional free-move coefficient 0.43 → 0.60 of the unconditional), 10 (a free move worth most late and when ahead; the middlegame now runs with the count), 14 (the per-board residual +0.02 … +0.08 and not growing), 16 (the raw board count discounted further, +0.037 → +0.022), 20 / 22 (settling median 36 → 34 on strong play; the ply-0 caveat grows to 21 %), 23 (policy–search disagreement 34 → 31 %, the value gap unchanged at 0.19), 24 (X 63 / O 21 / draws 16.6 %: X flat since deep10, draws still rising out of O's column), 25 (the count rule decides a third of games, not a quarter — flat for 250 Elo, then +6 points in 120), 27 (52.8 plies, 5.1 free moves per game, both climbing), 32 (failures halve again), 37 (the same probe grid learned 20–50 iterations earlier), 39 (the trunk carries a little more of the line ahead) | stated with the trajectory, not a point: "X's edge after [40] has risen at every strength measured and has not saturated" |
-| **R — reversed** | an ordering flipped between +242 and +363 | 7 (after [40], `_e4` puts 0.71 of its visits on the corner reply orbit 36 where deep10 put 0.75 on the edge orbit 37, and rates the edge subtree +0.022 better where the earlier nets rated the corner +0.016 better; its atlas agrees at 1k, 4k and 16k). The two lines were within 0.02 of each other on every net. | the most important line in the game section: it is what the strength-drift test is *for*, and it lands where the method said a reversal could — on a near-tie. uttt.ai's prose ("O's best reply pushes play into a corner board") agrees with the stronger net, §2a |
+| **R — reversed** | an ordering flipped between +242 and +363 | 7 (after [40], `_e4` puts 0.71 of its visits on the corner reply orbit 36 where deep10 put 0.75 on the edge orbit 37, and rates the edge subtree +0.022 better where the earlier nets rated the corner +0.016 better; its atlas agrees at 1k, 4k and 16k). The two lines were ≈ 0.02 apart on every net (0.022 on `_e4`: M1 J4). | the most important line in the game section: it is what the strength-drift test is *for*, and it lands where the method said a reversal could — on a near-tie. uttt.ai's prose ("O's best reply pushes play into a corner board") agrees with the stronger net, §2a |
 | **N — not re-read at +363** | read on deep10 (and often deep8_300 / the replicate) but its tool is not in I1 | 6 (the opening is learned first: ≥ 0.95 on [40] by iteration 20–30), 12 (tensor edits overstate the free move 2×), 15 (which board class is worth most — unresolved on three nets and read as noise), 18 (a dead open board is worth nothing), 38a (which concepts the trunk computes vs merely re-formats: dead boards, exact value, best move survive the non-linear control; threats and the immediate win do not), 41 / 41b (residual asymmetry 0.027 bits; the 8-way average +35 / +32 at 8× the cost, −201 at equal compute; exact canonicalisation a null, deep10 and `_e2`), 41a (a legible surrogate reproduces 41 % of the search's moves and none of its strength, −661 vs v2b) | quoted from the nets they were read on, marked as such; J1 decides which are cheap to re-read on `_e8` and does those |
 
 **Corrections from M0 and J1 (2026-09-12), each verified here in the file named.** 31: the

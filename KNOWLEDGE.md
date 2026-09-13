@@ -726,7 +726,8 @@ review, 2026-09-12.)*
     throughout; 70 of 153 600 steps were skipped by the GradScaler. **Two passes is not the
     plateau either: the dose–response follow-up doubled them again for another +64 (49), and a
     third doubling adds +40 more (51)** — +100, +64, +40 across three doublings, each worth
-    about two-thirds of the one before it, and none of them the plateau.
+    about two-thirds of the one before it; the +40 resolves that four passes was not the plateau, and
+    nothing in the run bears on whether eight is (M1 K6, 2026-09-12).
     *Behavioural; one run read against three references, seed band ≈ 3 points.*
     `runs/deep8_c1_300_e2/{analysis.out,eval_full.jsonl,timeline.png}`, PLAN6 log.
 47. **For a fixed teacher, the fit is a function of optimizer steps, not of distinct
