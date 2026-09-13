@@ -439,6 +439,36 @@ compute — delegate anything that reads more than a few files.
   parent's 3–5 %, [40] the modal first move; iterations 4–6 ran 281–332 s against the parent's 208 while the
   instruments' smoke shared `cuda:0` with the trainer, and iteration 7 returned to 209.6 s.
 
+- **2026-09-13, 02:40 — the count-rule parent pass is read (§5 item 1, and J1's cheap re-read with it).**
+  `runs/plan7/K1_parent_count_pass_3060.sh` on `deep8_c1_300_e8` under `count`, 22:14–02:40 on the 3060,
+  18 tools, every exit 0. Read claim by claim against the `_e4` pass under I1's pre-registered rule by an
+  opus worktree agent (merged 03:17), every verdict marked [CI] or [no CI] as M1 required: **37 claims — 27
+  held, 9 moved, 1 unresolved, 0 reversed**; seven verdicts rest on an interval `_e4` carries, thirty on a
+  repeated rank, sign, share or profile. Ledger: `runs/plan7/K1_parent_reading.md`; the 0.943 and +0.524
+  below re-derived here from `runs/book_deep8_e8.json`'s node `40` before the merge.
+  **7's reversal is confirmed and deepens.** After [40] the corner orbit takes **0.943** of the root's visits
+  (`_e4` 0.709, deep10 0.246 on the corner), 36 is the best reply orbit at 1k, 4k and 16k, and the *edge*
+  subtree is still the one rated better for X — **+0.017**, against `_e4`'s +0.022 and the +0.016 by which
+  both earlier nets preferred the corner. Two nets 40 Elo apart now agree on the corner and the two lines
+  stay ≈ 0.02 apart on every net measured: that is item 2's baseline, and the 0.02 tie tolerance applies to
+  a 0.94 / 0.06 visit share.
+  **What moved is mostly a trend stopping.** 25: by-count 16.5 → **15.7 %**, equal count flat at 16.6 — the
+  level (a third) holds, the +6-point rise does not, and 0.8 points is resolved on 98 581 games. 24: draws
+  flat at 16.6, O's half-point going to X. 27: length 52.8 → 53.2 but free moves 5.08 → **5.02**. 5: three of
+  the four reply gaps narrow back toward deep10's. 2: τ vs v2b back to **0.92** from 0.85, while the top four
+  hold their order at *all three* budgets for the first time. 37: the learned-by column later again on three
+  concepts. Moving onward: 3 (+0.495 → **+0.524**); 20 / 22 (the ply-0 caveat 21–22 → **24–25 %**, which
+  pulls 20's first quartile to 11 while its medians stay exactly `_e4`'s); and **12**, read for the first
+  time since deep10 — the tensor edit overstates **2.4×** against deep10's 2.1×.
+  **J1's cheap re-read paid:** `probe_value.py` gives 12, 18, 35's counterfactual half and 15's a reading
+  after deep10, so **38a is now the only game claim with none above deep10**. And 32's puzzles are this time
+  the same 6 001 candidates from the same 3 076 games as `_e4`'s — a genuinely paired reading, unlike
+  deep10 → `_e4` — 52 failures against 61, with the motif tail reordered a second time below the head. 24's
+  verdict is the agent's judgement call, taken: held [no CI] with `_e4`'s "draws still rising" clause
+  qualified, not a tenth MOVED. The outputs are committed (`573a1b9`, `de9091c`), the ledger whitelisted in
+  `.gitignore` (`!runs/*/*.md`). **M1's rebuttal round ran at 03:08** (475 s, 5.0 M tokens of which 4.66 M
+  cached, 922 words) — adjudicated next, in §7e M1's R-rows.
+
 ## 0. The decision in front of the project
 
 **What the paper is.** Three papers could be written from this repository, and they want different
