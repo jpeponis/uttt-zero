@@ -600,20 +600,25 @@ and — read for the first time since deep10 — the tensor-edit overstatement (
     +1.0, at the edge of the pre-registered band, the two sets being from different corpora.
     `endgame_v3_test` is a development set from here on.
     `runs/plan7/J1a_endgame_v3_test_e8.out`, `runs/plan7/J1a_endgame_v3_dev_e8.out`.
-31. **"Draw blindness" was not a capacity limit — a measurement and an inference.**
+31. **Draw recognition improves after the first LR drop across these runs, consistent with an
+    optimisation explanation; capacity limitations are not excluded** — a measurement and an
+    inference (the categorical "'Draw blindness' was not a capacity limit" headline replaced by
+    the reviewer's own sentence; M1 rebuttal, 2026-09-13).
     The 150-iteration nets recognised
     ~55 % of exact draws at every width and depth; the annealed 300-iteration nets
     recognise 67–72 % with the same architecture, loss and labels. The step happens at
     the first learning-rate drop (deep8_300: 58.8 → 65.7 % between checkpoints 200 and
     210), and the draw metric wobbles by up to 20 points between adjacent checkpoints at
     constant LR. *Exact* — the draw-recognition measurement, graded against the solver on
-    `suites/endgame_v1` every tenth checkpoint; the **diagnosis** (optimisation, not capacity) is
+    `suites/endgame_v1` every tenth checkpoint; the **diagnosis** (an optimisation explanation;
+    capacity not excluded — M1 rebuttal, 2026-09-13) is
     **inference** from the step's timing and from width and depth having been varied at 150
     iterations, and it leaves E (M0 row 2, applied to this line M1, 2026-09-12). *deep8_300 and
     deep10 timelines; `deep8_c1_300_e4`'s and `_e8`'s carry the later readings — draw recognition
     70.6 → 74.7 % and 73.1 → 79.6 % across the first drop.* `runs/*/timeline.json`,
     RETROSPECTIVE §3.
-31a. **The last-board phase is solved outright.** On every position with exactly one open
+31a. **Perfect measured accuracy on the sampled one-open-board positions** ("solved outright"
+    withdrawn as a headline; M1 rebuttal, 2026-09-13). On every position with exactly one open
     board in 60 000 held-out positions (701, 1.2 % of them; exact values from the
     one-open-board tablebase, `uttt/tablebase.py`), deep10's raw value head is 100 % exact
     (draws included), its raw policy plays an optimal move 100 % of the time, and the
@@ -1153,12 +1158,14 @@ and — read for the first time since deep10 — the tensor-edit overstatement (
     agent stays `deep8_c1_300_e4/net_0300.pt`. (The run was interrupted at iteration 268 by a
     Windows Update restart and resumed as attempt 1 from iteration 260, every file verified
     intact; iterations 260–268 are a perturbed re-run, so `log.jsonl` is read de-duplicated by
-    iteration.) **And the supervised curves do not put the 220 Elo down to the width:** the same architecture at
+    iteration.) **The parameter-matched supervised arm also loses later:** the same architecture at
     the ResNet's parameter count (`gcnn8x46`, 2.46 M parameters at 7.0× the inference cost) also
     trails the plain ResNet at 12 480 supervised steps, with *its* margin reversing by 6 240 — the
     narrow net's curve, one capacity up (48, restated 2026-09-10). That is a frozen-data result: no
     self-play run exists at that width, so it bears on the 220 Elo by analogy and not by measurement
-    (M1, 2026-09-12). *Behavioural; one run read
+    (M1, 2026-09-12). **The effect of self-play width on the 220 Elo is unmeasured**, and nothing
+    here excludes it — the earlier "the supervised curves do not put the 220 Elo down to the width"
+    invited that causal exclusion and is withdrawn (M1 rebuttal, 2026-09-13). *Behavioural; one run read
     against its parent, seed band ≈ 3 points.*
     `runs/gcnn8_c1_300_e4/{analysis.out,eval_full.jsonl,timeline.json}`,
     `runs/plan6/H4_timeline.out`, `runs/plan6/H4_lr_*.json`, `runs/plan6/H4_lr2_*_x32.json`,
