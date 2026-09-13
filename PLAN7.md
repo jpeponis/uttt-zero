@@ -20,138 +20,97 @@ game carries its level, CI, the nets it held on, and the file that produced it. 
 assembled from the claims file, not written beside it), and **every outside-review finding is
 adjudicated in this file before anything acts on it** (§7, as PLAN6 §1 did).
 
-## Handover (2026-09-12, 23:32 — written for the next instance by the second instance of the day)
+## Handover (2026-09-13, 08:38 — written for the next instance; this one stopped at ≈ 64 % of its context at the owner's word)
 
-**State at 03:39, 2026-09-13 (the latest; the paragraphs below it are the earlier states, kept).** Running: **K1**
-(≈ iteration 55 of 300, ≈ 213 s each, `end_count` 0.0, draw share ≈ 36 %; ≈ 22:30 today; then `eval_run_k1.sh` by
-itself) and **J3 → J4** on the 3060 (`runs/plan7/J3J4.out`; J3 is ≈ 1 h per net, not 45 min — `_e8` first, then
-`_e4`, so ≈ 04:45; J4 ≈ 3.5 h after, ≈ 08:30; the job notifies its session only at the very end). Nothing else.
-**Done since 02:45:** the pass's reading merged (`2854935`, 37 claims — 27 held / 9 moved / 1 unresolved / 0
-reversed); M1's rebuttal ran at 03:08 and is adjudicated and merged (`e2c8cd6`, R1–R14); M2's was at 23:46
-(§7e M2-R). Every review stage through M2 is now adjudicated with its rebuttal; M3 (the draft) comes after J5.
-**Next, in order:** (1) J3's two outputs and J4's — read them into KNOWLEDGE in §4 J3 / J4's forms (J3: the
-root value and line, the (b) and (c) splits with their concentration beside the intervals, (b) − (c) as the
-exploration package, (b) *compared* with 24; J4: the coverage curve conditional on alive, the optimal-move
-rate conditional on complete, the sentence §4 J4 writes out), a log entry, commit the outputs (`runs/plan7/J3_*`,
-`J4_*`; the `_positions.npz` too). (2) K1 at ≈ 22:30: read `runs/deep8_c1_300_e8_draw/analysis.out`; then on
-the 3060 `bash runs/plan7/K1_readings_3060.sh` (≈ 5 h; item 2), `tools/common_positions.py --corpus_a
-runs/deep8_c1_300_e8_draw --corpus_b runs/deep8_c1_300_e8 --net_a runs/deep8_c1_300_e8_draw/net_0300.pt --net_b
-runs/deep8_c1_300_e8/net_0300.pt --n 15000 --sims 256 --device cuda:1 --out runs/plan7/K1_common_positions.json`
-(item 3 and the DiD of item 2), `tools/paired_contrast.py --count runs/deep8_c1_300_e8_draw/paired_vs_deep8c1_300e8_64.json
---draw runs/deep8_c1_300_e8_draw/paired_vs_deep8c1_300e8_64_draw.json` (item 4); every claim marked by §5 item
-2's rules, one KNOWLEDGE clause each, K1's row in README's ladder (Elo "n/a — a different game"), a log entry.
-(3) J5, the manuscript skeleton (`docs/paper/paper.md` from the map's §3), then M3. Open for M3, from the
-rebuttals: the Padua terminal rule, the HUJI year, `knowledge/06`'s inferred solving cost, `surprise` /
-`probe_value` reading the draw run's own buffer, the count-play corpora read under draw. **Nothing has been
-pushed since `40b7864` (2026-09-12 22:00) — some forty commits; push when the owner says.**
+**State.** **K1 is running** — `runs/deep8_c1_300_e8_draw`, the play agent's recipe under the plain-draw tiebreak as
+its one change, launched 2026-09-13 00:20:02 at the owner's word (`wscript runs/launch_queue14_hidden.vbs`, from
+`33ebd8a`; `config.json` records `rule draw`, `gumbel_scale 1.0` and the resolved search configuration). At 08:37:
+iteration 123 of 300 on the 64-sim leg at ≈ 285 s per iteration → **≈ 22:40 today**; `end_count` 0.0 throughout;
+draw share ≈ 47 % at iteration 123 (the parent's final ≈ 17 %; the mechanical relabel baseline 32.3 %); the E7 worker
+(pid 4451) under `draw` on the 3060 (`eval_full_draw.jsonl`: net_0070 75.6 % vs v2b under draw, 42.6 vs the count
+parent, 60.1 vs deep8_c1_300; raw WDL 89.8 on the draw set). When training reaches DONE, `runs/eval_run_k1.sh` runs
+by itself (item 4's two cross-play matches against the parent, v2b under both rules, the 2 × 2 endgame reads →
+`runs/deep8_c1_300_e8_draw/analysis.out`) and `runs/queue14.out` ends "queue14 done" with the worker's exit status; a
+non-zero exit or a `!!! FAILED` line is the failure signal; a reboot is answered by relaunching the same `.vbs` (it
+resumes from `latest_full.pt`; a cross-rule resume is refused). Status: `python tools/run_status.py
+runs/deep8_c1_300_e8_draw --ref runs/deep8_c1_300_e8`. **Nothing else runs**; the 3060 is free apart from the worker;
+no worktrees; the play agent unchanged. `main` is the commit after `76366bd`. **44 commits are unpushed since
+`40b7864` (2026-09-12 22:00)** — push only at the owner's word; ask. The Codex five-hour window last opened at 03:08
+(M1's rebuttal), so it is fresh.
 
-**State (02:44).** Running: **K1**
-(iteration ≈ 40 of 300 at ≈ 213 s per iteration, `end_count` 0.0, draw share ≈ 39 %; ≈ 22:30 today); **J3 then J4** on
-the 3060 (`runs/plan7/J3J4_3060.sh`, started 02:43; log `runs/plan7/J3J4.out`; J3 on `_e8` and `_e4` ≈ 45 min each,
-J4 ≈ 3.5 h; outputs `runs/plan7/J3_empty_board_{e8,e4}.json|out`, `J4_frontier.json` + `_positions.npz` + `.out` —
-their readings become KNOWLEDGE lines in §4 J3 / J4's forms, then a log entry and a commit); **the `_e8` count
-pass's per-claim reading** by an opus worktree agent (KNOWLEDGE clauses, the map's `_e8` column,
-`runs/plan7/K1_parent_reading.md`; merge after a read, paste its draft log entry, commit; the pass itself finished
-02:40, every tool exit 0, outputs committed `573a1b9` / `de9091c`); and **a background waiter that launches M1's
-rebuttal at 03:08** (`docs/reviews/M1_account/launch_rebuttal.ps1`; watch `status_rebuttal.txt`; adjudicate into
-§7e M1 as R-rows). Not running: nothing else. Nothing pushed since `40b7864`.
-
-**State (00:20).** **Two things are running.** **K1 itself** — `runs/deep8_c1_300_e8_draw`, launched at the owner's word
-on 2026-09-13 at 00:20:02 (`wscript runs/launch_queue14_hidden.vbs` from `33ebd8a`; `config.json` records
-`rule draw`, `gumbel_scale 1.0` and the resolved search configuration; the E7 worker, pid 4451, under `draw` on
-the 3060; status `python tools/run_status.py runs/deep8_c1_300_e8_draw --ref runs/deep8_c1_300_e8`; ≈ 22 h, so
-≈ 22:30 on 2026-09-13; `eval_run_k1.sh` then runs by itself and `runs/queue14.out` ends "queue14 done" — a
-non-zero exit or a `!!! FAILED` line in `analysis.out` is the failure signal; a reboot is answered by relaunching
-the same `.vbs`, which resumes from `latest_full.pt` under the recorded rule). And **K1 item 1**, the `_e8`
-count-rule pass on the 3060
-(`runs/plan7/K1_parent_pass.out`, started 22:13, on `value_decomp` since 22:55; then `book`, `book_stats`, the
-16-checkpoint probe fit, `probe_report`, `ownership_grade`; done ≈ 03:00 — it is a background job of a session that
-may have ended; read its log, do not look for the job). The 3090 idle. Play agent `runs/deep8_c1_300_e8/net_0300.pt`,
-unchanged. `main` is at the commit after `5fa73e6`; **nothing pushed since `40b7864`** — the standing instruction:
-push only when told. No worktrees. Tree clean apart from `runs/probe_gcnn_smoke/` (deliberately untracked) and the
-pass's outputs (`runs/plan7/K1_parent_*`, `suites/puzzles_v4_dev.*`), which are committed with its reading. E11's
-off-machine copy is still owed. The Codex window that opened ≈ 21:50 closes ≈ 02:50; the rebuttal, M2 and M1 all
-ran in it at medium (the log's 23:32 entry has the costs) — M1's and M2's rebuttal rounds go in the *next* window.
-
-**Done tonight (the log has every number):** the rebuttal launched by hand and adjudicated (§7e R1–R8); M2 launched,
-adjudicated (§7e M2, 18 rows) and its engineering merged by two worktree agents (`3fe4190`, `7762e84`;
-`test_rules.py` green on `main`); M1's brief written, M1 launched, adjudicated by a third agent (§7e M1, 67 rows)
-and merged (`5fa73e6`); the `_e8` count pass launched with `probe_value` added; K1's launcher drafted
-(`runs/queue14.sh`, `runs/eval_run_k1.sh`, the hidden pair) and its draw-rule endgame sets built
-(`suites/endgame_v2_{dev,test}_draw.npz`).
+**Done in this session (2026-09-12 22:00 → 2026-09-13 08:40; the log has every number).** The M0 rebuttal, M2, M2's
+rebuttal, M1 and M1's rebuttal — all run at medium and adjudicated with every evidence cell re-derived (§7e: R1–R8,
+M2 rows 1–18, M2-R R1–R13, M1 rows 1–67, M1-R R1–R14); M2's engineering and its rebuttal's built by worktree agents,
+merged and tested (the K1 plumbing, the J3 / J4 tools, the five I1 tools threaded, the boundary suite, the launcher's
+failure handling); the `_e8` count-rule pass run and read (37 claims: 27 held / 9 moved / 1 unresolved / 0 reversed;
+7's reversal confirmed and deepened at 0.943 of the visits on the corner reply); K1's instruments built, tested and
+frozen before its final checkpoint exists (`runs/plan7/K1_readings_3060.sh`, `tools/common_positions.py`,
+`tools/paired_contrast.py`), and §5 item 2 amended to the difference-in-differences form on their control finding (a
+count net's own Δ across the evaluation rules is −0.020 mechanically; two count nets' DiD 0.0000); the draw-rule
+endgame sets built; K1 launched; J3 and J4 run and read (KNOWLEDGE 52, 53); the map, the literature draft, KNOWLEDGE
+and `knowledge/07` brought to M1-R's state (31's causal headline gone; 33's columns unpaired; the HUJI report
+CLOSED-DRAW with its 2 and 5 verbatim; the Padua thesis CLOSED, tiebreak unverified; the Othello comparison deleted).
 
 **What the next instance does, in order.**
 
-1. **K1 is running** (State, above). Its reading instruments — `runs/plan7/K1_readings_3060.sh` (§5 item 2),
-   `tools/common_positions.py` (item 3 and the paired Δ of item 2, 15 000 positions per corpus) and
-   `tools/paired_contrast.py` (item 4) — are **built, tested and merged** (`bd86052`), frozen before `net_0300.pt` exists (R9); do not touch them
-   (§5 item 2 was amended to the difference-in-differences form on their control finding — the log's 00:53
-   entry). When K1 lands (≈ 22:30): read `analysis.out`
-   (the in-run table, the two cross-play matches, the 2 × 2 endgame reads), then run the readings script on the
-   3060, `common_positions.py` on `_e8` vs the draw net (both corpora, both rules) and `paired_contrast.py` on the
-   two cross-play files; every claim marked rule-invariant / rule-dependent / unresolved by §5 item 2's rules, one
-   KNOWLEDGE clause each, a log entry, K1's row in README's ladder table (its Elo column is "n/a — a different
-   game"; the endgame column its draw-set read).
-2. **When the pass finishes (≈ 03:00): its per-claim reading is owed.** `runs/plan7/K1_parent_*.out` against
-   `runs/plan6/I1_*.out` (the `_e4` pass) by the I1 rule (HELD / MOVED / REVERSED; the template's header,
-   `runs/plan6/I1_second_pass_3060.sh`, states it), one KNOWLEDGE clause per claim, a log entry, the outputs and
-   `suites/puzzles_v4_dev.*` committed. Delegate it to an opus `directed` agent with the two output sets; readings
-   already made in this session, to be checked and folded in: 8, 10–14, 20–23 (both corpora), 24, 27 **held**
-   (free move +0.1959 ± 0.0283 vs +0.1953; settling plies 38 / 45 / 36 vs 39 / 45 / 36; surprise 30.7 % vs
-   30.8 %); 12 / 15 / 18 / 35's counterfactual shapes held against deep10's read (free move +0.467 vs +0.413,
-   ownership 1.050 / 0.954 / 0.848 vs 1.052 / 0.941 / 0.827, dead-board nulls ≤ 0.016); **to judge against the
-   claims' wording:** 25 (by-count share 16.5 → 15.7 %, equal 16.6 → 16.6) and 32 (52 puzzles, 1 hard; the motif
-   tail reordered, `denies_free_move` below `local_win`, no `macro_win`; regret-2 share 16.4 → 7.7 %). The pass's
-   `principles` output carries the *old* key names (`draws`, `mean boards each side`): the merged tool renamed them
-   (`draws total` / `draws sampled`, `mean boards X` / `O`) and its numbers are unchanged (16 369 draws, under the
-   cap). These readings are also the count-rule baseline every K1 draw reading is compared with (§5 item 2).
-3. **J3 and J4 on the freed 3060** (both tools as amended by M2; check `--help` for the exact flags first):
-   `tools/empty_board.py --net runs/deep8_c1_300_e8/net_0300.pt --games 2000 --sims 256 --root_sims 16384 --device cuda:1 --out runs/plan7/J3_empty_board_e8.json`
-   and the same on `_e4` (≈ 1.5 h); `tools/frontier.py --run runs/deep8_c1_300_e8 --net runs/deep8_c1_300_e8/net_0300.pt --plies 40 70 --per_ply 500 --max_nodes 1e8 --sims 256 --device cuda:1 --out runs/plan7/J4_frontier.json`
-   (CPU-bound, ≈ 3.5 h, 8 solver processes). Readings → KNOWLEDGE lines in the forms §4 J3 / J4 and §7e M2 rows 3,
-   15, 16 fix (the J4 sentence is written out there); a log entry each.
-4. **M1's rebuttal round — the Codex window reopens at 03:07** (M2's ran at 23:46 and is adjudicated, §7e
-   M2-R; M1's first attempt hit the usage limit at 23:49): `pwsh -NoProfile -ExecutionPolicy Bypass -File
-   docs/reviews/M1_account/launch_rebuttal.ps1` from the repo root (it resumes the M1 thread with
-   `docs/reviews/M1_account/rebuttal_brief.md`; watch `status_rebuttal.txt`), then adjudicate its answers into
-   §7e M1 as R-rows, as M2-R was. The M2-R engineering is **merged** (`7b17e48`, 2026-09-13 00:14; its three
-   suites green on `main`, no worktrees left) — **K1's only remaining gate is the owner's word.** During K1's
-   22 h: write and freeze `runs/plan7/K1_readings_3060.sh` and the common-set tool (§5 items 2–4, R9) —
-   15 000 positions per corpus — before `net_0300.pt` exists.
-5. **Then J5** (the manuscript skeleton, after M1's amendments: the map's §3 now carries the surviving sentences and
-   a setup-and-limits head), **§10's file updates** (README's "Current state" PLAN7 bullet still says the rebuttal
-   is deferred to 00:30 and M2 is armed — stale; the explainer's Part 8), and **K1's readings when it lands** (§5
-   item 2: the I1 tool set on the draw net under `draw` — every tool is threaded now; write
-   `runs/plan7/K1_readings_3060.sh` from `K1_parent_count_pass_3060.sh` with `--rule draw`, the draw net, the draw
-   endgame set and `--corpus_rule` where a tool reads the draw corpus; the common position set of §5 item 3 needs a
-   small tool of its own).
-6. Phase L (§6) is the owner's call; E11's copy when a destination exists; §8 stays unproposed.
+1. **Watch K1** (above): a glance at `runs/deep8_c1_300_e8_draw/log.jsonl` for `t_iter` and `draw` now and then;
+   nothing else until ≈ 22:40.
+2. **When K1 lands:** read `analysis.out` (the in-run table; s_C and s_D against the parent; the 2 × 2 endgame reads —
+   diagnostic, not item 3). Then on the 3060, in order: `bash runs/plan7/K1_readings_3060.sh` (item 2, ≈ 5 h; its
+   header states the corpus choice M3 judges — count-play positions read under draw, the draw net's own games only for
+   the descriptive claims, `surprise` / `probe_value` on the draw run's own buffer); `tools/common_positions.py
+   --corpus_a runs/deep8_c1_300_e8_draw --corpus_b runs/deep8_c1_300_e8 --net_a runs/deep8_c1_300_e8_draw/net_0300.pt
+   --net_b runs/deep8_c1_300_e8/net_0300.pt --n 15000 --sims 256 --device cuda:1 --out
+   runs/plan7/K1_common_positions.json` (item 3, and item 2's DiD — the count parent's own Δ is the control line);
+   `tools/paired_contrast.py --count runs/deep8_c1_300_e8_draw/paired_vs_deep8c1_300e8_64.json --draw
+   runs/deep8_c1_300_e8_draw/paired_vs_deep8c1_300e8_64_draw.json` (item 4). Then the reading: every §1–§8 claim
+   marked *rule-invariant* / *rule-dependent* / *unresolved* by §5 item 2's rules as amended (the DiD intervals for 16,
+   8, 13; the draw share against 32.3 % with a 2-point margin; claim 1's tie rule; 7's 0.02 visit-share tolerance at
+   16 384 sims; 33–34), one KNOWLEDGE clause each, K1's row in README's ladder (Elo "n/a — a different game"; the
+   endgame column its draw-set read), README's Current state, a log entry, commit. Delegate the reading to an opus
+   `directed` agent with the outputs and `runs/plan7/K1_parent_reading.md` as the count baseline; read its table
+   before merging. Every reading is "observed in this pair of runs".
+3. **J5**, the manuscript skeleton (`docs/paper/paper.md` from the map's §3, which does not yet place 52 and 53),
+   after K1's reading; then **M3**, the draft's review (brief on the M0 template, naming files; one review per window;
+   its inherited open items: the Padua terminal rule, the HUJI year, `knowledge/06`'s inferred solving cost, the
+   corpus choices in K1's readings, the DiD amendment of §5 item 2 for the reviewer's eye).
+4. **§10's file updates** after K1: RETROSPECTIVE §7 and a §8 "what the write-up changed" (31's causal headline, 33's
+   unpaired columns, 15's magnitudes, 7's confirmed reversal, the reuse framing); the explainer's Part 8. E11's copy
+   when a destination exists. Phase L is the owner's call. §8 stays unproposed.
 
-**Traps — each cost time today.** Never pipe a brief into `codex-sp`: it is a PowerShell *function*,
-stdin does not reach the binary inside it, and `exec … -` hangs on the console's stdin (0 CPU, 0
-bytes); the launchers pass a one-line prompt naming the brief file and redirect the child's stdin from
-`empty_stdin.txt`. `Start-Process -ArgumentList` takes one quoted string, not an array — the array
-splits at the space in the user name and the child exits at once having run nothing. One
-whole-repository review per five-hour Codex window; rebuttals in the next. `tests/test_symmetry.py`
-passes on `cuda:0` only (§11). Agent worktrees live under `.claude/worktrees/` (ignored), start from
-the commit current at launch, lack `.venv` and `runs/*/games`, and two agents on one file conflict at
-merge — resolve into one design, then remove the worktree and its branch. `gumbel_scale` is in no
-`config.json`; every run trained at 1.0. The Monitor tool delivers nothing from files on this machine —
-use a background `until` loop. The PowerShell tool refuses any command containing `Remove-Item` on a
-variable path (a static check) — clean up from bash. Delegate write-ups and file-heavy work to
-`directed` (opus) agents, scratchpad drafts first, adopt after a read; keep the reviewed files frozen
-while a reviewer is running.
-
-**Traps added tonight.** Agent worktrees can start from a commit *older* than HEAD (two of three tonight started at
-`40b7864` though launched after `09c687c`): tell every agent to `git merge --ff-only main` before it edits, and
-check `git worktree list`. The Bash tool's quoted heredoc fails with "unexpected EOF while looking for matching `'`"
-when the body has unbalanced apostrophes — write files with the Write tool and run them. Python 3.10's
-`Path.read_text` has no `newline=` argument (use `open(..., newline="")`; the files are LF, Git's CRLF warnings are
-noise). Codex at medium: a scoped review costs ≈ 1 M tokens and 4–8 minutes; a resumed rebuttal ≈ 2 minutes and
-mostly cache. The pass's outputs were produced by the pre-merge tools — their numbers are what the merged tools
-would give (the count path is bit-identical), but the field names of `principles` differ. Three background agents
-plus a GPU pass plus two Codex reviews ran concurrently without incident; the constraint that bit was context, not
+**Traps — each cost time today.** Never pipe a brief into `codex-sp`: it is a PowerShell *function*,
+stdin does not reach the binary inside it, and `exec … -` hangs on the console's stdin (0 CPU, 0
+bytes); the launchers pass a one-line prompt naming the brief file and redirect the child's stdin from
+`empty_stdin.txt`. `Start-Process -ArgumentList` takes one quoted string, not an array — the array
+splits at the space in the user name and the child exits at once having run nothing. One
+whole-repository review per five-hour Codex window; rebuttals in the next. `tests/test_symmetry.py`
+passes on `cuda:0` only (§11). Agent worktrees live under `.claude/worktrees/` (ignored), start from
+the commit current at launch, lack `.venv` and `runs/*/games`, and two agents on one file conflict at
+merge — resolve into one design, then remove the worktree and its branch. `gumbel_scale` is in no
+`config.json`; every run trained at 1.0. The Monitor tool delivers nothing from files on this machine —
+use a background `until` loop. The PowerShell tool refuses any command containing `Remove-Item` on a
+variable path (a static check) — clean up from bash. Delegate write-ups and file-heavy work to
+`directed` (opus) agents, scratchpad drafts first, adopt after a read; keep the reviewed files frozen
+while a reviewer is running.
+
+**Traps added tonight.** Agent worktrees can start from a commit *older* than HEAD (two of three tonight started at
+`40b7864` though launched after `09c687c`): tell every agent to `git merge --ff-only main` before it edits, and
+check `git worktree list`. The Bash tool's quoted heredoc fails with "unexpected EOF while looking for matching `'`"
+when the body has unbalanced apostrophes — write files with the Write tool and run them. Python 3.10's
+`Path.read_text` has no `newline=` argument (use `open(..., newline="")`; the files are LF, Git's CRLF warnings are
+noise). Codex at medium: a scoped review costs ≈ 1 M tokens and 4–8 minutes; a resumed rebuttal ≈ 2 minutes and
+mostly cache. The pass's outputs were produced by the pre-merge tools — their numbers are what the merged tools
+would give (the count path is bit-identical), but the field names of `principles` differ. Three background agents
+plus a GPU pass plus two Codex reviews ran concurrently without incident; the constraint that bit was context, not
 compute — delegate anything that reads more than a few files.
+
+**Traps added this session (2026-09-13).** PLAN7 is CRLF since the M1 adjudicator's merge, and a scripted insert must
+use the file's own line ending (thirteen doubled CRs were normalised at `0b599ce`). An agent's GPU smoke on `cuda:0`
+slows K1 by 40 % — the trainer's card is off limits while it runs; the 3060 is shared freely. J4's 3.5 h estimate was
+32 min (only the incomplete positions spend the budget). `runs/*/*.md` ledgers needed a `.gitignore` whitelist
+(`!runs/*/*.md`, in). The pass's `principles` output uses the pre-merge key names. The Codex accounting at medium: a
+scoped review ≈ 1 M tokens / 4–8 min, a resumed rebuttal ≈ 2–5 M (mostly cache) / 2–8 min, and ≈ 12 M input tokens
+filled one five-hour window; a stage that hits the limit fails in 25 s with the reset time in the error event.
 ## Log
 
 - **2026-09-12, evening — PLAN7 written.** After E11's push (PLAN6 log 19:05). Inputs read in full:
@@ -512,6 +471,27 @@ compute — delegate anything that reads more than a few files.
   stale phrases the agent flagged for KNOWLEDGE 14 and map row 2 were already gone by its merge. PLAN7's thirteen doubled CR bytes, an artifact of
   this session's scripted inserts that the agent had to restore around, are normalised (`0b599ce`). Open for
   M3: the Padua terminal rule (its code would settle it), the HUJI year, `knowledge/06`'s inferred cost.
+
+- **2026-09-13, 08:37 — J3 and J4 read into KNOWLEDGE** (an opus worktree agent, merged `76366bd`). The two
+  pre-registered readings land as a new KNOWLEDGE §9a: **52** (J3) and **53** (J4), in the forms §4 and §7e M2 rows
+  3, 4, 7, 15, 16 / M2-R R5–R7 fixed before either ran. 52, *search-relative* on `_e8` and `_e4`: the root **+0.5242**
+  / **+0.4950** at 16 384 sims with both principal lines — the same search and the same number claim 3 already
+  carries for [40], written out, not a new point; the near-greedy split **99.7 % [99.3, 99.9]** over **9** distinct
+  games and **99.9 %** over **7**, the interval the policy's with the concentration beside it and no opening
+  coverage claimed; the as-trained split **70.9 / 12.6 / 16.6** and **69.8 / 13.5 / 16.8** (not play as trained);
+  (b) − (c) the exploration package at a matched budget, four knobs unattributed (X +28.9 / +30.2); 24's corpus
+  split 63.2 / 20.2 / 16.6 *compared*, not tested — X +7.7, O −7.6, **the draw share unmoved**; the raw-policy
+  (0.982 / 0.990) against generated-games (0.835 / 0.841) first-move statistics, each labelled. 53, coverage
+  *exact* and the optimal-move rate *search-relative against exact labels*, `_e8` only: complete legal-action value
+  coverage within 10⁸ nodes **28.2 % [24.4, 32.3]** of games alive at ply 40 → **100 % [99.2, 100.0]** from 52; the
+  agent optimal in **12 565 of 12 573** covered positions (eight non-optimal moves, one at each of plies 44–49, 51,
+  52 — four draw → loss, three win → draw, one at ply 48 win → loss), median / p90 nodes at 40 / 45 / 50 / 60, the
+  finite-population note at 66–70, §4 J4's sentence verbatim, the three caveats. No monotonicity, no frontier, no
+  "solved from ply N". The map gains rows 52–53 (drift *not measured*), 61 rows / 58 claims; ledger
+  `runs/plan7/J3J4_reading.md`. **Noted:** J4 cost 32 min, not 3.5 h — only the 1 437 incomplete positions spend the
+  budget. Open: the map's §3 outline does not yet place 52 and 53 (J5).
+- **2026-09-13, 08:38 — this instance stops at the owner's word, at ≈ 64 % of its context.** K1 at iteration 123
+  of 300 on the 64-sim leg (≈ 22:40). Everything is in the Handover; 44 commits unpushed since `40b7864`.
 
 ## 0. The decision in front of the project
 
